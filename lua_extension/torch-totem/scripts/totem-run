@@ -1,0 +1,51 @@
+#!/usr/bin/env luajit
+
+local totem = require 'totem'
+local paths = require 'paths'
+local lapp = require 'pl.lapp'
+
+local args = lapp([[Run all tests in a folder
+
+Usage:
+
+  arg[0] [--folder <testfolder>] [options] [test1 [test2...] ]
+
+Options:
+]]
+..totem.Tester.CLoptions..
+[[
+--folder (string default '.') Folder containing the test scripts.
+    Only files named test*.lua will be run.
+
+]])
+
+-- Remove the --folder argument and its value from the argument table
+local found = nil
+for k,v in pairs(arg) do
+    if v == '--folder' then
+        arg[k] = nil
+        arg[k+1] = nil
+        found = k+1
+    elseif found and k>found then
+        arg[k-2] = arg[k]
+        arg[k] = nil
+    end
+end
+
+-- Add slash at the end of the path if not present
+if not string.match(args.folder, '.*/') then
+    args.folder = args.folder .. '/'
+end
+
+-- Run all the tests in the folder
+local files = paths.dir(args.folder)
+if files then
+    local tester = totem.Tester()
+    for k,v in pairs(files) do
+        if string.match(v, '^test.*%.lua$') then
+            tester:add(args.folder..v)
+        end
+    end
+
+    pcall(tester.run, tester)
+end

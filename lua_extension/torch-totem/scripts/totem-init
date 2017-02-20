@@ -1,0 +1,35 @@
+#!/bin/bash
+
+if [[ $# -ne 1 ]] ; then
+    echo "Usage: totem-init <filename>"
+    exit 1
+fi
+
+file=$1
+
+if [[ -a $file ]] ; then
+    echo "Output file '$file' already exists"
+    exit 1
+fi
+
+
+echo "#!/usr/bin/env th
+
+require 'totem'
+
+local test = totem.TestSuite()
+
+local tester = totem.Tester()
+
+
+function test.A()
+    -- add test code here, using tester:eq methods
+end
+
+
+-- add more tests by adding to the 'test' table
+
+
+return tester:add(test):run()" >> $file
+
+chmod +x $file
