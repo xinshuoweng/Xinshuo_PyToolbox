@@ -17,7 +17,8 @@ if length(rect) == 4
     width = rect(3);
     height = rect(4);
     assert(xmin >= 0 && ymin >= 0 && (xmin + width) <= size(image, 2) && (ymin + height) <= size(image, 1), 'the size of crop region is out of range');
-    cropped = imcrop(image, rect);
+    new_rect = [rect(1), rect(2), rect(3)-1, rect(4)-1];
+    cropped = imcrop(image, new_rect);
     return;
     
 else
@@ -27,7 +28,7 @@ else
     xmin = (size(image, 2) - width) / 2;
     ymin = (size(image, 1) - height) / 2;
     assert(xmin >= 0 && ymin >= 0, 'the size of crop region is out of range');
-    new_rect = [xmin, ymin, width, height];
+    new_rect = [xmin, ymin, width-1, height-1];
     cropped = imcrop(image, new_rect);
 end
 
