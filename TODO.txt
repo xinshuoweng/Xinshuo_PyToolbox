@@ -1,0 +1,5 @@
+5. integrate oculus
+4. integrate transformation detection network
+1. integrate hw
+2. integrate previous project before CMU
+3. integrate peojction on my github
