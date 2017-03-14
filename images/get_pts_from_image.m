@@ -6,19 +6,15 @@
 % this function returns a matrix which has Nx2 dimension
 % each row is [x, y]
 function pts = get_pts_from_image(img, number_pts)
-    if ischar(img)
-        img = imread(img);
-    else
-        assert(isimage(img), 'The input image doesn''t ...
-            have a good dimentsion while getting the point.');
-    end
-
+    img = isImageorPath(img);
     if ~exist('number_pts', 'var')
         number_pts = 1;
     else
-        assert(isPositiveInteger(number_pts), 'The number of points ...
-            should be positive integer while getting the point from image.');
-    figure;
-    imshow(im);
+        assert(isPositiveInteger(number_pts), ...
+            'The number of points should be positive integer while getting the point from image.');
+    end
+    fig = figure;
+    imshow(img);
     pts = ginput(number_pts);
+    close(fig);
 end

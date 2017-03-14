@@ -1,12 +1,16 @@
+% Author: Xinshuo Weng
+% email: xinshuo.weng@gmail.com
 
-function ret = visualize_pts_single_file(image, pts_path)
-    assert(ischar(image), 'The input image path is not valid.');
-    assert(ischar(pts_path), 'The input point path is not valid.');
-    im = imread(image);
+% this function takes a file of points and an image as input
+% then draw the points on top of the image as visualization
+% this function assumer each row fo file has [x, y] coordinate
+function img_with_pts = visualize_pts_single_file(img, pts_path)
+    img = isImageorPath(img);
+    fid = get_fileID_for_loading(pts_path);
     figure;
-    imshow(im);
+    imshow(img);
     hold on;
-    fid = fopen(pts_path, 'r');
+
     tline = fgetl(fid);
     while ischar(tline)
         contents = strsplit(tline, ' ');
@@ -14,7 +18,7 @@ function ret = visualize_pts_single_file(image, pts_path)
             'Marker', '*', 'MarkerFaceColor', 'b', 'MarkerSize', 10);
         tline = fgetl(fid);
     end
-       
     fclose(fid);
-    ret = true;
+    img_with_pts = getframe;
+    img_with_pts = img_with_pts.cdata;
 end
