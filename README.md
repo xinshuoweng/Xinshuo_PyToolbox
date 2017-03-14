@@ -1,2 +1,2 @@
-# cv_ml_tool
-my self-customized toolbox for computer vision and machine learning 
+# Xinshuo's Computer Vision & Machine Learning Toolbox
+
