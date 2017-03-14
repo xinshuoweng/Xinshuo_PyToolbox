@@ -32,7 +32,7 @@ function [bool, res] = point_inside_3d_triangle_test(pts, tri_A, tri_B, tri_C)
         pts = pts';
     end
     
-    A = [vec_b, vec_c, n/norm(n)];
+    A = [vec_b, vec_c, n];
     b = pts;
     solution = (A'*A) \ (A' * b);
 %     solution = inv(A) * b;
