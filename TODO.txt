@@ -1,13 +1,7 @@
-<<<<<<< HEAD
+
 5. integrate oculus
 4. integrate transformation detection network
 1. integrate hw
 2. integrate previous project before CMU
-3. integrate peojction on my github
-=======
-1. integrate hw
-2. integrate previous project
-3. integrate rotation aware
-4. integrate transformation
-5. integrate oculus
->>>>>>> 0bc5ad0fa4345640ae64ee510119818e9f13ffe7
+3. integrate peojction on my githu
+6. 
