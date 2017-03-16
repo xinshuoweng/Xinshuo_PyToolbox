@@ -13,3 +13,4 @@ function [full_image_list, num_image] = load_image_list_from_file(file_path)
     full_image_list = full_image_list{1};
     num_image = length(full_image_list);
     fclose(file);
+end

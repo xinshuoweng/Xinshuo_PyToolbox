@@ -20,7 +20,6 @@ function pts_dst = find_correspondence_pts_transformation(size_in, size_out, ang
 		end
 	end
 
-
 	% normalize the input coordinate based on center of the image
 	size_in = size_in / 2;
 	orig_x = pts_src(:, 1) - size_in(2);
