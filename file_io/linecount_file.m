@@ -9,7 +9,7 @@ function n = linecount(file_path)
     tline = fgetl(fid);
     while ischar(tline)
         tline = fgetl(fid);
-        n = n+1;
+        n = n + 1;
     end
-    fclose(f);
+    fclose(fid);
 end
