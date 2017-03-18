@@ -10,7 +10,6 @@ function gpu_id = auto_select_gpu()
     % deselects all GPU devices
     gpuDevice([]);
     
-
     maxFreeMemory = 0;
     for i = 1:gpuDeviceCount
         g = gpuDevice(i);
