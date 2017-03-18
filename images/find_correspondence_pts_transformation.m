@@ -4,6 +4,7 @@
 % this function takes an image and the angle in degree as input to find the correspondent point 
 % in the transformed image referred to the input point in the original image
 % this function assume the rotation is used as imrotate or imtransform
+% and then resize the rotated image to a specific size
 % the input pts_src should be Nx2 matrix, each row is [x, y] coordinate
 % when the debug flag is set false, no warning is provided
 function pts_dst = find_correspondence_pts_transformation(size_in, size_out, angle_degree, pts_src, debug_flag)
@@ -20,8 +21,10 @@ function pts_dst = find_correspondence_pts_transformation(size_in, size_out, ang
 		end
 	end
 
+
 	% normalize the input coordinate based on center of the image
-	size_in = size_in / 2;
+	dummy_image = ones(size_in);
+    size_in = size_in / 2;
 	orig_x = pts_src(:, 1) - size_in(2);
 	orig_y = pts_src(:, 2) - size_in(1);
 
@@ -30,8 +33,14 @@ function pts_dst = find_correspondence_pts_transformation(size_in, size_out, ang
 	new_orig = old_orig * rotation;
 	
 	% inverse normalization
-	size_out = size_out / 2;
-	pts_dst(:, 1) = new_orig(:, 1) + size_out(2);
-	pts_dst(:, 2) = new_orig(:, 2) + size_out(1);
+    transformed = imrotate(dummy_image, angle_degree);
+    scale = size_out ./ size(transformed);  % compute scale for imresize   
+	size_transformed = size(transformed) / 2;
+	pts_dst(:, 1) = new_orig(:, 1) + size_transformed(2);
+	pts_dst(:, 2) = new_orig(:, 2) + size_transformed(1);
+    
+    % inverse imresize
+    pts_dst(:, 1) = pts_dst(:, 1) * scale(2);
+    pts_dst(:, 2) = pts_dst(:, 2) * scale(1);
 end
 
