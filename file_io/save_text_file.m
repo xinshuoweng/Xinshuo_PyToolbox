@@ -15,7 +15,7 @@ function nrows = save_text_file(content_cell, file_path)
     	row_tmp = content_cell{i};	% still a cell storing content in this row
     	row_string = cellfun(@(x) num2str(x), row_tmp, 'UniformOutput', false);	% concatenate with parent folder path
         string_tmp = strjoin(row_string, ' ');
-        fprintf(fid, '%s\n ', string_tmp);    
+        fprintf(fid, '%s\n', string_tmp);    
     end
     
     fclose(fid);
