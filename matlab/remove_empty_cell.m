@@ -2,6 +2,7 @@
 % Email: xinshuo.weng@gmail.com
 
 % given a cell array, remove the empty content 
+% only remove the cell at depth = 1
 function [ cell_array ] = remove_empty_cell( cell_array )
 %REMOVE_EMPTY_CELL Summary of this function goes here
 %   Detailed explanation goes here
