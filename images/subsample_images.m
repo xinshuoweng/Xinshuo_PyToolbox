@@ -1,3 +1,4 @@
+% TODO: CHECK
 function [imdbs, roidbs] = subsample_images(imdbs, roidbs, max_num_neg_images, seed)
 
 if ~exist('seed', 'var')

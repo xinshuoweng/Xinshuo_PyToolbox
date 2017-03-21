@@ -6,6 +6,7 @@ import os, sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '../python'))
 import type_check
 
+# TODO: CHECK
 def is_path_creatable(pathname):
     '''
     `True` if the current user has sufficient permissions to create the passed
@@ -17,6 +18,7 @@ def is_path_creatable(pathname):
     dirname = os.path.dirname(pathname) or os.getcwd()
     return os.access(dirname, os.W_OK)
 
+# TODO: CHECK
 def is_path_exists_or_creatable(pathname):
     '''
     `True` if the passed pathname is a valid pathname for the current OS _and_

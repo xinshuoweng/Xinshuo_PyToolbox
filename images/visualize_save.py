@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-
+# TODO: CHECK
 def visualize_save(im, save_path, vis=False):
     assert (im.ndim == 3 and im.shape[2] == 3) or im.ndim == 2, 'The input image is not valid while visualizing'
 

@@ -1,3 +1,5 @@
+% TODO: CHECK
+
 %function F = refineF(F,pts1,pts2)
 % Non-linear refinement of fundamental matrix using simplex
 % pts1 and pts2 are Nx2 matrices, first row of pts1 being

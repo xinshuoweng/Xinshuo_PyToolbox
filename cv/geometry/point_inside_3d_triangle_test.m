@@ -1,3 +1,5 @@
+% TODO: CHECK
+
 % a, b, c is respectively three points representing the triangle
 % pts, a, b, c are all 3d points here
 

@@ -1,3 +1,7 @@
+% Author: Xinshuo Weng
+% email: xinshuo.weng@gmail.com
+
+% TODO: CHECK
 function distance = distance_two_parallellines(line1_a, line1_b, line2_a, line2_b)
 % this function return the distance of two parallel lines
 

@@ -1,3 +1,5 @@
+
+% TODO: CHECK
 function [inter] = point_in_edge(point, line_a, line_b)
 % this function return if the given point is in the line segment, including
 % the endpoint

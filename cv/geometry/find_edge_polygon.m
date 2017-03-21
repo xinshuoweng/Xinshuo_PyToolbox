@@ -1,3 +1,7 @@
+% Author: Xinshuo Weng
+% email: xinshuo.weng@gmail.com
+
+% TODO: CHECK
 function [ edge_list ] = find_edge_polygon( polygon )
 % this function finds all edge from given polygon, the input polygon is a
 % Nx2 matrix, which contains N points. Each of points contains x and y

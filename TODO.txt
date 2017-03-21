@@ -1,7 +1,21 @@
+coding 
+1. cv/geometry for python (2d manipulation)
+2. cv/geometry for matlab (project 3d line)
 
+debug
+1. fix TODO parts
+
+add more functions from old projects
 1. integrate oculus
 2. integrate transformation detection network
 3. integrate hw
 4. integrate previous project before CMU
 5. integrate peojction on my githu
 6. integrate stuff on my laptop
+
+fix toolbox structure
+1. ml/neural network
+2. miscellaneous/lua_extension
+2. miscellaneous/matlab_colorscheme
+2. miscellaneous/wrapper
+5. cv/kmeans_meanshift_normalizedcut

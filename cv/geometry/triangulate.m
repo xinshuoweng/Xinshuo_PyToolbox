@@ -1,3 +1,4 @@
+% TODO: CHECK
 function [ P, error ] = triangulate( M1, p1, M2, p2 )
 % triangulate:
 %       M1 - 3x4 Camera Matrix 1

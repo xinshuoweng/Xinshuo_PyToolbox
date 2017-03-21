@@ -1,3 +1,5 @@
+
+% TODO: CHECK
 % script for generating video 
 clear;
 close all;

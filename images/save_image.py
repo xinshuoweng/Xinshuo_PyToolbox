@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 
-
+# TODO: CHECK
 def save_image(img, save_path):
 	width = img.shape[1]
 	height = img.shape[0]

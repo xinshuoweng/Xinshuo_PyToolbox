@@ -1,3 +1,5 @@
+% TODO: CHECK
+
 function [ F ] = sevenpoint( pts1, pts2, M )
 % sevenpoint:
 %   pts1 - Nx2 matrix of (x,y) coordinates

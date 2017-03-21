@@ -1,3 +1,7 @@
+% Author: Xinshuo Weng
+% email: xinshuo.weng@gmail.com
+
+% TODO: CHECK
 function convex = find_convex_hull(points)
 % input are a set of points, which has a dimention Nx2, N is number of
 % points, each points has coordinate (x, y)

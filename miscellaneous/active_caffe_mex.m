@@ -1,3 +1,4 @@
+% TODO: CHECK
 function active_caffe_mex(gpu_id, caffe_version)
 % active_caffe_mex(gpu_id, caffe_version)
 % --------------------------------------------------------

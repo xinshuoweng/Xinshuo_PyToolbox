@@ -1,7 +1,7 @@
 % this script is for resizing the original raw frame from towncenter to different size for evaluation
 
 close all; clear; clc;
-
+% TODO: CHECK
 %% inputs to function
 data_base = '../7/';
 frame_list = dir(fullfile([data_base, '*.png']));

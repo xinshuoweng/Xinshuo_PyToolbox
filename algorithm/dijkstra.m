@@ -1,3 +1,4 @@
+% TODO: CHECK
 function [G_path] = dijkstra(G_edge)
 % this function compute minimal path tree from a specific start point by
 % using dijkstra's algorithm. The input of this function is a graph

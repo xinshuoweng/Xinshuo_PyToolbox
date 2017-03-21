@@ -1,3 +1,7 @@
+% Author: Xinshuo Weng
+% email: xinshuo.weng@gmail.com
+
+% TODO: CHECK
 function [point, intersect] = edge_edge_intersection(line1_a, line1_b, line2_a, line2_b)
 % this function test if two line segment will intersect with each other.
 % The output point will return the intersection point if existing,

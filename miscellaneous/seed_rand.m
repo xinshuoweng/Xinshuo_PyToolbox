@@ -1,3 +1,4 @@
+% TODO: CHECK
 function prev_rng = seed_rand(seed)
 % seed_rand - Set random number generator to a fixed seed.
 %   prev_rng = seed_rand(seed)

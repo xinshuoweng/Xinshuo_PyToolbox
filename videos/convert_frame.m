@@ -1,3 +1,4 @@
+% TODO: CHECK
 % this script is for resizing the original raw frame from towncenter to different size for evaluation
 
 close all; clear; clc;
