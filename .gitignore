@@ -47,5 +47,9 @@ Temporary Items
 .apdisk
 
 
+# Temporary files for python
+*.pyc
+
+
 # Directories not belonging to myself
 external/*
