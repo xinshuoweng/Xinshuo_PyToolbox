@@ -11,7 +11,7 @@ def get_line(pts, slope):
 	this function takes a point and a slope to construct a line
 	slope is represented by the angle in degree, 
 	'''
-    if slope == 90 or -90:
+    if slope == 90 or slope == -90:
         slope = slope + 0.00001
     slope = math.tan(math.radians(slope))
     # print('slope is ' + str(slope))
