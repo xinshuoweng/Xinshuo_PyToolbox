@@ -48,3 +48,4 @@ def fileparts(pathname):
 	filename = os.path.splitext(os.path.basename(pathname))[0]
 	ext = os.path.splitext(pathname)[1]
 	return (directory, filename, ext)
+
