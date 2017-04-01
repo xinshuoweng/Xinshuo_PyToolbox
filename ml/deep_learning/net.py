@@ -16,7 +16,7 @@ class Net(object):
 		 	assert isinstance(InputLayer, Input), 'the input layer is not valid'
 		 	nb_entries = 1
 		 	self._layers[InputLayer.name] = InputLayer
-		 	self._blobs[InputLayer.name] = {'data': InputLayer.get_data(), 'param': InputLayer.get_param()}
+		 	self._blobs[InputLayer.name] = {'data': InputLayer.get_data(), 'params': InputLayer.get_param()}
 
 		self._nb_entries = nb_entries
 
@@ -36,6 +36,7 @@ class Net(object):
 	def __len__(self):
 		return self.nb_entries
 
+	# TODO ALL BELOW
 	# add one more layer to the network
 	def append(self, layer):
 		if self.nb_entries == 0:
@@ -52,7 +53,7 @@ class Net(object):
 		else:
 			assert False, 'No layer queried existing'
 
-	def print(self):
+	def __print__(self):
 		print('Layer (type)\t\tOutput Shape\t\tParam')
 		print('============================================================================')
 		total_param = 0
