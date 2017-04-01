@@ -8,19 +8,25 @@ from layer import *
 
 class Net(object):
 	def __init__(self, InputLayer=None):
-		self._blob = OrderedDict()
+		self._blobs = OrderedDict()
+		self._layers = OrderedDict()
 		if InputLayer is None:
 		 	nb_entries = 0
 		else:
 		 	assert isinstance(InputLayer, Input), 'the input layer is not valid'
 		 	nb_entries = 1
-		 	self._blobs[InputLayer.name] = InputLayer
+		 	self._layers[InputLayer.name] = InputLayer
+		 	self._blobs[InputLayer.name] = {'data': InputLayer.get_data(), 'param': InputLayer.get_param()}
 
 		self._nb_entries = nb_entries
 
 	@property
 	def blobs(self):
 		return self._blobs
+
+	@property
+	def layers(self):
+		return self._layers
 
 	@property
 	def nb_entries(self):
@@ -47,9 +53,20 @@ class Net(object):
 			assert False, 'No layer queried existing'
 
 	def print(self):
-		print('Layer (type)\tOutput Shape\tParam')
-		for name, layer in self.blobs.items():
-			print('{} ({})')
+		print('Layer (type)\t\tOutput Shape\t\tParam')
+		print('============================================================================')
+		total_param = 0
+		if len(self) > 0:
+			input_layer_name = self.keys()[0]
+			bottom_shape = self.blobs[input_layer_name].get_output_blob_shape()
+			for name, layer in self.blobs.items():
+				if layer.type is 'Input':
+					continue
+				bottom_shape = layer.get_output_blob_shape(bottom_shape)
+				print('{} ({})\t\t({}, {}, {})\t\t{}'.format(name, layer.type, layer))
+		# no layer existing right now
+		print('============================================================================')
+		print('Total params: {}'.format(total_param))
 
 	def get_memory_usage(self):
 		'''
