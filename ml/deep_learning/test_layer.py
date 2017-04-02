@@ -7,19 +7,20 @@ from numpy.testing import assert_allclose
 from layer import *
 
 def test_Input():
-	inputlayer = Input(name='data')
+	inputlayer = Input(name='data', inputshape=(100, 100, 3))
 	assert inputlayer.name is 'data'
 	assert inputlayer.type is 'Input'
+	assert_allclose(inputlayer.inputshape, (100, 100, 3))
 	assert_allclose(inputlayer.get_num_param(), 0)
 	assert inputlayer.datatype is 'single'
 	assert inputlayer.paramtype is 'single'
 	# assert inputlayer.data is None
 	# assert inputlayer.params is None
 
-	inputlayer = Input(name='data', datatype='double')
+	inputlayer = Input(name='data', inputshape=(100, 100, 3), datatype='double')
 	assert inputlayer.datatype is 'double'
 
-	inputlayer = Input(name='data', datatype='double', paramtype='uint')
+	inputlayer = Input(name='data', inputshape=(100, 100, 3), datatype='double', paramtype='uint')
 	assert inputlayer.paramtype is 'uint'
 
 	# inputlayer.data = data
@@ -52,8 +53,8 @@ def test_Convolution():
 	assert convlayer.paramtype is 'single'
 	# assert convlayer.params is None
 	# assert convlayer.data is None
-	assert_allclose(convlayer.get_num_param(), 3*3*4*512)
 	bottom_shape = [(4, 12, 3)]
+	assert_allclose(convlayer.get_num_param(bottom_shape), 3*3*4*512)
 	assert_allclose(convlayer.get_output_blob_shape(bottom_shape), (2, 5, 512))
 
 def test_Pooling():

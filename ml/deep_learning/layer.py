@@ -14,7 +14,7 @@ class AbstractLayer(object):
 			assert any(datatype == item for item in ['uint', 'single', 'double']), 'type of data should be one of ''uint8'' ''single'' ''double'' '
 		else:
 			datatype = 'single'
-			print 'datatype of the layer is not defined. By default, we use single floating point to save the datas'
+			print 'datatype of the layer is not defined. By default, we use single floating point to save the data'
 		if paramtype is not None:
 			assert any(paramtype == item for item in ['uint', 'single', 'double']), 'type of parameter should be one of ''uint8'' ''single'' ''double'' '
 		else:
@@ -71,23 +71,24 @@ class AbstractLayer(object):
  		assert any(datatype is item for item in ['uint', 'single', 'double']), 'type of data should be one of ''uint8'' ''single'' ''double'' '
  		self._datatype = datatype
 
+
 	@property
 	def type(self):
  		raise NotImplementedError
 
- 	def get_num_param(self):
+ 	def get_num_param(self, bottom_shape=None):
  		raise NotImplementedError
 
  	def get_output_blob_shape(self, bottom_shape=None):
  		raise NotImplementedError
 
-	def get_memory_usage_param(self):
+	def get_memory_usage_param(self, bottom_shape=None):
  		if self._paramtype == 'single':
- 			return self.get_num_param() * 4 	# single has 4 bytes
+ 			return self.get_num_param(bottom_shape) * 4 	# single has 4 bytes
  		elif self._paramtype == 'double':
- 			return self.get_num_param() * 8		# double has 8 bytes
+ 			return self.get_num_param(bottom_shape) * 8		# double has 8 bytes
  		elif self._paramtype == 'uint':
- 			return self.get_num_param()			# unsigned integer has 1 byte
+ 			return self.get_num_param(bottom_shape)			# unsigned integer has 1 byte
 
 class Input(AbstractLayer):
 	'''
@@ -116,7 +117,8 @@ class Input(AbstractLayer):
 	def type(self):
  		return 'Input'
 
- 	def get_num_param(self):
+ 	def get_num_param(self, bottom_shape=None):
+ 		assert bottom_shape is None, 'No bottom layer before Input layer'
  		return 0
 
  	def get_output_blob_shape(self, data):
@@ -213,11 +215,12 @@ class Convolution(Layer):
 	def type(self):
  		return 'Convolution'
 
-	def get_num_param(self):
-		return self.kernal_size[0] * self.kernal_size[1] * self.nInputPlane * self.nOutputPlane
+	def get_num_param(self, bottom_shape):
+		assert len(bottom_shape) == 1 and len(bottom_shape[0]) == 3 and isinstance(bottom_shape[0], tuple), 'bottom shape is not correct'
+		return self.kernal_size[0] * self.kernal_size[1] * bottom_shape[0][-1] * self.nOutputPlane
 
 	def get_output_blob_shape(self, bottom_shape):
-		assert len(bottom_shape) == 1 and len(bottom_shape[0]) == 3, 'bottom blob is not correct'
+		assert len(bottom_shape) == 1 and len(bottom_shape[0]) == 3 and isinstance(bottom_shape[0], tuple), 'bottom blob is not correct'
 		return tuple((np.array(bottom_shape[0][0:2]) + 2*np.array(self.padding) - np.array(self.kernal_size)) / np.array(self.stride) + 1) + (self.nOutputPlane, )
 
   
@@ -250,11 +253,11 @@ class Pooling(Layer):
 	def type(self):
  		return 'Pooling'
 
-	def get_num_param(self):
+	def get_num_param(self, bottom_shape=None):
 		return 0
 
 	def get_output_blob_shape(self, bottom_shape):
-		assert len(bottom_shape) == 1 and len(bottom_shape[0]) == 3, 'bottom shape is not correct'
+		assert len(bottom_shape) == 1 and len(bottom_shape[0]) == 3 and isinstance(bottom_shape[0], tuple), 'bottom shape is not correct'
 		return tuple((np.array(bottom_shape[0][0:2]) + 2*np.array(self.padding) - np.array(self.kernal_size)) / np.array(self.stride) + 1) + (bottom_shape[0][2], )
 
 
