@@ -7,18 +7,22 @@ from type_check import isstring
 from layer import *
 
 class Net(object):
-	def __init__(self, InputLayer=None):
+	'''
+	connect all layers to form a network 
+	define blobs for parameters and data throughout all layers
+	'''
+	def __init__(self):
 		self._blobs = OrderedDict()
 		self._layers = OrderedDict()
-		if InputLayer is None:
-		 	nb_entries = 0
-		else:
-		 	assert isinstance(InputLayer, Input), 'the input layer is not valid'
-		 	nb_entries = 1
-		 	self._layers[InputLayer.name] = InputLayer
-		 	self._blobs[InputLayer.name] = {'data': InputLayer.get_data(), 'params': InputLayer.get_param()}
-
-		self._nb_entries = nb_entries
+		self._nb_entries = 0
+		# if InputLayer is None:
+		#  	nb_entries = 0
+		# else:
+		#  	assert isinstance(InputLayer, Input), 'the input layer is not valid'
+		#  	nb_entries = 1
+		#  	self._layers[InputLayer.name] = InputLayer
+		#  	if InputData is None:
+		#  		self._blobs[InputLayer.name] = {'data': None, 'params': None}
 
 	@property
 	def blobs(self):
@@ -36,20 +40,29 @@ class Net(object):
 	def __len__(self):
 		return self.nb_entries
 
-	# TODO ALL BELOW
-	# add one more layer to the network
+	# add one more layer to the network, only supporting sequential right now
 	def append(self, layer):
-		if self.nb_entries == 0:
-			assert isinstance(layer, Input), 'First layer appended should be Input layer'
-		assert isinstance(layer, Layer), 'layer appended is not a valid Layer'
-		assert not self.blobs.has_key(layer.name), 'layer name conflict'
+		assert isinstance(layer, AbstractLayer), 'layer appended is not a valid Layer'
+		assert not self._blobs.has_key(layer.name), 'layer name conflict'
+		
+		if self._nb_entries == 0:	# add the first input layer
+			assert isinstance(layer, Input), 'First layer appended should be Input layer'		
+			self._blobs[layer.name] = {'data': np.ndarray(layer.inputshape), 'params': None}
+		elif self._nb_entries > 0:
+			previous_layer_name = self._layer.keys()[self._nb_entries - 1]
+			bottom_shape = self._blobs[previous_layer_name].data.shape
+			output_shape = layer.get_output_blob_shape(bottom_shape)
+			self._blobs[layer.name] = {'data': np.ndarray(output_shape), 'params': None}
+		
+		self._layers[layer.name] = layer			
 		self._nb_entries += 1
-		self._blobs[layer.name] = layer
 
 	def delete(self, layer_name):
 		assert isstring(layer_name), 'the layer should be queried by a string name'
-		if self.blobs.has_key(layer_name):
-			del self.blobs[layer_name]
+		if self._blobs.has_key(layer_name):
+			del self._blobs[layer_name]
+			del self._layers[layer_name]
+			self._nb_entries -= 1
 		else:
 			assert False, 'No layer queried existing'
 
@@ -57,14 +70,14 @@ class Net(object):
 		print('Layer (type)\t\tOutput Shape\t\tParam')
 		print('============================================================================')
 		total_param = 0
-		if len(self) > 0:
-			input_layer_name = self.keys()[0]
-			bottom_shape = self.blobs[input_layer_name].get_output_blob_shape()
-			for name, layer in self.blobs.items():
-				if layer.type is 'Input':
-					continue
-				bottom_shape = layer.get_output_blob_shape(bottom_shape)
-				print('{} ({})\t\t({}, {}, {})\t\t{}'.format(name, layer.type, layer))
+		for layer_name in self._blobs.keys():
+			layer = self._layers[layer_name]
+			if layer.type is 'Input':
+				continue
+			output_shape = self._blobs[layer_name].data.shape
+			layer_num_param = layer.get_num_param()
+			print('{} ({})\t\t({}, {}, {})\t\t{}'.format(layer_name, layer.type, output_shape[0], output_shape[1], output_shape[2], layer_num_param))
+			total_param += layer_num_param
 		# no layer existing right now
 		print('============================================================================')
 		print('Total params: {}'.format(total_param))
@@ -73,7 +86,6 @@ class Net(object):
 		'''
 		this function return memory usage of a given network
 		'''
-
 		bottom = [network[0]]
 
 		for index in xrange(1, len(network)):

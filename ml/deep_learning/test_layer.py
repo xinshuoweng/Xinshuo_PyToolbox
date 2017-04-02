@@ -30,20 +30,20 @@ def test_Input():
 
 def test_Convolution():
 	# parameter shape test
-	convlayer = Convolution(name='conv1', nInputPlane=3, nOutputPlane=512, kernal_size=(3,4), stride=2)
+	convlayer = Convolution(name='conv1', nOutputPlane=512, kernal_size=(3,4), stride=2)
 	assert_allclose(convlayer.kernal_size, (3, 4))
 	assert_allclose(convlayer.stride, (2, 2))
-	convlayer = Convolution(name='conv1', nInputPlane=3, nOutputPlane=512, kernal_size=3, stride=(3,4), padding=1)
+	convlayer = Convolution(name='conv1', nOutputPlane=512, kernal_size=3, stride=(3,4), padding=1)
 	assert_allclose(convlayer.stride, (3, 4))
 	assert_allclose(convlayer.padding, (1, 1))
-	params = np.ndarray(())
-	convlayer = Convolution(name='conv1', nInputPlane=3, nOutputPlane=512, kernal_size=3, stride=2, padding=(3,4))
+	# params = np.ndarray(())
+	convlayer = Convolution(name='conv1', nOutputPlane=512, kernal_size=3, stride=2, padding=(3,4))
 	assert_allclose(convlayer.padding, (3, 4))
 
 	# main test
-	convlayer = Convolution(name='conv1', nInputPlane=3, nOutputPlane=512, kernal_size=(3, 4), stride=(2, 3), padding=(1, 2))
+	convlayer = Convolution(name='conv1', nOutputPlane=512, kernal_size=(3, 4), stride=(2, 3), padding=(1, 2))
 	assert convlayer.name is 'conv1'
-	assert_allclose(convlayer.nInputPlane, 3)
+	# assert_allclose(convlayer.nInputPlane, 3)
 	assert_allclose(convlayer.nOutputPlane, 512)
 	assert_allclose(convlayer.kernal_size, (3, 4)) 
 	assert_allclose(convlayer.stride, (2, 3))
@@ -53,8 +53,35 @@ def test_Convolution():
 	# assert convlayer.params is None
 	# assert convlayer.data is None
 	assert_allclose(convlayer.get_num_param(), 3*3*4*512)
-	bottom_shape = (256, 128, 3)
-	assert_allclose(convlayer.get_output_blob_shape(), )
+	bottom_shape = [(4, 12, 3)]
+	assert_allclose(convlayer.get_output_blob_shape(bottom_shape), (2, 5, 512))
+
+def test_Pooling():
+	# parameter shape test
+	poolinglayer = Pooling(name='pool1', kernal_size=(3,4), stride=2)
+	assert_allclose(poolinglayer.kernal_size, (3, 4))
+	assert_allclose(poolinglayer.stride, (2, 2))
+	poolinglayer = Pooling(name='pool1', kernal_size=3, stride=(3,4), padding=1)
+	assert_allclose(poolinglayer.stride, (3, 4))
+	assert_allclose(poolinglayer.padding, (1, 1))
+	# params = np.ndarray(())
+	poolinglayer = Pooling(name='pool1', kernal_size=3, stride=2, padding=(3,4))
+	assert_allclose(poolinglayer.padding, (3, 4))
+
+	# main test
+	poolinglayer = Pooling(name='pool1', kernal_size=(3, 4), stride=(2, 3), padding=(1, 2))
+	assert poolinglayer.name is 'pool1'
+	assert_allclose(poolinglayer.kernal_size, (3, 4)) 
+	assert_allclose(poolinglayer.stride, (2, 3))
+	assert_allclose(poolinglayer.padding, (1, 2))
+	assert poolinglayer.datatype is 'single'
+	assert poolinglayer.paramtype is 'single'
+	# assert convlayer.params is None
+	# assert convlayer.data is None
+	assert_allclose(poolinglayer.get_num_param(), 0)
+	bottom_shape = [(4, 12, 512)]
+	assert_allclose(poolinglayer.get_output_blob_shape(bottom_shape), (2, 5, 512))
+
 
 if __name__ == '__main__':
     pytest.main([__file__])

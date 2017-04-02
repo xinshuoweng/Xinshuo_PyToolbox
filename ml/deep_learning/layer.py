@@ -90,16 +90,14 @@ class AbstractLayer(object):
  		elif self._paramtype == 'uint':
  			return self.get_num_param()			# unsigned integer has 1 byte
 
-	def get_memory_usage(self):
-		return self.get_memory_usage_param() + self.get_memory_usage_data()
-
-
 class Input(AbstractLayer):
 	'''
 	define an input layer which contains info about the input data
 	'''
-	def __init__(self, name, datatype=None, paramtype=None):
+	def __init__(self, name, inputshape, datatype=None, paramtype=None):
 		super(Input, self).__init__(name=name, datatype=datatype, paramtype=paramtype)
+		assert isinstance(inputshape, tuple) and len(inputshape) > 0, 'the input shape should be a tuple'
+		self._inputshape = inputshape
 		# assert isinstance(data, np.ndarray), 'the input data layer should contains numpy array'
 		# self._data = data
 	# @AbstractLayer.data.setter
@@ -110,6 +108,10 @@ class Input(AbstractLayer):
 	# @AbstractLayer.params.setter
 	# def params(self, params):
 	# 	assert False, 'No parameter can be set in the input layer'
+
+	@property
+	def inputshape(self):
+ 		return self._inputshape
 
 	@property
 	def type(self):
@@ -127,10 +129,10 @@ class Layer(AbstractLayer):
 	define necessary layer parameter and property for deep learning
 	parameters are following HxW format
 	'''
-	def __init__(self, name, nInputPlane, nOutputPlane, kernal_size=None, stride=None, padding=None, datatype=None, paramtype=None):
+	def __init__(self, name, nOutputPlane=None, kernal_size=None, stride=None, padding=None, datatype=None, paramtype=None):
 		super(Layer, self).__init__(name=name, datatype=datatype, paramtype=paramtype)
-		assert type(nInputPlane) is int and nInputPlane > 0, 'number of input channel is not correct'
-		assert type(nOutputPlane) is int and nOutputPlane > 0, 'number of output channel is not correct'
+		# assert nInputPlane is None or (type(nInputPlane) is int and nInputPlane > 0), 'number of input channel is not correct'
+		assert nOutputPlane is None or (type(nOutputPlane) is int and nOutputPlane > 0), 'number of output channel is not correct'
 		assert kernal_size is None or type(kernal_size) is int or len(kernal_size) == 2, 'kernal size is not correct'
 		assert stride is None or type(stride) is int or len(stride) == 2, 'stride size is not correct'
 		assert padding is None or type(padding) is int or len(padding) == 2, 'padding size is not correct'
@@ -154,13 +156,13 @@ class Layer(AbstractLayer):
 		self._kernal_size = kernal_size
 		self._stride = stride
 		self._padding = padding
-		self._nInputPlane = nInputPlane
+		# self._nInputPlane = nInputPlane
 		self._nOutputPlane = nOutputPlane
 		# self._params = params
 
-	@property
-	def nInputPlane(self):
-		return self._nInputPlane
+	# @property
+	# def nInputPlane(self):
+	# 	return self._nInputPlane
 
 	@property
 	def nOutputPlane(self):
@@ -182,16 +184,16 @@ class Convolution(Layer):
 	'''
 	define a 2d convolutional layer
 	'''
-	def __init__(self, name, nInputPlane, nOutputPlane, kernal_size, stride=None, padding=None, datatype=None, paramtype=None):
-		super(Convolution, self).__init__(name=name, nInputPlane=nInputPlane, nOutputPlane=nOutputPlane, kernal_size=kernal_size, 
+	def __init__(self, name, nOutputPlane, kernal_size, stride=None, padding=None, datatype=None, paramtype=None):
+		super(Convolution, self).__init__(name=name, nOutputPlane=nOutputPlane, kernal_size=kernal_size, 
 			stride=stride, padding=padding, datatype=datatype, paramtype=paramtype)
 		# assert params.ndim == 3, 'the parameter of convolution layer should be 3-d array'
 		# assert params.shape(0) == self.nInputPlane, 'first dimension of parameter in convolution layer is not correct'
 		# self._params = params
-		if stride is None:
-			stride = (1, 1)
-		if padding is None:
-			padding = (0, 0)
+		if self._stride is None:
+			self._stride = (1, 1)
+		if self._padding is None:
+			self._padding = (0, 0)
 
 	# @AbstractLayer.data.setter
 	# def data(self, data):
@@ -217,19 +219,19 @@ class Convolution(Layer):
 
 	def get_output_blob_shape(self, bottom_shape):
 		assert len(bottom_shape) == 1 and len(bottom_shape[0]) == 3, 'bottom blob is not correct'
-		assert False
+		return tuple((np.array(bottom_shape[0][0:2]) + 2*np.array(self.padding) - np.array(self.kernal_size)) / np.array(self.stride) + 1) + (self.nOutputPlane, )
 
   
 class Pooling(Layer):
 	'''
 	define a 2d pooling layer
 	'''
-	def __init__(self, name, nInputPlane, nOutputPlane, kernal_size, stride=None, padding=None, datatype=None, paramtype=None):
-		super(Pooling, self).__init__(name, nInputPlane, nOutputPlane, kernal_size, stride, padding, datatype, paramtype)
-		if stride is None:
-			stride = (1, 1)
-		if padding is None:
-			padding = (0, 0)
+	def __init__(self, name, kernal_size, stride=None, padding=None, datatype=None, paramtype=None):
+		super(Pooling, self).__init__(name=name, kernal_size=kernal_size, stride=stride, padding=padding, datatype=datatype, paramtype=paramtype)
+		if self._stride is None:
+			self._stride = (1, 1)
+		if self._padding is None:
+			self._padding = (0, 0)
 
 	# @AbstractLayer.data.setter
 	# def data(self, data):
@@ -253,9 +255,8 @@ class Pooling(Layer):
 		return 0
 
 	def get_output_blob_shape(self, bottom_shape):
-		# assert len(bottom_shape) == 1 and len(bottom_shape[0]) == 3, 'bottom shape is not correct'
-		# assert False
-		pass
+		assert len(bottom_shape) == 1 and len(bottom_shape[0]) == 3, 'bottom shape is not correct'
+		return tuple((np.array(bottom_shape[0][0:2]) + 2*np.array(self.padding) - np.array(self.kernal_size)) / np.array(self.stride) + 1) + (bottom_shape[0][2], )
 
 
 
