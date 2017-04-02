@@ -11,7 +11,3 @@ def add_path(path):
 
 this_dir = osp.dirname(__file__)
 
-# Add caffe to PYTHONPATH
-# caffe_path = osp.join(this_dir, 'caffe-xinshuo', 'python')
-# add_path(caffe_path)
-
