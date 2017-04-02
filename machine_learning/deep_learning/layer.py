@@ -1,6 +1,7 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
 import numpy as np
+import sys
 
 import __init__paths__
 from type_check import isstring

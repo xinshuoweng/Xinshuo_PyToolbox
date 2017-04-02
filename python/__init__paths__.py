@@ -2,12 +2,11 @@
 # email: xinshuo.weng@gmail.com
 
 # this file is for the adding the path for python library
-import os.path as osp
-import sys
+import os, sys
 
 def add_path(path):
     if path not in sys.path:
         sys.path.insert(0, path)
 
-this_dir = osp.dirname(__file__)
+this_dir = os.path.dirname(os.path.abspath(__file__))
 

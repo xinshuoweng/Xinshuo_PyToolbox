@@ -6,5 +6,8 @@ def add_path(path):
     if path not in sys.path:
         sys.path.insert(0, path)
 
-add_path(os.path.join(os.path.dirname(__file__), '../../python'))
-add_path(os.path.join(os.path.dirname(__file__), '../../file_io'))
+python_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../python')
+add_path(python_path)
+
+file_io_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../file_io')
+add_path(file_io_path)
