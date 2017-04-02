@@ -6,7 +6,7 @@ import humanize
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 
-import __init__
+import __init__paths__
 from type_check import isstring
 from plot import autopct_generator, fixOverLappingText
 from layer import *

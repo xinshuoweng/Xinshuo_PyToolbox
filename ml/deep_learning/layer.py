@@ -2,7 +2,7 @@
 # email: xinshuo.weng@gmail.com
 import numpy as np
 
-import __init__
+import __init__paths__
 from type_check import isstring
 
 class AbstractLayer(object):

@@ -5,7 +5,7 @@
 import os, sys
 import errno
 
-import __init__
+import __init__paths__
 import type_check
 
 
