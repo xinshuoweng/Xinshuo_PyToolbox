@@ -6,7 +6,7 @@ import os, sys
 import errno
 
 import __init__paths__
-import type_check
+from type_check import isstring
 
 
 # Sadly, Python fails to provide the following magic number for us.
@@ -28,7 +28,7 @@ def is_pathname_valid(pathname):
     # If this pathname is either not a string or is but is empty, this pathname
     # is invalid.
     try:
-        if not isinstance(pathname, str) or not pathname:
+        if not isstring(pathname) or not pathname:
             return False
 
         # Strip this pathname's Windows-specific drive specifier (e.g., `C:\`)
@@ -97,7 +97,7 @@ def is_path_creatable(pathname):
     '''
     # Parent directory of the passed path. If empty, we substitute the current
     # working directory (CWD) instead.
-    assert type_check.isstring(pathname), 'The input path is not a string'
+    assert isstring(pathname), 'The input path is not a string'
     dirname = os.path.dirname(pathname) or os.getcwd()
     return os.access(dirname, os.W_OK)
 
@@ -109,7 +109,7 @@ def is_path_exists_or_creatable(pathname):
 
     This function is guaranteed to _never_ raise exceptions.
     '''
-    assert type_check.isstring(pathname), 'The input path is not a string'   
+    assert isstring(pathname), 'The input path is not a string'   
     try:
         # To prevent "os" module calls from raising undesirable exceptions on
         # invalid pathnames, is_pathname_valid() is explicitly called first.
@@ -126,7 +126,7 @@ def fileparts(pathname):
 	this function return a tuple, which contains (directory, filename, extension)
 	if the file has multiple extension, only last one will be displayed
 	'''
-	assert type_check.isstring(pathname), 'The input path is not a string'   
+	assert isstring(pathname), 'The input path is not a string'   
 	directory = os.path.dirname(pathname)
 	filename = os.path.splitext(os.path.basename(pathname))[0]
 	ext = os.path.splitext(pathname)[1]
