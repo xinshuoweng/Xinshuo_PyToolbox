@@ -71,7 +71,6 @@ class AbstractLayer(object):
  		assert any(datatype is item for item in ['uint', 'single', 'double']), 'type of data should be one of ''uint8'' ''single'' ''double'' '
  		self._datatype = datatype
 
-
 	@property
 	def type(self):
  		raise NotImplementedError
