@@ -1,5 +1,5 @@
 # Xinshuo's Toolbox
-A structured toolbox for mostly (learning-based and geometry-based) computer vision and machine learning (deep learning) related algorithm. For convenience, it also contains some basic algorithm, file io, image & video processing and some help function for debuging in python, matlab, c++ and lua.
+A structured toolbox for mostly (learning-based and geometry-based) **computer vision** and **machine learning** (**deep learning**) related algorithm. For convenience, it also contains some basic **algorithm**, **file io**, **image & video processing** and some help function for debuging in python, matlab, c++ and lua.
 
 #### Usage:
 
@@ -21,16 +21,16 @@ stay tuned.
 
 #### TODO:
 
-coding 
+*coding*
 1. cv/geometry for python (2d manipulation)<br>
 2. cv/geometry for matlab (project 3d line)<br>
 3. machine_learning/deep_learing net.py: more operation on model graph<br>
 4. machine_learning/deep_learing layer.py: more layers<br>
 
-debug
+*debug*
 1. test TODO in the code<br>
 
-add more functions from old projects
+*add more functions from old projects*
 1. integrate oculus help function<br>
 2. integrate transformation detection network<br>
 3. integrate hw<br>
@@ -38,7 +38,7 @@ add more functions from old projects
 5. integrate projct on my github<br>
 6. integrate stuff on my laptop<br>
 
-fix toolbox structure
+*fix toolbox structure*
 1. ml/neural network<br>
 2. miscellaneous/lua_extension<br>
 2. miscellaneous/matlab_colorscheme<br>
