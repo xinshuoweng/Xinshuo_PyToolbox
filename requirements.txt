@@ -1,2 +1,3 @@
 humanize
 matplotlib
+graphviz

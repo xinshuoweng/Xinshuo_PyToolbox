@@ -2,6 +2,7 @@
 # email: xinshuo.weng@gmail.com
 import numpy as np
 import sys
+from operator import mul
 
 import __init__paths__
 from type_check import isstring
@@ -124,7 +125,7 @@ class Input(AbstractLayer):
 
  	def get_output_blob_shape(self, data):
  		assert isinstance(data, np.ndarray), 'the input data layer should contains numpy array'
- 		return data.shape
+ 		return [data.shape]
 
 class Layer(AbstractLayer):
 	'''
@@ -218,11 +219,13 @@ class Convolution(Layer):
 
 	def get_num_param(self, bottom_shape):
 		assert len(bottom_shape) == 1 and len(bottom_shape[0]) == 3 and isinstance(bottom_shape[0], tuple), 'bottom shape is not correct'
-		return self.kernal_size[0] * self.kernal_size[1] * bottom_shape[0][-1] * self.nOutputPlane
+		num_weights = self.kernal_size[0] * self.kernal_size[1] * bottom_shape[0][-1] * self.nOutputPlane
+		num_bias = self._nOutputPlane
+		return num_weights + num_bias
 
 	def get_output_blob_shape(self, bottom_shape):
-		assert len(bottom_shape) == 1 and len(bottom_shape[0]) == 3 and isinstance(bottom_shape[0], tuple), 'bottom blob is not correct'
-		return tuple((np.array(bottom_shape[0][0:2]) + 2*np.array(self.padding) - np.array(self.kernal_size)) / np.array(self.stride) + 1) + (self.nOutputPlane, )
+		assert len(bottom_shape) == 1 and len(bottom_shape[0]) == 3 and isinstance(bottom_shape[0], tuple), 'bottom shape is not correct'
+		return [tuple((np.array(bottom_shape[0][0:2]) + 2*np.array(self.padding) - np.array(self.kernal_size)) / np.array(self.stride) + 1) + (self.nOutputPlane, )]
 
   
 class Pooling(Layer):
@@ -259,8 +262,61 @@ class Pooling(Layer):
 
 	def get_output_blob_shape(self, bottom_shape):
 		assert len(bottom_shape) == 1 and len(bottom_shape[0]) == 3 and isinstance(bottom_shape[0], tuple), 'bottom shape is not correct'
-		return tuple((np.array(bottom_shape[0][0:2]) + 2*np.array(self.padding) - np.array(self.kernal_size)) / np.array(self.stride) + 1) + (bottom_shape[0][2], )
+		return [tuple((np.array(bottom_shape[0][0:2]) + 2*np.array(self.padding) - np.array(self.kernal_size)) / np.array(self.stride) + 1) + (bottom_shape[0][2], )]
 
+
+
+class Dense(Layer):
+	'''
+	define a fully connected layer
+	'''
+	def __init__(self, name, nOutputPlane, datatype=None, paramtype=None):
+		super(Dense, self).__init__(name=name, nOutputPlane=nOutputPlane, datatype=datatype, paramtype=paramtype)
+
+	@property
+	def type(self):
+ 		return 'Dense'
+
+	def get_num_param(self, bottom_shape):
+		assert len(bottom_shape) == 1 and len(bottom_shape[0]) > 0 and isinstance(bottom_shape[0], tuple), 'bottom shape is not correct'
+		num_weights = reduce(mul, bottom_shape[0]) * self.nOutputPlane
+		num_bias = self.nOutputPlane
+		return num_weights + num_bias
+
+	def get_output_blob_shape(self, bottom_shape=None):
+		if bottom_shape is not None:
+			assert len(bottom_shape) == 1 and len(bottom_shape[0]) > 0 and isinstance(bottom_shape[0], tuple), 'bottom shape is not correct'
+		return [(self.nOutputPlane, )]
+
+
+
+class Activation(Layer):
+	'''
+	define a fully connected layer
+	TODO: check if it's inplace
+	'''
+	def __init__(self, name, function, datatype=None, paramtype=None):
+		super(Activation, self).__init__(name=name, datatype=datatype, paramtype=paramtype)
+		assert isstring(function), 'the function used in dense layer should be a string'
+		assert any(function is item for item in ['linear', 'relu', 'sigmoid', 'tanh']), 'type of parameter should be one of ''linear'' ''relu'' ''tanh'' ''sigmoid'' '
+		self._function = function
+
+	@property
+	def type(self):
+ 		return 'Activation'
+
+ 	@property
+	def function(self):
+ 		return self._function
+
+	def get_num_param(self, bottom_shape=None):
+		if bottom_shape is not None:
+			assert len(bottom_shape) == 1 and len(bottom_shape[0]) > 0 and isinstance(bottom_shape[0], tuple), 'bottom shape is not correct'
+		return 0
+
+	def get_output_blob_shape(self, bottom_shape):
+		assert len(bottom_shape) == 1 and len(bottom_shape[0]) > 0 and isinstance(bottom_shape[0], tuple), 'bottom shape is not correct'
+		return bottom_shape
 
 
 

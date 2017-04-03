@@ -1,19 +1,19 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
-
-
 from collections import OrderedDict
 from operator import mul
 import humanize
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import os
+import functools
+from graphviz import Digraph
 
 import __init__paths__
 from type_check import isstring
 from plot import autopct_generator, fixOverLappingText
 from layer import *
-from file_io import is_path_exists_or_creatable
+from file_io import is_path_exists_or_creatable, fileparts
 
 class Net(object):
 	'''
@@ -59,13 +59,14 @@ class Net(object):
 		assert self._compiled, 'the network is not compiled'
 		return self._batch_size
 
-class SequentialNet(Net):
+class Sequential(Net):
 	def __init__(self):
-		super(SequentialNet, self).__init__()
+		super(Sequential, self).__init__()
 
 	# add one more layer to the network, only supporting sequential right now
-	def append(self, layer):
+	def add(self, layer):
 		assert isinstance(layer, AbstractLayer), 'layer appended is not a valid Layer'
+		assert any(isinstance(layer, item) for item in [Input, Convolution, Pooling, Activation, Dense]), 'The sequential model only support ''Input'' ''Convolution'' ''Pooling'' ''Activation'' ''Dense'' right now'
 		assert not self._layers.has_key(layer.name), 'layer name conflict'
 		
 		if self._nb_entries == 0:	# add the first input layer
@@ -75,7 +76,7 @@ class SequentialNet(Net):
 		self._nb_entries += 1
 		self._compiled = False
 
-	def delete(self, layer_name):
+	def remove(self, layer_name):
 		assert isstring(layer_name), 'the layer should be queried by a string name'
 		if self._blobs.has_key(layer_name):
 			assert not isinstance(self._layers[layer_name], Input), 'the input layer is not able to delete. You might want to use reshape function to change the input shape.'
@@ -99,7 +100,7 @@ class SequentialNet(Net):
 		previous_layer_name = inputlayer.name
 		for layer_name, layer in self._layers.items()[1:]:		# get data shape for all layers
 			bottom_shape = [self._blobs[previous_layer_name]['data'].shape]
-			output_shape = layer.get_output_blob_shape(bottom_shape)
+			output_shape = layer.get_output_blob_shape(bottom_shape)[0]
 			self._blobs[layer_name] = {'data': np.ndarray(output_shape), 'params': None}
 			previous_layer_name = layer_name
 		
@@ -110,6 +111,7 @@ class SequentialNet(Net):
 	def set_input_data(self, input_data):
 		'''
 		feed data to input data layer and get batch size
+		one sequential model can only have one input
 		'''
 		assert isinstance(input_data, np.ndarray) and input_data.ndim > 1, 'the input data is not correct'
 		assert input_data.shape[1:] == self._blobs.values()[0]['data'].shape, 'the data feeding is not compatible with the network. Please change the input data or reshape the Input layer'
@@ -138,11 +140,33 @@ class SequentialNet(Net):
 		else:
 			assert False, 'unknown error while calculating memory usage for data'
 
-	def summary(self, table_path=None, chart_path=None, display_threshold=5, remove_threshold=1):
+	def construct_graph(self):
+		'''
+		this function return a graph object for the sequential model
+		'''
+		assert self._compiled, 'the network is not compiled'
+
+		# construct the graph
+		graph = Digraph(comment='Model Architecture')
+		previous_layer_name = self._layers.keys()[0]
+		previous_layer_shape = None
+		graph.node(previous_layer_name, '%s\n%s (%d, %s)' % (previous_layer_name, self._layers[previous_layer_name].type, self._batch_size, functools.reduce(lambda x, y: str(x) + ', ' + str(y), self._blobs[previous_layer_name]['data'].shape)))	# first node for input layer
+		for layer_name, layer in self._layers.items()[1:]:
+			output_shape = self._blobs[layer_name]['data'].shape
+			graph.node(layer_name, '%s\n%s (%d, %s)' % (layer_name, layer.type, self._batch_size, functools.reduce(lambda x, y: str(x) + ', ' + str(y), output_shape)))
+			graph.edge(previous_layer_name, layer_name)
+			previous_layer_name = layer_name
+			previous_layer_shape = [output_shape]
+
+		return graph
+
+	def summary(self, visualize=False, model_path=None, table_path=None, chart_path=None, display_threshold=5, remove_threshold=1):
 		'''
 		print all info about the network to terminal and local path
 
 		input parameter:
+			model_name: a string for denoting the save file of model graph
+
 			table_path: path to save network info for all layers including number of parameter, memory usage, output shape, layer name, layer type
 			
 			chart_path: path to save memory usage chart, which will display how much percentage of memory to take for each layer
@@ -158,13 +182,15 @@ class SequentialNet(Net):
 		assert self._compiled, 'the network is not compiled'
 		assert table_path is None or is_path_exists_or_creatable(table_path), 'table path is not correct'
 		assert chart_path is None or is_path_exists_or_creatable(chart_path), 'chart path is not correct'
+		assert model_path is None or is_path_exists_or_creatable(model_path), 'model path is not correct'	
 		if table_path is None:
 			table_path = 'table.txt'
 		if chart_path is None:
 			chart_path = 'chart.png'
+		if model_path is None:
+			model_path = 'model'
 
 		# print terminal network info to a table and file
-
 		file_handler = open(table_path, 'w')
 		print >> file_handler, 'Network Info Summary'
 		print >> file_handler, '======================================================================================================='
@@ -186,8 +212,10 @@ class SequentialNet(Net):
 			memory_data_format = humanize.naturalsize(memory_data, binary=True)
 			memory_param_format = humanize.naturalsize(memory_param, binary=True)
 			memory_format = humanize.naturalsize(memory, binary=True)
-			print >> file_handler, '{:<30}{:<25}{:<15}{:<20}'.format('%s (%s)' % (layer_name, layer.type), '(%d, %d, %d, %d)' % (self._batch_size, output_shape[0], output_shape[1], output_shape[2]),
-				layer_num_param, '%s (%s, %s)' % (memory_format, memory_data_format, memory_param_format))
+
+			# define a lambda symbolic function to format a string for connecting varying length of output shape
+			print >> file_handler, '{:<30}{:<25}{:<15}{:<20}'.format('%s (%s)' % (layer_name, layer.type), '(%d, %s)' % (self._batch_size, 
+				functools.reduce(lambda x, y: str(x) + ', ' + str(y), output_shape)), layer_num_param, '%s (%s, %s)' % (memory_format, memory_data_format, memory_param_format))
 			print >> file_handler, '-------------------------------------------------------------------------------------------------------'
 			total_param += layer_num_param
 			previous_layer_shape = [output_shape]
@@ -198,8 +226,9 @@ class SequentialNet(Net):
 		total_memory['data'] = total_data_usage
 		total_memory['param'] = total_param_usage
 		total_memory_usage = sum(total_memory.values())
-		print >> file_handler, 'Total params: {}'.format(total_param)
-		print >> file_handler, 'Total memory usage: {}'.format(humanize.naturalsize(total_memory_usage, binary=True))
+		print >> file_handler, 'Total params: {:,}'.format(total_param)
+		print >> file_handler, 'Total memory usage: {} (data: {}, param: {})'.format(humanize.naturalsize(total_memory_usage, binary=True), humanize.naturalsize(total_data_usage, binary=True), 
+			humanize.naturalsize(total_param_usage, binary=True))
 		print >> file_handler, '======================================================================================================='
 		file_handler.close()
 
@@ -243,8 +272,16 @@ class SequentialNet(Net):
 		# fixOverLappingText(text)
 		plt.axis('equal')
 		plt.savefig(chart_path)
-		# plt.show()
+		if visualize:
+			plt.show()
+
+		# save the model graph
+		graph = self.construct_graph()
+		model_save_path, model_name, ext = fileparts(model_path)
+		graph.format = ext[1:]
+		graph.render(os.path.join(model_save_path, model_name), view=visualize)
 
 		print ' '
 		print 'Network info table is saved to %s' % os.path.abspath(table_path)
 		print 'Network memory usage chart is saved to %s' % os.path.abspath(chart_path) 
+		print 'Network model graph is saved to %s' % os.path.abspath(model_path) 

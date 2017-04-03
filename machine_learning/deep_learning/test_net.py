@@ -3,15 +3,15 @@ import pytest
 from numpy.testing import assert_allclose
 
 from layer import *
-from net import SequentialNet
+from net import Sequential
 
 
 def test_SequentialNet():
 	# create network
-	network = SequentialNet()
-	network.append(Input(name='data', inputshape=(384, 256, 3)))
-	network.append(Convolution(name='conv1', nOutputPlane=128, kernal_size=3, padding=1))
-	network.append(Pooling(name='pool1', kernal_size=2, stride=2))
+	network = Sequential()
+	network.add(Input(name='data', inputshape=(384, 256, 3)))
+	network.add(Convolution(name='conv1', nOutputPlane=128, kernal_size=3, padding=1))
+	network.add(Pooling(name='pool1', kernal_size=2, stride=2))
 	network.compile(np.ndarray((16, 384, 256, 3)))
 	assert_allclose(network.nb_entries, 3)
 	assert_allclose(network.blobs['data']['data'].shape, (384, 256, 3))
@@ -20,7 +20,7 @@ def test_SequentialNet():
 	network.summary()
 	
 	# test delete
-	network.delete('conv1')
+	network.remove('conv1')
 	network.compile(np.ndarray((16, 384, 256, 3)))
 	assert_allclose(network.nb_entries, 2)
 	assert_allclose(network.blobs['pool1']['data'].shape, (192, 128, 3))
