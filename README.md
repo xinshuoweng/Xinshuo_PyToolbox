@@ -11,7 +11,7 @@ git clone https://github.com/xinshuoweng/xinshuo_toolbox
 *2. install dependency for the toolbox.*
 ~~~shell
 cd xinshuo_toolbox
-pip install requirements.txt
+pip install -r requirements.txt
 ~~~
 
 #### Example Usage:
