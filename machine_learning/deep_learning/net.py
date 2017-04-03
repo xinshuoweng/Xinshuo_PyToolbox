@@ -15,6 +15,8 @@ from plot import autopct_generator, fixOverLappingText
 from layer import *
 from file_io import is_path_exists_or_creatable, fileparts
 
+# TODO: add reshape input data function
+
 class Net(object):
 	'''
 	connect all layers to form a network 
@@ -128,14 +130,18 @@ class Sequential(Net):
 		assert isstring(layer_name), 'the name of layer queried should be a string'
 		assert self._layers.has_key(layer_name), 'no layer queried exists'
 		
+		# we treat activation layer as in-place layer and don't store data in it
+		if isinstance(self._layers[layer_name], Activation):
+			return 0
+
 		datashape = (self._batch_size, ) + self._blobs[layer_name]['data'].shape
 		layer = self._layers[layer_name]
 		num_pixel = reduce(mul, datashape)
-		if layer.paramtype == 'single':
+		if layer.datatype == 'single':
  			return num_pixel * 4 		# single has 4 bytes
- 		elif layer.paramtype == 'double':
+ 		elif layer.datatype == 'double':
  			return num_pixel * 8		# double has 8 bytes
- 		elif layer.paramtype == 'uint':
+ 		elif layer.datatype == 'uint':
  			return num_pixel			# unsigned integer has 1 byte
 		else:
 			assert False, 'unknown error while calculating memory usage for data'
@@ -286,3 +292,6 @@ class Sequential(Net):
 		print 'Network info table is saved to %s' % os.path.abspath(table_path)
 		print 'Network memory usage chart is saved to %s' % os.path.abspath(chart_path) 
 		print 'Network model graph is saved to %s' % os.path.abspath(model_path) 
+
+
+class 
