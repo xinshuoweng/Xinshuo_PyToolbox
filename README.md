@@ -5,7 +5,7 @@ A structured toolbox for mostly (learning-based and geometry-based) **computer v
 
 *1. clone the github repository recursively including xinshuo_toolbox.*
 ~~~shell
-git clone https://github.com/xinshuoweng/xinshuo_toolbox
+git clone --recursive https://github.com/xinshuoweng/xinshuo_toolbox
 ~~~
 
 *2. install dependency for the toolbox.*
