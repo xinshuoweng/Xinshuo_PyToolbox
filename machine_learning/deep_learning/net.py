@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import os
 import functools
-from graphviz import Digraph
+from graphviz import Graph
 
 import __init__paths__
 from type_check import isstring
@@ -147,7 +147,7 @@ class Sequential(Net):
 		assert self._compiled, 'the network is not compiled'
 
 		# construct the graph
-		graph = Digraph(comment='Model Architecture')
+		graph = Graph(comment='Model Architecture')
 		previous_layer_name = self._layers.keys()[0]
 		previous_layer_shape = None
 		graph.node(previous_layer_name, '%s\n%s (%d, %s)' % (previous_layer_name, self._layers[previous_layer_name].type, self._batch_size, functools.reduce(lambda x, y: str(x) + ', ' + str(y), self._blobs[previous_layer_name]['data'].shape)))	# first node for input layer
@@ -184,11 +184,11 @@ class Sequential(Net):
 		assert chart_path is None or is_path_exists_or_creatable(chart_path), 'chart path is not correct'
 		assert model_path is None or is_path_exists_or_creatable(model_path), 'model path is not correct'	
 		if table_path is None:
-			table_path = 'table.txt'
+			table_path = 'model_table.txt'
 		if chart_path is None:
-			chart_path = 'chart.png'
+			chart_path = 'memory_chart.png'
 		if model_path is None:
-			model_path = 'model'
+			model_path = 'model_graph.pdf'
 
 		# print terminal network info to a table and file
 		file_handler = open(table_path, 'w')
@@ -280,6 +280,7 @@ class Sequential(Net):
 		model_save_path, model_name, ext = fileparts(model_path)
 		graph.format = ext[1:]
 		graph.render(os.path.join(model_save_path, model_name), view=visualize)
+		os.system('rm %s' % os.path.join(model_save_path, model_name))		# delete source string file produced by graphviz
 
 		print ' '
 		print 'Network info table is saved to %s' % os.path.abspath(table_path)
