@@ -188,7 +188,7 @@ class Sequential(Net):
 		if chart_path is None:
 			chart_path = 'memory_chart.png'
 		if model_path is None:
-			model_path = 'model_graph.pdf'
+			model_path = 'model_graph.png'
 
 		# print terminal network info to a table and file
 		file_handler = open(table_path, 'w')
