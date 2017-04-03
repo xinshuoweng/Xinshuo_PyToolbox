@@ -293,3 +293,6 @@ class Sequential(Net):
 		print 'Network memory usage chart is saved to %s' % os.path.abspath(chart_path) 
 		print 'Network model graph is saved to %s' % os.path.abspath(model_path) 
 
+
+
+class Concat()
