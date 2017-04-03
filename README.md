@@ -16,8 +16,10 @@ pip install requirements.txt
 
 #### Example Usage:
 
+stay tuned.
 
-#### Limitation:
+
+#### TODO:
 
 coding 
 1. cv/geometry for python (2d manipulation)<br>
