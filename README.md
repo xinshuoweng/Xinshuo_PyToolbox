@@ -1,4 +1,4 @@
-# Computer Vision & Machine Learning & Algorithm Toolbox
+# Xinshuo's Toolbox
 A structured toolbox for mostly (learning-based and geometry-based) computer vision and machine learning (deep learning) related algorithm. For convenience, it also contains some basic algorithm, file io, image & video processing and some help function for debuging in python, matlab, c++ and lua.
 
 #### Usage:
