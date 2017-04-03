@@ -11,7 +11,7 @@ class AbstractLayer(object):
 	'''
 	define an abstract layer for all type of layers
 	'''
-	def __init__(self, name, datatype=None, paramtype=None):
+	def __init__(self, name, bottom=None, datatype=None, paramtype=None):
 		if datatype is not None:
 			assert any(datatype == item for item in ['uint', 'single', 'double']), 'type of data should be one of ''uint8'' ''single'' ''double'' '
 		else:
@@ -23,6 +23,10 @@ class AbstractLayer(object):
 			paramtype = 'single'
 			print 'paramtype of the layer is not defined. By default, we use single floating point to save the parameter'
 		assert isstring(name), 'the name of input layer should be a string'	
+		if bottom is not None:
+			assert len(bottom) > 0 and all(isinstance(layer_tmp, AbstractLayer) for layer_tmp in bottom), 'bottom layer is not correct'
+
+		self._bottom = bottom
 		self._name = name
 		# self._data = None
 		# self._params = None
@@ -36,6 +40,10 @@ class AbstractLayer(object):
 	@name.setter
 	def name(self, name):
 		assert isstring(name), 'the name of a layer should be a string'
+
+	@property
+	def bottom(self):
+		return self._bottom
 
 	# @property
 	# def data(self):
@@ -132,8 +140,8 @@ class Layer(AbstractLayer):
 	define necessary layer parameter and property for deep learning
 	parameters are following HxW format
 	'''
-	def __init__(self, name, nOutputPlane=None, kernal_size=None, stride=None, padding=None, datatype=None, paramtype=None):
-		super(Layer, self).__init__(name=name, datatype=datatype, paramtype=paramtype)
+	def __init__(self, name, bottom=None, nOutputPlane=None, kernal_size=None, stride=None, padding=None, datatype=None, paramtype=None):
+		super(Layer, self).__init__(name=name, bottom=bottom, datatype=datatype, paramtype=paramtype)
 		# assert nInputPlane is None or (type(nInputPlane) is int and nInputPlane > 0), 'number of input channel is not correct'
 		assert nOutputPlane is None or (type(nOutputPlane) is int and nOutputPlane > 0), 'number of output channel is not correct'
 		assert kernal_size is None or type(kernal_size) is int or len(kernal_size) == 2, 'kernal size is not correct'
@@ -187,8 +195,8 @@ class Convolution(Layer):
 	'''
 	define a 2d convolutional layer
 	'''
-	def __init__(self, name, nOutputPlane, kernal_size, stride=None, padding=None, datatype=None, paramtype=None):
-		super(Convolution, self).__init__(name=name, nOutputPlane=nOutputPlane, kernal_size=kernal_size, 
+	def __init__(self, name, nOutputPlane, kernal_size, bottom=None, stride=None, padding=None, datatype=None, paramtype=None):
+		super(Convolution, self).__init__(name=name, bottom=bottom, nOutputPlane=nOutputPlane, kernal_size=kernal_size, 
 			stride=stride, padding=padding, datatype=datatype, paramtype=paramtype)
 		# assert params.ndim == 3, 'the parameter of convolution layer should be 3-d array'
 		# assert params.shape(0) == self.nInputPlane, 'first dimension of parameter in convolution layer is not correct'
@@ -232,8 +240,8 @@ class Pooling(Layer):
 	'''
 	define a 2d pooling layer
 	'''
-	def __init__(self, name, kernal_size, stride=None, padding=None, datatype=None, paramtype=None):
-		super(Pooling, self).__init__(name=name, kernal_size=kernal_size, stride=stride, padding=padding, datatype=datatype, paramtype=paramtype)
+	def __init__(self, name, kernal_size, bottom=None, stride=None, padding=None, datatype=None, paramtype=None):
+		super(Pooling, self).__init__(name=name, bottom=bottom, kernal_size=kernal_size, stride=stride, padding=padding, datatype=datatype, paramtype=paramtype)
 		if self._stride is None:
 			self._stride = (1, 1)
 		if self._padding is None:
@@ -270,8 +278,8 @@ class Dense(Layer):
 	'''
 	define a fully connected layer
 	'''
-	def __init__(self, name, nOutputPlane, datatype=None, paramtype=None):
-		super(Dense, self).__init__(name=name, nOutputPlane=nOutputPlane, datatype=datatype, paramtype=paramtype)
+	def __init__(self, name, nOutputPlane, bottom=None, datatype=None, paramtype=None):
+		super(Dense, self).__init__(name=name, bottom=bottom, nOutputPlane=nOutputPlane, datatype=datatype, paramtype=paramtype)
 
 	@property
 	def type(self):
@@ -290,13 +298,12 @@ class Dense(Layer):
 
 
 
-class Activation(Layer):
+class Activation(AbstractLayer):
 	'''
 	define a fully connected layer
-	TODO: check if it's inplace
 	'''
-	def __init__(self, name, function, datatype=None, paramtype=None):
-		super(Activation, self).__init__(name=name, datatype=datatype, paramtype=paramtype)
+	def __init__(self, name, function, bottom=None, datatype=None, paramtype=None):
+		super(Activation, self).__init__(name=name, bottom=bottom, datatype=datatype, paramtype=paramtype)
 		assert isstring(function), 'the function used in dense layer should be a string'
 		assert any(function is item for item in ['linear', 'relu', 'sigmoid', 'tanh']), 'type of parameter should be one of ''linear'' ''relu'' ''tanh'' ''sigmoid'' '
 		self._function = function
