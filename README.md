@@ -19,6 +19,26 @@ pip install requirements.txt
 
 #### Limitation:
 
-*1. Only sequential model is supported right now. More operation for constructing the graph will be added depended on demand.*<br>
-*2. Only basic layers (Convolution, Pooling, Activation, Dense) are supported right now. More layers will be added in the future.*<br>
-*3. Add prototxt parse function in the future.*<br>
+coding 
+1. cv/geometry for python (2d manipulation)<br>
+2. cv/geometry for matlab (project 3d line)<br>
+3. machine_learning/deep_learing net.py: more operation on model graph<br>
+4. machine_learning/deep_learing layer.py: more layers<br>
+
+debug
+1. test TODO in the code<br>
+
+add more functions from old projects
+1. integrate oculus help function<br>
+2. integrate transformation detection network<br>
+3. integrate hw<br>
+4. integrate previous project before CMU<br>
+5. integrate projct on my github<br>
+6. integrate stuff on my laptop<br>
+
+fix toolbox structure
+1. ml/neural network<br>
+2. miscellaneous/lua_extension<br>
+2. miscellaneous/matlab_colorscheme<br>
+2. miscellaneous/wrapper<br>
+5. cv/kmeans_meanshift_normalizedcut<br>
