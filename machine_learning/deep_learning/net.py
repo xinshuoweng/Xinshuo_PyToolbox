@@ -43,7 +43,8 @@ class Net(object):
 		for input_tmp in inputlayers:
 			assert not self._layers.has_key(input_tmp.name), 'input layer should not have same name'
 			self._layers[input_tmp.name] = input_tmp
-			self._blobs[input_tmp.name] = {'data': np.ndarray(input_tmp.inputshape, dtype='uint8'), 'params': None}
+			# self._blobs[input_tmp.name] = {'data': np.ndarray(input_tmp.inputshape, dtype='uint8'), 'params': None}
+			self._blobs[input_tmp.name] = {'data': None, 'datashape': input_tmp.inputshape, 'params': None}
 
 		self._nb_entries = len(self._inputlayers)
 		self._compiled = False
@@ -109,7 +110,8 @@ class Net(object):
 		if isinstance(self._layers[layer_name], Activation):
 			return 0
 
-		datashape = (self._batch_size, ) + self._blobs[layer_name]['data'].shape
+		# datashape = (self._batch_size, ) + self._blobs[layer_name]['data'].shape
+		datashape = (self._batch_size, ) + self._blobs[layer_name]['datashape']
 		layer = self._layers[layer_name]
 		num_pixel = reduce(mul, datashape)
 		if layer.datatype == 'single':
@@ -132,10 +134,12 @@ class Net(object):
 				continue
 			bottom_shape = []
 			for bottom_layer in self._layers[layer_name].bottom:
-				bottom_shape += [self._blobs[bottom_layer.name]['data'].shape]
+				# bottom_shape += [self._blobs[bottom_layer.name]['data'].shape]
+				bottom_shape += [self._blobs[bottom_layer.name]['datashape']]
 
 			output_shape = layer.get_output_blob_shape(bottom_shape)[0]		# now all layers only output one output blob
-			self._blobs[layer_name] = {'data': np.ndarray(output_shape, dtype='uint8'), 'params': None}
+			# self._blobs[layer_name] = {'data': np.ndarray(output_shape, dtype='uint8'), 'params': None}
+			self._blobs[layer_name] = {'data': None, 'datashape': output_shape, 'params': None}
 
 		self.set_input_data(input_data)
 		assert len(self._blobs) == len(self._layers)
@@ -162,7 +166,8 @@ class Net(object):
 		for input_data_tmp in input_data:
 			assert isinstance(input_data_tmp, np.ndarray), \
 				'the input data should be numpy array'
-			assert input_data_tmp.shape[1:] == self._blobs.values()[index]['data'].shape, \
+			# assert input_data_tmp.shape[1:] == self._blobs.values()[index]['data'].shape, \
+			assert input_data_tmp.shape[1:] == self._blobs.values()[index]['datashape'], \
 				'the data feeding is not compatible with the network. ' \
 				+ 'Please change the input data or reshape the Input layer'
 			assert input_data_tmp.shape[0] > 0, 'batch size must be positive'
@@ -185,7 +190,8 @@ class Net(object):
 
 		# define nodes for all other layers and edges
 		for layer_name, layer in self._layers.items():
-			output_shape = self._blobs[layer_name]['data'].shape
+			# output_shape = self._blobs[layer_name]['data'].shape
+			output_shape = self._blobs[layer_name]['datashape']
 			graph.node(layer_name, '"%s"\n%s (%d, %s)' % (layer_name, layer.type, self._batch_size, \
 				functools.reduce(lambda x, y: str(x) + ', ' + str(y), output_shape)))
 			# graph.node(layer_name, layer_name)
@@ -257,7 +263,8 @@ class Net(object):
 		previous_layer_shape = None
 		for layer_name in self._blobs.keys():
 			layer = self._layers[layer_name]
-			output_shape = self._blobs[layer_name]['data'].shape
+			# output_shape = self._blobs[layer_name]['data'].shape
+			output_shape = self._blobs[layer_name]['datashape']
 			layer_num_param = layer.get_num_param(previous_layer_shape)
 			memory_data = self.get_memory_usage_data_layer(layer_name)
 			memory_param = layer.get_memory_usage_param(previous_layer_shape)
