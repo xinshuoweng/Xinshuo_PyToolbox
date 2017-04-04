@@ -7,7 +7,8 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import os, time
 import functools
-from graphviz import Graph
+from graphviz import Graph, Digraph
+# import pydot
 
 import __init__paths__
 from check import isstring, CHECK_EQ_LIST
@@ -42,7 +43,7 @@ class Net(object):
 		for input_tmp in inputlayers:
 			assert not self._layers.has_key(input_tmp.name), 'input layer should not have same name'
 			self._layers[input_tmp.name] = input_tmp
-			self._blobs[input_tmp.name] = {'data': np.ndarray(input_tmp.inputshape), 'params': None}
+			self._blobs[input_tmp.name] = {'data': np.ndarray(input_tmp.inputshape, dtype='uint8'), 'params': None}
 
 		self._nb_entries = len(self._inputlayers)
 		self._compiled = False
@@ -134,7 +135,7 @@ class Net(object):
 				bottom_shape += [self._blobs[bottom_layer.name]['data'].shape]
 
 			output_shape = layer.get_output_blob_shape(bottom_shape)[0]		# now all layers only output one output blob
-			self._blobs[layer_name] = {'data': np.ndarray(output_shape), 'params': None}
+			self._blobs[layer_name] = {'data': np.ndarray(output_shape, dtype='uint8'), 'params': None}
 
 		self.set_input_data(input_data)
 		assert len(self._blobs) == len(self._layers)
@@ -179,18 +180,24 @@ class Net(object):
 		assert self._compiled, 'the network is not compiled'
 
 		# construct the graph
-		graph = Graph(comment='Model Architecture')	
+		# graph = pydot.Dot(graph_type='graph')
+		graph = Digraph(comment='Model Architecture', encoding="UTF-8")	
 
 		# define nodes for all other layers and edges
 		for layer_name, layer in self._layers.items():
 			output_shape = self._blobs[layer_name]['data'].shape
-			graph.node(layer_name, '%s\n%s (%d, %s)' % (layer_name, layer.type, self._batch_size, \
+			graph.node(layer_name, '"%s"\n%s (%d, %s)' % (layer_name, layer.type, self._batch_size, \
 				functools.reduce(lambda x, y: str(x) + ', ' + str(y), output_shape)))
+			# graph.node(layer_name, layer_name)
+			# pydot.Node('"%s"\n%s\n(%d, %s)' % (layer_name, layer.type, self._batch_size, \
+				# functools.reduce(lambda x, y: str(x) + ', ' + str(y), output_shape)))
 			
+			# graph.add_node(pydot.Node(layer_name))
+
 			if layer.top is not None:
 				for top_tmp in layer.top:
 					graph.edge(layer_name, top_tmp.name)
-
+					# graph.add_edge(pydot.Edge(layer_name, top_tmp.name))
 		return graph
 
 
@@ -227,6 +234,16 @@ class Net(object):
 			chart_path = 'memory_chart.png'
 		if model_path is None:
 			model_path = 'model_graph.pdf'
+
+
+		# save the model graph
+		graph = self.construct_graph()
+		model_save_path, model_name, ext = fileparts(model_path)
+		graph.format = ext[1:]
+		graph.render(os.path.join(model_save_path, model_name), view=visualize, cleanup=True)
+		# os.system('rm %s' % os.path.join(model_save_path, model_name))		# delete source string file produced by graphviz
+		# graph.write_png(model_path)
+
 
 		# print terminal network info to a table and file
 		file_handler = open(table_path, 'w')
@@ -311,13 +328,8 @@ class Net(object):
 		plt.savefig(chart_path)
 		if visualize:
 			plt.show()
+		plt.close()
 
-		# save the model graph
-		graph = self.construct_graph()
-		model_save_path, model_name, ext = fileparts(model_path)
-		graph.format = ext[1:]
-		graph.render(os.path.join(model_save_path, model_name), view=visualize)
-		os.system('rm %s' % os.path.join(model_save_path, model_name))		# delete source string file produced by graphviz
 
 		print ' '
 		print 'Network info table is saved to %s' % os.path.abspath(table_path)
