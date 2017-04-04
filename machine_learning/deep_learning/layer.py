@@ -3,47 +3,90 @@
 import numpy as np
 import sys
 from operator import mul
+import functools
 
 import __init__paths__
-from type_check import isstring
+from check import isstring
+
+
+DATATYPE = ['uint', 'single', 'double']
+PARAMTYPE = ['uint', 'single', 'double']
+ACTIVATION_FUNCTION = ['linear', 'relu', 'sigmoid', 'tanh']
+
 
 class AbstractLayer(object):
 	'''
 	define an abstract layer for all type of layers
 	'''
-	def __init__(self, name, bottom=None, datatype=None, paramtype=None):
+	def __init__(self, name, datatype=None, paramtype=None):
 		if datatype is not None:
-			assert any(datatype == item for item in ['uint', 'single', 'double']), 'type of data should be one of ''uint8'' ''single'' ''double'' '
+			self._datatype_check(datatype)
 		else:
 			datatype = 'single'
-			print 'datatype of the layer is not defined. By default, we use single floating point to save the data'
+			print 'datatype of the layer is not defined.' \
+				'By default, we use single floating point to save the data'
 		if paramtype is not None:
-			assert any(paramtype == item for item in ['uint', 'single', 'double']), 'type of parameter should be one of ''uint8'' ''single'' ''double'' '
+			self._paramtype_check(paramtype)
 		else:
 			paramtype = 'single'
-			print 'paramtype of the layer is not defined. By default, we use single floating point to save the parameter'
+			print 'paramtype of the layer is not defined. By default,' \
+				'we use single floating point to save the parameter'
 		assert isstring(name), 'the name of input layer should be a string'	
-		if bottom is not None:
-			assert len(bottom) > 0 and all(isinstance(layer_tmp, AbstractLayer) for layer_tmp in bottom), 'bottom layer is not correct'
 
-		self._bottom = bottom
 		self._name = name
 		# self._data = None
 		# self._params = None
 		self._datatype = datatype
 		self._paramtype = paramtype
+		self._top = None
+		self._bottom = None
 
 	@property
 	def name(self):
 		return self._name
 
-	@name.setter
-	def name(self, name):
-		assert isstring(name), 'the name of a layer should be a string'
+	# @name.setter
+	# def name(self, name):
+	# 	assert isstring(name), 'the name of a layer should be a string'
+	# 	self._name = name
+
+	@property
+	def top(self):
+		'''
+		all layers can have multiple top layers
+		'''
+		return self._top
+
+	@top.setter
+	def top(self, top):
+		self._top = self._top_check(top)
+
+	def top_append(self, top):
+		top = self._top_check(top)
+		if self._top is None:
+			self._top = top
+		else:
+			if top is None:
+				top = []
+			self._top = self._top + top   	# append top layer to the existing top layers
+
+	def _top_check(self, top):
+		if isinstance(top, AbstractLayer):
+			top = [top]	
+		else:
+			assert top is None or isinstance(top, list) and len(top) > 0 \
+				and all(isinstance(layer_tmp, Layer) for layer_tmp in top), \
+				'top layer is not correct'		# top layer cannot be inputlayer
+		return top
+
 
 	@property
 	def bottom(self):
+		'''
+		different may have different number of bottom layers
+		'''
 		return self._bottom
+
 
 	# @property
 	# def data(self):
@@ -67,9 +110,14 @@ class AbstractLayer(object):
 
 	@paramtype.setter
 	def paramtype(self, paramtype):
- 		assert isstring(paramtype), 'the type of parameter should be a string'
- 		assert any(paramtype is item for item in ['uint', 'single', 'double']), 'type of parameter should be one of ''uint8'' ''single'' ''double'' '
+		self._paramtype_check(paramtype)
  		self._paramtype = paramtype
+
+ 	def _paramtype_check(self, paramtype):
+ 		assert isstring(paramtype), 'the type of parameter should be a string'
+ 		assert any(paramtype is item for item in PARAMTYPE), \
+ 			'type of parameter should be one of "%s"' \
+ 			% functools.reduce(lambda x, y: str(x) + '" "' + str(y), PARAMTYPE)
 
 	@property
 	def datatype(self):
@@ -77,9 +125,14 @@ class AbstractLayer(object):
 
 	@datatype.setter
 	def datatype(self, datatype):
- 		assert isstring(datatype), 'the type of data should be a string'
- 		assert any(datatype is item for item in ['uint', 'single', 'double']), 'type of data should be one of ''uint8'' ''single'' ''double'' '
+		self._datatype_check(datatype)
  		self._datatype = datatype
+
+ 	def _datatype_check(self, datatype):
+ 		assert isstring(datatype), 'the type of data should be a string'
+ 		assert any(datatype is item for item in DATATYPE), \
+ 			'type of data should be one of "%s"' \
+ 			% functools.reduce(lambda x, y: str(x) + '" "' + str(y), DATATYPE)
 
 
 	@property
@@ -87,9 +140,15 @@ class AbstractLayer(object):
  		raise NotImplementedError
 
  	def get_num_param(self, bottom_shape=None):
+ 		'''
+		the bottom shape is a list of tuple
+ 		'''
  		raise NotImplementedError
 
  	def get_output_blob_shape(self, bottom_shape=None):
+ 		'''
+		this function returns a list of tuple
+ 		'''
  		raise NotImplementedError
 
 	def get_memory_usage_param(self, bottom_shape=None):
@@ -106,7 +165,8 @@ class Input(AbstractLayer):
 	'''
 	def __init__(self, name, inputshape, datatype=None, paramtype=None):
 		super(Input, self).__init__(name=name, datatype=datatype, paramtype=paramtype)
-		assert isinstance(inputshape, tuple) and len(inputshape) > 0, 'the input shape should be a tuple'
+		assert isinstance(inputshape, tuple) and len(inputshape) > 0, \
+			'the input shape should be a tuple'
 		self._inputshape = inputshape
 		# assert isinstance(data, np.ndarray), 'the input data layer should contains numpy array'
 		# self._data = data
@@ -135,26 +195,73 @@ class Input(AbstractLayer):
  		assert isinstance(data, np.ndarray), 'the input data layer should contains numpy array'
  		return [data.shape]
 
+
 class Layer(AbstractLayer):
+	'''
+	define layer except Input layer
+	the bottom layer is not needed to be a list as input, it will be handled here.
+	'''
+	def __init__(self, name, nOutputPlane=None, bottom=None, datatype=None, paramtype=None):
+		super(Layer, self).__init__(name=name, datatype=datatype, paramtype=paramtype)
+		assert nOutputPlane is None or (type(nOutputPlane) is int and nOutputPlane > 0), \
+			'number of output channel is not correct'
+		self._nOutputPlane = nOutputPlane			
+		self._bottom = self._bottom_check(bottom)
+
+
+	@property
+	def nOutputPlane(self):
+		return self._nOutputPlane
+
+	@AbstractLayer.bottom.setter
+	def bottom(self, bottom):
+		self._bottom = self._bottom_check(bottom)
+
+	def bottom_append(self, bottom):
+		bottom = self._bottom_check(bottom)
+		if self._bottom is None:
+			self._bottom = bottom
+		else:
+			if bottom is None:
+				bottom = []
+			self._bottom = self._bottom + bottom
+
+	def _bottom_check(self, bottom):
+		if isinstance(bottom, AbstractLayer):
+			bottom = [bottom]	
+		else:
+			assert bottom is None or (isinstance(bottom, list) and len(bottom) > 0 \
+				and all(isinstance(layer_tmp, AbstractLayer) for layer_tmp in bottom)), \
+				'bottom layer is not correct'		# bottom layer could be any layer
+
+		return bottom
+
+class SpatialLayer(Layer):
 	'''
 	define necessary layer parameter and property for deep learning
 	parameters are following HxW format
 	'''
-	def __init__(self, name, bottom=None, nOutputPlane=None, kernal_size=None, stride=None, padding=None, datatype=None, paramtype=None):
-		super(Layer, self).__init__(name=name, bottom=bottom, datatype=datatype, paramtype=paramtype)
-		# assert nInputPlane is None or (type(nInputPlane) is int and nInputPlane > 0), 'number of input channel is not correct'
-		assert nOutputPlane is None or (type(nOutputPlane) is int and nOutputPlane > 0), 'number of output channel is not correct'
-		assert kernal_size is None or type(kernal_size) is int or len(kernal_size) == 2, 'kernal size is not correct'
-		assert stride is None or type(stride) is int or len(stride) == 2, 'stride size is not correct'
-		assert padding is None or type(padding) is int or len(padding) == 2, 'padding size is not correct'
+	def __init__(self, name, bottom=None, nOutputPlane=None, kernal_size=None, stride=None, 
+		padding=None, datatype=None, paramtype=None):
+		super(SpatialLayer, self).__init__(name=name, nOutputPlane=nOutputPlane, bottom=bottom, 
+			datatype=datatype, paramtype=paramtype)
+		assert kernal_size is None or type(kernal_size) is int or len(kernal_size) == 2, \
+			'kernal size is not correct'
+		assert stride is None or type(stride) is int or len(stride) == 2, \
+			'stride size is not correct'
+		assert padding is None or type(padding) is int or len(padding) == 2, \
+			'padding size is not correct'
 		# assert params is None or isinstance(params, np.ndarray), 'parameter is not correct'
 
 		if type(kernal_size) is not int and kernal_size is not None:
-			assert all(item > 0 and type(item) is int for item in kernal_size), 'kernal size must be positive integer'
+			assert all(item > 0 and type(item) is int for item in kernal_size), \
+				'kernal size must be positive integer'
 		if type(stride) is not int and stride is not None:
-			assert all(stride > 0 and type(item) is int for item in stride), 'stride must be positive integer'
+			assert all(stride > 0 and type(item) is int for item in stride), \
+				'stride must be positive integer'
 		if type(padding) is not int and padding is not None:
-			assert all(padding >= 0 and type(item) is int for item in padding), 'padding must be non-negative integer'
+			assert all(padding >= 0 and type(item) is int for item in padding), \
+				'padding must be non-negative integer'
 
 		# set horizontal and vertical parameter as the same if only one dimentional input is obtained
 		if type(kernal_size) is int:
@@ -168,16 +275,12 @@ class Layer(AbstractLayer):
 		self._stride = stride
 		self._padding = padding
 		# self._nInputPlane = nInputPlane
-		self._nOutputPlane = nOutputPlane
+
 		# self._params = params
 
 	# @property
 	# def nInputPlane(self):
 	# 	return self._nInputPlane
-
-	@property
-	def nOutputPlane(self):
-		return self._nOutputPlane
 
 	@property
 	def kernal_size(self):
@@ -191,13 +294,15 @@ class Layer(AbstractLayer):
 	def padding(self):
 		return self._padding
 
-class Convolution(Layer):
+class Convolution(SpatialLayer):
 	'''
 	define a 2d convolutional layer
 	'''
-	def __init__(self, name, nOutputPlane, kernal_size, bottom=None, stride=None, padding=None, datatype=None, paramtype=None):
-		super(Convolution, self).__init__(name=name, bottom=bottom, nOutputPlane=nOutputPlane, kernal_size=kernal_size, 
-			stride=stride, padding=padding, datatype=datatype, paramtype=paramtype)
+	def __init__(self, name, nOutputPlane, kernal_size, bottom=None, stride=None, padding=None, 
+		datatype=None, paramtype=None):
+		super(Convolution, self).__init__(name=name, bottom=bottom, nOutputPlane=nOutputPlane, 
+			kernal_size=kernal_size, stride=stride, padding=padding, datatype=datatype, 
+			paramtype=paramtype)
 		# assert params.ndim == 3, 'the parameter of convolution layer should be 3-d array'
 		# assert params.shape(0) == self.nInputPlane, 'first dimension of parameter in convolution layer is not correct'
 		# self._params = params
@@ -205,7 +310,8 @@ class Convolution(Layer):
 			self._stride = (1, 1)
 		if self._padding is None:
 			self._padding = (0, 0)
-
+		assert self._bottom is None or len(self._bottom) == 1, \
+			'Convolution layer can only have one bottom layer'
 	# @AbstractLayer.data.setter
 	# def data(self, data):
 	# 	assert isinstance(data, np.ndarray), 'the data of convolution layer should contains numpy array'
@@ -225,53 +331,66 @@ class Convolution(Layer):
 	def type(self):
  		return 'Convolution'
 
+	@AbstractLayer.bottom.setter
+	def bottom(self, bottom):
+		self._bottom = self._bottom_check(bottom)
+		assert self._bottom is None or len(self._bottom) == 1, 'Convolution layer can at most have one bottom layer'
+
+	def bottom_append(self, bottom):
+		super(Convolution, self).bottom_append(bottom)
+		assert self._bottom is None or len(self._bottom) == 1, 'Convolution layer can at most have one bottom layer'
+
 	def get_num_param(self, bottom_shape):
-		assert len(bottom_shape) == 1 and len(bottom_shape[0]) == 3 and isinstance(bottom_shape[0], tuple), 'bottom shape is not correct'
-		num_weights = self.kernal_size[0] * self.kernal_size[1] * bottom_shape[0][-1] * self.nOutputPlane
+		assert len(bottom_shape) == 1 and len(bottom_shape[0]) == 3 and \
+			isinstance(bottom_shape[0], tuple), 'bottom shape is not correct'
+		num_weights = self.kernal_size[0] * self.kernal_size[1] * bottom_shape[0][-1] \
+			* self.nOutputPlane
 		num_bias = self._nOutputPlane
 		return num_weights + num_bias
 
 	def get_output_blob_shape(self, bottom_shape):
-		assert len(bottom_shape) == 1 and len(bottom_shape[0]) == 3 and isinstance(bottom_shape[0], tuple), 'bottom shape is not correct'
-		return [tuple((np.array(bottom_shape[0][0:2]) + 2*np.array(self.padding) - np.array(self.kernal_size)) / np.array(self.stride) + 1) + (self.nOutputPlane, )]
+		assert len(bottom_shape) == 1 and len(bottom_shape[0]) == 3 and \
+			isinstance(bottom_shape[0], tuple), 'bottom shape is not correct'
+		return [tuple((np.array(bottom_shape[0][0:2]) + 2*np.array(self.padding) \
+			- np.array(self.kernal_size)) / np.array(self.stride) + 1) + (self.nOutputPlane, )]
 
   
-class Pooling(Layer):
+class Pooling(SpatialLayer):
 	'''
 	define a 2d pooling layer
 	'''
-	def __init__(self, name, kernal_size, bottom=None, stride=None, padding=None, datatype=None, paramtype=None):
-		super(Pooling, self).__init__(name=name, bottom=bottom, kernal_size=kernal_size, stride=stride, padding=padding, datatype=datatype, paramtype=paramtype)
+	def __init__(self, name, kernal_size, bottom=None, stride=None, padding=None, 
+		datatype=None, paramtype=None):
+		super(Pooling, self).__init__(name=name, bottom=bottom, kernal_size=kernal_size, 
+			stride=stride, padding=padding, datatype=datatype, paramtype=paramtype)
 		if self._stride is None:
 			self._stride = (1, 1)
 		if self._padding is None:
 			self._padding = (0, 0)
-
-	# @AbstractLayer.data.setter
-	# def data(self, data):
-	# 	# assert isinstance(data, np.ndarray), 'the data of convolution layer should contains numpy array'
-	# 	assert data.ndim == 4, 'the data of convolution layer should be 4-d array'
-	# 	assert data.shape(3) == self.nOutputPlane, 'last dimension of data in convolution layer is not correct'
-	# 	self._data = data
-
-	# @AbstractLayer.params.setter
-	# def params(self, params):
-	# 	# assert isinstance(params, np.ndarray), 'the parameter of convolution layer should contains numpy array'
-	# 	assert params.ndim == 3, 'the parameter of convolution layer should be 3-d array'
-	# 	assert params.shape(0) == self.nInputPlane, 'first dimension of parameter in convolution layer is not correct'
-	# 	self._params = params
+		assert self._bottom is None or len(self._bottom) == 1, \
+			'Pooling layer can only have one bottom layer'
 
 	@property
 	def type(self):
  		return 'Pooling'
 
+	@AbstractLayer.bottom.setter
+	def bottom(self, bottom):
+		self._bottom = self._bottom_check(bottom)
+		assert self._bottom is None or len(self._bottom) == 1, 'Pooling layer can at most have one bottom layer'
+
+	def bottom_append(self, bottom):
+		super(Pooling, self).bottom_append(bottom)
+		assert self._bottom is None or len(self._bottom) == 1, 'Pooling layer can at most have one bottom layer'
+
 	def get_num_param(self, bottom_shape=None):
 		return 0
 
 	def get_output_blob_shape(self, bottom_shape):
-		assert len(bottom_shape) == 1 and len(bottom_shape[0]) == 3 and isinstance(bottom_shape[0], tuple), 'bottom shape is not correct'
-		return [tuple((np.array(bottom_shape[0][0:2]) + 2*np.array(self.padding) - np.array(self.kernal_size)) / np.array(self.stride) + 1) + (bottom_shape[0][2], )]
-
+		assert len(bottom_shape) == 1 and len(bottom_shape[0]) == 3 and \
+			isinstance(bottom_shape[0], tuple), 'bottom shape is not correct'
+		return [tuple((np.array(bottom_shape[0][0:2]) + 2*np.array(self.padding) 
+			- np.array(self.kernal_size)) / np.array(self.stride) + 1) + (bottom_shape[0][2], )]
 
 
 class Dense(Layer):
@@ -279,38 +398,67 @@ class Dense(Layer):
 	define a fully connected layer
 	'''
 	def __init__(self, name, nOutputPlane, bottom=None, datatype=None, paramtype=None):
-		super(Dense, self).__init__(name=name, bottom=bottom, nOutputPlane=nOutputPlane, datatype=datatype, paramtype=paramtype)
+		super(Dense, self).__init__(name=name, bottom=bottom, nOutputPlane=nOutputPlane, 
+			datatype=datatype, paramtype=paramtype)
+		assert self._bottom is None or len(self._bottom) == 1, 'Dense layer can at most have one bottom layer'
+
+
+	@AbstractLayer.bottom.setter
+	def bottom(self, bottom):
+		self._bottom = self._bottom_check(bottom)
+		assert self._bottom is None or len(self._bottom) == 1, 'Dense layer can at most have one bottom layer'
+
+	def bottom_append(self, bottom):
+		super(Dense, self).bottom_append(bottom)
+		assert self._bottom is None or len(self._bottom) == 1, 'Dense layer can at most have one bottom layer'
 
 	@property
 	def type(self):
  		return 'Dense'
 
 	def get_num_param(self, bottom_shape):
-		assert len(bottom_shape) == 1 and len(bottom_shape[0]) > 0 and isinstance(bottom_shape[0], tuple), 'bottom shape is not correct'
+		assert len(bottom_shape) == 1 and len(bottom_shape[0]) > 0 and \
+			isinstance(bottom_shape[0], tuple), 'bottom shape is not correct'
 		num_weights = reduce(mul, bottom_shape[0]) * self.nOutputPlane
 		num_bias = self.nOutputPlane
 		return num_weights + num_bias
 
 	def get_output_blob_shape(self, bottom_shape=None):
 		if bottom_shape is not None:
-			assert len(bottom_shape) == 1 and len(bottom_shape[0]) > 0 and isinstance(bottom_shape[0], tuple), 'bottom shape is not correct'
+			assert len(bottom_shape) == 1 and len(bottom_shape[0]) > 0 and \
+				isinstance(bottom_shape[0], tuple), 'bottom shape is not correct'
 		return [(self.nOutputPlane, )]
 
 
 
-class Activation(AbstractLayer):
+class Activation(Layer):
 	'''
 	define a fully connected layer
 	'''
 	def __init__(self, name, function, bottom=None, datatype=None, paramtype=None):
-		super(Activation, self).__init__(name=name, bottom=bottom, datatype=datatype, paramtype=paramtype)
+		super(Activation, self).__init__(name=name, bottom=bottom, datatype=datatype, 
+			paramtype=paramtype)
 		assert isstring(function), 'the function used in dense layer should be a string'
-		assert any(function is item for item in ['linear', 'relu', 'sigmoid', 'tanh']), 'type of parameter should be one of ''linear'' ''relu'' ''tanh'' ''sigmoid'' '
+		assert any(function is item for item in ACTIVATION_FUNCTION), \
+			'type of parameter should be one of "%s"' \
+			% functools.reduce(lambda x, y: str(x) + '" "' + str(y), ACTIVATION_FUNCTION)
+		assert self._bottom is None or len(self._bottom) == 1, \
+			'Activation layer can only have one bottom layer'
+
 		self._function = function
 
 	@property
 	def type(self):
  		return 'Activation'
+	
+	@AbstractLayer.bottom.setter
+	def bottom(self, bottom):
+		self._bottom = self._bottom_check(bottom)
+		assert self._bottom is None or len(self._bottom) == 1, 'Activation layer can at most have one bottom layer'
+
+	def bottom_append(self, bottom):
+		super(Activation, self).bottom_append(bottom)
+		assert self._bottom is None or len(self._bottom) == 1, 'Activation layer can at most have one bottom layer'
 
  	@property
 	def function(self):
@@ -318,15 +466,14 @@ class Activation(AbstractLayer):
 
 	def get_num_param(self, bottom_shape=None):
 		if bottom_shape is not None:
-			assert len(bottom_shape) == 1 and len(bottom_shape[0]) > 0 and isinstance(bottom_shape[0], tuple), 'bottom shape is not correct'
+			assert len(bottom_shape) == 1 and len(bottom_shape[0]) > 0 and \
+				isinstance(bottom_shape[0], tuple), 'bottom shape is not correct'
 		return 0
 
 	def get_output_blob_shape(self, bottom_shape):
-		assert len(bottom_shape) == 1 and len(bottom_shape[0]) > 0 and isinstance(bottom_shape[0], tuple), 'bottom shape is not correct'
+		assert len(bottom_shape) == 1 and len(bottom_shape[0]) > 0 and \
+			isinstance(bottom_shape[0], tuple), 'bottom shape is not correct'
 		return bottom_shape
-
-
-
 
 
 

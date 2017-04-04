@@ -51,4 +51,5 @@ Temporary Items
 *.pyc
 
 
-# Directories not belonging to myself
+# test files
+*.cache/*

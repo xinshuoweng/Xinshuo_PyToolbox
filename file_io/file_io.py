@@ -6,7 +6,7 @@ import os, sys
 import errno
 
 import __init__paths__
-from type_check import isstring
+from check import isstring
 
 
 # Sadly, Python fails to provide the following magic number for us.
