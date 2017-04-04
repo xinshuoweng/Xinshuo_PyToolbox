@@ -104,8 +104,8 @@ def test_Pooling():
 	assert_allclose(poolinglayer.padding, (1, 2))
 	assert poolinglayer.datatype is 'single'
 	assert poolinglayer.paramtype is 'single'
-	assert_allclose(poolinglayer.get_num_param(), 0)
 	bottom_shape = [(4, 12, 512)]
+	assert_allclose(poolinglayer.get_num_param(bottom_shape), 0)
 	assert_allclose(poolinglayer.get_output_blob_shape(bottom_shape), [(2, 5, 512)])
 
 
@@ -122,6 +122,13 @@ def test_Activation():
 	assert_allclose(activation.get_num_param(bottom_shape), 0)
 	assert_allclose(activation.get_output_blob_shape(bottom_shape), bottom_shape)
 
+
+def test_Concat():
+	concat = Concat(name='concat1', axis=0)
+	assert concat.axis == 0
+	bottom_shape = [(4, 12, 3), (3, 12, 3), (3, 12, 3)]
+	assert_allclose(concat.get_num_param(bottom_shape), 0)
+	assert_allclose(concat.get_output_blob_shape(bottom_shape), [(10, 12, 3)])
 
 
 if __name__ == '__main__':

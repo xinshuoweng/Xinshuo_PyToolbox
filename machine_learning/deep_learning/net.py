@@ -47,6 +47,7 @@ class Net(object):
 		self._nb_entries = len(self._inputlayers)
 		self._compiled = False
 
+
 	@property
 	def inputlayers(self):
 		return self._inputlayers
@@ -391,7 +392,7 @@ class gModule(Net):
 		# what we do in the sequential model
 		for bottom_tmp in layer.bottom:
 			assert self._layers.has_key(bottom_tmp.name), 'bottom layer doesn\'t exist in the graph'
-			self._layers[bottom_tmp.name].top_append(bottom_tmp)	# apeend the newly added layer as top of last layer
+			self._layers[bottom_tmp.name].top_append(layer)	# apeend the newly added layer as top of last layer
 			
 		self._layers[layer.name] = layer
 		self._nb_entries += 1

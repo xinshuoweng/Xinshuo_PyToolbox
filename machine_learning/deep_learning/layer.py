@@ -6,7 +6,7 @@ from operator import mul
 import functools
 
 import __init__paths__
-from check import isstring
+from check import isstring, CHECK_EQ_LIST
 
 
 DATATYPE = ['uint', 'single', 'double']
@@ -236,6 +236,12 @@ class Layer(AbstractLayer):
 
 		return bottom
 
+	def _bottom_shape_check(self, bottom_shape):
+		assert bottom_shape is not None, 'bottom shape cannot be none'
+		assert len(bottom_shape) > 0 and isinstance(bottom_shape, list) \
+			and all(isinstance(bottom_shape_tmp, tuple) for bottom_shape_tmp in bottom_shape), \
+			'bottom shape is not correct'
+
 class SpatialLayer(Layer):
 	'''
 	define necessary layer parameter and property for deep learning
@@ -294,6 +300,14 @@ class SpatialLayer(Layer):
 	def padding(self):
 		return self._padding
 
+	def _bottom_shape_check(self, bottom_shape):
+		'''
+		Note that spatial layer can only accept bottom with 3 dimension
+		'''
+		super(SpatialLayer, self)._bottom_shape_check(bottom_shape)
+		assert all(len(bottom_shape_tmp) == 3 for bottom_shape_tmp in bottom_shape), \
+			'bottom shape is not correct'
+
 class Convolution(SpatialLayer):
 	'''
 	define a 2d convolutional layer
@@ -341,16 +355,18 @@ class Convolution(SpatialLayer):
 		assert self._bottom is None or len(self._bottom) == 1, 'Convolution layer can at most have one bottom layer'
 
 	def get_num_param(self, bottom_shape):
-		assert len(bottom_shape) == 1 and len(bottom_shape[0]) == 3 and \
-			isinstance(bottom_shape[0], tuple), 'bottom shape is not correct'
+		self._bottom_shape_check(bottom_shape)
+		assert len(bottom_shape) == 1, 'Convolution layer can at most have one bottom layer'
+		
 		num_weights = self.kernal_size[0] * self.kernal_size[1] * bottom_shape[0][-1] \
 			* self.nOutputPlane
 		num_bias = self._nOutputPlane
 		return num_weights + num_bias
 
 	def get_output_blob_shape(self, bottom_shape):
-		assert len(bottom_shape) == 1 and len(bottom_shape[0]) == 3 and \
-			isinstance(bottom_shape[0], tuple), 'bottom shape is not correct'
+		self._bottom_shape_check(bottom_shape)
+		assert len(bottom_shape) == 1, 'Convolution layer can at most have one bottom layer'
+
 		return [tuple((np.array(bottom_shape[0][0:2]) + 2*np.array(self.padding) \
 			- np.array(self.kernal_size)) / np.array(self.stride) + 1) + (self.nOutputPlane, )]
 
@@ -383,12 +399,16 @@ class Pooling(SpatialLayer):
 		super(Pooling, self).bottom_append(bottom)
 		assert self._bottom is None or len(self._bottom) == 1, 'Pooling layer can at most have one bottom layer'
 
-	def get_num_param(self, bottom_shape=None):
+	def get_num_param(self, bottom_shape):
+		self._bottom_shape_check(bottom_shape)
+		assert len(bottom_shape) == 1, 'Pooling layer can at most have one bottom layer'
+
 		return 0
 
 	def get_output_blob_shape(self, bottom_shape):
-		assert len(bottom_shape) == 1 and len(bottom_shape[0]) == 3 and \
-			isinstance(bottom_shape[0], tuple), 'bottom shape is not correct'
+		self._bottom_shape_check(bottom_shape)
+		assert len(bottom_shape) == 1, 'Pooling layer can at most have one bottom layer'
+
 		return [tuple((np.array(bottom_shape[0][0:2]) + 2*np.array(self.padding) 
 			- np.array(self.kernal_size)) / np.array(self.stride) + 1) + (bottom_shape[0][2], )]
 
@@ -417,16 +437,18 @@ class Dense(Layer):
  		return 'Dense'
 
 	def get_num_param(self, bottom_shape):
-		assert len(bottom_shape) == 1 and len(bottom_shape[0]) > 0 and \
-			isinstance(bottom_shape[0], tuple), 'bottom shape is not correct'
+		self._bottom_shape_check(bottom_shape)
+		assert len(bottom_shape) == 1, 'Dense layer can at most have one bottom layer'
+
 		num_weights = reduce(mul, bottom_shape[0]) * self.nOutputPlane
 		num_bias = self.nOutputPlane
 		return num_weights + num_bias
 
-	def get_output_blob_shape(self, bottom_shape=None):
+	def get_output_blob_shape(self, bottom_shape):
 		if bottom_shape is not None:
-			assert len(bottom_shape) == 1 and len(bottom_shape[0]) > 0 and \
-				isinstance(bottom_shape[0], tuple), 'bottom shape is not correct'
+			self._bottom_shape_check(bottom_shape)
+			assert len(bottom_shape) == 1, 'Dense layer can at most have one bottom layer'
+
 		return [(self.nOutputPlane, )]
 
 
@@ -464,16 +486,76 @@ class Activation(Layer):
 	def function(self):
  		return self._function
 
-	def get_num_param(self, bottom_shape=None):
-		if bottom_shape is not None:
-			assert len(bottom_shape) == 1 and len(bottom_shape[0]) > 0 and \
-				isinstance(bottom_shape[0], tuple), 'bottom shape is not correct'
+	def get_num_param(self, bottom_shape):
+		self._bottom_shape_check(bottom_shape)
+		assert len(bottom_shape) == 1, 'Activation layer can at most have one bottom layer'
+
 		return 0
 
 	def get_output_blob_shape(self, bottom_shape):
-		assert len(bottom_shape) == 1 and len(bottom_shape[0]) > 0 and \
-			isinstance(bottom_shape[0], tuple), 'bottom shape is not correct'
+		self._bottom_shape_check(bottom_shape)
+		assert len(bottom_shape) == 1, 'Activation layer can at most have one bottom layer'
+
 		return bottom_shape
+
+
+class Concat(Layer):
+	'''
+	define a concat layer, which can concatenate several layers along specific dimension
+	Note: it's a litte bit different than Caffe, since the axis doesn't include the first 
+	batch dimension. So if the input data is (N)xHxWxC, axis 1 means to concatenate along W dimension
+	'''
+	def __init__(self, name, axis, bottom=None, datatype=None, paramtype=None):
+		super(Concat, self).__init__(name=name, bottom=bottom, datatype=datatype, 
+			paramtype=paramtype)
+		assert isinstance(axis, int) and axis >= 0, 'axis for concatenation should be an non-negative integer'
+		self._axis = axis
+
+	@property
+	def type(self):
+ 		return 'Concat'
+	
+ 	@property
+ 	def axis(self):
+ 		return self._axis
+
+	@AbstractLayer.bottom.setter
+	def bottom(self, bottom):
+		self._bottom = self._bottom_check(bottom)
+
+	def bottom_append(self, bottom):
+		super(Concat, self).bottom_append(bottom)
+
+	def _bottom_shape_check(self, bottom_shape):
+		super(Concat, self)._bottom_shape_check(bottom_shape)
+
+		dimension = len(bottom_shape[0])
+		bottom_shape_list_removal = []
+		for bottom_shape_tmp in bottom_shape:
+			assert len(bottom_shape_tmp) == dimension, 'all bottom layer during concatenation should have same dimension'
+
+			# construct a list of list without the dimension along the axis
+			bottom_shape_list_tmp = list(bottom_shape_tmp)
+			del bottom_shape_list_tmp[self._axis]
+			bottom_shape_list_removal.append(bottom_shape_list_tmp)
+		assert CHECK_EQ_LIST(bottom_shape_list_removal), 'bottom shape should be equal for all bottom layers except for the dimension to concatenate'
+
+	def get_num_param(self, bottom_shape):
+		self._bottom_shape_check(bottom_shape)
+		return 0
+
+	def get_output_blob_shape(self, bottom_shape):
+		self._bottom_shape_check(bottom_shape)	
+
+		axis_list = []
+		for bottom_shape_tmp in bottom_shape:
+			axis_list += [bottom_shape_tmp[self._axis]]
+
+		# sum the dimension along the axis
+		top_shape = list(bottom_shape[0])
+		top_shape[self._axis] = sum(axis_list)
+		return [tuple(top_shape)]
+
 
 
 

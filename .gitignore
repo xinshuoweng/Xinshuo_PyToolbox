@@ -52,4 +52,4 @@ Temporary Items
 
 
 # test files
-*.cache/*
+**/.cache/*
