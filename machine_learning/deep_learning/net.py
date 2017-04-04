@@ -16,7 +16,7 @@ from layer import *
 from file_io import is_path_exists_or_creatable, fileparts
 
 
-Layer_supported = [Input, Convolution, Pooling, Dense, Activation]
+Layer_supported = [Input, Convolution, Pooling, Dense, Activation, Concat]
 
 # TODO: once layers with multiple blobs as output (e.g. split or slice layer) added, 
 # compile, construct_graph, summary functions need to be modified
@@ -132,6 +132,7 @@ class Net(object):
 			bottom_shape = []
 			for bottom_layer in self._layers[layer_name].bottom:
 				bottom_shape += [self._blobs[bottom_layer.name]['data'].shape]
+
 			output_shape = layer.get_output_blob_shape(bottom_shape)[0]		# now all layers only output one output blob
 			self._blobs[layer_name] = {'data': np.ndarray(output_shape), 'params': None}
 
@@ -225,7 +226,7 @@ class Net(object):
 		if chart_path is None:
 			chart_path = 'memory_chart.png'
 		if model_path is None:
-			model_path = 'model_graph.png'
+			model_path = 'model_graph.pdf'
 
 		# print terminal network info to a table and file
 		file_handler = open(table_path, 'w')
@@ -271,51 +272,40 @@ class Net(object):
 		print >> file_handler, '======================================================================================================='
 		file_handler.close()
 
-		# remove small percentage during display
-		for key, value in memory_data_list.items():
-			if value < remove_threshold * total_data_usage / 100.:
-				del memory_data_list[key]
-		for key, value in memory_param_list.items():
-			if value < remove_threshold * total_param_usage / 100.:
-				del memory_param_list[key]
-		for key, value in total_memory.items():
-			if value < remove_threshold * total_memory_usage / 100.:
-				del total_memory[key]
+		# suppress the label below the threshold
+		def remove_small_percentage(memory_list, remove_threshold):
+			total_usage = sum(memory_list.values())
+			for key, value in memory_list.items():
+				if value < remove_threshold * total_usage / 100.:
+					del memory_list[key]	
+			return memory_list	
+		memory_data_list = remove_small_percentage(memory_data_list, remove_threshold)
+		memory_param_list = remove_small_percentage(memory_param_list, remove_threshold)
+		total_memory = remove_small_percentage(total_memory, remove_threshold)
 
 		# plot pie chart for memory usage
 		fig = plt.figure()
 		gs = gridspec.GridSpec(2, 2)
 		fig.suptitle('Network Memory Usage', fontsize=16)
+		
+		def plot_pie_chart(ax, memory_list, title, display_threshold):
+			ax.set_title('%s: %s' % (title, humanize.naturalsize(sum(memory_list.values()), binary=True)), 
+				fontsize=10)
+			max_index = np.argmax(np.array(memory_list.values()))	# find the one to explode
+			explode_list = [0] * len(memory_list)
+			explode_list[max_index] = 0.1
+			text = plt.pie(memory_list.values(), labels=memory_list.keys(), 
+				autopct=autopct_generator(display_threshold), shadow=True, explode=explode_list)[1]		# suppress the number below the threshold
+			fixOverLappingText(text)
+			plt.axis('equal')
+
 		ax = plt.subplot(gs[0, 0])
-		ax.set_title('Data Memory Usage: %s' % humanize.naturalsize(total_data_usage, binary=True), 
-			fontsize=10)
-		max_index = np.argmax(np.array(memory_data_list.values()))	# find the one to explode
-		explode_list = [0] * len(memory_data_list)
-		explode_list[max_index] = 0.1
-		text = plt.pie(memory_data_list.values(), labels=memory_data_list.keys(), 
-			autopct=autopct_generator(display_threshold), shadow=True, explode=explode_list)[1]
-		# fixOverLappingText(text)
-		plt.axis('equal')
+		plot_pie_chart(ax, memory_data_list, 'Data Memory Usage', display_threshold)
 		ax = plt.subplot(gs[0, 1])
-		ax.set_title('Parameter Memory Usage: %s' % humanize.naturalsize(total_param_usage, 
-			binary=True), fontsize=10)
-		max_index = np.argmax(np.array(memory_param_list.values()))	# find the one to explode
-		explode_list = [0] * len(memory_param_list)
-		explode_list[max_index] = 0.1
-		text = plt.pie(memory_param_list.values(), labels=memory_param_list.keys(), 
-			autopct=autopct_generator(display_threshold), shadow=True, explode=explode_list)[1]
-		# fixOverLappingText(text)
-		plt.axis('equal')
+		plot_pie_chart(ax, memory_param_list, 'Parameter Memory Usage', display_threshold)
 		ax = plt.subplot(gs[1, :])
-		ax.set_title('Total Memory Usage: %s' % humanize.naturalsize(total_memory_usage, 
-			binary=True), fontsize=10)
-		max_index = np.argmax(np.array(total_memory.values()))	# find the one to explode
-		explode_list = [0] * len(total_memory)
-		explode_list[max_index] = 0.1
-		text = plt.pie(total_memory.values(), labels=total_memory.keys(), 
-			autopct=autopct_generator(display_threshold), shadow=True, explode=explode_list)[1]
-		# fixOverLappingText(text)
-		plt.axis('equal')
+		plot_pie_chart(ax, total_memory, 'Total Memory Usage', display_threshold)
+
 		plt.savefig(chart_path)
 		if visualize:
 			plt.show()

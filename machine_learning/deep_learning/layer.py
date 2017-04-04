@@ -537,6 +537,7 @@ class Concat(Layer):
 			# construct a list of list without the dimension along the axis
 			bottom_shape_list_tmp = list(bottom_shape_tmp)
 			del bottom_shape_list_tmp[self._axis]
+			
 			bottom_shape_list_removal.append(bottom_shape_list_tmp)
 		assert CHECK_EQ_LIST(bottom_shape_list_removal), 'bottom shape should be equal for all bottom layers except for the dimension to concatenate'
 
