@@ -152,12 +152,18 @@ class AbstractLayer(object):
  		raise NotImplementedError
 
 	def get_memory_usage_param(self, bottom_shape=None):
+		'''
+		this function calculate memory usage for the layer
+		Note that we also consider the diff variable in each layer.
+		So the memory usage should be double size
+		'''
+		num_param = 2 * self.get_num_param(bottom_shape)
  		if self._paramtype == 'single':
- 			return self.get_num_param(bottom_shape) * 4 	# single has 4 bytes
+ 			return num_param * 4 		# single has 4 bytes
  		elif self._paramtype == 'double':
- 			return self.get_num_param(bottom_shape) * 8		# double has 8 bytes
+ 			return num_param * 8		# double has 8 bytes
  		elif self._paramtype == 'uint':
- 			return self.get_num_param(bottom_shape)			# unsigned integer has 1 byte
+ 			return num_param			# unsigned integer has 1 byte
 
 class Input(AbstractLayer):
 	'''
