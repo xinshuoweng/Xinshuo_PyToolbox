@@ -181,7 +181,7 @@ class Net(object):
 
 		# construct the graph
 		# graph = pydot.Dot(graph_type='graph')
-		graph = Digraph(comment='Model Architecture', encoding="UTF-8")	
+		graph = Digraph(comment='Model Architecture')	
 
 		# define nodes for all other layers and edges
 		for layer_name, layer in self._layers.items():
