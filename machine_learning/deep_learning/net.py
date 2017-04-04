@@ -5,7 +5,7 @@ from operator import mul
 import humanize
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
-import os
+import os, time
 import functools
 from graphviz import Graph
 
@@ -195,7 +195,7 @@ class Net(object):
 
 
 	def summary(self, visualize=False, model_path=None, table_path=None, chart_path=None, 
-		display_threshold=5, remove_threshold=1):
+		display_threshold=4):
 		'''
 		print all info about the network to terminal and local path
 
@@ -235,8 +235,8 @@ class Net(object):
 		print >> file_handler, '{:<30}{:<25}{:<15}{:<20}'.format('Layer (type)', 'Output Shape', 'Param', 'Memory Usage(data, param)')
 		print >> file_handler, '-------------------------------------------------------------------------------------------------------'
 		total_param = 0
-		memory_data_list = dict()
-		memory_param_list = dict()
+		memory_data_dict = dict()
+		memory_param_dict = dict()
 		previous_layer_shape = None
 		for layer_name in self._blobs.keys():
 			layer = self._layers[layer_name]
@@ -244,8 +244,8 @@ class Net(object):
 			layer_num_param = layer.get_num_param(previous_layer_shape)
 			memory_data = self.get_memory_usage_data_layer(layer_name)
 			memory_param = layer.get_memory_usage_param(previous_layer_shape)
-			memory_data_list[layer_name] = memory_data
-			memory_param_list[layer_name] = memory_param
+			memory_data_dict[layer_name] = memory_data
+			memory_param_dict[layer_name] = memory_param
 			memory = memory_data + memory_param
 			memory_data_format = humanize.naturalsize(memory_data, binary=True)
 			memory_param_format = humanize.naturalsize(memory_param, binary=True)
@@ -260,8 +260,8 @@ class Net(object):
 			total_param += layer_num_param
 			previous_layer_shape = [output_shape]
 
-		total_data_usage = sum(memory_data_list.values())
-		total_param_usage = sum(memory_param_list.values())
+		total_data_usage = sum(memory_data_dict.values())
+		total_param_usage = sum(memory_param_dict.values())
 		total_memory = dict()
 		total_memory['data'] = total_data_usage
 		total_memory['param'] = total_param_usage
@@ -273,39 +273,41 @@ class Net(object):
 		file_handler.close()
 
 		# suppress the label below the threshold
-		def remove_small_percentage(memory_list, remove_threshold):
-			total_usage = sum(memory_list.values())
-			for key, value in memory_list.items():
-				if value < remove_threshold * total_usage / 100.:
-					del memory_list[key]	
-			return memory_list	
-		memory_data_list = remove_small_percentage(memory_data_list, remove_threshold)
-		memory_param_list = remove_small_percentage(memory_param_list, remove_threshold)
-		total_memory = remove_small_percentage(total_memory, remove_threshold)
+		def suppress_labels(memory_dict, display_threshold):
+			total_usage = sum(memory_dict.values())
+			suppress_list = []
+			for key, value in memory_dict.items():
+				if value < display_threshold * total_usage / 100.:
+					suppress_list.append(key)
+
+			original_labels = memory_dict.keys()
+			for candidate in suppress_list:
+				index = original_labels.index(candidate)
+				original_labels[index] = ''
+			return original_labels
 
 		# plot pie chart for memory usage
 		fig = plt.figure()
 		gs = gridspec.GridSpec(2, 2)
 		fig.suptitle('Network Memory Usage', fontsize=16)
 		
-		def plot_pie_chart(ax, memory_list, title, display_threshold):
-			ax.set_title('%s: %s' % (title, humanize.naturalsize(sum(memory_list.values()), binary=True)), 
+		def plot_pie_chart(ax, memory_dict, title, display_threshold):
+			ax.set_title('%s: %s' % (title, humanize.naturalsize(sum(memory_dict.values()), binary=True)), 
 				fontsize=10)
-			max_index = np.argmax(np.array(memory_list.values()))	# find the one to explode
-			explode_list = [0] * len(memory_list)
+			max_index = np.argmax(np.array(memory_dict.values()))	# find the one to explode
+			explode_list = [0] * len(memory_dict)
 			explode_list[max_index] = 0.1
-			text = plt.pie(memory_list.values(), labels=memory_list.keys(), 
+			plt.pie(memory_dict.values(), labels=suppress_labels(memory_dict, display_threshold), 
 				autopct=autopct_generator(display_threshold), shadow=True, explode=explode_list)[1]		# suppress the number below the threshold
-			fixOverLappingText(text)
+			# fixOverLappingText(text)
 			plt.axis('equal')
 
 		ax = plt.subplot(gs[0, 0])
-		plot_pie_chart(ax, memory_data_list, 'Data Memory Usage', display_threshold)
+		plot_pie_chart(ax, memory_data_dict, 'Data Memory Usage', display_threshold)
 		ax = plt.subplot(gs[0, 1])
-		plot_pie_chart(ax, memory_param_list, 'Parameter Memory Usage', display_threshold)
+		plot_pie_chart(ax, memory_param_dict, 'Parameter Memory Usage', display_threshold)
 		ax = plt.subplot(gs[1, :])
 		plot_pie_chart(ax, total_memory, 'Total Memory Usage', display_threshold)
-
 		plt.savefig(chart_path)
 		if visualize:
 			plt.show()
