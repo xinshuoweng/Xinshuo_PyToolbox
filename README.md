@@ -24,8 +24,7 @@ stay tuned.
 *coding*
 1. cv/geometry for python (2d manipulation)<br>
 2. cv/geometry for matlab (project 3d line)<br>
-3. machine_learning/deep_learing net.py: more operation on model graph<br>
-4. machine_learning/deep_learing layer.py: more layers<br>
+3. machine_learning/deep_learing layer.py: more layers<br>
 
 *debug*
 1. test TODO in the code<br>
