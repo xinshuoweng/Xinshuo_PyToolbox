@@ -19,11 +19,11 @@ function gpu_id = auto_select_gpu()
         fprintf('GPU %d: free memory %d\n', i, freeMemory);
         if freeMemory > maxFreeMemory
             maxFreeMemory = freeMemory;
-            gpu_id = i;
+            gpu_id = ;
 %             gpu_handler = g;
         end
     end
-    fprintf('Use GPU %d\n', gpu_id);
+    fprintf('Use GPU %d\n', 4 - gpu_id);
     
     % deselects all GPU devices
     gpuDevice([]);
