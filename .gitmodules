@@ -1,0 +1,12 @@
+[submodule "external/wrapper/matlab_wrapper"]
+	path = external/wrapper/matlab_wrapper
+	url = git@github.com:mrkrd/matlab_wrapper.git
+[submodule "external/lua/torch-totem"]
+	path = external/lua/torch-totem
+	url = git@github.com:deepmind/torch-totem.git
+[submodule "external/lua/debugger.lua"]
+	path = external/lua/debugger.lua
+	url = git@github.com:slembcke/debugger.lua.git
+[submodule "external/lua/graphicsmagick"]
+	path = external/lua/graphicsmagick
+	url = git@github.com:clementfarabet/graphicsmagick.git

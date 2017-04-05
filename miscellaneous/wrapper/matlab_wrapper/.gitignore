@@ -1,7 +1,0 @@
-*.html
-*.pyc
-*.egg-info
-dist
-build
-docs/_build
-*.orig

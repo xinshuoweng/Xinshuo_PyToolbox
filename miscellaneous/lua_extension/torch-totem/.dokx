@@ -1,8 +1,0 @@
-return {
-    packageName = 'totem',
-    exclude = { 'examples', 'scripts', 'build' },
-    mathematics = false,
-    githubURL = 'akfidjeland/torch-totem',
-    includeLocal = false,
-    includePrivate = false
-}
