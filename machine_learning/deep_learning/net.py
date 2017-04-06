@@ -120,6 +120,8 @@ class Net(object):
  			return num_pixel * 8		# double has 8 bytes
  		elif layer.datatype == 'uint':
  			return num_pixel			# unsigned integer has 1 byte
+ 		elif layer.datatype == 'boolean':
+ 			return num_pixel			# boolean has 4 bytes
 		else:
 			assert False, 'unknown error while calculating memory usage for data'
 

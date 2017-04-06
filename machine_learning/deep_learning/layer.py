@@ -9,8 +9,8 @@ import __init__paths__
 from check import isstring, CHECK_EQ_LIST
 
 
-DATATYPE = ['uint', 'single', 'double']
-PARAMTYPE = ['uint', 'single', 'double']
+DATATYPE = ['uint', 'single', 'double', 'boolean']
+PARAMTYPE = ['uint', 'single', 'double', 'boolean']
 ACTIVATION_FUNCTION = ['linear', 'relu', 'sigmoid', 'tanh']
 
 
@@ -164,6 +164,10 @@ class AbstractLayer(object):
  			return num_param * 8		# double has 8 bytes
  		elif self._paramtype == 'uint':
  			return num_param			# unsigned integer has 1 byte
+ 		elif self._paramtype == 'boolean':
+ 			return num_param 			# boolean has 1 byte
+ 		else:
+ 			assert False, 'Unknown parameter datatype error'
 
 class Input(AbstractLayer):
 	'''
