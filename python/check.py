@@ -2,8 +2,14 @@
 # email: xinshuo.weng@gmail.com
 import os, sys
 
-def isstring(string):
-	return isinstance(string, basestring)
+def isstring(string_test):
+	return isinstance(string_test, basestring)
+
+def isinteger(integer_test):
+	return isinstance(integer_test, int)
+
+def islist(list_test):
+	return isinstance(list_test, list)
 
 def CHECK_EQ_LIST(input_list):
 	'''

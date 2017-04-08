@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_allclose
 
+import __init__path__
 from layer import *
 
 def test_Input():
