@@ -2,11 +2,15 @@
 # email: xinshuo.weng@gmail.com
 import math
 import numpy as np
+from numpy.testing import assert_almost_equal
+from check import islist
 
 def get_line(pts, slope):
     '''
     # slope is the angle in degree, this function takes a point and a
     '''
+    assert islist(pts) and len(pts) == 2, 'point is not correct'
+
     if slope == 90 or -90:
         slope = slope + 0.00001
     slope = math.tan(math.radians(slope))
@@ -16,20 +20,23 @@ def get_line(pts, slope):
         dividor += 0.00001
     b = 1.0 / dividor
     a = -b * slope
-    assert math.fabs(pts[0]*a + pts[1]*b + 1) < 0.0000001, 'Point is not on the line'
+    # assert_almost_equal(pts[0]*a + pts[1]*b + 1, 0, err_msg='Point is not on the line')
     return np.array([a, b, 1], dtype=float)
 
 def get_slope(pts1, pts2):
+    assert islist(pts1) and len(pts1) == 2, 'point is not correct'
+    assert islist(pts2) and len(pts2) == 2, 'point is not correct'
+
     slope = (pts1[1] - pts2[1]) / (pts1[0] - pts2[0])
-    # print(slope)
     slope = np.arctan(slope)
-    # print(slope)
     slope = math.degrees(slope)
-    # print(slope)
     return slope
 
 
 def get_intersection(line1, line2):
+    assert islist(line1) and len(line1) == 2, 'point is not correct'
+    assert islist(line2) and len(line2) == 2, 'point is not correct'
+    
     a1 = line1[0]
     b1 = line1[1]
     a2 = line2[0]
@@ -41,8 +48,8 @@ def get_intersection(line1, line2):
     if a1 == 0:
         a1 += 0.00001
     x = (-1.0 - b1 * y) / a1
-    assert math.fabs(x*line1[0] + y*line1[1] + 1) < 0.0000001, 'Intersection point is not on the line'
-    assert math.fabs(x*line2[0] + y*line2[1] + 1) < 0.0000001, 'Intersection point is not on the line'
+    # assert_almost_equal(x*line1[0] + y*line1[1] + 1, 0, err_msg='Intersection point is not on the line')
+    # assert_almost_equal(x*line2[0] + y*line2[1] + 1, 0, err_msg='Intersection point is not on the line')
     return np.array([x, y], dtype=float)
 
 # convert the point coordinate in the image to the general coordinate, y axis is inverse
