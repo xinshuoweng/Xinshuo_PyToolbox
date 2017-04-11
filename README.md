@@ -39,7 +39,6 @@ stay tuned.
 
 *fix toolbox structure*
 1. ml/neural network<br>
-2. miscellaneous/lua_extension<br>
-2. miscellaneous/matlab_colorscheme<br>
-2. miscellaneous/wrapper<br>
-5. cv/kmeans_meanshift_normalizedcut<br>
+2. cv/kmeans_meanshift_normalizedcut<br>
+3. videos
+4. images
