@@ -3,13 +3,13 @@
 import math
 import numpy as np
 from numpy.testing import assert_almost_equal
-from check import islist
+from check import is2dline, is2dpts
 
 def get_line(pts, slope):
     '''
     # slope is the angle in degree, this function takes a point and a
     '''
-    assert islist(pts) and len(pts) == 2, 'point is not correct'
+    assert is2dpts(pts), 'point is not correct'
 
     if slope == 90 or -90:
         slope = slope + 0.00001
@@ -24,8 +24,8 @@ def get_line(pts, slope):
     return np.array([a, b, 1], dtype=float)
 
 def get_slope(pts1, pts2):
-    assert islist(pts1) and len(pts1) == 2, 'point is not correct'
-    assert islist(pts2) and len(pts2) == 2, 'point is not correct'
+    assert is2dpts(pts1), 'point is not correct'
+    assert is2dpts(pts2), 'point is not correct'
 
     slope = (pts1[1] - pts2[1]) / (pts1[0] - pts2[0])
     slope = np.arctan(slope)
@@ -34,8 +34,8 @@ def get_slope(pts1, pts2):
 
 
 def get_intersection(line1, line2):
-    assert islist(line1) and len(line1) == 2, 'point is not correct'
-    assert islist(line2) and len(line2) == 2, 'point is not correct'
+    assert is2dline(line1), 'line is not correct'
+    assert is2dline(line2), 'line is not correct'
     
     a1 = line1[0]
     b1 = line1[1]
@@ -54,8 +54,10 @@ def get_intersection(line1, line2):
 
 # convert the point coordinate in the image to the general coordinate, y axis is inverse
 def convert_pts(pts):
+    assert is2dpts(pts), 'point is not correct'
     return np.array([pts[0], -pts[1]], dtype=float)
 
 # convert the point from general coordinate to image coordinate
 def convert_pts_back2image(pts):
+    assert is2dpts(pts), 'point is not correct'
     return np.array([pts[0], -pts[1]], dtype=float)

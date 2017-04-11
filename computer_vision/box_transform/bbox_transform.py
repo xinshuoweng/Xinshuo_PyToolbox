@@ -13,7 +13,7 @@ import math_function as mf
 from numpy.testing import assert_almost_equal
 from math import radians as rad
 
-from check import islist
+from check import isnparray
 
 def bbox_transform(ex_rois, gt_rois):
     ex_widths = ex_rois[:, 2] - ex_rois[:, 0] + 1.0
@@ -104,7 +104,7 @@ def bbox_rotation_inv(bbox_in, angle_in_degree, image_shape):
     bbox_in is two coordinate
     angle is clockwise
     '''
-    assert islist(bbox_in) and len(bbox_in) == 4, 'box is not correct'
+    assert isnparray(bbox_in) and len(bbox_in) == 4, 'box is not correct'
 
     im_width = image_shape[1]
     im_height = image_shape[0]
@@ -134,7 +134,7 @@ def bbox_rotatedtight2rotatedloose(bbox_in, angle_in_degree):
     transfer the rotated bbox with tight version to loose version, both contains only two points (top left and bottom right)
     only a single box is feeded into
     '''
-    assert islist(bbox_in) and len(bbox_in) == 4, 'box is not correct'
+    assert isnparray(bbox_in) and len(bbox_in) == 4, 'box is not correct'
 
     pts_tl = np.array([bbox_in[0], bbox_in[1]])
     pts_br = np.array([bbox_in[2], bbox_in[3]])
