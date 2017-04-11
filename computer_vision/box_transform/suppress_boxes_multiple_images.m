@@ -21,7 +21,16 @@ function boxes = suppress_boxes_multiple_images(boxes, before_nms_topN, nms_over
     end
     assert(isPositiveInteger(after_nms_topN) || after_nms_topN == -1, 'number of top boxes after nms should be positive integer or -1');
     assert(nms_overlap_thres > 0 && nms_overlap_thres < 1, 'overlap threshold should be in the range of (0, 1)');
-    assert(iscell(boxes) && length(boxes) > 0, 'input boxes are not correct.');
+    
+    assert(length(boxes) > 0, 'input boxes are not correct.');
+    if iscell(boxes)
+        assert(isvector(boxes), 'input boxes are not correct.');
+    elseif ismatrix(boxes)
+        boxes = {boxes};
+    else
+        assert(false, 'input boxes are not correct.');
+    end
+    
     test_boxes = boxes{1};
     boxcheck_LTRB(test_boxes);
     boxcheck_sortedscore(test_boxes);
