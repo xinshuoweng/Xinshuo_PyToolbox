@@ -12,8 +12,8 @@
 
 function overlap = boxoverlap(box_a, box_b)
     % check the format of the box
-    box_a = boxcheck_LTBR(box_a);
-    box_b = boxcheck_LTBR(box_b);
+    box_a = boxcheck_LTRB(box_a);
+    box_b = boxcheck_LTRB(box_b);
 
     overlap = cell(1, size(box_b, 1));
     for i = 1:size(box_b, 1)

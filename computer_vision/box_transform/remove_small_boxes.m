@@ -7,7 +7,7 @@
 % input format: LTRB 
 % output format: LTRB 
 function [boxes, scores] = remove_small_boxes(min_box_size, min_box_height, boxes, scores)
-	boxes = boxcheck_LTBR(boxes);
+	boxes = boxcheck_LTRB(boxes);
     widths = boxes(:, 3) - boxes(:, 1) + 1;
     heights = boxes(:, 4) - boxes(:, 2) + 1;
     

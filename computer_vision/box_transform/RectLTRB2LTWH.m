@@ -8,7 +8,7 @@
 % output format: LTWH (x, y)
 
 function boxes = RectLTRB2LTWH(boxes)
-	boxes = boxcheck_LTWH(boxes);
+	boxes = boxcheck_LTRB(boxes);
 	boxes = [boxes(:, 1), boxes(:, 2), boxes(:, 3) - boxes(:,1) + 1, boxes(:,4) - boxes(:,2) + 1];
 end
 

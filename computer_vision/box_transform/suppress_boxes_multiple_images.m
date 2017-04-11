@@ -23,7 +23,7 @@ function boxes = suppress_boxes_multiple_images(boxes, before_nms_topN, nms_over
     assert(nms_overlap_thres > 0 && nms_overlap_thres < 1, 'overlap threshold should be in the range of (0, 1)');
     assert(iscell(boxes) && length(boxes) > 0, 'input boxes are not correct.');
     test_boxes = boxes{1};
-    boxcheck_LTBR(test_boxes);
+    boxcheck_LTRB(test_boxes);
     boxcheck_sortedscore(test_boxes);
 
     % to speed up nms

@@ -67,18 +67,18 @@ function showboxes(im, boxes, legends, color_conf)
 
             for j = 1:size(boxes{i})
                 box = boxes{i}(j, 1:4);
-    %             orientation = boxes{i}(j, end);
+    %           orientation = boxes{i}(j, end);
                 if size(boxes{i}, 2) >= 5
                     score = boxes{i}(j, end);
                     linewidth = 2 + min(max(score, 0), 1) * 2;
                     rectangle('Position', RectLTRB2LTWH(box), 'LineWidth', linewidth, 'EdgeColor', colors{i});
                     label = sprintf('%s : %.3f', legends{i}, score);
-    %                 text(double(box(1))+2, double(box(2)), label, 'BackgroundColor', 'w');
+    %               text(double(box(1))+2, double(box(2)), label, 'BackgroundColor', 'w');
                 else
                     linewidth = 2;
                     rectangle('Position', RectLTRB2LTWH(box), 'LineWidth', linewidth, 'EdgeColor', colors{i});
                     label = sprintf('%s(%d)', legends{i}, i);
-    %                 text(double(box(1))+2, double(box(2)), label, 'BackgroundColor', 'w');
+    %               text(double(box(1))+2, double(box(2)), label, 'BackgroundColor', 'w');
                 end
             end
 
