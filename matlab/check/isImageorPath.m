@@ -6,8 +6,7 @@ function img = isImageorPath(img)
     if ischar(img)
         img = imread(img);
     else
-        assert(isimage(img), ...
+        assert(isImage(img), ...
             'The input image doesn''t have a good dimension.');
-    	img = img;
     end
 end
