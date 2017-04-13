@@ -10,13 +10,14 @@
 %   batch_size:     how many image to store in a single hdf file
 %   ext_filder:     what format of data to use for generating hdf5 data 
 
-function [num_hdf5, num_data] = generate_hdf5(save_dir, data_src, batch_size, ext_filter, label_src, function_name)
-    print(function_name)
-    % parse input data
+function [num_hdf5, num_data] = generate_hdf5(save_dir, data_src, batch_size, ext_filter, label_src, label_preprocess_function)
+    % parse input
+    assert(isFile(save_dir), 'save path should be a folder to save all hdf5 files')
+    mkdir_is_missing(save_dir);
+
     if ~exist('ext_filter', 'var')
         ext_filter = 'png';
     end
-
     if isFolder(data_src)
         filepath = file_abspath();
         datalist_name = 'datalist.txt';
@@ -29,23 +30,29 @@ function [num_hdf5, num_data] = generate_hdf5(save_dir, data_src, batch_size, ex
         assert(false, 'data source format is not correct.');
     end
 
-    % parse input label
-    if ~exist('label_src', 'var') || isempty(label_src)
-        labellist = {};
-    elseif isFile(label_src)
-        [labellist, num_label] = load_list_from_file(label_src);   
-    else
-        assert(false, 'label source format is not correct.');
-    end
-
-    assert(num_data == num_label, 'number of data and label is not equal.');
-    assert(isFile(save_dir), 'save path should be a folder to save all hdf5 files')
-    mkdir_is_missing(save_dir);
-
     if ~exist('batch_size', 'var')
         batch_size = 1;
     end
 
+    if ~exist('label_src', 'var') || isempty(label_src)
+        labellist = [];
+    elseif isFile(label_src)
+        [labellist, num_label] = load_list_from_file(label_src);   
+        assert(num_data == num_label, 'number of data and label is not equal.');
+        labellist = cellfun(@(x) str2double(x), labellist, 'UniformOutput', false);
+        labellist = cell2mat(labellist);
+    elseif isvector(label_src)
+        labellist = label_src;
+    else
+        assert(false, 'label source format is not correct.');
+    end
+    if exist('label_preprocess_function', 'var')
+        assert(isa(label_preprocess_function, function_handle), 'label preprocess function is not correct.');
+        label_preprocess = true;
+    else
+        label_preprocess = false;
+    end
+    
     % MAX_LABEL = 40;
     % MIN_LABEL = 0;
     % BATCH_SIZE = 2;
@@ -78,21 +85,22 @@ function [num_hdf5, num_data] = generate_hdf5(save_dir, data_src, batch_size, ex
         data(:,:,:, mod(i-1, batch_size)+1) = img;
 
         if ~isempty(labellist)
-            labels(1, mod(i-1, batch_size)+1) = str2double(labellist{i});  
+            labels(1, mod(i-1, batch_size)+1) = labellist[i];
         end
 
         if mod(i, batch_size) == 0
             % preprocess
-            data = data(:, :, [3, 2, 1], :); % from rgb to brg
-            data = permute(data, [2 1 3 4]);     % permute to [cols, rows, channel, numbers]
+            data = data(:, :, [3, 2, 1], :);        % from rgb to brg
+            data = permute(data, [2 1 3 4]);        % permute to [cols, rows, channel, numbers]
             
             % write to hdf5 format
-            h5create(sprintf('%s/siamese_mirror_%05d.hdf5', save_dir, count_hdf), '/data', size(data), 'Datatype', 'double');  
-            h5write(sprintf('%s/siamese_mirror_%05d.hdf5', save_dir, count_hdf), '/data', data);
+            h5create(sprintf('%s/data_%10d.hdf5', save_dir, count_hdf), '/data', size(data), 'Datatype', 'double');  
+            h5write(sprintf('%s/data_%10d.hdf5', save_dir, count_hdf), '/data', data);
 
             if ~isempty(labellist)
-                h5create(sprintf('%s/siamese_mirror_%05d.hdf5', save_dir, count_hdf),'/label', size(labels), 'Datatype', 'double');
-                h5write(sprintf('%s/siamese_mirror_%05d.hdf5', save_dir, count_hdf), '/label', labels);
+                labels = label_preprocess_function(labels);
+                h5create(sprintf('%s/data_%10d.hdf5', save_dir, count_hdf),'/label', size(labels), 'Datatype', 'double');
+                h5write(sprintf('%s/data_%10d.hdf5', save_dir, count_hdf), '/label', labels);
                 labels = zeros([1, batch_size]);   
             end
 
