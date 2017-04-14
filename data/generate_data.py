@@ -32,7 +32,7 @@ def generate_hdf5(save_dir, data_src, batch_size=1, ext_filter='png', label_src=
     if isfolder(data_src):
         if debug:
             print 'data is loading from %s' % data_src
-        filepath = file_abspath()
+        filepath = os.path.dirname(os.path.abspath(__file__))
         datalist_name = os.path.abspath('./datalist.txt')
         cmd = 'th %s/../file_io/generate_list.lua %s %s %s' % (filepath, data_src, datalist_name, ext_filter)
         os.system(cmd)    # generate data list

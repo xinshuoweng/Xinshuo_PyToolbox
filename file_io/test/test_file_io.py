@@ -16,6 +16,17 @@ def test_load_list_from_file():
     assert datalist[1] == '/home/xinshuow/toy'
     assert num_elem == 2
 
+def test_load_list_from_folder():
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../test')
+    datalist, num_elem = load_list_from_folder(folder_path=path, ext_filter='txt')   
+    assert datalist[0] == os.path.abspath('test.txt')
+    assert datalist[1] == os.path.abspath('test1.txt')
+    assert num_elem == 2
+
+    datalist, num_elem = load_list_from_folder(folder_path=path)
+    assert num_elem == 8
+
+
 def test_mkdir_if_missing():
     path = './'
     mkdir_if_missing(path)

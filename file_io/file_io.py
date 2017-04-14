@@ -20,11 +20,6 @@ def fileparts(pathname):
 	ext = os.path.splitext(pathname)[1]
 	return (directory, filename, ext)
 
-def file_abspath():
-    '''
-    this function returns a absolute path for current file
-    '''
-    return os.path.dirname(os.path.abspath(__file__))
 
 def load_list_from_file(file_path):
     '''
@@ -37,6 +32,7 @@ def load_list_from_file(file_path):
     assert file != -1, 'datalist not found'
 
     fulllist = file.read().splitlines()
+    fulllist = [os.path.normpath(path_tmp) for path_tmp in fulllist]
     num_elem = len(fulllist)
     file.close()
 
@@ -47,12 +43,14 @@ def load_list_from_folder(folder_path, ext_filter=None):
     '''
     load a list of files from a system folder
     '''
-    assert isfolder(folder_path) and is_path_exists(folder_path), 'input folder path is not correct'
+    assert isfolder(folder_path) and is_path_exists(folder_path), 'input folder path is not correct %s' % folder_path
     if ext_filter is not None:
         assert isstring(ext_filter), 'extension filder is not correct'
         fulllist = glob.glob(os.path.join(folder_path, '*%s' % ext_filter))
     else:
-        fulllist = glob.glob(folder_path)
+        fulllist = glob.glob(os.path.join(folder_path, '*'))
+
+    fulllist = [os.path.normpath(path_tmp) for path_tmp in fulllist]
     num_elem = len(fulllist)
     
     return fulllist, num_elem
@@ -75,7 +73,7 @@ def generate_list_from_folder(save_path, src_path, ext_filter=None):
     if ext_filter is not None:
         assert isstring(ext_filter), 'extension filter is not correct'
 
-    filepath = file_abspath()
+    filepath = os.path.dirname(os.path.abspath(__file__))
     datalist_name = save_path
     cmd = 'th %s/../file_io/generate_list.lua %s %s %s' % (filepath, src_path, datalist_name, ext_filter)
     os.system(cmd)    # generate data list
