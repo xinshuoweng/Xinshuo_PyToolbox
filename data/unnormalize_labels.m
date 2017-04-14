@@ -10,6 +10,6 @@ function unnormalized_label = unnormalize_labels(labels, data_range)
 	MAX_LABEL = data_range(2);
 	MIN_LABEL = data_range(1);
 
-	unnormalized_label = labels */ (MAX_LABEL - MIN_LABEL);
+	unnormalized_label = labels .* (MAX_LABEL - MIN_LABEL);
 	unnormalized_label = labels + MIN_LABEL;
 end

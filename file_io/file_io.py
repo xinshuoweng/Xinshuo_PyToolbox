@@ -44,7 +44,6 @@ def load_list_from_file(pathname):
 def mkdir_if_missing(pathname):
     if isfile(pathname):
         pathname, _, _ = fileparts(pathname)
-    print(pathname)
     assert is_path_exists_or_creatable(pathname), 'input path is not valid or creatable'
     if not is_path_exists(pathname):
         os.mkdir(pathname)

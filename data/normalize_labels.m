@@ -15,6 +15,6 @@ function normalized_label = normalize_labels(labels, data_range)
 		MIN_LABEL = data_range(1);
 	end
 
-	normalized_labels = labels + MIN_LABEL;
+	normalized_labels = labels - MIN_LABEL;
 	normalized_labels = normalized_labels ./ (MAX_LABEL - MIN_LABEL);
 end

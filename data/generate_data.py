@@ -10,8 +10,8 @@ import h5py
 
 import __init__paths__
 from math_function import identity
-from check import is_path_exists, isnparray, is_path_exists_or_creatable, isfile, isfolder, isfunction
-from file_io import file_abspath, load_list_from_file, mkdir_if_missing
+from check import is_path_exists, isnparray, is_path_exists_or_creatable, isfile, isfolder, isfunction, isdict
+from file_io import file_abspath, load_list_from_file, mkdir_if_missing, fileparts
 
 def generate_hdf5(save_dir, data_src, batch_size=1, ext_filter='png', label_src=None, label_preprocess_function=identity, debug=False):
     '''
@@ -28,7 +28,6 @@ def generate_hdf5(save_dir, data_src, batch_size=1, ext_filter='png', label_src=
     # parse input
     assert is_path_exists_or_creatable(save_dir), 'save path should be a folder to save all hdf5 files'
     mkdir_if_missing(save_dir)
-    time.sleep(10000)
 
     if isfolder(data_src):
         if debug:
@@ -47,7 +46,10 @@ def generate_hdf5(save_dir, data_src, batch_size=1, ext_filter='png', label_src=
     
     if label_src is None:
         labeldict = None
-    elif is_path_exists(label_src):
+    elif isfile(label_src):
+        assert is_path_exists(label_src), 'file not found'
+        _, _, ext = fileparts(label_src)
+        assert ext == '.json', 'only json extension is supported'
         labeldict = json.load(label_src)
         num_label = len(labeldict)
         assert(num_data == num_label, 'number of data and label is not equal.')
@@ -63,12 +65,14 @@ def generate_hdf5(save_dir, data_src, batch_size=1, ext_filter='png', label_src=
     data = np.zeros(size_data + (batch_size, ), dtype='float32')
     if labeldict is not None:
         labels = np.zeros([1, batch_size], dtype='float32')
+        label_value = [float(label_tmp_char) for label_tmp_char in labeldict.values()]
+        label_range = np.array([min(label_value), max(label_value)])
 
     # start generating
     count_hdf = 1       # count number of hdf5 file
     for i in xrange(num_data):
-        print('%d/%d\n', i, num_data)
-        img = imread(datalist[i]).astype('float32')    # [rows,col,channel,numbers], scale the image data to (0, 1)
+        print('%s %d/%d' % (save_dir, i+1, num_data))
+        img = imread(datalist[i]).astype('float32') / 255.0   # [rows,col,channel,numbers], scale the image data to (0, 1)
         if batch_size > 1:
             assert size_data == img.shape, 'image size should be equal in each single hdf5 file.'
         
@@ -77,31 +81,21 @@ def generate_hdf5(save_dir, data_src, batch_size=1, ext_filter='png', label_src=
 
         if labeldict is not None:
             _, name, _ = fileparts(datalist[i])
-            print(labeldict[name])
-            print(type(labeldict[name]))
-            labels[0, i % batch_size] = labeldict[name]
-            time.sleep(1000)
+            labels[0, i % batch_size] = float(labeldict[name])
 
         if i % batch_size == 0:
             # preprocess
             data = data[:, :, [2, 1, 0], :]        # from rgb to brg
             data = np.transpose(data, (1, 0, 2, 3))        # permute to [cols, rows, channel, numbers]
-            
+
             # write to hdf5 format
             h5f = h5py.File('%s/data_%010d.hdf5' % (save_dir, count_hdf), 'w')
             h5f.create_dataset('data', data=data, dtype='float32')
-    
-            # h5write(sprintf('%s/data_%10d.hdf5', save_dir, count_hdf), '/data', data)
-
             if labeldict is not None:
-                labels = label_preprocess_function(labels)
+                labels = label_preprocess_function(data=labels, data_range=label_range)
                 h5f.create_dataset('label', data=labels, dtype='float32')
-
-                # h5create(sprintf('%s/data_%10d.hdf5', save_dir, count_hdf),'/label', size(labels), 'Datatype', 'single')
-                # h5write(sprintf('%s/data_%10d.hdf5', save_dir, count_hdf), '/label', labels)
                 labels = np.zeros([1, batch_size], dtype='float32')
 
-            # data = zeros([size(img), batch_size]);
             h5f.close()
             count_hdf = count_hdf + 1
             data = np.zeros(size_data + (batch_size, ), dtype='float32')

@@ -20,7 +20,6 @@ def normalize_data(data, data_range=None):
 		max_value = data_range[1]
 		min_value = data_range[0]
 
-	normalized_data = data + min_value
+	normalized_data = data - min_value
 	normalized_data = normalized_data / (max_value - min_value)
-
 	return normalized_data
