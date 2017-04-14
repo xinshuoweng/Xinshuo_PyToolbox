@@ -42,7 +42,7 @@ def generate_hdf5(save_dir, data_src, batch_size=1, ext_filter='png', label_src=
 
     if label_src is None:
         labellist = None
-    elif isstring(label_src):
+    elif is_path_exists(label_src):
         labellist, num_label = load_list_from_file(label_src)
         assert(num_data == num_label, 'number of data and label is not equal.')
         labellist = float(labellist)

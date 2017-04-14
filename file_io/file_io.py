@@ -14,8 +14,8 @@ def fileparts(pathname):
 	this function return a tuple, which contains (directory, filename, extension)
 	if the file has multiple extension, only last one will be displayed
 	'''
-	assert isstring(pathname), 'The input path is not a string'   
-	directory = os.path.dirname(pathname)
+	assert is_path_valid(pathname), 'The input path is not a string'   
+	directory = os.path.dirname(os.path.abspath(pathname))
 	filename = os.path.splitext(os.path.basename(pathname))[0]
 	ext = os.path.splitext(pathname)[1]
 	return (directory, filename, ext)
