@@ -35,14 +35,13 @@ def generate_hdf5(save_dir, data_src, batch_size=1, ext_filter='png', label_src=
         filepath = file_abspath()
         datalist_name = os.path.abspath('./datalist.txt')
         cmd = 'th %s/../file_io/generate_list.lua %s %s %s' % (filepath, data_src, datalist_name, ext_filter)
-        print cmd
         os.system(cmd)    # generate data list
         datalist, num_data = load_list_from_file(datalist_name)
         os.system('rm %s' % datalist_name)
     elif isfile(data_src):
         datalist, num_data = load_list_from_file(data_src)
     else:
-        assert(False, 'data source format is not correct.')
+        assert False, 'data source format is not correct.'
     
     if label_src is None:
         labeldict = None
@@ -52,7 +51,7 @@ def generate_hdf5(save_dir, data_src, batch_size=1, ext_filter='png', label_src=
         assert ext == '.json', 'only json extension is supported'
         labeldict = json.load(label_src)
         num_label = len(labeldict)
-        assert(num_data == num_label, 'number of data and label is not equal.')
+        assert num_data == num_label, 'number of data and label is not equal.'
     elif isdict(label_src):
         labeldict = label_src;
     else:
@@ -100,4 +99,4 @@ def generate_hdf5(save_dir, data_src, batch_size=1, ext_filter='png', label_src=
             count_hdf = count_hdf + 1
             data = np.zeros(size_data + (batch_size, ), dtype='float32')
 
-    return num_hdf5, num_data
+    return count_hdf, num_data
