@@ -11,7 +11,7 @@ import h5py
 import __init__paths__
 from math_function import identity
 from check import is_path_exists, isnparray, is_path_exists_or_creatable, isfile, isfolder, isfunction, isdict
-from file_io import file_abspath, load_list_from_file, mkdir_if_missing, fileparts
+from file_io import load_list_from_file, mkdir_if_missing, fileparts, load_list_from_folder
 
 def generate_hdf5(save_dir, data_src, batch_size=1, ext_filter='png', label_src=None, label_preprocess_function=identity, debug=False):
     '''
@@ -32,12 +32,7 @@ def generate_hdf5(save_dir, data_src, batch_size=1, ext_filter='png', label_src=
     if isfolder(data_src):
         if debug:
             print 'data is loading from %s' % data_src
-        filepath = os.path.dirname(os.path.abspath(__file__))
-        datalist_name = os.path.abspath('./datalist.txt')
-        cmd = 'th %s/../file_io/generate_list.lua %s %s %s' % (filepath, data_src, datalist_name, ext_filter)
-        os.system(cmd)    # generate data list
-        datalist, num_data = load_list_from_file(datalist_name)
-        os.system('rm %s' % datalist_name)
+        datalist, num_data = load_list_from_folder(data_src)
     elif isfile(data_src):
         datalist, num_data = load_list_from_file(data_src)
     else:
