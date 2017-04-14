@@ -5,7 +5,7 @@
 import os, sys
 
 import __init__paths__
-from check import is_path_exists, isstring, is_path_exists_or_creatable, isfile
+from check import is_path_exists, isstring, is_path_exists_or_creatable, isfile, isfolder
 
 
 def fileparts(pathname):
@@ -47,3 +47,17 @@ def mkdir_if_missing(pathname):
     assert is_path_exists_or_creatable(pathname), 'input path is not valid or creatable'
     if not is_path_exists(pathname):
         os.mkdir(pathname)
+
+def generate_list_from_folder(save_path, src_path, ext_filter=None):
+    assert isfolder(src_path) and if_path_exists(src_path), 'source folder not found or incorrect'
+    if not isfile(save_path):
+        assert isfolder(save_path), 'save path is not correct'
+        save_path = os.path.join(save_path, 'datalist.txt')
+
+    if ext_filter is not None:
+        assert isstring(ext_filter), 'extension filter is not correct'
+
+    filepath = file_abspath()
+    datalist_name = save_path
+    cmd = 'th %s/../file_io/generate_list.lua %s %s %s' % (filepath, src_path, datalist_name, ext_filter)
+    os.system(cmd)    # generate data list
