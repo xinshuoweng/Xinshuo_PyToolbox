@@ -6,7 +6,7 @@ import os, sys
 import glob
 
 import __init__paths__
-from check import is_path_exists, isstring, is_path_exists_or_creatable, isfile, isfolder
+from check import is_path_exists, isstring, is_path_exists_or_creatable, isfile, isfolder, isnparray
 
 
 def fileparts(pathname):
@@ -74,6 +74,17 @@ def generate_list_from_folder(save_path, src_path, ext_filter=None):
         assert isstring(ext_filter), 'extension filter is not correct'
 
     filepath = os.path.dirname(os.path.abspath(__file__))
-    datalist_name = save_path
-    cmd = 'th %s/../file_io/generate_list.lua %s %s %s' % (filepath, src_path, datalist_name, ext_filter)
+    cmd = 'th %s/generate_list.lua %s %s %s' % (filepath, src_path, save_path, ext_filter)
     os.system(cmd)    # generate data list
+
+def generate_list_from_data(save_path, src_data):
+    assert isnparray(src_data) and src_data.ndim == 1, 'source data is incorrect'
+    if not isfile(save_path):
+        assert isfolder(save_path), 'save path is not correct'
+        save_path = os.path.join(save_path, 'datalist.txt')
+    else:
+        assert is_path_exists_or_creatable(save_path), 'the file cannot be created'
+
+    with open(save_path, 'w') as file:
+        for item in src_data:
+            file.write('%f\n' % item)
