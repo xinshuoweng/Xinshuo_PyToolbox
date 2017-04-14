@@ -10,10 +10,10 @@ import h5py
 
 import __init__paths__
 from math_function import identity
-from check import is_path_exists, isnparray, is_path_exists_or_creatable, isfile, isfolder, isfunction, isdict
+from check import is_path_exists, isnparray, is_path_exists_or_creatable, isfile, isfolder, isfunction, isdict, isstring
 from file_io import load_list_from_file, mkdir_if_missing, fileparts, load_list_from_folder
 
-def generate_hdf5(save_dir, data_src, batch_size=1, ext_filter='png', label_src=None, label_preprocess_function=identity, debug=False):
+def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter='png', label_src=None, label_name='label', label_preprocess_function=identity, debug=False):
     '''
     # this function creates data in hdf5 format from a image path 
 
@@ -37,7 +37,8 @@ def generate_hdf5(save_dir, data_src, batch_size=1, ext_filter='png', label_src=
         datalist, num_data = load_list_from_file(data_src)
     else:
         assert False, 'data source format is not correct.'
-    
+    assert isstring(data_name), 'dataset name is not correct'
+
     if label_src is None:
         labeldict = None
     elif isfile(label_src):
@@ -58,6 +59,7 @@ def generate_hdf5(save_dir, data_src, batch_size=1, ext_filter='png', label_src=
     size_data = imread(datalist[0]).shape
     data = np.zeros(size_data + (batch_size, ), dtype='float32')
     if labeldict is not None:
+        assert isstring(label_name), 'label name is not correct'
         labels = np.zeros([1, batch_size], dtype='float32')
         label_value = [float(label_tmp_char) for label_tmp_char in labeldict.values()]
         label_range = np.array([min(label_value), max(label_value)])
@@ -83,11 +85,11 @@ def generate_hdf5(save_dir, data_src, batch_size=1, ext_filter='png', label_src=
             data = np.transpose(data, (1, 0, 2, 3))        # permute to [cols, rows, channel, numbers]
 
             # write to hdf5 format
-            h5f = h5py.File('%s/data_%010d.hdf5' % (save_dir, count_hdf), 'w')
-            h5f.create_dataset('data', data=data, dtype='float32')
+            h5f = h5py.File(os.path.join(save_dir, 'data_%010d.hdf5' % count_hdf), 'w')
+            h5f.create_dataset(data_name, data=data, dtype='float32')
             if labeldict is not None:
                 labels = label_preprocess_function(data=labels, data_range=label_range)
-                h5f.create_dataset('label', data=labels, dtype='float32')
+                h5f.create_dataset(label_name, data=labels, dtype='float32')
                 labels = np.zeros([1, batch_size], dtype='float32')
 
             h5f.close()
