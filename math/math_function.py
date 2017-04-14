@@ -3,7 +3,13 @@
 import math
 import numpy as np
 from numpy.testing import assert_almost_equal
-from check import is2dline, is2dpts
+
+import __init__paths__
+from check import is2dline, is2dpts, isnparray
+
+def identity(data):
+    assert isnparray(data), 'data is not correct'
+    return data
 
 def get_line(pts, slope):
     '''

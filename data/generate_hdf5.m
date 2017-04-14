@@ -94,12 +94,12 @@ function [num_hdf5, num_data] = generate_hdf5(save_dir, data_src, batch_size, ex
             data = permute(data, [2 1 3 4]);        % permute to [cols, rows, channel, numbers]
             
             % write to hdf5 format
-            h5create(sprintf('%s/data_%10d.hdf5', save_dir, count_hdf), '/data', size(data), 'Datatype', 'double');  
+            h5create(sprintf('%s/data_%10d.hdf5', save_dir, count_hdf), '/data', size(data), 'Datatype', 'single');  
             h5write(sprintf('%s/data_%10d.hdf5', save_dir, count_hdf), '/data', data);
 
             if ~isempty(labellist)
                 labels = label_preprocess_function(labels);
-                h5create(sprintf('%s/data_%10d.hdf5', save_dir, count_hdf),'/label', size(labels), 'Datatype', 'double');
+                h5create(sprintf('%s/data_%10d.hdf5', save_dir, count_hdf),'/label', size(labels), 'Datatype', 'single');
                 h5write(sprintf('%s/data_%10d.hdf5', save_dir, count_hdf), '/label', labels);
                 labels = zeros([1, batch_size]);   
             end
@@ -107,7 +107,6 @@ function [num_hdf5, num_data] = generate_hdf5(save_dir, data_src, batch_size, ex
             % data = zeros([size(img), batch_size]);
             count_hdf = count_hdf + 1;
         end
-        
     end
 
     % size(trainData)
