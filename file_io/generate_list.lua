@@ -11,7 +11,6 @@
 local io = require 'io'
 require 'string'
 require 'lfs'
--- require 'checks'
 
 
 -- parse input argument
@@ -30,16 +29,18 @@ if filter == nil then
 end
 
 -- generate data list
-io.output(io.open(save_path, 'w'))
+f = io.open(save_path, 'w')
+io.output(f)
+
 for file in lfs.dir(data_dir) do
     -- find subfolder containing the image
-    if lfs.attributes(data_dir .. file, 'mode') == 'directory' and file ~= "." and file ~= ".." then
+    if lfs.attributes(path.join(data_dir, file), 'mode') == 'directory' and file ~= "." and file ~= ".." then
     	print('please use other script to consider files in ' .. data_dir .. '/' .. file)
     end
 
-    if lfs.attributes(data_dir .. file, 'mode') == 'file' and string.find(file, filter) then
-    	io.write(data_dir .. file .. '\n')
+    if lfs.attributes(path.join(data_dir, file), 'mode') == 'file' and (string.find(file, filter) ~= nil) then
+    	io.write(path.join(data_dir, file) .. '\n')
     end
-
 end
+
 io.close()

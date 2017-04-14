@@ -27,6 +27,9 @@ def is2dpts(pts_test):
 def isfunction(func_test):
 	return callable(func_test)
 
+def isdict(dict_test):
+    return isinstance(dict_test, dict)
+
 def is_path_valid(pathname):
     '''
     `True` if the passed pathname is a valid pathname for the current OS;

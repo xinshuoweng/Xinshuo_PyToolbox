@@ -16,6 +16,11 @@ def test_load_list_from_file():
     assert datalist[1] == '/home/xinshuow/toy'
     assert num_elem == 2
 
+def test_mkdir_if_missing():
+    path = './'
+    mkdir_if_missing(path)
+    path = 'test_folder'
+    mkdir_if_missing(path)
 
 if __name__ == '__main__':
     pytest.main([__file__])

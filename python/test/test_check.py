@@ -9,17 +9,21 @@ from check import *
 
 def test_is_path_valid():
 	path = ''
-	assert is_pathname_valid(path) is False
+	assert is_path_valid(path) is False
+	path = './'
+	assert is_path_valid(path)
 	path = 'test'
-	assert is_pathname_valid(path)
+	assert is_path_valid(path)
 	path = 123
-	assert is_pathname_valid(path) is False
+	assert is_path_valid(path) is False
 	path = 'test.txt'
-	assert is_pathname_valid(path)
+	assert is_path_valid(path)
 
 def test_is_path_creatable():
 	path = ''
 	assert is_path_creatable(path) is False
+	path = './'
+	assert is_path_creatable(path)
 	path = 'test'
 	assert is_path_creatable(path)
 	path = 123
@@ -32,6 +36,8 @@ def test_is_path_creatable():
 def test_is_path_exists():
 	path = ''
 	assert is_path_exists(path) is False
+	path = './'
+	assert is_path_exists(path)
 	path = 'test'
 	assert is_path_exists(path) is False
 	path = 123
@@ -40,6 +46,20 @@ def test_is_path_exists():
 	assert is_path_exists(path) is False
 	path = '../test'
 	assert is_path_exists(path)
+
+def test_is_path_exists_or_creatable():
+	path = ''
+	assert is_path_exists_or_creatable(path) is False
+	path = './'
+	assert is_path_exists_or_creatable(path)
+	path = 'test'
+	assert is_path_exists_or_creatable(path)
+	path = 123
+	assert is_path_exists_or_creatable(path) is False
+	path = 'test.txt'
+	assert is_path_exists_or_creatable(path)
+	path = '../test'
+	assert is_path_exists_or_creatable(path)
 
 
 if __name__ == '__main__':
