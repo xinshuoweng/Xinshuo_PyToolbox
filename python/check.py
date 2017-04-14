@@ -3,7 +3,6 @@
 import os, sys
 import numpy as np
 
-
 def isstring(string_test):
 	return isinstance(string_test, basestring)
 
@@ -69,6 +68,23 @@ def is_path_exists(pathname):
     try:
         return is_path_valid(pathname) and os.path.exists(pathname)
     except OSError:
+        return False
+
+def isfile(pathname):
+    if is_path_valid(pathname):
+        name = os.path.splitext(os.path.basename(pathname))[0]
+        ext = os.path.splitext(pathname)[1]
+        return len(name) > 0 and len(ext) > 0
+    else:
+        return False;
+
+
+def isfolder(pathname):
+    if is_path_valid(pathname):
+        name = os.path.splitext(os.path.basename(pathname))[0]
+        ext = os.path.splitext(pathname)[1]
+        return len(name) > 0 and len(ext) == 0
+    else:
         return False
 
 

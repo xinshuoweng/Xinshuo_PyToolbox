@@ -3,10 +3,9 @@
 
 # this file contains a set of function for manipulating file io in python
 import os, sys
-import errno
 
 import __init__paths__
-from check import isstring, is_path_exists
+from check import is_path_exists, isstring
 
 
 def fileparts(pathname):
@@ -14,7 +13,7 @@ def fileparts(pathname):
 	this function return a tuple, which contains (directory, filename, extension)
 	if the file has multiple extension, only last one will be displayed
 	'''
-	assert is_path_valid(pathname), 'The input path is not a string'   
+	assert isstring(pathname), 'The input path is not a string'   
 	directory = os.path.dirname(os.path.abspath(pathname))
 	filename = os.path.splitext(os.path.basename(pathname))[0]
 	ext = os.path.splitext(pathname)[1]

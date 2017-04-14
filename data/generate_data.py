@@ -5,14 +5,14 @@
 
 from cv2 import imread
 import numpy as np
-import os
+import os, time
 
 import __init__paths__
 from math_function import identity
-from check import is_path_exists, isstring, isnparray, is_path_exists_or_creatable
-from file_io import file_abspath
+from check import is_path_exists, isnparray, is_path_exists_or_creatable, isfile, isfolder, isfunction
+from file_io import file_abspath, load_list_from_file
 
-def generate_hdf5(save_dir, data_src, batch_size=1, ext_filter='png', label_src=None, label_preprocess_function=identity):
+def generate_hdf5(save_dir, data_src, batch_size=1, ext_filter='png', label_src=None, label_preprocess_function=identity, debug=False):
     '''
     # this function creates data in hdf5 format from a image path 
 
@@ -28,13 +28,18 @@ def generate_hdf5(save_dir, data_src, batch_size=1, ext_filter='png', label_src=
     assert is_path_exists_or_creatable(save_dir), 'save path should be a folder to save all hdf5 files'
     # mkdir_is_missing(save_dir);
 
-    if is_path_exists(data_src):
+    if isfolder(data_src):
+        if debug:
+            print 'data is loading from %s' % data_src
         filepath = file_abspath()
         datalist_name = 'datalist.txt'
-        cmd = 'th %s/../file_io/generate_list %s %s %s' % (filepath, data_src, datalist_name, ext_filter)
+        cmd = 'th %s/../file_io/generate_list.lua %s %s %s' % (filepath, data_src, datalist_name, ext_filter)
+        print cmd
         os.system(cmd)    # generate data list
-        datalist, num_data = load_list_from_file(data_src)
-    elif isstring(data_src):
+        datalist, num_data = load_list_from_file(datalist_name)
+        print(datalist)
+        time.sleep(1000)
+    elif isfile(data_src):
         datalist, num_data = load_list_from_file(data_src)
     else:
         assert(False, 'data source format is not correct.')
@@ -55,9 +60,9 @@ def generate_hdf5(save_dir, data_src, batch_size=1, ext_filter='png', label_src=
     
     assert isfunction(label_preprocess_function), 'label preprocess function is not correct.'
 
+    print(datalist)
 
-
-    size_data = imread(datalist[1]).shape
+    size_data = imread(datalist[0]).shape
     data = np.zeros(size_data + (batch_size, ), dtype='float32')
     if labellist is not None:
         labels = np.zeros([1, batch_size], dtype='float32')
@@ -70,10 +75,10 @@ def generate_hdf5(save_dir, data_src, batch_size=1, ext_filter='png', label_src=
             assert size_data == img.shape, 'image size should be equal in each single hdf5 file.'
         
         size_data = img.shape
-        data[:,:,:, mod(i-1, batch_size)+1] = img
+        data[:,:,:, mod(i-1, batch_size)] = img
 
         if labellist is not None:
-            labels[1, mod(i-1, batch_size)+1] = labellist[i]
+            labels[0, mod(i-1, batch_size)] = labellist[i]
         
 
         if mod(i, batch_size) == 0:
