@@ -28,6 +28,7 @@ def generate_hdf5(save_dir, data_src, batch_size=1, ext_filter='png', label_src=
     # parse input
     assert is_path_exists_or_creatable(save_dir), 'save path should be a folder to save all hdf5 files'
     mkdir_if_missing(save_dir)
+    time.sleep(10000)
 
     if isfolder(data_src):
         if debug:

@@ -21,6 +21,8 @@ def test_mkdir_if_missing():
     mkdir_if_missing(path)
     path = 'test_folder'
     mkdir_if_missing(path)
+    path = 'test_folder1/te.txt'
+    mkdir_if_missing(path)
 
 if __name__ == '__main__':
     pytest.main([__file__])

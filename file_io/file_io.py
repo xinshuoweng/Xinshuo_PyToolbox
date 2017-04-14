@@ -5,7 +5,7 @@
 import os, sys
 
 import __init__paths__
-from check import is_path_exists, isstring, is_path_exists_or_creatable
+from check import is_path_exists, isstring, is_path_exists_or_creatable, isfile
 
 
 def fileparts(pathname):
@@ -42,7 +42,9 @@ def load_list_from_file(pathname):
     return fulllist, num_elem
 
 def mkdir_if_missing(pathname):
-    _, folder, _ = fileparts(pathname)
-    assert is_path_exists_or_creatable(folder), 'input path is not valid or creatable'
-    if not is_path_exists(folder):
-        os.mkdir(folder)
+    if isfile(pathname):
+        pathname, _, _ = fileparts(pathname)
+    print(pathname)
+    assert is_path_exists_or_creatable(pathname), 'input path is not valid or creatable'
+    if not is_path_exists(pathname):
+        os.mkdir(pathname)
