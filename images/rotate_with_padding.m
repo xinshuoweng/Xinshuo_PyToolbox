@@ -9,31 +9,29 @@
 % scale is for controling how much content will be deleted from original image after rotation.
 % the bigger the scale is, more content will be removed. Generally scale
 % range is [0, 10]
-function im = rotate_with_padding(im, angle_degree, padding, background, edge_eliminate, edge_scale)
-    if ischar(im)
-    	im = imread(im);
+function im = rotate_with_padding(im, angle_degree, padding, background, edge_eliminate, edge_scale, debug_mode)
+    im = isImageorPath(im);
+    if ~exist('debug_mode', 'var')
+    	debug_mode = true;
     end
-	assert(isimage(im), 'The input matrix is not as same as format of image while rotating.');
-    
     if ~exist('padding', 'var')
 		padding = 'noise';
-	else
-		assert(strcmp(padding, 'noise') || strcmp(padding, 'background'), 'Only random noise or background padding are supported right now.');
-    end
-    
+	end
     if ~exist('edge_eliminate', 'var')
 		edge_eliminate = false;
-	else
-		assert(islogical(edge_eliminate), 'The input argument for edge elimination should be logical.');
-    end
-    
+	end
     if ~edge_eliminate         % if no edge elimination is considered
         edge_scale = 1;
     elseif ~exist('edge_scale', 'var') 
 		edge_scale = 0.1;
-    else
-		assert(isscalar(edge_scale) && ~iscell(edge_scale), 'The input argument for scale of edge should be scalar.');
     end
+
+	if debug_mode
+		assert(strcmp(padding, 'noise') || strcmp(padding, 'background'), 'Only random noise or background padding are supported right now.');
+		assert(isscalar(edge_scale) && ~iscell(edge_scale), 'The input argument for scale of edge should be scalar.');
+		assert(islogical(edge_eliminate), 'The input argument for edge elimination should be logical.');
+		assert(islogical(debug_mode), 'The format of debug mode is not correct');
+	end
 
 	% rotating the image
 	im = im2double(im);
@@ -44,13 +42,14 @@ function im = rotate_with_padding(im, angle_degree, padding, background, edge_el
     if strcmp(padding, 'noise')
 		template_padding = rand(size(im));
 	else
-		assert(exist('background', 'var'), 'The background must be provided if one want to add background as padding.');
-        if ischar(background)
-			template_padding = imread(background);
-		else
-			assert(isimage(background), 'The background image given is not as same as format of image while rotating.');
-			template_padding = background;
-        end
+		if debug_mode
+			assert(exist('background', 'var') == 1, 'The background must be provided if one want to add background as padding.');
+		end
+		
+        template_padding = im2double(isImageorPath(background));
+        shape = size(im);
+        shape = shape(1:2);
+        template_padding = imresize(template_padding, shape);	% resize the background to the same scale
     end
     
 	% fill the blank with padding

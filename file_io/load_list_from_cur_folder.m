@@ -2,7 +2,7 @@
 % email: xinshuo.weng@gmail.com
 
 % this script return a cell which contains a set of image path under current folder
-function full_image_list = get_image_list_from_cur_folder(folder_path)
+function full_image_list = load_list_from_cur_folder(folder_path)
 	assert(ischar(folder_path), 'Input path is not valid for obtaining list');
 	fprintf('Warning! Only jpeg jpg png bmp extension are supported!\n');
 	image_list = dir(folder_path);
