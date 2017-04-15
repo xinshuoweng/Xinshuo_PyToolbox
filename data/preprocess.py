@@ -2,12 +2,11 @@
 # email: xinshuo.weng@gmail.com
 
 # this file contains function to preprocess data
-from cv2 import imread
 import numpy as np
 
 import __init__paths__
 from check import isnparray, iscolorimage, istuple, islist, CHECK_EQ_LIST
-
+from visualize import visualize_save_image
 
 def normalize_data(data, data_range=None, debug=True):
 	'''
@@ -51,7 +50,7 @@ def unnormalize_data(data, data_range, debug=True):
 	return data * (max_value - min_value) + min_value
 
 
-def preprocess_image_caffe(image_datalist, debug=True):
+def preprocess_image_caffe(image_datalist, debug=True, vis=True):
 	'''
 	this function preprocesses image for caffe only,
 	including transfer from rgb to bgr
@@ -61,11 +60,11 @@ def preprocess_image_caffe(image_datalist, debug=True):
 		print('debug mode is on during preprocessing. Please turn off after debuging')
 		assert islist(image_datalist), 'input is not a list of image'
 		assert all(iscolorimage(image_data) for image_data in image_datalist), 'input is not a image format'	
-		num_pixel = [image_data.size for image_data in image_datalist]
-		assert CHECK_EQ_LIST(num_pixel), 'number of pixel is not equal inside one batch'
+		shape_list = [image_data.shape for image_data in image_datalist]
+		assert CHECK_EQ_LIST(shape_list), 'image shape is not equal inside one batch'
 
 	batch_size = len(image_datalist)
-	caffe_input_data = np.zeros((batch_size, ) + image_data.shape, dtype='float32')
+	caffe_input_data = np.zeros((batch_size, ) + image_datalist[0].shape, dtype='float32')
 
 	# fill one minibatch data
 	index = 0
@@ -74,8 +73,19 @@ def preprocess_image_caffe(image_datalist, debug=True):
 		index += 1
 		
 	caffe_input_data = caffe_input_data[:, :, :, [2, 1, 0]]                 # from rgb to bgr, currently [batch, height, weight, channels]
+	if debug:
+		if vis:																# visualize swapped channel
+			print('visualization in debug mode is on during preprocessing. Please turn off after confirmation')
+			for index in xrange(caffe_input_data.shape[0]):
+				image_tmp_swapped = caffe_input_data[index]
+				print('\n\nPlease make sure the image is not RGB after swapping channel')
+				visualize_save_image(image_tmp_swapped)
+		assert caffe_input_data.shape[-1] == 3, 'channel is not correct'
 	caffe_input_data = np.transpose(caffe_input_data, (0, 3, 1, 2))         # permute to [batch, channel, height, weight]
-	return image_data
+	
+	if debug:
+		assert caffe_input_data.shape[1] == 3, 'channel is not correct'
+	return caffe_input_data
 
 def unpreprocess_image_caffe(image_datablob, debug=True):
 	'''

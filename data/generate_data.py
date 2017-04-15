@@ -3,7 +3,7 @@
 
 # this file contains function for generating many formats of data
 
-from cv2 import imread
+from scipy.misc import imread
 import numpy as np
 import os, time
 import h5py
@@ -12,8 +12,9 @@ import __init__paths__
 from math_function import identity
 from check import is_path_exists, isnparray, is_path_exists_or_creatable, isfile, isfolder, isfunction, isdict, isstring
 from file_io import load_list_from_file, mkdir_if_missing, fileparts, load_list_from_folder
+from preprocess import preprocess_image_caffe
 
-def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter='png', label_src=None, label_name='label', label_preprocess_function=identity, debug=False):
+def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter='png', label_src=None, label_name='label', label_preprocess_function=identity, debug=True, vis=True):
     '''
     # this function creates data in hdf5 format from a image path 
 
@@ -78,13 +79,18 @@ def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter
     count_hdf = 1       # count number of hdf5 file
     for i in xrange(num_data):
         print('%s %d/%d' % (save_dir, i+1, num_data))
-        img = imread(datalist[i]).astype('float32') / 255.0   # [rows,col,channel,numbers], scale the image data to (0, 1)
-        if batch_size > 1:
-            assert size_data == img.shape, 'image size should be equal in each single hdf5 file.'
+        raw_image = imread(datalist[i]).astype('float32')
+        if debug:
+            max_value = np.max(raw_image)
+            assert max_value > 1 and max_value <= 255, 'data is not in [0, 255]'
         
-        size_data = img.shape
+        img = raw_image / 255.0   # [rows,col,channel,numbers], scale the image data to (0, 1)
         datalist_batch.append(img)
-        # data[i % batch_size, :, :, :] = img
+        if debug:
+            min_value = np.min(img)
+            max_value = np.max(img)
+            assert max_value >= 0 and max_value <= 1, 'data is not in [0, 1]'
+            assert min_value >= 0 and min_value <= 1, 'data is not in [0, 1]'
 
         if labeldict is not None:
             _, name, _ = fileparts(datalist[i])
@@ -93,9 +99,7 @@ def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter
             labels[i % batch_size, 0] = float(labellist[i])
 
         if i % batch_size == 0:
-            data = preprocess_image_caffe(datalist_batch, debug=debug)   # swap channel, transfer from list of HxWxC to NxCxHxW
-            if debug:
-                assert data.shape == (batch_size, 3, ) + size_data, 'shape of hdf5 data for caffe blob is not correct'
+            data = preprocess_image_caffe(datalist_batch, debug=debug, vis=vis)   # swap channel, transfer from list of HxWxC to NxCxHxW
 
             # write to hdf5 format
             h5f = h5py.File(os.path.join(save_dir, 'data_%010d.hdf5' % count_hdf), 'w')
@@ -110,6 +114,5 @@ def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter
             del datalist_batch[:]
             if debug:
                 assert len(datalist_batch) == 0, 'list has not been cleared'
-            # data = np.zeros((batch_size, ) + size_data, dtype='float32')
 
     return count_hdf, num_data
