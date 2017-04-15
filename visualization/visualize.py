@@ -3,10 +3,20 @@
 import matplotlib.pyplot as plt
 
 import __init__paths__
-from check import isimage, is_path_exists_or_creatable, isfile
+from check import isimage, is_path_exists_or_creatable, isfile, islist, isnparray
 
-def visualize_save_image(image, vis=True, save_path=None, save=False):
-    assert isimage(image), 'input is not a good image'
+def visualize_save_image(image, vis=True, save=False, save_path=None):
+    if islist(image):
+        print('visualizing a list of images:')
+        index = 1
+        for image_tmp in image:
+            print('processing %d/%d' % (index, len(image)))
+            visualize_save_image(image_tmp, vis, save_path, save)
+            index += 1
+        return
+
+    assert isnparray(image), 'input image is not a numpy array {}'.format(type(image))
+    assert isimage(image), 'input is not a good image, shape is {}'.format(image.shape)
     if save:
         assert is_path_exists_or_creatable(save_path) and isfile(save_path), 'save path is not valid'
 

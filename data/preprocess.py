@@ -98,7 +98,7 @@ def unpreprocess_image_caffe(image_datablob, debug=True):
 		assert isnparray(image_datablob) and image_datablob.ndim == 4, 'input is not correct'	
 
 	image_datablob = np.transpose(image_datablob, (0, 2, 3, 1))         # permute to [batch, height, weight, channel]
-	# image_datablob = image_datablob[:, :, :, [2, 1, 0]]                 # from bgr to rgb 
+	image_datablob = image_datablob[:, :, :, [2, 1, 0]]                 # from bgr to rgb 
 	image_data_list = list()
 	for i in xrange(image_datablob.shape[0]):
 		image_data_list.append(image_datablob[i, :, :, :])
