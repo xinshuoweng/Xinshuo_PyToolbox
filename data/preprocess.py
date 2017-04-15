@@ -23,3 +23,12 @@ def normalize_data(data, data_range=None):
 	normalized_data = data - min_value
 	normalized_data = normalized_data / (max_value - min_value)
 	return normalized_data
+
+
+def unnormalize_data(data, data_range):
+	assert isnparray(data), 'only numpy array is supported'
+	assert isnparray(data_range) and data_range.size == 2, 'data range is not correct'
+	max_value = data_range[1]
+	min_value = data_range[0]
+
+	return data * (max_value - min_value) + min_value
