@@ -7,7 +7,7 @@ from numpy.testing import assert_almost_equal
 import __init__paths__
 from check import is2dline, is2dpts, isnparray
 
-def identity(data, data_range):
+def identity(data, data_range=None):
     assert isnparray(data), 'data is not correct'
     return data
 

@@ -30,6 +30,9 @@ def isfunction(func_test):
 def isdict(dict_test):
     return isinstance(dict_test, dict)
 
+def istuple(tuple_test):
+    return isinstance(tuple_test, tuple)
+
 def iscolorimage(image_test):
     if not isnparray(image_test):
         return False
