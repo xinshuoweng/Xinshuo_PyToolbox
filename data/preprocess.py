@@ -6,23 +6,26 @@ from cv2 import imread
 import numpy as np
 
 import __init__paths__
-from check import isnparray, iscolorimage, istuple, islist
+from check import isnparray, iscolorimage, istuple, islist, CHECK_EQ_LIST
 
 
-def normalize_data(data, data_range=None):
+def normalize_data(data, data_range=None, debug=True):
 	'''
 	this function normalizes 1-d label to 0-1
 	'''
-	assert isnparray(data), 'only numpy array is supported'
+	if debug:
+		assert isnparray(data), 'only numpy array is supported'
+		print('debug mode is on during data normalizing. Please turn off after debuging')
 
 	if data_range is None:
 		max_value = np.max(data)
 		min_value = np.min(data)
 	else:
-		if istuple(data_range) or islist(data_range):
-			assert len(data_range) == 2, 'data range is not correct'
-		elif isnparray(data_range):
-			assert data_range.size == 2, 'data range is not correct'
+		if debug:
+			if istuple(data_range) or islist(data_range):
+				assert len(data_range) == 2, 'data range is not correct'
+			elif isnparray(data_range):
+				assert data_range.size == 2, 'data range is not correct'
 		max_value = data_range[1]
 		min_value = data_range[0]
 
@@ -31,45 +34,62 @@ def normalize_data(data, data_range=None):
 	return normalized_data
 
 
-def unnormalize_data(data, data_range):
+def unnormalize_data(data, data_range, debug=True):
 	'''
 	this function unnormalizes 1-d label to normal scale based on range of data
 	'''
-	assert isnparray(data), 'only numpy array is supported'
-	if istuple(data_range) or islist(data_range):
-		assert len(data_range) == 2, 'data range is not correct'
-	elif isnparray(data_range):
-		assert data_range.size == 2, 'data range is not correct'
+	if debug:
+		print('debug mode is on during data unnormalizing. Please turn off after debuging')
+		assert isnparray(data), 'only numpy array is supported'
+		if istuple(data_range) or islist(data_range):
+			assert len(data_range) == 2, 'data range is not correct'
+		elif isnparray(data_range):
+			assert data_range.size == 2, 'data range is not correct'
 	max_value = data_range[1]
 	min_value = data_range[0]
 
 	return data * (max_value - min_value) + min_value
 
 
-def preprocess_image_caffe(image_data):
+def preprocess_image_caffe(image_datalist, debug=True):
 	'''
 	this function preprocesses image for caffe only,
 	including transfer from rgb to bgr
 	from HxWxC to NxCxHxW
 	'''
-	assert iscolorimage(image_data), 'input is not a image format'	
+	if debug:
+		print('debug mode is on during preprocessing. Please turn off after debuging')
+		assert islist(image_datalist), 'input is not a list of image'
+		assert all(iscolorimage(image_data) for image_data in image_datalist), 'input is not a image format'	
+		num_pixel = [image_data.size for image_data in image_datalist]
+		assert CHECK_EQ_LIST(num_pixel), 'number of pixel is not equal inside one batch'
 
-	image_data = np.reshape(image_data, (1, ) + image_data.shape)
-	image_data = image_data[:, :, :, [2, 1, 0]]                 # from rgb to bgr, currently [batch, height, weight, channels]
-	image_data = np.transpose(image_data, (0, 3, 1, 2))         # permute to [batch, channel, height, weight]
+	batch_size = len(image_datalist)
+	caffe_input_data = np.zeros((batch_size, ) + image_data.shape, dtype='float32')
+
+	# fill one minibatch data
+	index = 0
+	for image_data in image_datalist:
+		caffe_input_data[0, :, :, :] = image_data
+		index += 1
+		
+	caffe_input_data = caffe_input_data[:, :, :, [2, 1, 0]]                 # from rgb to bgr, currently [batch, height, weight, channels]
+	caffe_input_data = np.transpose(caffe_input_data, (0, 3, 1, 2))         # permute to [batch, channel, height, weight]
 	return image_data
 
-def unpreprocess_image_caffe(image_data):
+def unpreprocess_image_caffe(image_datablob, debug=True):
 	'''
 	this function unpreprocesses image for caffe only,
 	including transfer from bgr to rgb
 	from NxCxHxW to a list of HxWxC 
 	'''
-	assert isnparray(image_data) and image_data.ndim == 4, 'input is not correct'	
+	if debug:
+		print('debug mode is on during unpreprocessing. Please turn off after debuging')
+		assert isnparray(image_datablob) and image_datablob.ndim == 4, 'input is not correct'	
 
-	image_data = np.transpose(image_data, (0, 2, 3, 1))         # permute to [batch, height, weight, channel]
-	# image_data = image_data[:, :, :, [2, 1, 0]]                 # from bgr to rgb 
+	image_datablob = np.transpose(image_datablob, (0, 2, 3, 1))         # permute to [batch, height, weight, channel]
+	# image_datablob = image_datablob[:, :, :, [2, 1, 0]]                 # from bgr to rgb 
 	image_data_list = list()
-	for i in xrange(image_data.shape[0]):
-		image_data_list.append(image_data[i, :, :, :])
+	for i in xrange(image_datablob.shape[0]):
+		image_data_list.append(image_datablob[i, :, :, :])
 	return image_data_list

@@ -63,7 +63,8 @@ def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter
 
     # warm up
     size_data = imread(datalist[0]).shape
-    data = np.zeros((batch_size, ) + size_data, dtype='float32')
+    datalist_batch = list()
+    # data = np.zeros((batch_size, ) + size_data, dtype='float32')
     if labeldict is not None:
         assert isstring(label_name), 'label name is not correct'
         labels = np.zeros((batch_size, 1), dtype='float32')
@@ -82,7 +83,8 @@ def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter
             assert size_data == img.shape, 'image size should be equal in each single hdf5 file.'
         
         size_data = img.shape
-        data[i % batch_size, :, :, :] = img
+        datalist_batch.append(img)
+        # data[i % batch_size, :, :, :] = img
 
         if labeldict is not None:
             _, name, _ = fileparts(datalist[i])
@@ -91,20 +93,23 @@ def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter
             labels[i % batch_size, 0] = float(labellist[i])
 
         if i % batch_size == 0:
-            # preprocess
-            data = data[:, :, :, [2, 1, 0]]                 # from rgb to brg, currently [batch, height, weight, channels]
-            data = np.transpose(data, (0, 3, 1, 2))         # permute to [batch, channel, height, weight]
+            data = preprocess_image_caffe(datalist_batch, debug=debug)   # swap channel, transfer from list of HxWxC to NxCxHxW
+            if debug:
+                assert data.shape == (batch_size, 3, ) + size_data, 'shape of hdf5 data for caffe blob is not correct'
 
             # write to hdf5 format
             h5f = h5py.File(os.path.join(save_dir, 'data_%010d.hdf5' % count_hdf), 'w')
             h5f.create_dataset(data_name, data=data, dtype='float32')
             if (labeldict is not None) or (labellist is not None):
-                labels = label_preprocess_function(data=labels, data_range=label_range)
+                labels = label_preprocess_function(data=labels, data_range=label_range, debug=debug)
                 h5f.create_dataset(label_name, data=labels, dtype='float32')
                 labels = np.zeros((batch_size, 1), dtype='float32')
 
             h5f.close()
             count_hdf = count_hdf + 1
-            data = np.zeros((batch_size, ) + size_data, dtype='float32')
+            del datalist_batch[:]
+            if debug:
+                assert len(datalist_batch) == 0, 'list has not been cleared'
+            # data = np.zeros((batch_size, ) + size_data, dtype='float32')
 
     return count_hdf, num_data
