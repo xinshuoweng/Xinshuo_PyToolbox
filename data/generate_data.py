@@ -41,6 +41,7 @@ def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter
 
     if label_src is None:
         labeldict = None
+        labellist = None
     elif isfile(label_src):
         assert is_path_exists(label_src), 'file not found'
         _, _, ext = fileparts(label_src)
@@ -48,8 +49,10 @@ def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter
         labeldict = json.load(label_src)
         num_label = len(labeldict)
         assert num_data == num_label, 'number of data and label is not equal.'
+        labellist = None
     elif isdict(label_src):
         labeldict = label_src
+        labellist = None
     elif isnparray(label_src):
         labeldict = None
         labellist = label_src
