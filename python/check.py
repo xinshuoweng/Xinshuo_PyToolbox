@@ -30,6 +30,21 @@ def isfunction(func_test):
 def isdict(dict_test):
     return isinstance(dict_test, dict)
 
+def iscolorimage(image_test):
+    if not isnparray(image_test):
+        return False
+
+    return image_test.ndim == 3 and image_test.shape[2] == 3
+
+def isgrayimage(image_test):
+    if not isnparray(image_test):
+        return False
+
+    return image_test.ndim == 2 or (image_test.ndim == 3 and image_test.shape[2] == 1)
+
+def isimage(image_test):
+    return iscolorimage(image_test) or isgrayimage(image_test)
+
 def is_path_valid(pathname):
     '''
     `True` if the passed pathname is a valid pathname for the current OS;
