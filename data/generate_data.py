@@ -7,6 +7,7 @@ from scipy.misc import imread
 import numpy as np
 import os, time
 import h5py
+import random
 
 import __init__paths__
 from math_function import identity
@@ -145,4 +146,20 @@ def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter
             if debug:
                 assert len(datalist_batch) == 0, 'list has not been cleared'
 
-    return count_hdf, num_data
+    return count_hdf-1, num_data
+
+
+
+def load_hdf5_data(hdf5_src, dataname):
+    assert is_path_exists(hdf5_src) and isfolder(hdf5_src), 'input hdf5 path does not exist'
+    assert islist(dataname), 'dataset queried is not correct'
+    assert all(isstring(dataset_tmp) for dataset_tmp in dataname), 'dataset queried is not correct'
+
+    hdf5list, num_hdf5_files = load_list_from_folder(folder_path=hdf5_src, ext_filter='.hdf5')
+    check_index = random.randrange(0, num_hdf5_files)
+    hdf5_path_sample = hdf5list[check_index]
+    hdf5_file = h5py.File(hdf5_path_sample, 'r')
+    datadict = dict()
+    for dataset in dataname:
+        datadict[dataset] = hdf5_file[dataset]
+    return datadict
