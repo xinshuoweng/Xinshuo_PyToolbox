@@ -23,3 +23,8 @@ add_path(math_path)
 file_path = os.path.join(this_dir, '../file_io')
 add_path(file_path)
 
+
+# Add math to PYTHONPATH
+file_path = os.path.join(this_dir, '../miscellaneous')
+add_path(file_path)
+
