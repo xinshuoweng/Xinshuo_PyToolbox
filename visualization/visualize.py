@@ -1,6 +1,7 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
 import matplotlib.pyplot as plt
+import numpy as np
 
 import __init__paths__
 from check import isimage, is_path_exists_or_creatable, isfile, islist, isnparray, isgrayimage, iscolorimage
@@ -31,6 +32,8 @@ def visualize_save_image(image, vis=True, save=False, save_path=None):
     if iscolorimage(image):
         ax.imshow(image, interpolation='nearest')
     elif isgrayimage(image):
+        if image.ndim == 3 and image.shape[-1] == 1:
+            image = np.reshape(image, image.shape[:-1])
         ax.imshow(image, interpolation='nearest', cmap='gray')
     else:
         assert False, 'image is not correct'
