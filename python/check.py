@@ -3,6 +3,7 @@
 import os, sys
 import numpy as np
 
+
 def isstring(string_test):
 	return isinstance(string_test, basestring)
 
@@ -67,11 +68,23 @@ def is_path_creatable(pathname):
     '''
     `True` if the current user has sufficient permissions to create the passed
     pathname; `False` otherwise.
+
+    For folder, it needs the previous level of folder existing
+    for file, it needs the folder existing
     '''
     if is_path_valid(pathname) is False:
     	return False
-    dirname = os.path.dirname(os.path.abspath(pathname))
-    return os.access(dirname, os.W_OK)
+    
+    pathname = safepath(pathname)
+    pathname = os.path.dirname(os.path.abspath(pathname))
+    
+    # recursively to find the root existing
+    while not is_path_exists(pathname):     
+        pathname_new = os.path.dirname(os.path.abspath(pathname))
+        if pathname_new == pathname:
+            return False
+        pathname = pathname_new
+    return os.access(pathname, os.W_OK)
 
 def is_path_exists_or_creatable(pathname):
     '''
@@ -93,6 +106,7 @@ def is_path_exists(pathname):
 
 def isfile(pathname):
     if is_path_valid(pathname):
+        pathname = safepath(pathname)
         name = os.path.splitext(os.path.basename(pathname))[0]
         ext = os.path.splitext(pathname)[1]
         return len(name) > 0 and len(ext) > 0
@@ -102,11 +116,22 @@ def isfile(pathname):
 
 def isfolder(pathname):
     if is_path_valid(pathname):
+        pathname = safepath(pathname)
+        if pathname == './':
+            return True
         name = os.path.splitext(os.path.basename(pathname))[0]
         ext = os.path.splitext(pathname)[1]
         return len(name) > 0 and len(ext) == 0
     else:
         return False
+
+
+def safepath(pathname):
+    '''
+    convert path to a normal representation
+    '''
+    assert is_path_valid(pathname), 'path is not valid'
+    return os.path.normpath(pathname)
 
 
 def CHECK_EQ_LIST(input_list):
@@ -115,3 +140,4 @@ def CHECK_EQ_LIST(input_list):
 	'''
 	assert islist(input_list), 'input is not a list'
 	return input_list[1:] == input_list[:-1]
+

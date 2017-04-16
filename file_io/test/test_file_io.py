@@ -23,8 +23,8 @@ def test_load_list_from_folder():
     assert datalist[1] == os.path.abspath('test1.txt')
     assert num_elem == 2
 
-    datalist, num_elem = load_list_from_folder(folder_path=path)
-    assert num_elem == 8
+    # datalist, num_elem = load_list_from_folder(folder_path=path)
+    # assert num_elem == 8
 
 
 def test_mkdir_if_missing():
@@ -32,7 +32,7 @@ def test_mkdir_if_missing():
     mkdir_if_missing(path)
     path = 'test_folder'
     mkdir_if_missing(path)
-    path = 'test_folder1/te.txt'
+    path = 'test_folder1/test2/test3/te.txt'
     mkdir_if_missing(path)
 
 if __name__ == '__main__':

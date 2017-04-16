@@ -5,21 +5,33 @@ import numpy as np
 
 import __init__paths__
 from check import isimage, is_path_exists_or_creatable, isfile, islist, isnparray, isgrayimage, iscolorimage
+from file_io import mkdir_if_missing
 
-def visualize_save_image(image, vis=True, save=False, save_path=None):
+def visualize_save_image(image, vis=True, save=False, save_path=None, debug=True):
     if islist(image):
-        print('visualizing a list of images:')
-        index = 1
-        for image_tmp in image:
-            print('processing %d/%d' % (index, len(image)))
-            visualize_save_image(image_tmp, vis, save_path, save)
+        imagelist = image
+        save_path_list = save_path
+        if vis:
+            print('visualizing a list of images:')
+        if save:
+            print('saving a list of images')
+            if debug:
+                assert islist(save_path_list), 'for saving a list of images, please provide a list of saving path'
+                assert all(is_path_exists_or_creatable(save_path_tmp) and isfile(save_path_tmp) for save_path_tmp in save_path_list), 'save path is not valid'
+                assert len(save_path_list) == len(imagelist), 'length of list for saving path and data is not equal'
+        index = 0
+        for image_tmp in imagelist:
+            print('processing %d/%d' % (index+1, len(imagelist)))
+            visualize_save_image(image_tmp, vis, save_path[i], save)
             index += 1
         return
 
-    assert isnparray(image), 'input image is not a numpy array {}'.format(type(image))
-    assert isimage(image), 'input is not a good image, shape is {}'.format(image.shape)
-    if save:
-        assert is_path_exists_or_creatable(save_path) and isfile(save_path), 'save path is not valid'
+    if debug:
+        assert isnparray(image), 'input image is not a numpy array {}'.format(type(image))
+        assert isimage(image), 'input is not a good image, shape is {}'.format(image.shape)
+        if save:
+            mkdir_if_missing(save_path)
+            assert is_path_exists_or_creatable(save_path) and isfile(save_path), 'save path is not valid: %s' % save_path
 
     dpi = 80  
     width = image.shape[1]

@@ -6,15 +6,21 @@ import os, sys
 import glob
 
 import __init__paths__
-from check import is_path_exists, isstring, is_path_exists_or_creatable, isfile, isfolder, isnparray
-
+from check import is_path_exists, isstring, is_path_exists_or_creatable, isfile, isfolder, isnparray, is_path_creatable, is_path_valid, safepath
 
 def fileparts(pathname):
 	'''
 	this function return a tuple, which contains (directory, filename, extension)
 	if the file has multiple extension, only last one will be displayed
 	'''
-	assert isstring(pathname), 'The input path is not a string'   
+	pathname = safepath(pathname)
+	if len(pathname) == 0:
+		return ('', '', '')
+	if pathname[-1] == '/':
+		if len(pathname) > 1:
+			return (pathname[:-1], '', '')	# ignore the final '/'
+		else:
+			return (pathname, '', '')	# ignore the final '/'
 	directory = os.path.dirname(os.path.abspath(pathname))
 	filename = os.path.splitext(os.path.basename(pathname))[0]
 	ext = os.path.splitext(pathname)[1]
@@ -25,7 +31,7 @@ def load_list_from_file(file_path):
     '''
     this function reads list from a txt file
     '''
-    assert is_path_exists(file_path), 'input path does not exist'
+    file_path = safepath(file_path)
     _, _, extension = fileparts(file_path)
     assert extension == '.txt', 'File doesn''t have valid extension.'
     file = open(file_path, 'r')
@@ -43,6 +49,7 @@ def load_list_from_folder(folder_path, ext_filter=None):
     '''
     load a list of files from a system folder
     '''
+    folder_path = safepath(folder_path)
     assert isfolder(folder_path) and is_path_exists(folder_path), 'input folder path is not correct %s' % folder_path
     if ext_filter is not None:
         assert isstring(ext_filter), 'extension filder is not correct'
@@ -57,28 +64,46 @@ def load_list_from_folder(folder_path, ext_filter=None):
 
 
 def mkdir_if_missing(pathname):
-    if isfile(pathname):
-        pathname, _, _ = fileparts(pathname)
-    assert is_path_exists_or_creatable(pathname), 'input path is not valid or creatable'
-    if not is_path_exists(pathname):
-        os.mkdir(pathname)
+	pathname = safepath(pathname)
+	assert is_path_exists_or_creatable(pathname), 'input path is not valid or creatable: %s' % pathname
+	dirname, _, _ = fileparts(pathname)
+
+	if not is_path_exists(dirname):
+		mkdir_if_missing(dirname)
+		
+	if isfolder(pathname) and not is_path_exists(pathname):
+		os.mkdir(pathname)
 
 
 def generate_list_from_folder(save_path, src_path, ext_filter=None):
-    assert isfolder(src_path) and is_path_exists(src_path), 'source folder not found or incorrect'
-    if not isfile(save_path):
-        assert isfolder(save_path), 'save path is not correct'
-        save_path = os.path.join(save_path, 'datalist.txt')
+	save_path = safepath(save_path)
+	src_path = safepath(src_path)
+	assert isfolder(src_path) and is_path_exists(src_path), 'source folder not found or incorrect'
+	if not isfile(save_path):
+		assert isfolder(save_path), 'save path is not correct'
+		save_path = os.path.join(save_path, 'datalist.txt')
 
-    if ext_filter is not None:
-        assert isstring(ext_filter), 'extension filter is not correct'
+	if ext_filter is not None:
+		assert isstring(ext_filter), 'extension filter is not correct'
 
-    filepath = os.path.dirname(os.path.abspath(__file__))
-    cmd = 'th %s/generate_list.lua %s %s %s' % (filepath, src_path, save_path, ext_filter)
-    os.system(cmd)    # generate data list
+	filepath = os.path.dirname(os.path.abspath(__file__))
+	cmd = 'th %s/generate_list.lua %s %s %s' % (filepath, src_path, save_path, ext_filter)
+	os.system(cmd)    # generate data list
+
 
 def generate_list_from_data(save_path, src_data):
-    assert isnparray(src_data) and src_data.ndim == 1, 'source data is incorrect'
+    '''
+    generate a file which contains a 1-d numpy array data
+
+    parameter:
+        src_data:   a list of 1 element data, or a 1-d numpy array data
+    '''
+    if isnparray(src_data):
+        assert src_data.ndim == 1, 'source data is incorrect'
+    elif islist(src_data):
+        assert all(np.array(data_tmp).size == 1 for data_tmp in src_data), 'source data is in correct'
+    
+    save_path = safepath(save_path)
     if not isfile(save_path):
         assert isfolder(save_path), 'save path is not correct'
         save_path = os.path.join(save_path, 'datalist.txt')

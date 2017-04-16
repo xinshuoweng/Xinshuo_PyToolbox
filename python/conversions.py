@@ -2,8 +2,10 @@
 # email: xinshuo.weng@gmail.com
 
 # this file define a set of functions which converting data type
+import os
 import numpy as np
-from check import isstring, isinteger, islist
+from check import isstring, isinteger, islist, is_path_valid
+
 
 def character2onehot(character):
 	'''
@@ -86,9 +88,15 @@ def ord2string(ord_list):
 	
 	return L
 
-def str2float_from_list(str_list):
+def str2float_from_list(str_list, debug):
 	'''
 	convert a list of string to a list of floating number
 	'''
-	assert islist(str_list), 'input is not a list'
+	if debug:
+		assert islist(str_list), 'input is not a list'
+		assert all(isstring(str_tmp) for str_tmp in str_list), 'input is not a list of string'
+	if any(len(str_tmp) == 0 for str_tmp in str_list):
+		if debug:
+			print('warning: the list of string contains empty element which will be removed before converting to floating number')
+		str_list = filter(None, str_list)
 	return [float(str_tmp) for str_tmp in str_list]

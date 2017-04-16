@@ -10,5 +10,8 @@ def add_path(path):
 
 this_dir = os.path.dirname(os.path.abspath(__file__))
 
-file_path = os.path.join(this_dir, '../python')
+python_path = os.path.join(this_dir, '../python')
+add_path(python_path)
+
+file_path = os.path.join(this_dir, '../file_io')
 add_path(file_path)
