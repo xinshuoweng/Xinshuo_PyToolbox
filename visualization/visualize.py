@@ -51,7 +51,7 @@ def visualize_save_image(image, vis=True, save=False, save_path=None, debug=True
     if save:
         if debug:
             assert is_path_exists_or_creatable(save_path) and isfile(save_path), 'save path is not valid: %s' % save_path
-        mkdir_if_missing(save_path)
+            mkdir_if_missing(save_path)
         fig.savefig(save_path, dpi=dpi, transparent=True)
     if vis:
         plt.show()

@@ -10,6 +10,9 @@ def isstring(string_test):
 def isinteger(integer_test):
 	return isinstance(integer_test, int)
 
+def isfloat(float_test):
+    return isinstance(float_test, float)
+
 def islist(list_test):
 	return isinstance(list_test, list)
 

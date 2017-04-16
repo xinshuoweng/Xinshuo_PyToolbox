@@ -5,6 +5,9 @@
 
 import time
 
+import __init__paths__
+from check import isfloat, isinteger
+
 class Timer(object):
     """A simple timer."""
     def __init__(self):
@@ -28,3 +31,14 @@ class Timer(object):
             return self.average_time
         else:
             return self.diff
+
+
+
+def format_time(seconds):
+    '''
+    format second to human readable way
+    '''
+    assert isfloat(seconds) or isinteger(seconds), 'input should be an integer or floating number to represent number of seconds'
+    m, s = divmod(int(seconds), 60)
+    h, m = divmod(m, 60)
+    return '%d:%02d:%02d' % (h, m, s)

@@ -5,9 +5,10 @@
 import os, sys
 import glob
 import numpy as np
+from PIL import Image
 
 import __init__paths__
-from check import is_path_exists, isstring, is_path_exists_or_creatable, isfile, isfolder, isnparray, is_path_creatable, is_path_valid, safepath, islist
+from check import is_path_exists, isstring, is_path_exists_or_creatable, isfile, isfolder, isnparray, is_path_creatable, is_path_valid, safepath, islist, isimage, isgrayimage
 
 def fileparts(pathname):
 	'''
@@ -92,25 +93,41 @@ def generate_list_from_folder(save_path, src_path, ext_filter=None):
 	os.system(cmd)    # generate data list
 
 
-def generate_list_from_data(save_path, src_data):
+def generate_list_from_data(save_path, src_data, debug=True):
     '''
     generate a file which contains a 1-d numpy array data
 
     parameter:
         src_data:   a list of 1 element data, or a 1-d numpy array data
     '''
-    if isnparray(src_data):
-        assert src_data.ndim == 1, 'source data is incorrect'
-    elif islist(src_data):
-        assert all(np.array(data_tmp).size == 1 for data_tmp in src_data), 'source data is in correct'
-    
     save_path = safepath(save_path)
-    if not isfile(save_path):
-        assert isfolder(save_path), 'save path is not correct'
+
+    if debug:
+        if isnparray(src_data):
+            assert src_data.ndim == 1, 'source data is incorrect'
+        elif islist(src_data):
+            assert all(np.array(data_tmp).size == 1 for data_tmp in src_data), 'source data is in correct'
+        assert isfolder(save_path) or isfile(save_path), 'save path is not correct'
+        
+    if isfolder(save_path):
         save_path = os.path.join(save_path, 'datalist.txt')
-    else:
+
+    if debug:
         assert is_path_exists_or_creatable(save_path), 'the file cannot be created'
 
     with open(save_path, 'w') as file:
         for item in src_data:
             file.write('%f\n' % item)
+
+
+def save_image_from_data(save_path, data, debug=True):
+    save_path = safepath(save_path)
+    if debug:
+        assert isimage(data), 'input data is not image format'
+        assert is_path_exists_or_creatable(save_path), 'save path is not correct'
+        mkdir_if_missing(save_path)
+
+    img = Image.fromarray(data)
+    if isgrayimage(data):
+        img = img.convert('L')
+    img.save(save_path)

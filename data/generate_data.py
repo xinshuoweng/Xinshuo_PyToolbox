@@ -14,7 +14,7 @@ from math_function import identity
 from check import is_path_exists, isnparray, is_path_exists_or_creatable, isfile, isfolder, isfunction, isdict, isstring, islist, isimage
 from file_io import load_list_from_file, mkdir_if_missing, fileparts, load_list_from_folder
 from preprocess import preprocess_image_caffe
-from timer import Timer
+from timer import Timer, format_time
 
 def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter='png', label_src=None, label_name='label', label_preprocess_function=identity, debug=True, vis=True):
     '''
@@ -149,7 +149,7 @@ def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter
             if debug:
                 assert len(datalist_batch) == 0, 'list has not been cleared'
         average_time = clock.toc()
-        print('saving to %s: %d/%d, average time:%.3f, elapsed time:%.3f, estimated time remaining:%.3f' % (save_dir, i+1, num_data, average_time, average_time * i, average_time * (len(num_data) - i)))
+        print('saving to %s: %d/%d, average time:%.3f, elapsed time:%s, estimated time remaining:%s' % (save_dir, i+1, num_data, average_time, format_time(average_time*i), format_time(average_time*(num_data-i))))
 
     
     return count_hdf-1, num_data
