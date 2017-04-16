@@ -35,7 +35,7 @@ def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter
     # convert data source to a list of numpy array image data
     if isfolder(data_src):
         if debug:
-            print 'data is loading from %s' % data_src
+            print 'data is loading from %s with extension .%s' % (data_src, ext_filter)
         filelist, num_data = load_list_from_folder(data_src, ext_filter=ext_filter)
         datalist = None
     elif isfile(data_src):
@@ -66,7 +66,8 @@ def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter
                 assert max_value >= 0 and max_value <= 1, 'data is not in [0, 1]'
                 assert min_value >= 0 and min_value <= 1, 'data is not in [0, 1]'
             datalist.append(img)
-
+    if debug:
+        assert len(datalist) == num_data, 'number of data is not equal'
 
     # convert label source to a list of numpy array label
     if label_src is None:

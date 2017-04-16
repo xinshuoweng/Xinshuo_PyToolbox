@@ -4,9 +4,10 @@
 # this file contains a set of function for manipulating file io in python
 import os, sys
 import glob
+import numpy as np
 
 import __init__paths__
-from check import is_path_exists, isstring, is_path_exists_or_creatable, isfile, isfolder, isnparray, is_path_creatable, is_path_valid, safepath
+from check import is_path_exists, isstring, is_path_exists_or_creatable, isfile, isfolder, isnparray, is_path_creatable, is_path_valid, safepath, islist
 
 def fileparts(pathname):
 	'''
@@ -70,7 +71,7 @@ def mkdir_if_missing(pathname):
 
 	if not is_path_exists(dirname):
 		mkdir_if_missing(dirname)
-		
+
 	if isfolder(pathname) and not is_path_exists(pathname):
 		os.mkdir(pathname)
 
