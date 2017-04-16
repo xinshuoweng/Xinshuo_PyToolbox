@@ -36,6 +36,8 @@ def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter
         datalist, num_data = load_list_from_folder(data_src)
     elif isfile(data_src):
         datalist, num_data = load_list_from_file(data_src)
+    elif islist(data_src):
+
     else:
         assert False, 'data source format is not correct.'
     assert isstring(data_name), 'dataset name is not correct'
@@ -80,13 +82,12 @@ def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter
     for i in xrange(num_data):
         print('%s %d/%d' % (save_dir, i+1, num_data))
         raw_image = imread(datalist[i]).astype('float32')
+        img = raw_image / 255.0   # [rows,col,channel,numbers], scale the image data to (0, 1)
+        
+        datalist_batch.append(img)
         if debug:
             max_value = np.max(raw_image)
             assert max_value > 1 and max_value <= 255, 'data is not in [0, 255]'
-        
-        img = raw_image / 255.0   # [rows,col,channel,numbers], scale the image data to (0, 1)
-        datalist_batch.append(img)
-        if debug:
             min_value = np.min(img)
             max_value = np.max(img)
             assert max_value >= 0 and max_value <= 1, 'data is not in [0, 1]'

@@ -63,7 +63,7 @@ def onehot2string(onehot):
 
 
 def string2ord(string):
-		'''
+	'''
 	convert a string to a list of ASCII character
 	'''
 	assert isstring(string) and len(string) > 0, 'input should be a string with length larger than 0'
@@ -85,3 +85,10 @@ def ord2string(ord_list):
 		L += chr(o)
 	
 	return L
+
+def str2float_from_list(str_list):
+	'''
+	convert a list of string to a list of floating number
+	'''
+	assert islist(str_list), 'input is not a list'
+	return [float(str_tmp) for str_tmp in str_list]

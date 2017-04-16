@@ -3,7 +3,7 @@
 import matplotlib.pyplot as plt
 
 import __init__paths__
-from check import isimage, is_path_exists_or_creatable, isfile, islist, isnparray
+from check import isimage, is_path_exists_or_creatable, isfile, islist, isnparray, isgrayimage, iscolorimage
 
 def visualize_save_image(image, vis=True, save=False, save_path=None):
     if islist(image):
@@ -28,7 +28,12 @@ def visualize_save_image(image, vis=True, save=False, save_path=None):
     fig = plt.figure(figsize=figsize)
     ax = fig.add_axes([0, 0, 1, 1])
     ax.axis('off')
-    ax.imshow(image, interpolation='nearest')
+    if iscolorimage(image):
+        ax.imshow(image, interpolation='nearest')
+    elif isgrayimage(image):
+        ax.imshow(image, interpolation='nearest', cmap='gray')
+    else:
+        assert False, 'image is not correct'
     ax.set(xlim=[0, width], ylim=[height, 0], aspect=1)
 
     if save:
