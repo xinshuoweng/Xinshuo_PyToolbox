@@ -5,7 +5,9 @@
 import os, sys
 import glob
 import numpy as np
-from PIL import Image
+# from PIL import Image
+from scipy.misc import imsave
+import time
 
 import __init__paths__
 from check import is_path_exists, isstring, is_path_exists_or_creatable, isfile, isfolder, isnparray, is_path_creatable, is_path_valid, safepath, islist, isimage, isgrayimage
@@ -120,14 +122,11 @@ def generate_list_from_data(save_path, src_data, debug=True):
             file.write('%f\n' % item)
 
 
-def save_image_from_data(save_path, data, debug=True):
+def save_image_from_data(save_path, data, debug=True, vis=False):
     save_path = safepath(save_path)
     if debug:
         assert isimage(data), 'input data is not image format'
         assert is_path_exists_or_creatable(save_path), 'save path is not correct'
         mkdir_if_missing(save_path)
 
-    img = Image.fromarray(data)
-    if isgrayimage(data):
-        img = img.convert('L')
-    img.save(save_path)
+    imsave(save_path, data)
