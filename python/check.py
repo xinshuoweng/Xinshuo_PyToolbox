@@ -52,6 +52,21 @@ def isgrayimage(image_test):
 def isimage(image_test):
     return iscolorimage(image_test) or isgrayimage(image_test)
 
+def isscaledimage(image_test):
+    if not isimage(image_test):
+        return False
+    max_value = np.max(image_test)
+    min_value = np.min(image_test)
+    assert min_value >= 0, 'image value is not correct'
+    assert max_value >= 0, 'image value is not correct' 
+    if max_value > 1 and max_value < 255:
+        print('input image is raw image in [0, 255]')
+        return False
+    elif max_value <= 1:
+        return True
+    else:
+        assert False, 'Unknown error'
+
 def is_path_valid(pathname):
     '''
     `True` if the passed pathname is a valid pathname for the current OS;

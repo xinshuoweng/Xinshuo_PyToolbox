@@ -22,7 +22,10 @@ def visualize_save_image(image, vis=True, save=False, save_path=None, debug=True
         index = 0
         for image_tmp in imagelist:
             print('processing %d/%d' % (index+1, len(imagelist)))
-            visualize_save_image(image_tmp, vis, save_path[i], save)
+            if save:
+                visualize_save_image(image_tmp, vis=vis, save_path=save_path[i], save=save, debug=debug)
+            else:
+                visualize_save_image(image_tmp, vis=vis, debug=debug)
             index += 1
         return
 
