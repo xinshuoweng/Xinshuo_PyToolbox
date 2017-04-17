@@ -221,5 +221,5 @@ def load_hdf5_data(hdf5_src, dataname):
     hdf5_file = h5py.File(hdf5_path_sample, 'r')
     datadict = dict()
     for dataset in dataname:
-        datadict[dataset] = hdf5_file[dataset]
+        datadict[dataset] = np.array(hdf5_file[dataset])
     return datadict
