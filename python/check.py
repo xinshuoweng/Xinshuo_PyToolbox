@@ -144,11 +144,12 @@ def isfolder(pathname):
         return False
 
 
-def safepath(pathname):
+def safepath(pathname, debug=True):
     '''
     convert path to a normal representation
     '''
-    assert is_path_valid(pathname), 'path is not valid'
+    if debug:
+        assert is_path_valid(pathname), 'path is not valid'
     return os.path.normpath(pathname)
 
 

@@ -16,7 +16,7 @@ from file_io import load_list_from_file, mkdir_if_missing, fileparts, load_list_
 from preprocess import preprocess_image_caffe
 from timer import Timer, format_time
 
-def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter='png', label_src1=None, label_name1='label', label_preprocess_function1=identity, label_src2=None, label_name2='label2', label_preprocess_function2=identity, debug=True, vis=True):
+def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter='png', label_src1=None, label_name1='label', label_preprocess_function1=identity, label_range1=None, label_src2=None, label_name2='label2', label_preprocess_function2=identity, label_range2=None, debug=True, vis=True):
     '''
     # this function creates data in hdf5 format from a image path 
 
@@ -131,23 +131,27 @@ def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter
     # warm up
     size_data = datalist[0].shape
     datalist_batch = list()
+    if label_src1 is not None:
+        assert label_range1 is not None, 'label range is not correct'
     if labeldict1 is not None:
         assert isstring(label_name1), 'label name is not correct'
         labels1 = np.zeros((batch_size, 1), dtype='float32')
-        label_value1 = [float(label_tmp_char) for label_tmp_char in labeldict1.values()]
-        label_range1 = np.array([min(label_value1), max(label_value1)])
+        # label_value1 = [float(label_tmp_char) for label_tmp_char in labeldict1.values()]
+        # label_range1 = np.array([min(label_value1), max(label_value1)])
     if labellist1 is not None:
         labels1 = np.zeros((batch_size, 1), dtype='float32')
-        label_range1 = [np.min(labellist1), np.max(labellist1)]
+        # label_range1 = [np.min(labellist1), np.max(labellist1)]
 
+    if label_src2 is not None:
+        assert label_range2 is not None, 'label range is not correct'
     if labeldict2 is not None:
         assert isstring(label_name2), 'label name is not correct'
         labels2 = np.zeros((batch_size, 1), dtype='float32')
-        label_value2 = [float(label_tmp_char) for label_tmp_char in labeldict2.values()]
-        label_range2 = np.array([min(label_value2), max(label_value2)])
+        # label_value2 = [float(label_tmp_char) for label_tmp_char in labeldict2.values()]
+        # label_range2 = np.array([min(label_value2), max(label_value2)])
     if labellist2 is not None:
         labels2 = np.zeros((batch_size, 1), dtype='float32')
-        label_range2 = [np.min(labellist2), np.max(labellist2)]
+        # label_range2 = [np.min(labellist2), np.max(labellist2)]
 
 
     # start generating
@@ -155,6 +159,8 @@ def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter
     clock = Timer()
     for i in xrange(num_data):
         clock.tic()
+        if filelist is not None:
+            _, name, _ = fileparts(filelist[i])
         if debug:
             assert size_data == datalist[i].shape
         datalist_batch.append(datalist[i])
@@ -162,7 +168,7 @@ def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter
         if labeldict1 is not None and labellist1 is None:
             if debug:
                 assert len(filelist) == len(labeldict1), 'file list is not equal to label dictionary'
-            _, name, _ = fileparts(filelist[i])
+            
             labels1[i % batch_size, 0] = float(labeldict1[name])
         elif labellist1 is not None and labeldict1 is None:
             labels1[i % batch_size, 0] = float(labellist1[i])
@@ -172,7 +178,6 @@ def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter
         if labeldict2 is not None and labellist2 is None:
             if debug:
                 assert len(filelist) == len(labeldict2), 'file list is not equal to label dictionary'
-            _, name, _ = fileparts(filelist[i])
             labels2[i % batch_size, 0] = float(labeldict2[name])
         elif labellist2 is not None and labeldict2 is None:
             labels2[i % batch_size, 0] = float(labellist2[i])
@@ -184,7 +189,10 @@ def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter
             data = preprocess_image_caffe(datalist_batch, debug=debug, vis=vis)   # swap channel, transfer from list of HxWxC to NxCxHxW
 
             # write to hdf5 format
-            save_path = os.path.join(save_dir, 'data_%010d.hdf5' % count_hdf)
+            if filelist is not None:
+                save_path = os.path.join(save_dir, '%s.hdf5' % name)
+            else:
+                save_path = os.path.join(save_dir, 'image_%010d.hdf5' % count_hdf)
             h5f = h5py.File(save_path, 'w')
             h5f.create_dataset(data_name, data=data, dtype='float32')
             if (labeldict1 is not None) or (labellist1 is not None):
@@ -205,15 +213,17 @@ def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter
         average_time = clock.toc()
         print('saving to %s: %d/%d, average time:%.3f, elapsed time:%s, estimated time remaining:%s' % (save_path, i+1, num_data, average_time, format_time(average_time*i), format_time(average_time*(num_data-i))))
 
-    
     return count_hdf-1, num_data
 
 
-
-def load_hdf5_data(hdf5_src, dataname):
-    assert is_path_exists(hdf5_src) and isfolder(hdf5_src), 'input hdf5 path does not exist'
-    assert islist(dataname), 'dataset queried is not correct'
-    assert all(isstring(dataset_tmp) for dataset_tmp in dataname), 'dataset queried is not correct'
+def rand_load_hdf5_from_folder(hdf5_src, dataname, debug=True):
+    '''
+    randomly load a single hdf5 file from a hdf5 folder
+    '''
+    if debug:
+        assert is_path_exists(hdf5_src) and isfolder(hdf5_src), 'input hdf5 path does not exist'
+        assert islist(dataname), 'dataset queried is not correct'
+        assert all(isstring(dataset_tmp) for dataset_tmp in dataname), 'dataset queried is not correct'
 
     hdf5list, num_hdf5_files = load_list_from_folder(folder_path=hdf5_src, ext_filter='.hdf5')
     check_index = random.randrange(0, num_hdf5_files)
@@ -222,4 +232,20 @@ def load_hdf5_data(hdf5_src, dataname):
     datadict = dict()
     for dataset in dataname:
         datadict[dataset] = np.array(hdf5_file[dataset])
+    return datadict
+
+
+def load_hdf5_file(hdf5_file, dataname, debug=True):
+    '''
+    load a single hdf5 file
+    '''
+    if debug:
+        assert is_path_exists(hdf5_file) and isfile(hdf5_file), 'input hdf5 path does not exist: %s' % hdf5_file
+        assert islist(dataname), 'dataset queried is not correct'
+        assert all(isstring(dataset_tmp) for dataset_tmp in dataname), 'dataset queried is not correct'
+
+    hdf5 = h5py.File(hdf5_file, 'r')
+    datadict = dict()
+    for dataset in dataname:
+        datadict[dataset] = np.array(hdf5[dataset])
     return datadict

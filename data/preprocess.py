@@ -3,6 +3,7 @@
 
 # this file contains function to preprocess data
 import numpy as np
+from numpy.testing import assert_almost_equal
 
 import __init__paths__
 from check import isnparray, iscolorimage, istuple, islist, CHECK_EQ_LIST, isimage, isgrayimage
@@ -30,6 +31,10 @@ def normalize_data(data, data_range=None, debug=True):
 
 	normalized_data = data - min_value
 	normalized_data = normalized_data / (max_value - min_value)
+
+	if debug:
+		unnormalized = unnormalize_data(data=normalized_data, data_range=(min_value, max_value), debug=False)
+		assert_almost_equal(data, unnormalized, decimal=6, err_msg='data is not correct: %f vs %f' % (data, unnormalized))
 	return normalized_data
 
 
@@ -46,8 +51,12 @@ def unnormalize_data(data, data_range, debug=True):
 			assert data_range.size == 2, 'data range is not correct'
 	max_value = data_range[1]
 	min_value = data_range[0]
+	unnormalized = data * (max_value - min_value) + min_value
 
-	return data * (max_value - min_value) + min_value
+	if debug:
+		normalized = normalize_data(data=unnormalized, data_range=data_range, debug=False)
+		assert_almost_equal(data, normalized, decimal=6, err_msg='data is not correct: %f vs %f' % (data, normalized))
+	return unnormalized
 
 
 def preprocess_image_caffe(image_datalist, debug=True, vis=True):

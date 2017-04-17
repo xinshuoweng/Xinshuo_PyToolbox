@@ -12,12 +12,12 @@ import time
 import __init__paths__
 from check import is_path_exists, isstring, is_path_exists_or_creatable, isfile, isfolder, isnparray, is_path_creatable, is_path_valid, safepath, islist, isimage, isgrayimage
 
-def fileparts(pathname):
+def fileparts(pathname, debug=True):
 	'''
 	this function return a tuple, which contains (directory, filename, extension)
 	if the file has multiple extension, only last one will be displayed
 	'''
-	pathname = safepath(pathname)
+	pathname = safepath(pathname, debug=debug)
 	if len(pathname) == 0:
 		return ('', '', '')
 	if pathname[-1] == '/':
