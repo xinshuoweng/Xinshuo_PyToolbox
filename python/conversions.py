@@ -4,7 +4,10 @@
 # this file define a set of functions which converting data type
 import os
 import numpy as np
-from check import isstring, isinteger, islist, is_path_valid
+import math
+
+from check import *
+
 
 ######################################################### string related #########################################################
 def character2onehot(character):
@@ -105,11 +108,33 @@ def str2float_from_list(str_list, debug=True):
 
 ######################################################### math related #########################################################
 def cart2pol_2d_degree(pts, debug=True):
-    rho = np.sqrt(x**2 + y**2)
-    phi = np.arctan2(y, x)
-    return (rho, phi)
+	'''
+	input a 2d point and convert to polar coordinate
 
-def pol2cart(rho, phi):
-    x = rho * np.cos(phi)
-    y = rho * np.sin(phi)
-    return (x, y)
+	return for degree: (-180, 180]
+	'''
+	if debug:
+		assert istuple(pts) or islist(pts) or isnparray(pts), 'input point is not correct'
+		assert np.array(pts).size == 2, 'input point is not 2d points'
+
+	x = pts[0]
+	y = pts[1]
+	rho = np.sqrt(x**2 + y**2)
+	phi = math.degrees(np.arctan2(y, x))
+	return (rho, phi)
+
+def pol2cart_2d_degree(pts, debug=True):
+	'''
+	input point: (rho, phi)
+
+	phi is in degree
+	'''
+	if debug:
+		assert istuple(pts) or islist(pts) or isnparray(pts), 'input point is not correct'
+		assert np.array(pts).size == 2, 'input point is not 2d points'
+
+	rho = pts[0]
+	phi = math.radians(pts[1])
+	x = rho * np.cos(phi)
+	y = rho * np.sin(phi)
+	return (x, y)

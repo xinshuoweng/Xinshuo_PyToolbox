@@ -7,7 +7,7 @@ from numpy.testing import assert_almost_equal
 import __init__paths__
 from check import is2dline, is2dpts, isnparray
 
-
+################################################################## 2d geometry ##################################################################
 def get_line(pts, slope, debug=True):
     '''
     # slope is the angle in degree, this function takes a point and a
@@ -65,6 +65,7 @@ def get_intersection(line1, line2, debug=True):
         assert_almost_equal(x*line2[0] + y*line2[1] + 1, 0, err_msg='Intersection point is not on the line')
     return np.array([x, y], dtype=float)
 
+################################################################## image related ##################################################################
 # convert the point coordinate in the image to the general coordinate, y axis is inverse
 def convert_pts(pts, debug=True):
     if debug:
@@ -78,3 +79,5 @@ def convert_pts_back2image(pts, debug=True):
         print('debug mode is on during convert_pts_back2image function. Please turn off after debuging')
         assert is2dpts(pts), 'point is not correct'
     return np.array([pts[0], -pts[1]], dtype=float)
+
+

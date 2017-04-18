@@ -20,7 +20,7 @@ def isnparray(nparray_test):
 	return isinstance(nparray_test, np.ndarray)
 
 def istuple(tuple_test):
-	return isinstance(tuple_test, np.ndarray)
+	return isinstance(tuple_test, tuple)
 
 def is2dline(line_test):
 	return (isnparray(line_test) or islist(line_test) or istuple(line_test)) and len(line_test) == 3
