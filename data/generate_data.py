@@ -49,32 +49,12 @@ def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter
         filelist = None
     else:
         assert False, 'data source format is not correct.'
-    if filelist is not None and datalist is None:
-        num_images = len(filelist)
-        print('loading %d images from list........' % num_images)
-        if debug:
-            assert islist(filelist), 'file list is not correct'
-        datalist = list()
-
-        # read image from list of path and become a list of image numpy array data
-        index_img = 1
-        clock = Timer()
-        for imagefile in filelist:
-            clock.tic()
-            img = imread(imagefile).astype('float32')
-            max_value = np.max(img)
-            if max_value > 1 and max_value <= 255:
-                img = img / 255.0   # [rows,col,channel,numbers], scale the image data to (0, 1)
-
-            if debug:
-                min_value = np.min(img)
-                assert min_value >= 0 and min_value <= 1, 'data is not in [0, 1]'
-            datalist.append(img)
-            average_time = clock.toc()
-            print('loading images %d/%d: %s, average time:%.3f, elapsed time:%s, estimated time remaining:%s' % (index_img, num_images, imagefile, average_time, format_time(average_time*index_img), format_time(average_time*(num_images-index_img))))
-            index_img += 1
     if debug:
-        assert len(datalist) == num_data, 'number of data is not equal'
+        assert (datalist is None and filelist is not None) or (filelist is None and datalist is not None), 'data is not correct'
+        if datalist is not None:
+            assert len(datalist) == num_data, 'number of data is not equal'
+        if filelist is not None:
+            assert len(filelist) == num_data, 'number of data is not equal'    
 
     # convert label source to a list of numpy array label
     if label_src1 is None:
@@ -167,10 +147,20 @@ def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter
     for i in xrange(num_data):
         clock.tic()
         if filelist is not None:
-            _, name, _ = fileparts(filelist[i])
+            imagefile = filelist[i]
+            _, name, _ = fileparts(imagefile)
+            img = imread(imagefile).astype('float32')
+            max_value = np.max(img)
+            if max_value > 1 and max_value <= 255:
+                img = img / 255.0   # [rows,col,channel,numbers], scale the image data to (0, 1)
+            if debug:
+                min_value = np.min(img)
+                assert min_value >= 0 and min_value <= 1, 'data is not in [0, 1]'
+        if datalist is not None:
+            img = datalist[i]
         if debug:
-            assert size_data == datalist[i].shape
-        datalist_batch.append(datalist[i])
+            assert size_data == img.shape
+        datalist_batch.append(img)
 
         if labeldict1 is not None and labellist1 is None:
             if debug:
