@@ -33,12 +33,12 @@ def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter
     assert isstring(data_name), 'dataset name is not correct'   # name for hdf5 data
 
     # convert data source to a list of numpy array image data
-    if isfolder(data_src):
-        if debug:
-            print 'data is loading from %s with extension .%s' % (data_src, ext_filter)
+    if isfolder(data_src):    
+        print 'data is loading from %s with extension .%s' % (data_src, ext_filter)
         filelist, num_data = load_list_from_folder(data_src, ext_filter=ext_filter)
         datalist = None
     elif isfile(data_src):
+        print 'data is loading from %s with extension .%s' % (data_src, ext_filter)
         filelist, num_data = load_list_from_file(data_src)
         datalist = None
     elif islist(data_src):
@@ -50,12 +50,17 @@ def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter
     else:
         assert False, 'data source format is not correct.'
     if filelist is not None and datalist is None:
+        num_images = len(filelist)
+        print('loading %d images from list........' % num_images)
         if debug:
             assert islist(filelist), 'file list is not correct'
         datalist = list()
 
         # read image from list of path and become a list of image numpy array data
+        index_img = 1
+        clock = Timer()
         for imagefile in filelist:
+            clock.tic()
             img = imread(imagefile).astype('float32')
             max_value = np.max(img)
             if max_value > 1 and max_value <= 255:
@@ -65,6 +70,9 @@ def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter
                 min_value = np.min(img)
                 assert min_value >= 0 and min_value <= 1, 'data is not in [0, 1]'
             datalist.append(img)
+            average_time = clock.toc()
+            print('loading images %d/%d: %s, average time:%.3f, elapsed time:%s, estimated time remaining:%s' % (index_img, num_images, imagefile, average_time, format_time(average_time*index_img), format_time(average_time*(num_images-index_img))))
+            index_img += 1
     if debug:
         assert len(datalist) == num_data, 'number of data is not equal'
 
