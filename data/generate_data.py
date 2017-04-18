@@ -16,7 +16,7 @@ from file_io import load_list_from_file, mkdir_if_missing, fileparts, load_list_
 from preprocess import preprocess_image_caffe
 from timer import Timer, format_time
 
-def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter='png', label_src1=None, label_name1='label', label_preprocess_function1=identity, label_range1=None, label_src2=None, label_name2='label2', label_preprocess_function2=identity, label_range2=None, debug=True, vis=True):
+def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter='png', label_src1=None, label_name1='label', label_preprocess_function1=identity, label_range1=None, label_src2=None, label_name2='label2', label_preprocess_function2=identity, label_range2=None, debug=True, vis=False):
     '''
     # this function creates data in hdf5 format from a image path 
 
