@@ -9,6 +9,14 @@ import __init__paths__
 from check import isnparray, iscolorimage, istuple, islist, CHECK_EQ_LIST, isimage, isgrayimage
 from visualize import visualize_save_image
 
+
+def identity(data, data_range=None, debug=True):
+    if debug:
+        print('debug mode is on during identity function. Please turn off after debuging')
+        assert isnparray(data), 'data is not correct'
+    return data
+    
+
 def normalize_data(data, data_range=None, debug=True):
 	'''
 	this function normalizes 1-d label to 0-1

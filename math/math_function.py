@@ -7,11 +7,6 @@ from numpy.testing import assert_almost_equal
 import __init__paths__
 from check import is2dline, is2dpts, isnparray
 
-def identity(data, data_range=None, debug=True):
-    if debug:
-        print('debug mode is on during identity function. Please turn off after debuging')
-        assert isnparray(data), 'data is not correct'
-    return data
 
 def get_line(pts, slope, debug=True):
     '''
