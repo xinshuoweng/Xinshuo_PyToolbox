@@ -65,19 +65,36 @@ def get_intersection(line1, line2, debug=True):
         assert_almost_equal(x*line2[0] + y*line2[1] + 1, 0, err_msg='Intersection point is not on the line')
     return np.array([x, y], dtype=float)
 
-################################################################## image related ##################################################################
-# convert the point coordinate in the image to the general coordinate, y axis is inverse
-def convert_pts(pts, debug=True):
+
+################################################################## coordinates ##################################################################
+def cart2pol_2d_degree(pts, debug=True):
+    '''
+    input a 2d point and convert to polar coordinate
+
+    return for degree: (-180, 180]
+    '''
     if debug:
-        print('debug mode is on during convert_pts function. Please turn off after debuging')
-        assert is2dpts(pts), 'point is not correct'
-    return np.array([pts[0], -pts[1]], dtype=float)
+        assert istuple(pts) or islist(pts) or isnparray(pts), 'input point is not correct'
+        assert np.array(pts).size == 2, 'input point is not 2d points'
 
-# convert the point from general coordinate to image coordinate
-def convert_pts_back2image(pts, debug=True):
+    x = pts[0]
+    y = pts[1]
+    rho = np.sqrt(x**2 + y**2)
+    phi = math.degrees(np.arctan2(y, x))
+    return (rho, phi)
+
+def pol2cart_2d_degree(pts, debug=True):
+    '''
+    input point: (rho, phi)
+
+    phi is in degree
+    '''
     if debug:
-        print('debug mode is on during convert_pts_back2image function. Please turn off after debuging')
-        assert is2dpts(pts), 'point is not correct'
-    return np.array([pts[0], -pts[1]], dtype=float)
+        assert istuple(pts) or islist(pts) or isnparray(pts), 'input point is not correct'
+        assert np.array(pts).size == 2, 'input point is not 2d points'
 
-
+    rho = pts[0]
+    phi = math.radians(pts[1])
+    x = rho * np.cos(phi)
+    y = rho * np.sin(phi)
+    return (x, y)

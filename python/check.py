@@ -23,10 +23,10 @@ def istuple(tuple_test):
 	return isinstance(tuple_test, tuple)
 
 def is2dline(line_test):
-	return (isnparray(line_test) or islist(line_test) or istuple(line_test)) and len(line_test) == 3
+	return (isnparray(line_test) or islist(line_test) or istuple(line_test)) and np.array(line_test).size == 3
 
 def is2dpts(pts_test):
-	return (isnparray(pts_test) or islist(pts_test) or istuple(pts_test)) and len(pts_test) == 2
+	return (isnparray(pts_test) or islist(pts_test) or istuple(pts_test)) and np.array(pts_test).size == 2
 
 def isfunction(func_test):
 	return callable(func_test)

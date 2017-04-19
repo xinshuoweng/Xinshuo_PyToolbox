@@ -104,37 +104,3 @@ def str2float_from_list(str_list, debug=True):
 		str_list = filter(None, str_list)
 	return [float(str_tmp) for str_tmp in str_list]
 
-
-
-######################################################### math related #########################################################
-def cart2pol_2d_degree(pts, debug=True):
-	'''
-	input a 2d point and convert to polar coordinate
-
-	return for degree: (-180, 180]
-	'''
-	if debug:
-		assert istuple(pts) or islist(pts) or isnparray(pts), 'input point is not correct'
-		assert np.array(pts).size == 2, 'input point is not 2d points'
-
-	x = pts[0]
-	y = pts[1]
-	rho = np.sqrt(x**2 + y**2)
-	phi = math.degrees(np.arctan2(y, x))
-	return (rho, phi)
-
-def pol2cart_2d_degree(pts, debug=True):
-	'''
-	input point: (rho, phi)
-
-	phi is in degree
-	'''
-	if debug:
-		assert istuple(pts) or islist(pts) or isnparray(pts), 'input point is not correct'
-		assert np.array(pts).size == 2, 'input point is not 2d points'
-
-	rho = pts[0]
-	phi = math.radians(pts[1])
-	x = rho * np.cos(phi)
-	y = rho * np.sin(phi)
-	return (x, y)

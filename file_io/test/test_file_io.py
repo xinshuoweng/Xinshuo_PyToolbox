@@ -1,7 +1,5 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
-
-# this file contains a set of function for manipulating file io in python
 import os, sys
 import pytest
 
