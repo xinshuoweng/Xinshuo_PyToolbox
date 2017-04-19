@@ -144,7 +144,7 @@ def nearest_neighbor_visualization(featuremap_dict, num_neighbor=5, top_number=5
     if debug:
         print selected_nearest_id
 
-    if vis:
+    if save:
         fig, axarray = plt.subplots(top_number, num_neighbor)
         for index in range(top_number):
             for nearest_index in range(num_neighbor):
@@ -153,7 +153,10 @@ def nearest_neighbor_visualization(featuremap_dict, num_neighbor=5, top_number=5
                     print('loading image from %s'%img_path)
                 img = imread(img_path)
                 axarray[index, nearest_index].imshow(img)
-        plt.show()
+
+        fig.savefig(nn_save_folder, transparent=True)
+        if vis:
+            plt.show()
         plt.close(fig)
 
     # save top visualization to the folder
