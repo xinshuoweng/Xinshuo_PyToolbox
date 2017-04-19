@@ -116,34 +116,43 @@ def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter
 
 
     # warm up
-    size_data = datalist[0].shape
-    datalist_batch = list()
-    if label_src1 is not None:
-        assert label_range1 is not None, 'label range is not correct'
+    if datalist is not None:
+        size_data = datalist[0].shape
+    else:
+        size_data = imread(filelist[0]).shape
+
+
     if labeldict1 is not None:
-        assert isstring(label_name1), 'label name is not correct'
+        if debug:
+            assert isstring(label_name1), 'label name is not correct'
         labels1 = np.zeros((batch_size, 1), dtype='float32')
         # label_value1 = [float(label_tmp_char) for label_tmp_char in labeldict1.values()]
         # label_range1 = np.array([min(label_value1), max(label_value1)])
     if labellist1 is not None:
         labels1 = np.zeros((batch_size, 1), dtype='float32')
         # label_range1 = [np.min(labellist1), np.max(labellist1)]
+    if label_src1 is not None and debug:
+        assert label_range1 is not None, 'label range is not correct'
+        assert (labeldict1 is not None and labellist1 is None) or (labellist1 is not None and labeldict1 is None), 'label is not correct'
 
-    if label_src2 is not None:
-        assert label_range2 is not None, 'label range is not correct'
+
     if labeldict2 is not None:
-        assert isstring(label_name2), 'label name is not correct'
+        if debug:
+            assert isstring(label_name2), 'label name is not correct'
         labels2 = np.zeros((batch_size, 1), dtype='float32')
         # label_value2 = [float(label_tmp_char) for label_tmp_char in labeldict2.values()]
         # label_range2 = np.array([min(label_value2), max(label_value2)])
     if labellist2 is not None:
         labels2 = np.zeros((batch_size, 1), dtype='float32')
         # label_range2 = [np.min(labellist2), np.max(labellist2)]
-
+    if label_src2 is not None and debug:
+        assert label_range2 is not None, 'label range is not correct'
+        assert (labeldict2 is not None and labellist2 is None) or (labellist2 is not None and labeldict2 is None), 'label is not correct'
 
     # start generating
     count_hdf = 1       # count number of hdf5 file
     clock = Timer()
+    datalist_batch = list()
     for i in xrange(num_data):
         clock.tic()
         if filelist is not None:
@@ -162,26 +171,22 @@ def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter
             assert size_data == img.shape
         datalist_batch.append(img)
 
-        if labeldict1 is not None and labellist1 is None:
+        # process label
+        if labeldict1 is not None:
             if debug:
                 assert len(filelist) == len(labeldict1), 'file list is not equal to label dictionary'
             
             labels1[i % batch_size, 0] = float(labeldict1[name])
-        elif labellist1 is not None and labeldict1 is None:
+        if labellist1 is not None:
             labels1[i % batch_size, 0] = float(labellist1[i])
-        else:
-            assert False, 'label is not correct'
-
-        if labeldict2 is not None and labellist2 is None:
+        if labeldict2 is not None:
             if debug:
                 assert len(filelist) == len(labeldict2), 'file list is not equal to label dictionary'
             labels2[i % batch_size, 0] = float(labeldict2[name])
-        elif labellist2 is not None and labeldict2 is None:
+        if labellist2 is not None:
             labels2[i % batch_size, 0] = float(labellist2[i])
-        else:
-            assert False, 'label is not correct'
 
-
+        # save to hdf5
         if i % batch_size == 0:
             data = preprocess_image_caffe(datalist_batch, debug=debug, vis=vis)   # swap channel, transfer from list of HxWxC to NxCxHxW
 
