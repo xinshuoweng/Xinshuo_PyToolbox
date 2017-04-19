@@ -160,3 +160,18 @@ def CHECK_EQ_LIST(input_list):
 	assert islist(input_list), 'input is not a list'
 	return input_list[1:] == input_list[:-1]
 
+
+def CHECK_EQ_DICT(input_dict1, input_dict2):
+    '''
+    check all elements in a list are equal
+    '''
+    assert isdict(input_dict1) and isdict(input_dict2), 'input is not a dictionary'
+    assert len(input_dict1) == len(input_dict2), 'length of input dictionary is not equal'
+
+    for key, value in input_dict1.items():
+        if input_dict2.has_key(key) and input_dict2[key] == value:
+            continue
+        else:
+            return False
+    return True
+

@@ -121,6 +121,7 @@ def nearest_neighbor_visualization(featuremap_dict, num_neighbor=5, top_number=5
         assert list(nearest_id[:, 0]) == id_list, 'nearest neighbor has problem'
     
     # sort the feature based on distance
+    print('sorting the feature based on distance')
     featuremap_distance = np.sum(distances, axis=1)
     if debug:
         assert featuremap_distance.shape == (num_features, ), 'distance is not correct'

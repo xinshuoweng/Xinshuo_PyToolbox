@@ -5,6 +5,7 @@
 import os
 import numpy as np
 import math
+from itertools import islice
 
 from check import *
 
@@ -104,3 +105,15 @@ def str2float_from_list(str_list, debug=True):
 		str_list = filter(None, str_list)
 	return [float(str_tmp) for str_tmp in str_list]
 
+
+
+######################################################### miscellaneous #########################################################
+def get_subdict(dictionary, num, debug=True):	
+	if debug:
+		assert isdict(dictionary), 'dictionary is not correct'
+		assert num > 0 and isinteger(num) and num <= len(dictionary), 'number of sub-dictionary is not correct'
+
+	def take(num, iterable):
+		return dict(islice(iterable, num))
+
+	return take(num, dictionary.iteritems())
