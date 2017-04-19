@@ -8,10 +8,13 @@
 %       output image has specific height and width
 %       2. rect = [xmin, ymin, width, height], then crop image within 
 %       specific rectangular region
-function cropped = crop_center(img, rect)
-    img = isImageorPath(img)
-    assert(length(rect) == 2 || length(rect) == 4, 'the format of rect is wrong');
-    assert(~iscell(rect), 'The input of rectangular should be a matrix.');
+function cropped = crop_center(img, rect, debug_mode)
+    if debug_mode
+        img = isImageorPath(img);
+        assert(length(rect) == 2 || length(rect) == 4, 'the format of rect is wrong');
+        assert(~iscell(rect), 'The input of rectangular should be a matrix.');
+    end
+
     %% crop the specific region
     if length(rect) == 4
         xmin = rect(1);

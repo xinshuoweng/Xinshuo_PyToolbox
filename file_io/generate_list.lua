@@ -25,7 +25,7 @@ if save_path == nil then
 	save_path = './'
 end
 if filter == nil then
-	filter = 'png'
+	filter = 'jpg'
 end
 
 -- generate data list

@@ -66,7 +66,7 @@ def visualize_save_image(image, vis=True, save=False, save_path=None, debug=True
 
 
 
-def nearest_neighbor_visualization(featuremap_dict, num_neighbor=5, top_number=5, vis=True, save=False, csv_save_path=None, img_src_folder=None, ext_filter='.jpg', nn_save_folder=None, debug=True):
+def nearest_neighbor_visualization(featuremap_dict, num_neighbor=5, top_number=5, vis=True, save=False, csv_save_path=None, save_thumb_name='nearest_neighbor.png', img_src_folder=None, ext_filter='.jpg', nn_save_folder=None, debug=True):
     '''
     visualize nearest neighbor for featuremap from images
 
@@ -90,6 +90,7 @@ def nearest_neighbor_visualization(featuremap_dict, num_neighbor=5, top_number=5
                 assert is_path_exists(img_src_folder), 'source folder for image is not correct'
                 assert all(isstring(path_tmp) for path_tmp in featuremap_dict.keys())     # key should be the path for the image
                 assert is_path_exists_or_creatable(nn_save_folder), 'folder to save top visualized images is not correct'
+                assert isstring(save_thumb_name), 'name of thumbnail is not correct'
     if ext_filter.find('.') == -1:
         ext_filter = '.%s' % ext_filter
 
@@ -158,7 +159,7 @@ def nearest_neighbor_visualization(featuremap_dict, num_neighbor=5, top_number=5
                 else:
                     assert False, 'unknown error'
                 axarray[index, nearest_index].axis('off')
-        save_thumb = os.path.join(nn_save_folder, 'pool5_nearest_neighbor.png')
+        save_thumb = os.path.join(nn_save_folder, save_thumb_name)
         fig.savefig(save_thumb)
         if vis:
             plt.show()
