@@ -153,6 +153,7 @@ def nearest_neighbor_visualization(featuremap_dict, num_neighbor=5, top_number=5
                 if debug:
                     print('loading image from %s'%img_path)
                 img = imread(img_path)
+                axarray[index, nearest_index].axis('off')
                 if isgrayimage(img):
                     axarray[index, nearest_index].imshow(img, interpolation='nearest', cmap='gray')
                 elif iscolorimage(img):
