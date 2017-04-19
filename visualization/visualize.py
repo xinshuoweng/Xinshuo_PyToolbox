@@ -142,8 +142,6 @@ def nearest_neighbor_visualization(featuremap_dict, num_neighbor=5, top_number=5
         for i in range(num_features-1):
             assert featuremap_distance[sorted_indices[i]] < featuremap_distance[sorted_indices[i+1]], 'feature map is not well sorted based on distance' 
     selected_nearest_id = nearest_id[selected_sorted_indices, :]
-    if debug:
-        print selected_nearest_id
 
     if save:
         fig, axarray = plt.subplots(top_number, num_neighbor)
