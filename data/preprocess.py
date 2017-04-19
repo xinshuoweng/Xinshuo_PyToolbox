@@ -134,7 +134,7 @@ def unpreprocess_image_caffe(image_datablob, debug=True):
 		assert image_datablob.shape[1] == 1 or image_datablob.shape[1] == 3, 'this is not an blob of image, channel is not 1 or 3'
 
 	image_datablob = np.transpose(image_datablob, (0, 2, 3, 1))         # permute to [batch, height, weight, channel]	
-	if image_datablob.shape[1] == 3:
+	if image_datablob.shape[-1] == 3:	# channel dimension
 		image_datablob = image_datablob[:, :, :, [2, 1, 0]]             # from bgr to rgb for color image
 	image_data_list = list()
 	for i in xrange(image_datablob.shape[0]):
