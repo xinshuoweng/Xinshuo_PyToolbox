@@ -79,7 +79,7 @@ def mkdir_if_missing(pathname):
 		os.mkdir(pathname)
 
 
-def generate_list_from_folder(save_path, src_path, ext_filter=None):
+def generate_list_from_folder(save_path, src_path, ext_filter='jpg'):
 	save_path = safepath(save_path)
 	src_path = safepath(src_path)
 	assert isfolder(src_path) and is_path_exists(src_path), 'source folder not found or incorrect'
