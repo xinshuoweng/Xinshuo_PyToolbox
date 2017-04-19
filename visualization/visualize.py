@@ -152,9 +152,15 @@ def nearest_neighbor_visualization(featuremap_dict, num_neighbor=5, top_number=5
                 if debug:
                     print('loading image from %s'%img_path)
                 img = imread(img_path)
-                axarray[index, nearest_index].imshow(img)
+                if isgrayimage(img):
+                    axarray[index, nearest_index].imshow(img, interpolation='nearest', cmap='gray')
+                elif iscolorimage(img):
+                    axarray[index, nearest_index].imshow(img, interpolation='nearest')
+                else:
+                    assert False, 'unknown error'
 
-        fig.savefig(nn_save_folder, transparent=True)
+        save_thumb = os.path.join(nn_save_folder, 'pool5_nearest_neighbor.png')
+        fig.savefig(save_thumb, transparent=True)
         if vis:
             plt.show()
         plt.close(fig)
@@ -163,9 +169,11 @@ def nearest_neighbor_visualization(featuremap_dict, num_neighbor=5, top_number=5
     if save and nn_save_folder is not None:
         for top_index in range(top_number):
             file_list = selected_nearest_id[top_index]
-            save_subfolder = os.path.join(nn_save_folder, '%s%s'%(filename, ext_filter))
-            if debug:
-                mkdir_if_missing(save_subfolder)
+            save_subfolder = os.path.join(nn_save_folder, file_list[0])
+            mkdir_if_missing(save_subfolder)
             for file_tmp in file_list:
-                file_tmp = os.path.join(img_src_folder, '%s%s'%(file_tmp, ext_filter))
-                shutil.copy(file_tmp, save_subfolder)
+                file_src = os.path.join(img_src_folder, '%s%s'%(file_tmp, ext_filter))
+                save_path = os.path.join(save_subfolder, '%s%s'%(file_tmp, ext_filter))
+                if debug:
+                    print('saving %s to %s' % (file_src, save_path))
+                shutil.copyfile(file_src, save_path)
