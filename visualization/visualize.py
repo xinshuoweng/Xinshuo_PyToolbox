@@ -2,10 +2,13 @@
 # email: xinshuo.weng@gmail.com
 import matplotlib.pyplot as plt
 import numpy as np
+import shutil
+from sklearn.neighbors import NearestNeighbors
+from scipy.misc import imread
 
 import __init__paths__
-from check import isimage, is_path_exists_or_creatable, isfile, islist, isnparray, isgrayimage, iscolorimage
-from file_io import mkdir_if_missing
+from check import *
+from file_io import mkdir_if_missing, fileparts
 
 def visualize_save_image(image, vis=True, save=False, save_path=None, debug=True):
     if islist(image):
@@ -60,3 +63,106 @@ def visualize_save_image(image, vis=True, save=False, save_path=None, debug=True
         plt.show()
 
     plt.close(fig)
+
+
+
+def nearest_neighbor_visualization(featuremap_dict, num_neighbor=5, top_number=5, vis=True, save=False, csv_save_path=None, img_src_folder=None, ext_filter='.jpg', nn_save_folder=None, debug=True):
+    '''
+    visualize nearest neighbor for featuremap from images
+
+    parameter:
+        featuremap_dict: a dictionary contains image path as key, and featuremap as value, the featuremap needs to be numpy array with any shape. No flatten needed
+        num_neighbor: number of neighbor to visualize, the first nearest is itself
+        top_number: number of top to visualize, since there might be tons of featuremap (length of dictionary), we choose the top ten with lowest distance with their nearest neighbor
+        csv_save_path: path to save .csv file which contains indices and distance array for all elements
+        nn_save_folder: save the nearest neighbor images for top featuremap
+    '''
+    print('processing feature map to nearest neightbor.......')
+    if debug:
+        assert isdict(featuremap_dict), 'featuremap should be dictionary'
+        assert all(isnparray(featuremap_tmp) for featuremap_tmp in featuremap_dict.values()), 'value of dictionary should be numpy array'
+        assert isinteger(num_neighbor) and num_neighbor > 1, 'number of neighborhodd is an integer larger than 1'
+        if save:
+            if csv_save_path is not None:
+                assert is_path_exists_or_creatable(csv_save_path), 'path to save .csv file is not correct'
+            if nn_save_folder is not None:  # save image directly
+                assert isstring(ext_filter), 'extension filter is not correct'
+                assert is_path_exists(img_src_folder), 'source folder for image is not correct'
+                assert all(isstring(path_tmp) for path_tmp in featuremap_dict.keys())     # key should be the path for the image
+                assert is_path_exists_or_creatable(nn_save_folder), 'folder to save top visualized images is not correct'
+    if ext_filter.find('.') == -1:
+        ext_filter = '.%s' % ext_filter
+
+    # flatten the feature map
+    nn_feature_dict = dict()
+    for key, featuremap_tmp in featuremap_dict.items():
+        nn_feature_dict[key] = featuremap_tmp.flatten()
+    num_features = len(nn_feature_dict)
+
+    # nearest neighbor
+    featuremap = np.array(nn_feature_dict.values())
+    nearbrs = NearestNeighbors(n_neighbors=num_neighbor, algorithm='ball_tree').fit(featuremap)
+    distances, indices = nearbrs.kneighbors(featuremap)
+    
+    if debug:
+        assert featuremap.shape[0] == num_features, 'shape of feature map is not correct'
+        assert indices.shape == (num_features, num_neighbor), 'shape of indices is not correct'
+        assert distances.shape == (num_features, num_neighbor), 'shape of indices is not correct'
+
+    # convert the nearest indices for all featuremap to the key accordingly
+    id_list = nn_feature_dict.keys()
+    max_length = len(max(id_list, key=len))     # find the maximum length of string in the key
+    nearest_id = np.chararray(indices.shape, itemsize=max_length+1)
+    for x in range(nearest_id.shape[0]):
+        for y in range(nearest_id.shape[1]):
+            nearest_id[x, y] = id_list[indices[x, y]]
+
+    if debug:
+        assert list(nearest_id[:, 0]) == id_list, 'nearest neighbor has problem'
+    
+    # sort the feature based on distance
+    featuremap_distance = np.sum(distances, axis=1)
+    if debug:
+        assert featuremap_distance.shape == (num_features, ), 'distance is not correct'
+    sorted_indices = np.argsort(featuremap_distance)
+
+
+    # save to the csv file
+    if save and csv_save_path is not None:
+        print 'Saving nearest neighbor result as .csv to path: %s' % csv_save_path
+        with open(csv_save_path, 'w+') as file:
+            np.savetxt(file, distances, delimiter=',', fmt='%f')
+            np.savetxt(file, nearest_id[sorted_indices, :], delimiter=',', fmt='%s')
+            file.close()
+
+    # choose the best to visualize
+    selected_sorted_indices = sorted_indices[0:top_number]
+    if debug:
+        for i in range(num_features-1):
+            assert featuremap_distance[sorted_indices[i]] < featuremap_distance[sorted_indices[i+1]], 'feature map is not well sorted based on distance' 
+    selected_nearest_id = nearest_id[selected_sorted_indices, :]
+    if debug:
+        print selected_nearest_id
+
+    if vis:
+        fig, axarray = plt.subplots(top_number, num_neighbor)
+        for index in range(top_number):
+            for nearest_index in range(num_neighbor):
+                img_path = os.path.join(img_src_folder, '%s%s'%(selected_nearest_id[index, nearest_index], ext_filter))
+                if debug:
+                    print('loading image from %s'%img_path)
+                img = imread(img_path)
+                axarray[index, nearest_index].imshow(img)
+        plt.show()
+        plt.close(fig)
+
+    # save top visualization to the folder
+    if save and nn_save_folder is not None:
+        for top_index in range(top_number):
+            file_list = selected_nearest_id[top_index]
+            save_subfolder = os.path.join(nn_save_folder, '%s%s'%(filename, ext_filter))
+            if debug:
+                mkdir_if_missing(save_subfolder)
+            for file_tmp in file_list:
+                file_tmp = os.path.join(img_src_folder, '%s%s'%(file_tmp, ext_filter))
+                shutil.copy(file_tmp, save_subfolder)
