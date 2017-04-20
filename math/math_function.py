@@ -5,7 +5,7 @@ import numpy as np
 from numpy.testing import assert_almost_equal
 
 import __init__paths__
-from check import is2dline, is2dpts, isnparray
+from check import *
 
 ################################################################## 2d geometry ##################################################################
 def get_line(pts, slope, debug=True):

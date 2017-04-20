@@ -67,7 +67,7 @@ def unnormalize_data(data, data_range, debug=True):
 	return unnormalized
 
 
-def preprocess_image_caffe(image_datalist, debug=True, vis=True):
+def preprocess_image_caffe(image_datalist, debug=True, vis=False):
 	'''
 	this function preprocesses image for caffe only,
 	including transfer from rgb to bgr

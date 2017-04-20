@@ -45,10 +45,16 @@ def visualize_save_image(image, vis=True, save=False, save_path=None, debug=True
     ax = fig.add_axes([0, 0, 1, 1])
     ax.axis('off')
     if iscolorimage(image):
+        if debug:
+            print 'visualizing color image'
         ax.imshow(image, interpolation='nearest')
     elif isgrayimage(image):
+        if debug:
+            print 'visualizing grayscale image'
         if image.ndim == 3 and image.shape[-1] == 1:
             image = np.reshape(image, image.shape[:-1])
+
+        print image
         ax.imshow(image, interpolation='nearest', cmap='gray')
     else:
         assert False, 'image is not correct'
