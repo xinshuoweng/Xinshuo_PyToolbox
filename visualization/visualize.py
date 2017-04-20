@@ -5,6 +5,7 @@ import numpy as np
 import shutil
 from sklearn.neighbors import NearestNeighbors
 from scipy.misc import imread
+import sys
 
 import __init__paths__
 from check import *
@@ -40,10 +41,11 @@ def visualize_save_image(image, vis=True, save=False, save_path=None, debug=True
     width = image.shape[1]
     height = image.shape[0]
     figsize = width / float(dpi), height / float(dpi)
-
     fig = plt.figure(figsize=figsize)
     ax = fig.add_axes([0, 0, 1, 1])
     ax.axis('off')
+
+
     if iscolorimage(image):
         if debug:
             print 'visualizing color image'
@@ -54,6 +56,14 @@ def visualize_save_image(image, vis=True, save=False, save_path=None, debug=True
         if image.ndim == 3 and image.shape[-1] == 1:
             image = np.reshape(image, image.shape[:-1])
 
+        if isfloatimage(image) and all(item == 1.0 for item in image.flatten().tolist()):
+            if debug:
+                print('all elements in image are 1. For visualizing, we subtract the top left with an epsilon value')
+            image[0, 0] -= 0.00001
+        elif isuintimage(image) and all(item == 255 for item in image.flatten().tolist()):
+            if debug:
+                print('all elements in image are 255. For visualizing, we subtract the top left with an epsilon value')
+            image[0, 0] -= 1
         ax.imshow(image, interpolation='nearest', cmap='gray')
     else:
         assert False, 'image is not correct'

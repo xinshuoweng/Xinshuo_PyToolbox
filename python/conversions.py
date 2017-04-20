@@ -106,8 +106,17 @@ def str2float_from_list(str_list, debug=True):
 	return [float(str_tmp) for str_tmp in str_list]
 
 
+def float2percent(number, debug=True):
+	'''
+	convert a floating number to a string representing percentage
+	'''
+	try:
+		number = float(number)
+	except ValueError:
+		print('could not convert to a floating number')
+	return '{:.1%}'.format(number)
 
-######################################################### miscellaneous #########################################################
+######################################################### data structure related #########################################################
 def get_subdict(dictionary, num, debug=True):	
 	if debug:
 		assert isdict(dictionary), 'dictionary is not correct'
@@ -117,3 +126,18 @@ def get_subdict(dictionary, num, debug=True):
 		return dict(islice(iterable, num))
 
 	return take(num, dictionary.iteritems())
+
+
+
+######################################################### data related #########################################################
+def get_subdict(dictionary, num, debug=True):	
+	if debug:
+		assert isdict(dictionary), 'dictionary is not correct'
+		assert num > 0 and isinteger(num) and num <= len(dictionary), 'number of sub-dictionary is not correct'
+
+	def take(num, iterable):
+		return dict(islice(iterable, num))
+
+	return take(num, dictionary.iteritems())
+
+

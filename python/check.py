@@ -49,8 +49,32 @@ def isgrayimage(image_test):
 
     return image_test.ndim == 2 or (image_test.ndim == 3 and image_test.shape[2] == 1)
 
+def isuintimage(image_test):
+    if not (isgrayimage(image_test) or iscolorimage(image_test)):
+        return False
+
+    if not image_test.dtype == 'uint8':
+        return False
+
+    if not all(item >= 0 and item <= 255 for item in image_test.flatten().tolist()):
+        return False
+
+    return True
+
+def isfloatimage(image_test):
+    if not (isgrayimage(image_test) or iscolorimage(image_test)):
+        return False
+
+    if not image_test.dtype == 'float32':
+        return False
+
+    if not all(item >= 0 and item <= 1 for item in image_test.flatten().tolist()):
+        return False
+
+    return True
+
 def isimage(image_test):
-    return iscolorimage(image_test) or isgrayimage(image_test)
+    return isfloatimage(image_test) or isuintimage(image_test)
 
 def isscaledimage(image_test):
     if not isimage(image_test):
