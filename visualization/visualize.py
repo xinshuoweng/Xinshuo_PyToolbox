@@ -54,7 +54,6 @@ def visualize_save_image(image, vis=True, save=False, save_path=None, debug=True
         if image.ndim == 3 and image.shape[-1] == 1:
             image = np.reshape(image, image.shape[:-1])
 
-        print image
         ax.imshow(image, interpolation='nearest', cmap='gray')
     else:
         assert False, 'image is not correct'

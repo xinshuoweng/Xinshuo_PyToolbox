@@ -114,7 +114,7 @@ def preprocess_image_caffe(image_datalist, debug=True, vis=False):
 			for index in xrange(caffe_input_data.shape[0]):
 				image_tmp_swapped = caffe_input_data[index]
 				print('\n\nPlease make sure the image is not RGB after swapping channel')
-				visualize_save_image(image_tmp_swapped)
+				visualize_save_image(image_tmp_swapped, debug=debug)
 		assert caffe_input_data.shape[-1] == 3 or caffe_input_data.shape[-1] == 1, 'channel is not correct'
 	caffe_input_data = np.transpose(caffe_input_data, (0, 3, 1, 2))         # permute to [batch, channel, height, weight]
 	

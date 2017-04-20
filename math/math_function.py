@@ -71,7 +71,7 @@ def cart2pol_2d_degree(pts, debug=True):
     '''
     input a 2d point and convert to polar coordinate
 
-    return for degree: (-180, 180]
+    return for degree: [0, 360)
     '''
     if debug:
         assert istuple(pts) or islist(pts) or isnparray(pts), 'input point is not correct'
@@ -81,6 +81,8 @@ def cart2pol_2d_degree(pts, debug=True):
     y = pts[1]
     rho = np.sqrt(x**2 + y**2)
     phi = math.degrees(np.arctan2(y, x))
+    if phi < 0:
+        phi += 360
     return (rho, phi)
 
 def pol2cart_2d_degree(pts, debug=True):
