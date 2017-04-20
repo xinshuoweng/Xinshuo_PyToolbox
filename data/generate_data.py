@@ -223,7 +223,7 @@ def rand_load_hdf5_from_folder(hdf5_src, dataname, debug=True):
     randomly load a single hdf5 file from a hdf5 folder
     '''
     if debug:
-        assert is_path_exists(hdf5_src) and isfolder(hdf5_src), 'input hdf5 path does not exist'
+        assert is_path_exists(hdf5_src) and isfolder(hdf5_src), 'input hdf5 path does not exist: %s' % hdf5_src
         assert islist(dataname), 'dataset queried is not correct'
         assert all(isstring(dataset_tmp) for dataset_tmp in dataname), 'dataset queried is not correct'
 
