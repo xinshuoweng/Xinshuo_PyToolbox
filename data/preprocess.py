@@ -76,14 +76,14 @@ def preprocess_image_caffe(image_datalist, debug=True, vis=False):
 	if debug:
 		print('debug mode is on during preprocessing. Please turn off after debuging')
 		assert islist(image_datalist), 'input is not a list of image'
-		assert all(isimage(image_data) for image_data in image_datalist), 'input is not a list of image'
+		assert all(isimage(image_data, debug=debug) for image_data in image_datalist), 'input is not a list of image'
 		shape_list = [image_data.shape for image_data in image_datalist]
 		assert CHECK_EQ_LIST(shape_list), 'image shape is not equal inside one batch'
 
 	data_warmup = image_datalist[0]
-	if iscolorimage(data_warmup):
+	if iscolorimage(data_warmup, debug=debug):
 		color = True
-	elif isgrayimage(data_warmup):
+	elif isgrayimage(data_warmup, debug=debug):
 		color = False
 		if data_warmup.ndim == 2:
 			image_datalist = [np.reshape(image_data, image_data.shape + (1, )) for image_data in image_datalist]
@@ -92,9 +92,9 @@ def preprocess_image_caffe(image_datalist, debug=True, vis=False):
 
 	if debug:
 		if color:
-			assert all(iscolorimage(image_data) for image_data in image_datalist), 'input should be all color image format'	
+			assert all(iscolorimage(image_data, debug=debug) for image_data in image_datalist), 'input should be all color image format'	
 		else:
-			assert all(isgrayimage(image_data) and image_data.ndim == 3 and image_data.shape[-1] == 1 for image_data in image_datalist), 'input should be all grayscale image format'	
+			assert all(isgrayimage(image_data, debug=debug) and image_data.ndim == 3 and image_data.shape[-1] == 1 for image_data in image_datalist), 'input should be all grayscale image format'	
 
 	batch_size = len(image_datalist)
 	caffe_input_data = np.zeros((batch_size, ) + image_datalist[0].shape, dtype='float32')
