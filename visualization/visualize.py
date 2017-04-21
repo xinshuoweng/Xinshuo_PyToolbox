@@ -192,3 +192,42 @@ def nearest_neighbor_visualization(featuremap_dict, num_neighbor=5, top_number=5
                 if debug:
                     print('saving %s to %s' % (file_src, save_path))
                 shutil.copyfile(file_src, save_path)
+
+
+def distribution_vis(data, bin_size=None, vis=True, save=False, save_path=None, debug=True):
+    '''
+    visualize the histgram of a data, which can be a dictionary or list or numpy array or tuple
+    '''
+    if debug:
+        assert istuple(data) or isdict(data) or islist(data) or isnparray(data), 'input data is not correct'
+
+    if isdict(data):
+        data = data.values()
+
+    if bin_size is None:
+        max_value = np.max(data)
+        min_value = np.min(data)
+        bin_size = (max_value - min_value) / 10
+    else:
+        try:
+            bin_size = int(bin_size)
+        except TypeError:
+            print('size of bin should be integer')
+
+    # fixed bin size
+    bins = np.arange(min(data) - bin_size, max(data) + bin_size, bin_size) # fixed bin size
+    plt.xlim([min(data) - bin_size, max(data) + bin_size])
+    plt.hist(data, bins=bins, alpha=0.5)
+    plt.title('distribution of data')
+    plt.xlabel('data (bin size = %d)' % int(bin_size))
+    plt.ylabel('count')
+
+    if vis:
+        plt.show()
+
+    if save:
+        if debug:
+            assert is_path_exists_or_creatable(save_path) and isfile(save_path), 'save path is not correct' 
+        plt.savefig(save_path)
+
+    plt.close()
