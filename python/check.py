@@ -56,10 +56,12 @@ def isuintimage(image_test):
     if not image_test.dtype == 'uint8':
         return False
 
-    if not all(item >= 0 and item <= 255 for item in image_test.flatten().tolist()):
+    item_check_le = (image_test <= 255)
+    item_check_se = (image_test >= 0)
+    if item_check_le.all() and item_check_se.all():
+        return True
+    else:
         return False
-
-    return True
 
 def isfloatimage(image_test):
     if not (isgrayimage(image_test) or iscolorimage(image_test)):
@@ -68,10 +70,12 @@ def isfloatimage(image_test):
     if not image_test.dtype == 'float32':
         return False
 
-    if not all(item >= 0 and item <= 1 for item in image_test.flatten().tolist()):
+    item_check_le = (image_test <= 1.0)
+    item_check_se = (image_test >= 0.0)
+    if item_check_le.all() and item_check_se.all():
+        return True
+    else:
         return False
-
-    return True
 
 def isimage(image_test):
     return isfloatimage(image_test) or isuintimage(image_test)
