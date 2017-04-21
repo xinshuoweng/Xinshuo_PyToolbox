@@ -35,7 +35,7 @@ def visualize_save_image(image, vis=True, save=False, save_path=None, debug=True
 
     if debug:
         assert isnparray(image), 'input image is not a numpy array {}'.format(type(image))
-        assert isimage(image), 'input is not a good image, shape is {}'.format(image.shape)
+        assert isimage(image, debug=debug), 'input is not a good image, shape is {}'.format(image.shape)
 
     dpi = 80  
     width = image.shape[1]
@@ -46,21 +46,21 @@ def visualize_save_image(image, vis=True, save=False, save_path=None, debug=True
     ax.axis('off')
 
 
-    if iscolorimage(image):
+    if iscolorimage(image, debug=debug):
         if debug:
             print 'visualizing color image'
         ax.imshow(image, interpolation='nearest')
-    elif isgrayimage(image):
+    elif isgrayimage(image, debug=debug):
         if debug:
             print 'visualizing grayscale image'
         if image.ndim == 3 and image.shape[-1] == 1:
             image = np.reshape(image, image.shape[:-1])
 
-        if isfloatimage(image) and all(item == 1.0 for item in image.flatten().tolist()):
+        if isfloatimage(image, debug=debug) and all(item == 1.0 for item in image.flatten().tolist()):
             if debug:
                 print('all elements in image are 1. For visualizing, we subtract the top left with an epsilon value')
             image[0, 0] -= 0.00001
-        elif isuintimage(image) and all(item == 255 for item in image.flatten().tolist()):
+        elif isuintimage(image, debug=debug) and all(item == 255 for item in image.flatten().tolist()):
             if debug:
                 print('all elements in image are 255. For visualizing, we subtract the top left with an epsilon value')
             image[0, 0] -= 1
