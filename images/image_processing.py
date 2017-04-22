@@ -9,7 +9,7 @@ def imagecoor2cartesian(pts, debug=True):
 	change the coordinate system from image coordinate system to normal cartesian system, basically reverse the y coordinate
 	'''
 	if debug:
-		print('debug mode is on during convert_pts function. Please turn off after debuging')
+		# print('debug mode is on during convert_pts function. Please turn off after debuging')
 		assert is2dpts(pts), 'point is not correct'
 	return (pts[0], -pts[1])
 
@@ -19,7 +19,7 @@ def cartesian2imagecoor(pts, debug=True):
 	change the coordinate system from normal cartesian system back to image coordinate system, basically reverse the y coordinate
 	'''
 	if debug:
-		print('debug mode is on during convert_pts_back2image function. Please turn off after debuging')
+		# print('debug mode is on during convert_pts_back2image function. Please turn off after debuging')
 		assert is2dpts(pts), 'point is not correct'
 	return (pts[0], -pts[1])
 
