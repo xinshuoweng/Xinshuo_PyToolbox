@@ -152,7 +152,7 @@ def radian2degree(radian, debug=True):
 	if debug:
 		assert isfloat(radian) or isinteger(radian) or (isnparray(radian) and radian.size == 1), 'input radian number is not correct'
 
-	degree = math.radians(radian)
+	degree = math.degrees(radian)
 	while degree < 0:
 		degree += 360.0
 	while degree >= 360.0:
