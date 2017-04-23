@@ -129,15 +129,33 @@ def get_subdict(dictionary, num, debug=True):
 
 
 
-######################################################### data related #########################################################
-def get_subdict(dictionary, num, debug=True):	
+######################################################### math related #########################################################
+def degree2radian(degree, debug=True):
+	'''
+	this function return degree given radians, difference from default math.degrees is that this function normalize the output in range [0, 2*pi)
+	'''
 	if debug:
-		assert isdict(dictionary), 'dictionary is not correct'
-		assert num > 0 and isinteger(num) and num <= len(dictionary), 'number of sub-dictionary is not correct'
+		assert isfloat(degree) or isinteger(degree) or (isnparray(degree) and degree.size == 1), 'input degree number is not correct'
 
-	def take(num, iterable):
-		return dict(islice(iterable, num))
+	radian = math.radians(degree)
+	while radian < 0:
+		radian += 2*math.pi
+	while radian >= 2*math.pi:
+		radian -= 2*math.pi
 
-	return take(num, dictionary.iteritems())
+	return radian
 
+def radian2degree(radian, debug=True):
+	'''
+	this function return radian given degree, difference from default math.degrees is that this function normalize the output in range [0, 360)
+	'''
+	if debug:
+		assert isfloat(radian) or isinteger(radian) or (isnparray(radian) and radian.size == 1), 'input radian number is not correct'
 
+	degree = math.radians(radian)
+	while degree < 0:
+		degree += 360.0
+	while degree >= 360.0:
+		degree -= 360.0
+
+	return degree

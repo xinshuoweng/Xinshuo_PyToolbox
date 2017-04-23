@@ -37,9 +37,9 @@ def normalize_data(data, data_range=None, debug=True):
 		max_value = data_range[1]
 		min_value = data_range[0]
 
-	normalized_data = data - min_value
+	normalized_data = float(data - min_value)
 	normalized_data = normalized_data / (max_value - min_value)
-
+	
 	if debug:
 		unnormalized = unnormalize_data(data=normalized_data, data_range=(min_value, max_value), debug=False)
 		assert_almost_equal(data, unnormalized, decimal=6, err_msg='data is not correct: %f vs %f' % (data, unnormalized))
