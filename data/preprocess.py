@@ -6,7 +6,7 @@ import numpy as np
 from numpy.testing import assert_almost_equal
 
 import __init__paths__
-from check import isnparray, iscolorimage, istuple, islist, CHECK_EQ_LIST, isimage, isgrayimage
+from check import isnparray, iscolorimage, istuple, islist, CHECK_EQ_LIST, isimage, isgrayimage, isuintimage, isfloatimage
 from visualize import visualize_save_image
 
 
@@ -90,14 +90,25 @@ def preprocess_image_caffe(image_datalist, debug=True, vis=False):
 	else:
 		assert False, 'only color or gray image is supported'
 
+	if isuintimage(data_warmup, debug=debug):
+		uint = True
+	elif isfloatimage(data_warmup, debug=debug):
+		uint = False
+	else:
+		assert False, 'only uint8 or float image is supported'		
+
 	if debug:
 		if color:
 			assert all(iscolorimage(image_data, debug=debug) for image_data in image_datalist), 'input should be all color image format'	
 		else:
 			assert all(isgrayimage(image_data, debug=debug) and image_data.ndim == 3 and image_data.shape[-1] == 1 for image_data in image_datalist), 'input should be all grayscale image format'	
+		if uint:
+			assert all(isuintimage(image_data, debug=debug) for image_data in image_datalist), 'input should be all color image format'	
+		else:
+			assert all(isfloatimage(image_data, debug=debug) for image_data in image_datalist), 'input should be all grayscale image format'	
 
 	batch_size = len(image_datalist)
-	caffe_input_data = np.zeros((batch_size, ) + image_datalist[0].shape, dtype='float32')
+	caffe_input_data = np.zeros((batch_size, ) + image_datalist[0].shape, dtype=data_warmup.dtype)
 
 	# fill one minibatch data
 	index = 0

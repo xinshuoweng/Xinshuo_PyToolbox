@@ -91,6 +91,10 @@ def nearest_neighbor_visualization(featuremap_dict, num_neighbor=5, top_number=5
         top_number: number of top to visualize, since there might be tons of featuremap (length of dictionary), we choose the top ten with lowest distance with their nearest neighbor
         csv_save_path: path to save .csv file which contains indices and distance array for all elements
         nn_save_folder: save the nearest neighbor images for top featuremap
+
+    return:
+        all_sorted_nearest_id: a 2d matrix, each row is a feature followed by its nearest neighbor in whole feature dataset, the column is sorted by the distance of all nearest neighbor each row
+        selected_nearest_id: only top number of sorted nearest id 
     '''
     print('processing feature map to nearest neightbor.......')
     if debug:
@@ -142,14 +146,14 @@ def nearest_neighbor_visualization(featuremap_dict, num_neighbor=5, top_number=5
     if debug:
         assert featuremap_distance.shape == (num_features, ), 'distance is not correct'
     sorted_indices = np.argsort(featuremap_distance)
-
+    all_sorted_nearest_id = nearest_id[sorted_indices, :]
 
     # save to the csv file
     if save and csv_save_path is not None:
         print 'Saving nearest neighbor result as .csv to path: %s' % csv_save_path
         with open(csv_save_path, 'w+') as file:
             np.savetxt(file, distances, delimiter=',', fmt='%f')
-            np.savetxt(file, nearest_id[sorted_indices, :], delimiter=',', fmt='%s')
+            np.savetxt(file, all_sorted_nearest_id, delimiter=',', fmt='%s')
             file.close()
 
     # choose the best to visualize
@@ -192,6 +196,8 @@ def nearest_neighbor_visualization(featuremap_dict, num_neighbor=5, top_number=5
                 if debug:
                     print('saving %s to %s' % (file_src, save_path))
                 shutil.copyfile(file_src, save_path)
+
+    return all_sorted_nearest_id, selected_nearest_id
 
 
 def distribution_vis(data, bin_size=None, vis=True, save=False, save_path=None, debug=True):
