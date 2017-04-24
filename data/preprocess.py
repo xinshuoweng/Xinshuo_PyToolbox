@@ -102,7 +102,7 @@ def preprocess_image_caffe(image_datalist, debug=True, vis=False):
 	# fill one minibatch data
 	index = 0
 	for image_data in image_datalist:
-		caffe_input_data[0, :, :, :] = image_data
+		caffe_input_data[index, :, :, :] = image_data
 		index += 1
 		
 	if color:
