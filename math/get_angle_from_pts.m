@@ -9,6 +9,6 @@ function [angle_in_degree] = get_angle_from_pts(pts1, pts2, debug_mode)
 	end
 
 	slope = get_slope(pts1, pts2, debug_mode);
-    slope = atan(slope);				%(-pi/2, pi/2)
-    slope = rad2deg(slope);			%(-90, 90)
+	slope = atan(slope);				%(-pi/2, pi/2)
+	angle_in_degree = rad2deg(slope);			%(-90, 90)
 end
