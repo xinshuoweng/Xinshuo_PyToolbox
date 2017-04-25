@@ -9,6 +9,10 @@
 %       2. rect = [xmin, ymin, width, height], then crop image within 
 %       specific rectangular region
 function cropped = crop_center(img, rect, debug_mode)
+    if ~exist('debug_mode', 'var')
+        debug_mode = true;
+    end
+
     if debug_mode
         img = isImageorPath(img);
         assert(length(rect) == 2 || length(rect) == 4, 'the format of rect is wrong');
