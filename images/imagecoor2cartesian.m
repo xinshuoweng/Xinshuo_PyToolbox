@@ -15,5 +15,6 @@ function pts = imagecoor2cartesian(pts, debug_mode)
 	if iscell(pts)
 		pts = cell2mat(pts);
 	end
-	pts(2) = -pts(2);
+	pts(2) = -double(pts(2));
+	pts(1) = double(pts(1));
 end
