@@ -5,7 +5,7 @@ close all;
 clear;
 
 % assigning the name of sample avi file to a variable
-filename = '../1.mp4';
+filename = '3.mp4';
 
 %reading a video file
 mov = VideoReader(filename);
