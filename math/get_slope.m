@@ -16,5 +16,5 @@ function slope = get_slope(pts1, pts2, debug_mode)
 		pts2 = cell2mat(pts2);
 	end
 
-	slope = (pts1(2) - pts2(2)) / (pts1(1) - pts2(1));
+	slope = (double(pts1(2)) - double(pts2(2))) / (double(pts1(1)) - double(pts2(1)));
 end
