@@ -146,7 +146,8 @@ def unpreprocess_image_caffe(image_datablob, pixel_mean=None, swap_channel=True,
 
 	if pixel_mean is not None:
 		assert pixel_mean.shape == (1, 1, 3) or pixel_mean.shape == (1, ), 'pixel mean is not correct'
-		image_datablob += pixel_mean
+		pixel_mean_reshape = np.reshape(pixel_mean, (1, 3, 1, 1))
+		image_datablob += pixel_mean_reshape
 
 	image_datablob = np.transpose(image_datablob, (0, 2, 3, 1))         # permute to [batch, height, weight, channel]	
 
