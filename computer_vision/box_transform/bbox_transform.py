@@ -10,9 +10,9 @@ import numpy as np
 import math
 import time
 import math_function as mf
+from image_processing import imagecoor2cartesian, cartesian2imagecoor
 from numpy.testing import assert_almost_equal
 from math import radians as rad
-
 from check import isnparray
 
 def bbox_transform(ex_rois, gt_rois):
@@ -99,12 +99,13 @@ def clip_boxes(boxes, im_shape):
     return boxes
 
 
-def bbox_rotation_inv(bbox_in, angle_in_degree, image_shape):
+def bbox_rotation_inv(bbox_in, angle_in_degree, image_shape, debug=True):
     '''
     bbox_in is two coordinate
     angle is clockwise
     '''
-    assert isnparray(bbox_in) and len(bbox_in) == 4, 'box is not correct'
+    if debug:
+        assert isnparray(bbox_in) and len(bbox_in) == 4, 'box is not correct'
 
     im_width = image_shape[1]
     im_height = image_shape[0]
@@ -124,12 +125,12 @@ def bbox_rotation_inv(bbox_in, angle_in_degree, image_shape):
 
 
 # transfer the general bbox (top left and bottom right points) to represent rotated bbox with loose version including top left and bottom right points
-def bbox_general2rotated_loose(bbox_in, angle_in_degree, image_shape):
-    bbox = bbox_rotation_inv(bbox_in, angle_in_degree, image_shape) # get top left and bottom right coordinate of the rotated bbox in the image coordinate
-    return bbox_rotatedtight2rotatedloose(bbox, angle_in_degree)
+def bbox_general2rotated_loose(bbox_in, angle_in_degree, image_shape, debug=True):
+    bbox = bbox_rotation_inv(bbox_in, angle_in_degree, image_shape, debug=debug) # get top left and bottom right coordinate of the rotated bbox in the image coordinate
+    return bbox_rotatedtight2rotatedloose(bbox, angle_in_degree, debug=debug)
 
 
-def bbox_rotatedtight2rotatedloose(bbox_in, angle_in_degree):
+def bbox_rotatedtight2rotatedloose(bbox_in, angle_in_degree, debug=True):
     '''
     transfer the rotated bbox with tight version to loose version, both contains only two points (top left and bottom right)
     only a single box is feeded into
@@ -138,10 +139,10 @@ def bbox_rotatedtight2rotatedloose(bbox_in, angle_in_degree):
 
     pts_tl = np.array([bbox_in[0], bbox_in[1]])
     pts_br = np.array([bbox_in[2], bbox_in[3]])
-    line1 = mf.get_line(mf.convert_pts(pts_tl), angle_in_degree + 90.00)
-    line2 = mf.get_line(mf.convert_pts(pts_br), angle_in_degree)
-    pts_bl = mf.convert_pts_back2image(mf.get_intersection(line1, line2))
-    pts_tr = mf.convert_pts_back2image(mf.get_intersection(mf.get_line(mf.convert_pts(pts_tl), angle_in_degree), mf.get_line(mf.convert_pts(pts_br), angle_in_degree + 90.00)))
+    line1 = mf.get_line(imagecoor2cartesian(pts_tl, debug=debug), angle_in_degree + 90.00, debug=debug)
+    line2 = mf.get_line(imagecoor2cartesian(pts_br, debug=debug), angle_in_degree, debug=debug)
+    pts_bl = cartesian2imagecoor(mf.get_intersection(line1, line2, debug=debug), debug=debug)
+    pts_tr = cartesian2imagecoor(mf.get_intersection(mf.get_line(imagecoor2cartesian(pts_tl, debug=debug), angle_in_degree, debug=debug), mf.get_line(imagecoor2cartesian(pts_br, debug=debug), angle_in_degree + 90.00, debug=debug), debug=debug), debug=debug)
     # assert_almost_equal(np.dot(pts_bl - pts_br, pts_bl - pts_tl), 0, err_msg='The intersection points are wrong')
     # assert_almost_equal(np.dot(pts_tr - pts_br, pts_tr - pts_tl), 0, err_msg='The intersection points are wrong')
 
@@ -161,7 +162,7 @@ def bbox_rotatedtight2rotatedloose(bbox_in, angle_in_degree):
     return test
 
 
-def apply_rotation_loose(all_boxes, angle_in_degree, image_shape):
+def apply_rotation_loose(all_boxes, angle_in_degree, image_shape, debug=True):
     '''
     this function takes Nx84 bounding box into account and transfer all of them
     to rotated representation with loose version
@@ -178,6 +179,6 @@ def apply_rotation_loose(all_boxes, angle_in_degree, image_shape):
         for cls_ind in xrange(num_classes):
             # print()
             box_tmp = all_boxes[row, cls_ind * 4 : (cls_ind + 1) * 4]
-            all_boxes[row, cls_ind * 4 : (cls_ind + 1) * 4] = bbox_general2rotated_loose(box_tmp, angle_in_degree, image_shape)
+            all_boxes[row, cls_ind * 4 : (cls_ind + 1) * 4] = bbox_general2rotated_loose(box_tmp, angle_in_degree, image_shape, debug=debug)
 
     return all_boxes

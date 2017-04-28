@@ -133,7 +133,7 @@ def preprocess_image_caffe(image_datalist, debug=True, vis=False):
 		assert caffe_input_data.shape[1] == 3 or caffe_input_data.shape[1] == 1, 'channel is not correct'
 	return caffe_input_data
 
-def unpreprocess_image_caffe(image_datablob, debug=True):
+def unpreprocess_image_caffe(image_datablob, pixel_mean=None, swap_channel=True, debug=True):
 	'''
 	this function unpreprocesses image for caffe only,
 	including transfer from bgr to rgb
@@ -144,8 +144,13 @@ def unpreprocess_image_caffe(image_datablob, debug=True):
 		assert isnparray(image_datablob) and image_datablob.ndim == 4, 'input is not correct'	
 		assert image_datablob.shape[1] == 1 or image_datablob.shape[1] == 3, 'this is not an blob of image, channel is not 1 or 3'
 
+	if pixel_mean is not None:
+		assert pixel_mean.shape == (1, 1, 3) or pixel_mean.shape == (1, ), 'pixel mean is not correct'
+		image_datablob += pixel_mean
+
 	image_datablob = np.transpose(image_datablob, (0, 2, 3, 1))         # permute to [batch, height, weight, channel]	
-	if image_datablob.shape[-1] == 3:	# channel dimension
+
+	if image_datablob.shape[-1] == 3 and swap_channel:	# channel dimension
 		image_datablob = image_datablob[:, :, :, [2, 1, 0]]             # from bgr to rgb for color image
 	image_data_list = list()
 	for i in xrange(image_datablob.shape[0]):
