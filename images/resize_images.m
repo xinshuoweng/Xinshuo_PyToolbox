@@ -12,13 +12,13 @@ function num_images = resize_images(src_path, resize_size, debug_mode)
 	mkdir_if_missing(save_dir);
 
 	for i = 1:num_images
-		fprintf('processing %d/%d', i, num_images);
+		fprintf('processing %d/%d\n', i, num_images);
 		image_path_temp = image_list{i};
+		[~, filename, ~] = fileparts(image_path_temp);
 		image_temp = imread(image_path_temp);
-		[~, filename, ~] = fileparts(image_temp);
-		image_temp = imresize(image_temp, resize_size);
+		resized = imresize(image_temp, resize_size);
 		save_path = fullfile(save_dir, sprintf('%s.jpg', filename));
-		imwrite(image_temp, save_path);
+		imwrite(resized, save_path);
 	end
 
 end
