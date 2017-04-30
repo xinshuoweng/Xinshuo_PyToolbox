@@ -70,7 +70,7 @@ function showboxes(im, boxes, legends, color_conf)
     %           orientation = boxes{i}(j, end);
                 if size(boxes{i}, 2) >= 5
                     score = boxes{i}(j, end);
-                    linewidth = 2 + min(max(score, 0), 1) * 2;
+                    linewidth = 1 + min(max(score, 0), 1) * 2;
                     rectangle('Position', RectLTRB2LTWH(box), 'LineWidth', linewidth, 'EdgeColor', colors{i});
                     label = sprintf('%s : %.3f', legends{i}, score);
     %               text(double(box(1))+2, double(box(2)), label, 'BackgroundColor', 'w');
