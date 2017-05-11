@@ -127,6 +127,18 @@ def get_subdict(dictionary, num, debug=True):
 
 	return take(num, dictionary.iteritems())
 
+def merge_listoflist(listoflist, debug=True):
+	'''
+	merge a list of list in original order
+	'''
+	if debug:
+		assert islistoflist(listoflist), 'the input is not a list of list'
+
+	merged = list()
+	for individual in listoflist:
+		merged = merged + individual
+
+	return merged
 
 
 ######################################################### math related #########################################################
