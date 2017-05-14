@@ -81,7 +81,7 @@ def visualize_save_image(image, vis=True, save=False, save_path=None, debug=True
 
 
 
-def nearest_neighbor_visualization(featuremap_dict, num_neighbor=5, top_number=5, vis=True, save=False, csv_save_path=None, save_thumb_name='nearest_neighbor.png', img_src_folder=None, ext_filter='.jpg', nn_save_folder=None, debug=True):
+def nearest_neighbor_visualization(featuremap_dict, num_neighbor=5, top_number=5, vis=True, save_csv=False, csv_save_path=None, save_vis=False, save_img=False, save_thumb_name='nearest_neighbor.png', img_src_folder=None, ext_filter='.jpg', nn_save_folder=None, debug=True):
     '''
     visualize nearest neighbor for featuremap from images
 
@@ -101,15 +101,17 @@ def nearest_neighbor_visualization(featuremap_dict, num_neighbor=5, top_number=5
         assert isdict(featuremap_dict), 'featuremap should be dictionary'
         assert all(isnparray(featuremap_tmp) for featuremap_tmp in featuremap_dict.values()), 'value of dictionary should be numpy array'
         assert isinteger(num_neighbor) and num_neighbor > 1, 'number of neighborhodd is an integer larger than 1'
-        if save:
-            if csv_save_path is not None:
-                assert is_path_exists_or_creatable(csv_save_path), 'path to save .csv file is not correct'
+        if save_csv and csv_save_path is not None:
+            assert is_path_exists_or_creatable(csv_save_path), 'path to save .csv file is not correct'
+        
+        if save_vis or save_img:
             if nn_save_folder is not None:  # save image directly
                 assert isstring(ext_filter), 'extension filter is not correct'
                 assert is_path_exists(img_src_folder), 'source folder for image is not correct'
                 assert all(isstring(path_tmp) for path_tmp in featuremap_dict.keys())     # key should be the path for the image
                 assert is_path_exists_or_creatable(nn_save_folder), 'folder to save top visualized images is not correct'
                 assert isstring(save_thumb_name), 'name of thumbnail is not correct'
+
     if ext_filter.find('.') == -1:
         ext_filter = '.%s' % ext_filter
 
@@ -149,7 +151,7 @@ def nearest_neighbor_visualization(featuremap_dict, num_neighbor=5, top_number=5
     all_sorted_nearest_id = nearest_id[sorted_indices, :]
 
     # save to the csv file
-    if save and csv_save_path is not None:
+    if save_csv and csv_save_path is not None:
         print 'Saving nearest neighbor result as .csv to path: %s' % csv_save_path
         with open(csv_save_path, 'w+') as file:
             np.savetxt(file, distances, delimiter=',', fmt='%f')
@@ -163,7 +165,7 @@ def nearest_neighbor_visualization(featuremap_dict, num_neighbor=5, top_number=5
             assert featuremap_distance[sorted_indices[i]] < featuremap_distance[sorted_indices[i+1]], 'feature map is not well sorted based on distance' 
     selected_nearest_id = nearest_id[selected_sorted_indices, :]
 
-    if save:
+    if save_vis:
         fig, axarray = plt.subplots(top_number, num_neighbor)
         for index in range(top_number):
             for nearest_index in range(num_neighbor):
@@ -185,7 +187,7 @@ def nearest_neighbor_visualization(featuremap_dict, num_neighbor=5, top_number=5
         plt.close(fig)
 
     # save top visualization to the folder
-    if save and nn_save_folder is not None:
+    if save_img and nn_save_folder is not None:
         for top_index in range(top_number):
             file_list = selected_nearest_id[top_index]
             save_subfolder = os.path.join(nn_save_folder, file_list[0])
