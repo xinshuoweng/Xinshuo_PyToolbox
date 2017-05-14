@@ -155,7 +155,7 @@ def bbox_rotation_inv(bbox_in, angle_in_degree, image_shape, debug=True):
     angle is clockwise
     '''
     if debug:
-        assert isnparray(bbox_in) and len(bbox_in) == 4, 'box is not correct'
+        assert isnparray(bbox_in) and bbox_in.size == 4, 'box is not correct'
 
     im_width = image_shape[1]
     im_height = image_shape[0]
@@ -185,7 +185,8 @@ def bbox_rotatedtight2rotatedloose(bbox_in, angle_in_degree, debug=True):
     transfer the rotated bbox with tight version to loose version, both contains only two points (top left and bottom right)
     only a single box is feeded into
     '''
-    assert isnparray(bbox_in) and len(bbox_in) == 4, 'box is not correct'
+    if debug:
+        assert isnparray(bbox_in) and bbox_in.size == 4, 'box is not correct'
 
     pts_tl = np.array([bbox_in[0], bbox_in[1]])
     pts_br = np.array([bbox_in[2], bbox_in[3]])
@@ -232,3 +233,87 @@ def apply_rotation_loose(all_boxes, angle_in_degree, image_shape, debug=True):
             all_boxes[row, cls_ind * 4 : (cls_ind + 1) * 4] = bbox_general2rotated_loose(box_tmp, angle_in_degree, image_shape, debug=debug)
 
     return all_boxes
+
+
+
+
+
+
+# convert the point coordinate in the image, y axis is inverse
+def convert_pts(pts):
+    return np.array([pts[0], -pts[1]], dtype=float)
+
+def convert_pts_back2image(pts):
+    return np.array([pts[0], -pts[1]], dtype=float)
+
+# slope is the angle
+def get_line(pts, slope):
+    if slope == 90 or -90:
+        slope = slope + 0.00001
+    slope = math.tan(math.radians(slope))
+    # print('slope is ' + str(slope))
+    dividor = slope * pts[0] - pts[1]
+    if dividor == 0:
+        dividor += 0.00001
+    b = 1.0 / dividor
+    a = -b * slope
+    # assert math.fabs(pts[0]*a + pts[1]*b + 1) < 0.0000001, 'Point is not on the line'
+    return np.array([a, b, 1], dtype=float)
+
+def get_slope(pts1, pts2):
+    slope = (pts1[1] - pts2[1]) / (pts1[0] - pts2[0])
+    # print(slope)
+    slope = np.arctan(slope)
+    # print(slope)
+    slope = math.degrees(slope)
+    # print(slope)
+    return slope
+
+
+def get_intersection(line1, line2):
+    a1 = line1[0]
+    b1 = line1[1]
+    a2 = line2[0]
+    b2 = line2[1]
+    dividor = a2 * b1 - a1 * b2
+    if dividor == 0:
+        dividor += 0.00001
+    y = (a1 - a2) / dividor
+    if a1 == 0:
+        a1 += 0.00001
+    x = (-1.0 - b1 * y) / a1
+    # assert math.fabs(x*line1[0] + y*line1[1] + 1) < 0.0000001, 'Intersection point is not on the line'
+    # assert math.fabs(x*line2[0] + y*line2[1] + 1) < 0.0000001, 'Intersection point is not on the line'
+    return np.array([x, y], dtype=float)
+
+
+def apply_rotation_tight(bbox_in, angle_in_degree, im_shape, debug=True):
+    '''
+    return 4 points clockwise
+    '''
+    if debug:
+        assert isnparray(bbox_in) and bbox_in.size == 4, 'box is not correct'
+
+    bbox_in = np.reshape(bbox_in, (4, ))
+    bbox_tight = bbox_rotation_inv(bbox_in, angle_in_degree, im_shape, debug=debug) # get top left and bottom right coordinate of the rotated bbox in the image coordinate
+    # print('bbox after inverse the rotation')
+    # print(bbox_tight)
+    pts_total = np.zeros((4, 2), dtype=np.int)
+    pts_tl = np.array([bbox_tight[0], bbox_tight[1]])
+    pts_br = np.array([bbox_tight[2], bbox_tight[3]])
+    line1 = get_line(convert_pts(pts_tl), angle_in_degree + 90.00)
+    line2 = get_line(convert_pts(pts_br), angle_in_degree)
+    pts_bl = convert_pts_back2image(get_intersection(line1, line2))
+    pts_tr = convert_pts_back2image(get_intersection(get_line(convert_pts(pts_tl), angle_in_degree), get_line(convert_pts(pts_br), angle_in_degree + 90.00)))
+
+    # print np.reshape(pts_tl, (1, 2)).shape
+    # print pts_total[0, :].shape
+
+    pts_total[0, :] = np.reshape(pts_tl, (1, 2))
+    pts_total[1, :] = np.reshape(pts_tr, (1, 2))
+    pts_total[2, :] = np.reshape(pts_br, (1, 2))
+    pts_total[3, :] = np.reshape(pts_bl, (1, 2))
+
+    # print pts_total
+
+    return pts_total
