@@ -53,7 +53,7 @@ function boxes = suppress_boxes_multiple_images(boxes, before_nms_topN, nms_over
     end
 
     aver_boxes_num = mean(cellfun(@(x) size(x, 1), boxes, 'UniformOutput', true));
-    fprintf('aver_boxes_num = %d, select top %d\n\n', round(aver_boxes_num), after_nms_topN);
+    % fprintf('aver_boxes_num = %d, select top %d\n\n', round(aver_boxes_num), after_nms_topN);
     if after_nms_topN > 0
         boxes = cellfun(@(x) x(1:min(size(x, 1), after_nms_topN), :), boxes, 'UniformOutput', false);
     end

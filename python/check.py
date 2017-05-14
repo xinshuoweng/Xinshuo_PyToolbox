@@ -16,6 +16,14 @@ def isfloat(float_test):
 def islist(list_test):
 	return isinstance(list_test, list)
 
+def islistoflist(list_test):
+    if not islist(list_test):
+        return False
+    if all(islist(tmp) for tmp in list_test):
+        return True
+    else:
+        return False
+
 def isnparray(nparray_test):
 	return isinstance(nparray_test, np.ndarray)
 

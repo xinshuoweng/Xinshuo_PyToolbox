@@ -2,13 +2,13 @@
 % email: xinshuo.weng@gmail.com
 
 % this script return a cell which contains a set of image path under folder recursively
-function [full_image_list, num_image] = load_list_from_folder(folder_path, save_fullpath)
+function [full_image_list, num_image] = load_list_from_folder(folder_path, ext_filter, save_fullpath)
 	assert(ischar(folder_path), 'Input path is not valid for obtaining list');
 	fprintf('Warning! Only jpeg jpg png bmp extension are supported!\n');
 
 	subfolder_list = get_subfolder_list(folder_path);
-    imagelist_subfolder = remove_empty_cell(cellfun(@(x) load_list_from_cur_folder(x), subfolder_list, 'UniformOutput', false));	
-    imagelist_curfolder = load_list_from_cur_folder(folder_path);
+    imagelist_subfolder = remove_empty_cell(cellfun(@(x) load_list_from_cur_folder(x, ext_filter), subfolder_list, 'UniformOutput', false));	
+    imagelist_curfolder = load_list_from_cur_folder(folder_path, ext_filter);
     full_image_list = [imagelist_curfolder, imagelist_subfolder];	
     num_image = length(full_image_list);
     
