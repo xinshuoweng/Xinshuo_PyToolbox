@@ -46,7 +46,7 @@ function im=mat2im(mat,cmap,limits)
 
 
 %Check input arguments
-error(nargchk(2,3,nargin));
+narginchk(2,3);
 
 if ~isa(mat, 'double')
     mat = double(mat)+1;    % Switch to one based indexing

@@ -7,7 +7,7 @@ function valid = isfloatimage(image_test)
 		valid = false;
 	else
 		% double type and within range [0, 1]
-		logical_matrix = arrayfun(@(x) ~isInteger(x) && x<=1.0 && x>=0.0, image_test);	
+		logical_matrix = arrayfun(@(x) isscalar(x) && x<=1.0 && x>=0.0, image_test);	
 		valid = all(logical_matrix(:));
 	end
 end
