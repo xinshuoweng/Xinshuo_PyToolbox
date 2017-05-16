@@ -36,7 +36,7 @@ function [X,Y,score] = find_peaks(heatmap, thre, debug_mode, vis)
     map_aug4(3:end, 2:end-1) = map_smooth;
     peakMap = (map_aug > map_aug1) & (map_aug > map_aug2) & (map_aug > map_aug3) & (map_aug > map_aug4);
     peakMap = peakMap(2:end-1, 2:end-1);
-    [X, Y] = find(peakMap);     % find 1
+    [Y, X] = find(peakMap);     % find 1
     
     if vis
         figure;
@@ -48,8 +48,8 @@ function [X,Y,score] = find_peaks(heatmap, thre, debug_mode, vis)
         subplot(2, 3, 6); imshow(heatmap); title('map');
     end
 
-    score = zeros(length(X),1);
-    for i = 1:length(X)
-        score(i) = heatmap(X(i),Y(i));
+    score = zeros(length(Y),1);
+    for i = 1:length(Y)
+        score(i) = heatmap(Y(i), X(i));
     end
 end
