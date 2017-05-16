@@ -2,6 +2,8 @@
 % email: xinshuo.weng@gmail.com
 
 % find peak locations and scores for convex blob in heatmap
+% note that this function is very strict. No smooth for peak points have been applied
+% if there are multiple local peak in a same blob, all of them will be returned. 
 function [X,Y,score] = find_peaks(heatmap, thre, debug_mode, vis)
     %filter = fspecial('gaussian', [3 3], 2);
     %map_smooth = conv2(map, filter, 'same');
