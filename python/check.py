@@ -3,7 +3,6 @@
 import os, sys
 import numpy as np
 
-
 def isstring(string_test):
 	return isinstance(string_test, basestring)
 
@@ -15,6 +14,9 @@ def isfloat(float_test):
 
 def islist(list_test):
 	return isinstance(list_test, list)
+
+def islogical(logical_test):
+    return isinstance(logical_test, bool)
 
 def islistoflist(list_test):
     if not islist(list_test):
@@ -45,6 +47,9 @@ def isdict(dict_test):
 def istuple(tuple_test):
     return isinstance(tuple_test, tuple)
 
+def isext(ext_test):
+    return isstring(ext_test) and ext_test[0] == '.'
+
 def iscolorimage(image_test, debug=True):
     if debug:
         print('is numpy array when testing color image?')
@@ -68,7 +73,6 @@ def isgrayimage(image_test, debug=True):
     shape_check = (image_test.ndim == 2 or (image_test.ndim == 3 and image_test.shape[2] == 1))
 
     return True if shape_check else False
-
 
 def isuintimage(image_test, debug=True):
     if debug:
@@ -192,7 +196,6 @@ def isfile(pathname):
     else:
         return False;
 
-
 def isfolder(pathname):
     if is_path_valid(pathname):
         pathname = safepath(pathname)
@@ -204,7 +207,6 @@ def isfolder(pathname):
     else:
         return False
 
-
 def safepath(pathname, debug=True):
     '''
     convert path to a normal representation
@@ -213,14 +215,12 @@ def safepath(pathname, debug=True):
         assert is_path_valid(pathname), 'path is not valid'
     return os.path.normpath(pathname)
 
-
 def CHECK_EQ_LIST(input_list):
 	'''
 	check all elements in a list are equal
 	'''
 	assert islist(input_list), 'input is not a list'
 	return input_list[1:] == input_list[:-1]
-
 
 def CHECK_EQ_DICT(input_dict1, input_dict2):
     '''
@@ -235,4 +235,3 @@ def CHECK_EQ_DICT(input_dict1, input_dict2):
         else:
             return False
     return True
-

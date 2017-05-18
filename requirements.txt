@@ -2,3 +2,4 @@ humanize
 matplotlib
 graphviz
 matlab_wrapper
+glob2

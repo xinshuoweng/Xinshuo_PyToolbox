@@ -116,6 +116,18 @@ def float2percent(number, debug=True):
 		print('could not convert to a floating number')
 	return '{:.1%}'.format(number)
 
+def string2ext_filter(string, debug=True):
+	'''
+	convert a string to an extension filter
+	'''
+	if debug:
+		assert isstring(string), 'input should be a string'
+
+	if isext(string):
+		return string
+	else:
+		return '.' + string
+
 ######################################################### data structure related #########################################################
 def get_subdict(dictionary, num, debug=True):	
 	if debug:
@@ -140,6 +152,19 @@ def merge_listoflist(listoflist, debug=True):
 
 	return merged
 
+def remove_item_from_list(list_to_remove, item, debug=True):
+	'''
+	remove a single item from a list
+	'''
+	if debug:
+		assert islist(list_to_remove), 'input list is not a list'
+		
+	try:
+		list_to_remove.remove(item)
+	except ValueError:
+		print('Warning!!!!!! Item to remove is not in the list. Remove operation is not done.')
+
+	return list_to_remove
 
 ######################################################### math related #########################################################
 def degree2radian(degree, debug=True):
