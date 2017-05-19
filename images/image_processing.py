@@ -7,21 +7,36 @@ from check import *
 def imagecoor2cartesian(pts, debug=True):
 	'''
 	change the coordinate system from image coordinate system to normal cartesian system, basically reverse the y coordinate
+
+	parameter: 
+		pts:	a single point (list, tuple, numpy array) or a 2 x N numpy array representing a set of points
+
+	return:
+		pts:	a tuple if only single point comes in or a 2 x N numpy array
 	'''
-	if debug:
-		# print('debug mode is on during convert_pts function. Please turn off after debuging')
-		assert is2dpts(pts), 'point is not correct'
-	return (pts[0], -pts[1])
+	return cartesian2imagecoor(pts, debug=debug)
 
 
 def cartesian2imagecoor(pts, debug=True):
 	'''
 	change the coordinate system from normal cartesian system back to image coordinate system, basically reverse the y coordinate
+	
+	parameter: 
+		pts:	a single point (list, tuple, numpy array) or a 2 x N numpy array representing a set of points
+
+	return:
+		pts:	a tuple if only single point comes in or a 2 x N numpy array
 	'''
 	if debug:
-		# print('debug mode is on during convert_pts_back2image function. Please turn off after debuging')
-		assert is2dpts(pts), 'point is not correct'
-	return (pts[0], -pts[1])
+		assert is2dpts(pts) or (isnparray(pts) and pts.shape[0] == 2 and pts.shape[1] > 0), 'point is not correct'
+	
+	if is2dpts(pts):
+		if isnparray(pts):
+			pts = np.reshape(pts, (2, ))
+		return (pts[0], -pts[1])
+	else:
+		pts[1, :] = -pts[1, :]
+		return pts
 
 
 def imagecoor2cartesian_center(image_shape, debug=True):

@@ -10,6 +10,7 @@ import sys
 import __init__paths__
 from check import *
 from file_io import mkdir_if_missing, fileparts
+from bbox_transform import bbox_TLBR2TLWH, bboxcheck_TLBR
 
 def visualize_save_image(image, vis=True, save=False, save_path=None, debug=True):
     '''
@@ -146,6 +147,75 @@ def visualize_image_with_pts(image_path, pts, vis=True, save=False, save_path=No
         plt.show()
     plt.close(fig)
     return
+
+def visualize_image_with_bbox(image_path, bbox, vis=True, save=False, save_path=None, debug=True):
+    '''
+    visualize image and plot keypoints on top of it
+
+    parameter:
+        image_path:     a path to an image
+        bbox:           N X 4 numpy array, with TLBR format
+    '''
+
+    if debug:
+        assert is_path_exists(image_path), 'image is not existing'
+        assert bboxcheck_TLBR(bbox), 'input bounding boxes are not correct'
+
+    try:
+        image = imread(image_path)
+    except IOError:
+        print('path is not a valid image path. Please check: %s' % image_path)
+        return
+
+    dpi = 80  
+    width = image.shape[1]
+    height = image.shape[0]
+    figsize = width / float(dpi), height / float(dpi)
+    fig = plt.figure(figsize=figsize)
+    ax = fig.add_axes([0, 0, 1, 1])
+    ax.axis('off')
+    
+    # display image
+    if iscolorimage(image, debug=debug):
+        if debug:
+            print 'visualizing color image'
+        ax.imshow(image, interpolation='nearest')
+    elif isgrayimage(image, debug=debug):
+        if debug:
+            print 'visualizing grayscale image'
+        if image.ndim == 3 and image.shape[-1] == 1:
+            image = np.reshape(image, image.shape[:-1])
+        if isfloatimage(image, debug=debug) and all(item == 1.0 for item in image.flatten().tolist()):
+            if debug:
+                print('all elements in image are 1. For visualizing, we subtract the top left with an epsilon value')
+            image[0, 0] -= 0.00001
+        elif isuintimage(image, debug=debug) and all(item == 255 for item in image.flatten().tolist()):
+            if debug:
+                print('all elements in image are 255. For visualizing, we subtract the top left with an epsilon value')
+            image[0, 0] -= 1
+        ax.imshow(image, interpolation='nearest', cmap='gray')
+    else:
+        assert False, 'image is not correct'
+    ax.set(xlim=[0, width], ylim=[height, 0], aspect=1)
+
+    # plot bounding box
+    bbox = bbox_TLBR2TLWH(bbox)              # convert TLBR format to TLWH format
+    for bbox_index in range(bbox.shape[0]):
+        bbox_tmp = bbox[bbox_index, :]     
+        ax.add_patch(plt.Rectangle((bbox_tmp[0], bbox_tmp[1]), bbox_tmp[2], bbox_tmp[3], fill=False, edgecolor='red', linewidth=3.5))
+
+    # save and visualization
+    if save:
+        if debug:
+            assert is_path_exists_or_creatable(save_path) and isfile(save_path), 'save path is not valid: %s' % save_path
+            mkdir_if_missing(save_path)
+        fig.savefig(save_path, dpi=dpi, transparent=True)
+    if vis:
+        plt.show()
+    plt.close(fig)
+    return
+
+
 
 def nearest_neighbor_visualization(featuremap_dict, num_neighbor=5, top_number=5, vis=True, save_csv=False, csv_save_path=None, save_vis=False, save_img=False, save_thumb_name='nearest_neighbor.png', img_src_folder=None, ext_filter='.jpg', nn_save_folder=None, debug=True):
     '''

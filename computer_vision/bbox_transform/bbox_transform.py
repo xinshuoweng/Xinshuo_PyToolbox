@@ -14,6 +14,7 @@ from image_processing import imagecoor2cartesian, cartesian2imagecoor
 from numpy.testing import assert_almost_equal
 from math import radians as rad
 from check import isnparray
+import matplotlib.pyplot as plt
 
 def bbox_transform(ex_rois, gt_rois):
     ex_widths = ex_rois[:, 2] - ex_rois[:, 0] + 1.0
@@ -204,11 +205,19 @@ def pts2bbox(pts, debug=True, vis=False):
         assert pts.shape[1] >= 2, 'number of points should be larger or equal than 2'
 
     bbox = np.zeros((1, 4), dtype='float32')
-    bbox[0] = np.min(pts[0, :])          # x coordinate of left top point
-    bbox[1] = np.min(pts[1, :])          # y coordinate of left top point
-    bbox[2] = np.max(pts[0, :])          # x coordinate of bottom right point
-    bbox[3] = np.max(pts[1, :])          # y coordinate of bottom right point
+    bbox[0, 0] = np.min(pts[0, :])          # x coordinate of left top point
+    bbox[0, 1] = np.min(pts[1, :])          # y coordinate of left top point
+    bbox[0, 2] = np.max(pts[0, :])          # x coordinate of bottom right point
+    bbox[0, 3] = np.max(pts[1, :])          # y coordinate of bottom right point
     
+    if vis:
+        fig = plt.figure()
+        pts = imagecoor2cartesian(pts)
+        plt.scatter(pts[0, :], pts[1, :], color='r')
+        plt.scatter(bbox[0, 0], -bbox[0, 1], color='b')         # -1 is to convert the coordinate from image to cartesian
+        plt.scatter(bbox[0, 2], -bbox[0, 3], color='b')
+        plt.show()
+        plt.close(fig)
     return bbox
 
 def bbox2center(bbox, debug=True, vis=False):
@@ -222,12 +231,21 @@ def bbox2center(bbox, debug=True, vis=False):
         center: 2 x N numpy array, x and y correspond to first and second row respectively
     '''
     if debug:
-        assert bboxcheck_LTRB(bbox), 'the input bounding box should be TLBR format'
+        assert bboxcheck_TLBR(bbox), 'the input bounding box should be TLBR format'
 
     num_bbox = bbox.shape[0]        
     center = np.zeros((num_bbox, 2), dtype='float32')
     center[:, 0] = (bbox[:, 0] + bbox[:, 2]) / 2.
     center[:, 1] = (bbox[:, 1] + bbox[:, 3]) / 2.
+
+    if vis:
+        fig = plt.figure()
+        plt.scatter(bbox[0, 0], -bbox[0, 1], color='b')         # -1 is to convert the coordinate from image to cartesian
+        plt.scatter(bbox[0, 2], -bbox[0, 3], color='b')
+        center_show = imagecoor2cartesian(center)
+        plt.scatter(center_show[0], center_show[1], color='r')        
+        plt.show()
+        plt.close(fig)
     return np.transpose(center)
 
 def bboxcheck(bbox, debug=True):
@@ -236,17 +254,43 @@ def bboxcheck(bbox, debug=True):
 
     parameter:
         bbox:   N x 4 numpy array, TLBR format
+    
+    return:
+        True or False
     '''    
     return isnparray(bbox) and bbox.shape[1] == 4 and bbox.shape[0] > 0
 
-def bboxcheck_LTRB(bbox, debug=True):
+def bboxcheck_TLBR(bbox, debug=True):
     '''
     check the input bounding box to be TLBR format
 
     parameter:
         bbox:   N x 4 numpy array, TLBR format
+    
+    return:
+        True or False
     '''
     if not bboxcheck(bbox):
         return False
 
-    return (box[:, 3] >= bbox[:, 1]).all() and (box[:, 4] >= bbox[:, 2]).all()      # coordinate of bottom right point should be larger or equal than top left point
+    return (bbox[:, 3] >= bbox[:, 1]).all() and (bbox[:, 2] >= bbox[:, 0]).all()      # coordinate of bottom right point should be larger or equal than top left point
+
+def bbox_TLBR2TLWH(bbox, debug=True):
+    '''
+    transform the input bounding box with TLBR format to TLWH format
+
+    parameter:
+        bbox: N X 4 numpy array, TLBR format
+
+    return 
+        bbox: N X 4 numpy array, TLWH format
+    '''
+    if debug:
+        assert bboxcheck_TLBR(bbox), 'the input bounding box should be TLBR format'
+
+    bbox_TLWH = np.zeros_like(bbox)
+    bbox_TLWH[:, 0] = bbox[:, 0]
+    bbox_TLWH[:, 1] = bbox[:, 1]
+    bbox_TLWH[:, 2] = bbox[:, 2] - bbox[:, 0]
+    bbox_TLWH[:, 3] = bbox[:, 3] - bbox[:, 1]
+    return bbox_TLWH
