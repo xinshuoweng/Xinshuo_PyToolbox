@@ -6,6 +6,7 @@ import os
 import numpy as np
 import math
 from itertools import islice
+import struct
 
 from check import *
 
@@ -174,6 +175,24 @@ def remove_empty_item_from_list(list_to_remove, debug=True):
 		assert islist(list_to_remove), 'input list is not a list'
 	
 	return remove_item_from_list(list_to_remove, '', debug=debug)
+
+def float_list2bytes(float_list, debug=True):
+	'''
+	convert a float number to a set of bytes
+	'''
+	if debug:
+		assert isfloat(float_list) or (islist(float_list) and all(isfloat(float_tmp) for float_tmp in float_list)), 'input is not a floating number or a list of floating number'
+
+	# convert a single floating number to a list with one item
+	if isfloat(float_list):
+		floats = [floats]
+
+	try:
+		binary = struct.pack('%sf' % len(floats), *floats)
+	except ValueError:
+		print('Warnings!!!! Failed to convert to bytes!!!!!')
+
+	return binary
 
 ######################################################### math related #########################################################
 def degree2radian(degree, debug=True):
