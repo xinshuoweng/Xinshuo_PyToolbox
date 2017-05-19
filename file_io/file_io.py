@@ -18,7 +18,7 @@ def fileparts(pathname, debug=True):
 	this function return a tuple, which contains (directory, filename, extension)
 	if the file has multiple extension, only last one will be displayed
 	'''
-	pathname = safepath(pathname, debug=debug)
+	pathname = safepath(pathname)
 	if len(pathname) == 0:
 		return ('', '', '')
 	if pathname[-1] == '/':
@@ -104,6 +104,7 @@ def load_list_from_folder(folder_path, ext_filter=None, depth=1, recursive=False
         with open(save_path, 'w') as file:
             for item in fulllist:
                 file.write('%s\n' % item)
+        file.close()
 
     return fulllist, num_elem
 
@@ -129,6 +130,7 @@ def load_list_from_folders(folder_path_list, ext_filter=None, depth=1, recursive
         with open(save_path, 'w') as file:
             for item in fulllist:
                 file.write('%s\n' % item)
+        file.close()
 
     return fulllist, num_elem
 
@@ -185,7 +187,7 @@ def generate_list_from_data(save_path, src_data, debug=True):
     with open(save_path, 'w') as file:
         for item in src_data:
             file.write('%f\n' % item)
-
+    file.close()
 
 def save_image_from_data(save_path, data, debug=True, vis=False):
     save_path = safepath(save_path)
@@ -195,3 +197,18 @@ def save_image_from_data(save_path, data, debug=True, vis=False):
         mkdir_if_missing(save_path)
 
     imsave(save_path, data)
+
+def load_txt_file(file_path, debug=True):
+    '''
+    load data or string from text file
+    '''
+    file_path = safepath(file_path)
+    if debug:
+        assert is_path_exists(file_path), 'text file is not existing!'
+
+    with open(file_path, 'r') as file:
+        data = file.read().splitlines()
+    num_lines = len(data)
+    file.close()
+
+    return data, num_lines

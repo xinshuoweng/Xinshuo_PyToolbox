@@ -166,6 +166,15 @@ def remove_item_from_list(list_to_remove, item, debug=True):
 
 	return list_to_remove
 
+def remove_empty_item_from_list(list_to_remove, debug=True):
+	'''
+	remove an empty string from a list
+	'''
+	if debug:
+		assert islist(list_to_remove), 'input list is not a list'
+	
+	return remove_item_from_list(list_to_remove, '', debug=debug)
+
 ######################################################### math related #########################################################
 def degree2radian(degree, debug=True):
 	'''

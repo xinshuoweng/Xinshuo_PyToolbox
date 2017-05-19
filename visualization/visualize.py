@@ -12,6 +12,9 @@ from check import *
 from file_io import mkdir_if_missing, fileparts
 
 def visualize_save_image(image, vis=True, save=False, save_path=None, debug=True):
+    '''
+    input image is a numpy array matrix
+    '''
     if islist(image):
         imagelist = image
         save_path_list = save_path
@@ -78,6 +81,10 @@ def visualize_save_image(image, vis=True, save=False, save_path=None, debug=True
         plt.show()
 
     plt.close(fig)
+
+
+def visualize_image_with_pts(image_path, pts, vis=True, save=False, save_path=None, debug=True):
+    pass
 
 
 

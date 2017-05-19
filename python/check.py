@@ -207,12 +207,11 @@ def isfolder(pathname):
     else:
         return False
 
-def safepath(pathname, debug=True):
+def safepath(pathname):
     '''
     convert path to a normal representation
     '''
-    if debug:
-        assert is_path_valid(pathname), 'path is not valid'
+    assert is_path_valid(pathname), 'path is not valid'
     return os.path.normpath(pathname)
 
 def CHECK_EQ_LIST(input_list):
