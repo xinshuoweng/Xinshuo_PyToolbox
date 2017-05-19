@@ -42,3 +42,7 @@ def format_time(seconds):
     m, s = divmod(int(seconds), 60)
     h, m = divmod(m, 60)
     return '%d:%02d:%02d' % (h, m, s)
+
+
+def get_timestring():
+    return time.strftime('%Y%m%d_%Hh%Mm%Ss')
