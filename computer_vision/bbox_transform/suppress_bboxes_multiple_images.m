@@ -32,8 +32,8 @@ function boxes = suppress_boxes_multiple_images(boxes, before_nms_topN, nms_over
     end
     
     test_boxes = boxes{1};
-    boxcheck_LTRB(test_boxes);
-    boxcheck_sortedscore(test_boxes);
+    bboxcheck_TLBR(test_boxes);
+    bboxcheck_sortedscore(test_boxes);
 
     % to speed up nms
     if before_nms_topN > 0

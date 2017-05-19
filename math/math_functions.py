@@ -8,6 +8,7 @@ import __init__paths__
 from check import *
 
 ################################################################## 2d geometry ##################################################################
+# TODO: check
 def get_line(pts, slope, debug=True):
     '''
     # slope is the angle in degree, this function takes a point and a
@@ -30,6 +31,7 @@ def get_line(pts, slope, debug=True):
         assert_almost_equal(pts[0]*a + pts[1]*b + 1, 0, err_msg='Point is not on the line')
     return np.array([a, b, 1], dtype=float)
 
+# TODO: check
 def get_slope(pts1, pts2, debug=True):
     if debug:
         print('debug mode is on during get_slope function. Please turn off after debuging')
@@ -41,7 +43,7 @@ def get_slope(pts1, pts2, debug=True):
     slope = math.degrees(slope)
     return slope
 
-
+# TODO: check
 def get_intersection(line1, line2, debug=True):
     if debug:
         print('debug mode is on during get_intersection function. Please turn off after debuging')

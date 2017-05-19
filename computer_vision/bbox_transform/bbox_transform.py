@@ -9,61 +9,11 @@ import __init__paths__
 import numpy as np
 import math
 import time
-# import math_function as mf
-# from image_processing import imagecoor2cartesian, cartesian2imagecoor
+from math_functions import get_line, get_intersection
+from image_processing import imagecoor2cartesian, cartesian2imagecoor
 from numpy.testing import assert_almost_equal
 from math import radians as rad
 from check import isnparray
-
-
-# convert the point coordinate in the image, y axis is inverse
-def convert_pts(pts):
-    return np.array([pts[0], -pts[1]], dtype=float)
-
-def convert_pts_back2image(pts):
-    return np.array([pts[0], -pts[1]], dtype=float)
-
-# slope is the angle
-def get_line(pts, slope):
-    if slope == 90 or -90:
-        slope = slope + 0.00001
-    slope = math.tan(math.radians(slope))
-    # print('slope is ' + str(slope))
-    dividor = slope * pts[0] - pts[1]
-    if dividor == 0:
-        dividor += 0.00001
-    b = 1.0 / dividor
-    a = -b * slope
-    # assert math.fabs(pts[0]*a + pts[1]*b + 1) < 0.0000001, 'Point is not on the line'
-    return np.array([a, b, 1], dtype=float)
-
-def get_slope(pts1, pts2):
-    slope = (pts1[1] - pts2[1]) / (pts1[0] - pts2[0])
-    # print(slope)
-    slope = np.arctan(slope)
-    # print(slope)
-    slope = math.degrees(slope)
-    # print(slope)
-    return slope
-
-
-def get_intersection(line1, line2):
-    a1 = line1[0]
-    b1 = line1[1]
-    a2 = line2[0]
-    b2 = line2[1]
-    dividor = a2 * b1 - a1 * b2
-    if dividor == 0:
-        dividor += 0.00001
-    y = (a1 - a2) / dividor
-    if a1 == 0:
-        a1 += 0.00001
-    x = (-1.0 - b1 * y) / a1
-    # assert math.fabs(x*line1[0] + y*line1[1] + 1) < 0.0000001, 'Intersection point is not on the line'
-    # assert math.fabs(x*line2[0] + y*line2[1] + 1) < 0.0000001, 'Intersection point is not on the line'
-    return np.array([x, y], dtype=float)
-
-
 
 def bbox_transform(ex_rois, gt_rois):
     ex_widths = ex_rois[:, 2] - ex_rois[:, 0] + 1.0
@@ -84,21 +34,14 @@ def bbox_transform(ex_rois, gt_rois):
     targets = np.vstack((targets_dx, targets_dy, targets_dw, targets_dh)).transpose()
     return targets
 
-# boxes are from RPN, deltas are from boxes regression parameter
-
-def bbox_transform_inv(boxes, deltas):
-    # if cfg.DEBUG:
-    #     print(boxes.shape)
-    #     print(deltas.shape)
-    #     print(boxes[0])
-    #     print(deltas[0])
-        # time.sleep(10000)
-
+def bbox_transform_inv(boxes, deltas, debug=True):
+    '''
+    boxes are from RPN, deltas are from boxes regression parameter
+    '''
     if boxes.shape[0] == 0:
         return np.zeros((0, deltas.shape[1]), dtype=deltas.dtype)
 
     boxes = boxes.astype(deltas.dtype, copy=False)
-
     widths = boxes[:, 2] - boxes[:, 0] + 1.0
     heights = boxes[:, 3] - boxes[:, 1] + 1.0
     ctr_x = boxes[:, 0] + 0.5 * widths          # center of the boxes
@@ -109,12 +52,11 @@ def bbox_transform_inv(boxes, deltas):
     dw = deltas[:, 2::4]
     dh = deltas[:, 3::4]
 
-    # if cfg.DEBUG:
-    #     print(deltas[0, 0:4])
-    #     print(deltas[0, 1::4])
-    #     print(deltas[0, 2::4])
-    #     print(deltas[0, 3::4])
-        # time.sleep(1000)
+    if debug:
+        print(deltas[0, 0:4])
+        print(deltas[0, 1::4])
+        print(deltas[0, 2::4])
+        print(deltas[0, 3::4])
 
     pred_ctr_x = dx * widths[:, np.newaxis] + ctr_x[:, np.newaxis]
     pred_ctr_y = dy * heights[:, np.newaxis] + ctr_y[:, np.newaxis]
@@ -122,32 +64,21 @@ def bbox_transform_inv(boxes, deltas):
     pred_h = np.exp(dh) * heights[:, np.newaxis]
 
     pred_boxes = np.zeros(deltas.shape, dtype=deltas.dtype)
-    # x1
-    pred_boxes[:, 0::4] = pred_ctr_x - 0.5 * pred_w
-    # y1
-    pred_boxes[:, 1::4] = pred_ctr_y - 0.5 * pred_h
-    # x2
-    pred_boxes[:, 2::4] = pred_ctr_x + 0.5 * pred_w
-    # y2
-    pred_boxes[:, 3::4] = pred_ctr_y + 0.5 * pred_h
-
+    pred_boxes[:, 0::4] = pred_ctr_x - 0.5 * pred_w     # x1
+    pred_boxes[:, 1::4] = pred_ctr_y - 0.5 * pred_h     # y1
+    pred_boxes[:, 2::4] = pred_ctr_x + 0.5 * pred_w     # x2
+    pred_boxes[:, 3::4] = pred_ctr_y + 0.5 * pred_h     # y2
     return pred_boxes
 
 def clip_boxes(boxes, im_shape):
-    """
+    '''
     Clip boxes to image boundaries.
-    """
-
-    # x1 >= 0
-    boxes[:, 0::4] = np.maximum(np.minimum(boxes[:, 0::4], im_shape[1] - 1), 0)
-    # y1 >= 0
-    boxes[:, 1::4] = np.maximum(np.minimum(boxes[:, 1::4], im_shape[0] - 1), 0)
-    # x2 < im_shape[1]
-    boxes[:, 2::4] = np.maximum(np.minimum(boxes[:, 2::4], im_shape[1] - 1), 0)
-    # y2 < im_shape[0]
-    boxes[:, 3::4] = np.maximum(np.minimum(boxes[:, 3::4], im_shape[0] - 1), 0)
+    '''
+    boxes[:, 0::4] = np.maximum(np.minimum(boxes[:, 0::4], im_shape[1] - 1), 0)     # x1 >= 0
+    boxes[:, 1::4] = np.maximum(np.minimum(boxes[:, 1::4], im_shape[0] - 1), 0)     # y1 >= 0
+    boxes[:, 2::4] = np.maximum(np.minimum(boxes[:, 2::4], im_shape[1] - 1), 0)     # x2 < im_shape[1]
+    boxes[:, 3::4] = np.maximum(np.minimum(boxes[:, 3::4], im_shape[0] - 1), 0)     # y2 < im_shape[0]
     return boxes
-
 
 def bbox_rotation_inv(bbox_in, angle_in_degree, image_shape, debug=True):
     '''
@@ -173,12 +104,12 @@ def bbox_rotation_inv(bbox_in, angle_in_degree, image_shape, debug=True):
 
     return bbox_recover
 
-
-# transfer the general bbox (top left and bottom right points) to represent rotated bbox with loose version including top left and bottom right points
 def bbox_general2rotated_loose(bbox_in, angle_in_degree, image_shape, debug=True):
+    '''
+    transfer the general bbox (top left and bottom right points) to represent rotated bbox with loose version including top left and bottom right points
+    '''
     bbox = bbox_rotation_inv(bbox_in, angle_in_degree, image_shape, debug=debug) # get top left and bottom right coordinate of the rotated bbox in the image coordinate
     return bbox_rotatedtight2rotatedloose(bbox, angle_in_degree, debug=debug)
-
 
 def bbox_rotatedtight2rotatedloose(bbox_in, angle_in_degree, debug=True):
     '''
@@ -190,10 +121,10 @@ def bbox_rotatedtight2rotatedloose(bbox_in, angle_in_degree, debug=True):
 
     pts_tl = np.array([bbox_in[0], bbox_in[1]])
     pts_br = np.array([bbox_in[2], bbox_in[3]])
-    line1 = get_line(convert_pts(pts_tl), angle_in_degree + 90.00)
-    line2 = get_line(convert_pts(pts_br), angle_in_degree)
-    pts_bl = convert_pts_back2image(get_intersection(line1, line2))
-    pts_tr = convert_pts_back2image(get_intersection(get_line(convert_pts(pts_tl), angle_in_degree), get_line(convert_pts(pts_br), angle_in_degree + 90.00)))
+    line1 = get_line(imagecoor2cartesian(pts_tl), angle_in_degree + 90.00)
+    line2 = get_line(imagecoor2cartesian(pts_br), angle_in_degree)
+    pts_bl = cartesian2imagecoor(get_intersection(line1, line2))
+    pts_tr = cartesian2imagecoor(get_intersection(get_line(imagecoor2cartesian(pts_tl), angle_in_degree), get_line(imagecoor2cartesian(pts_br), angle_in_degree + 90.00)))
     # assert_almost_equal(np.dot(pts_bl - pts_br, pts_bl - pts_tl), 0, err_msg='The intersection points are wrong')
     # assert_almost_equal(np.dot(pts_tr - pts_br, pts_tr - pts_tl), 0, err_msg='The intersection points are wrong')
 
@@ -207,11 +138,7 @@ def bbox_rotatedtight2rotatedloose(bbox_in, angle_in_degree, debug=True):
     # print(pts_tl_final)
     # print(pts_br_final)
     test = np.hstack((pts_tl_final, pts_br_final))
-    # print(test)
-
-    # time.sleep(1000)
     return test
-
 
 def apply_rotation_loose(all_boxes, angle_in_degree, image_shape, debug=True):
     '''
@@ -234,59 +161,6 @@ def apply_rotation_loose(all_boxes, angle_in_degree, image_shape, debug=True):
 
     return all_boxes
 
-
-
-
-
-
-# convert the point coordinate in the image, y axis is inverse
-def convert_pts(pts):
-    return np.array([pts[0], -pts[1]], dtype=float)
-
-def convert_pts_back2image(pts):
-    return np.array([pts[0], -pts[1]], dtype=float)
-
-# slope is the angle
-def get_line(pts, slope):
-    if slope == 90 or -90:
-        slope = slope + 0.00001
-    slope = math.tan(math.radians(slope))
-    # print('slope is ' + str(slope))
-    dividor = slope * pts[0] - pts[1]
-    if dividor == 0:
-        dividor += 0.00001
-    b = 1.0 / dividor
-    a = -b * slope
-    # assert math.fabs(pts[0]*a + pts[1]*b + 1) < 0.0000001, 'Point is not on the line'
-    return np.array([a, b, 1], dtype=float)
-
-def get_slope(pts1, pts2):
-    slope = (pts1[1] - pts2[1]) / (pts1[0] - pts2[0])
-    # print(slope)
-    slope = np.arctan(slope)
-    # print(slope)
-    slope = math.degrees(slope)
-    # print(slope)
-    return slope
-
-
-def get_intersection(line1, line2):
-    a1 = line1[0]
-    b1 = line1[1]
-    a2 = line2[0]
-    b2 = line2[1]
-    dividor = a2 * b1 - a1 * b2
-    if dividor == 0:
-        dividor += 0.00001
-    y = (a1 - a2) / dividor
-    if a1 == 0:
-        a1 += 0.00001
-    x = (-1.0 - b1 * y) / a1
-    # assert math.fabs(x*line1[0] + y*line1[1] + 1) < 0.0000001, 'Intersection point is not on the line'
-    # assert math.fabs(x*line2[0] + y*line2[1] + 1) < 0.0000001, 'Intersection point is not on the line'
-    return np.array([x, y], dtype=float)
-
-
 def apply_rotation_tight(bbox_in, angle_in_degree, im_shape, debug=True):
     '''
     return 4 points clockwise
@@ -301,10 +175,10 @@ def apply_rotation_tight(bbox_in, angle_in_degree, im_shape, debug=True):
     pts_total = np.zeros((4, 2), dtype=np.int)
     pts_tl = np.array([bbox_tight[0], bbox_tight[1]])
     pts_br = np.array([bbox_tight[2], bbox_tight[3]])
-    line1 = get_line(convert_pts(pts_tl), angle_in_degree + 90.00)
-    line2 = get_line(convert_pts(pts_br), angle_in_degree)
-    pts_bl = convert_pts_back2image(get_intersection(line1, line2))
-    pts_tr = convert_pts_back2image(get_intersection(get_line(convert_pts(pts_tl), angle_in_degree), get_line(convert_pts(pts_br), angle_in_degree + 90.00)))
+    line1 = get_line(imagecoor2cartesian(pts_tl, debug=debug), angle_in_degree + 90.00, debug=debug)
+    line2 = get_line(imagecoor2cartesian(pts_br, debug=debug), angle_in_degree, debug=debug)
+    pts_bl = cartesian2imagecoor(get_intersection(line1, line2, debug=debug), debug=debug)
+    pts_tr = cartesian2imagecoor(get_intersection(get_line(imagecoor2cartesian(pts_tl, debug=debug), angle_in_degree, debug=debug), get_line(imagecoor2cartesian(pts_br, debug=debug), angle_in_degree + 90.00, debug=debug), debug=debug), debug=debug)
 
     # print np.reshape(pts_tl, (1, 2)).shape
     # print pts_total[0, :].shape
@@ -313,7 +187,66 @@ def apply_rotation_tight(bbox_in, angle_in_degree, im_shape, debug=True):
     pts_total[1, :] = np.reshape(pts_tr, (1, 2))
     pts_total[2, :] = np.reshape(pts_br, (1, 2))
     pts_total[3, :] = np.reshape(pts_bl, (1, 2))
-
-    # print pts_total
-
     return pts_total
+
+def pts2bbox(pts, debug=True, vis=False):
+    '''
+    convert a set of 2d points to a bounding box
+
+    parameter:  
+        pts:    2 x N numpy array, N should >= 2
+
+    return:
+        bbox:   1 x 4 numpy array, TLBR format
+    '''
+    if debug:
+        assert isnparray(pts) and pts.shape[0] == 2, 'the input points should have shape 2 x num_pts'
+        assert pts.shape[1] >= 2, 'number of points should be larger or equal than 2'
+
+    bbox = np.zeros((1, 4), dtype='float32')
+    bbox[0] = np.min(pts[0, :])          # x coordinate of left top point
+    bbox[1] = np.min(pts[1, :])          # y coordinate of left top point
+    bbox[2] = np.max(pts[0, :])          # x coordinate of bottom right point
+    bbox[3] = np.max(pts[1, :])          # y coordinate of bottom right point
+    
+    return bbox
+
+def bbox2center(bbox, debug=True, vis=False):
+    '''
+    convert a bounding box to a point, which is the center of this bounding box
+
+    parameter:
+        bbox:   N x 4 numpy array, TLBR format
+
+    return:
+        center: 2 x N numpy array, x and y correspond to first and second row respectively
+    '''
+    if debug:
+        assert bboxcheck_LTRB(bbox), 'the input bounding box should be TLBR format'
+
+    num_bbox = bbox.shape[0]        
+    center = np.zeros((num_bbox, 2), dtype='float32')
+    center[:, 0] = (bbox[:, 0] + bbox[:, 2]) / 2.
+    center[:, 1] = (bbox[:, 1] + bbox[:, 3]) / 2.
+    return np.transpose(center)
+
+def bboxcheck(bbox, debug=True):
+    '''
+    check the input to be a bounding box 
+
+    parameter:
+        bbox:   N x 4 numpy array, TLBR format
+    '''    
+    return isnparray(bbox) and bbox.shape[1] == 4 and bbox.shape[0] > 0
+
+def bboxcheck_LTRB(bbox, debug=True):
+    '''
+    check the input bounding box to be TLBR format
+
+    parameter:
+        bbox:   N x 4 numpy array, TLBR format
+    '''
+    if not bboxcheck(bbox):
+        return False
+
+    return (box[:, 3] >= bbox[:, 1]).all() and (box[:, 4] >= bbox[:, 2]).all()      # coordinate of bottom right point should be larger or equal than top left point

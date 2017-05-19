@@ -50,7 +50,7 @@ def istuple(tuple_test):
 def isext(ext_test):
     return isstring(ext_test) and ext_test[0] == '.'
 
-def iscolorimage(image_test, debug=True):
+def iscolorimage(image_test, debug=False):
     if debug:
         print('is numpy array when testing color image?')
     if not isnparray(image_test):
@@ -62,7 +62,7 @@ def iscolorimage(image_test, debug=True):
 
     return True if shape_check else False
 
-def isgrayimage(image_test, debug=True):
+def isgrayimage(image_test, debug=False):
     if debug:
         print('is numpy array when testing grayscale image?')
     if not isnparray(image_test):
@@ -74,7 +74,7 @@ def isgrayimage(image_test, debug=True):
 
     return True if shape_check else False
 
-def isuintimage(image_test, debug=True):
+def isuintimage(image_test, debug=False):
     if debug:
         print('is shape correct when testing uint8 image?')
     if not (isgrayimage(image_test, debug=debug) or iscolorimage(image_test, debug=debug)):
@@ -94,7 +94,7 @@ def isuintimage(image_test, debug=True):
     else:
         return False
 
-def isfloatimage(image_test, debug=True):
+def isfloatimage(image_test, debug=False):
     if debug:
         print('is shape correct when testing float32 image?')
     if not (isgrayimage(image_test, debug=debug) or iscolorimage(image_test, debug=debug)):
@@ -114,7 +114,7 @@ def isfloatimage(image_test, debug=True):
     else:
         return False
 
-def isimage(image_test, debug=True):
+def isimage(image_test, debug=False):
     return isfloatimage(image_test, debug=debug) or isuintimage(image_test, debug=debug)
 
 def isscaledimage(image_test):

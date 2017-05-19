@@ -4,7 +4,7 @@
 % this function check the format of the input boxes
 % input format could be a 1x1 cell, which contains Nx5 or a .mat
 
-function boxes = boxcheck_score(boxes)
+function boxes = bboxcheck_score(boxes)
 	if ischar(boxes)
 		try
 			fprintf('loading input boxes for clipping.');
