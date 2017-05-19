@@ -176,6 +176,20 @@ def remove_empty_item_from_list(list_to_remove, debug=True):
 	
 	return remove_item_from_list(list_to_remove, '', debug=debug)
 
+def scalar_list2float_list(scalar_list, debug=True):
+	'''
+	remove an empty string from a list
+	'''
+	if debug:
+		assert islist(scalar_list) and all(isscalar(scalar_tmp) for scalar_tmp in scalar_list), 'input list is not a scalar list'
+	
+	float_list = list()
+	for item in scalar_list:
+		float_list.append(float(item))
+
+	return float_list
+
+
 def float_list2bytes(float_list, debug=True):
 	'''
 	convert a float number to a set of bytes
@@ -185,10 +199,10 @@ def float_list2bytes(float_list, debug=True):
 
 	# convert a single floating number to a list with one item
 	if isfloat(float_list):
-		floats = [floats]
+		float_list = [float_list]
 
 	try:
-		binary = struct.pack('%sf' % len(floats), *floats)
+		binary = struct.pack('%sf' % len(float_list), *float_list)
 	except ValueError:
 		print('Warnings!!!! Failed to convert to bytes!!!!!')
 

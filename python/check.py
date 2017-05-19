@@ -26,6 +26,9 @@ def islistoflist(list_test):
     else:
         return False
 
+def isscalar(scalar_test):
+    return isinteger(scalar_test) or isfloat(scalar_test)
+
 def isnparray(nparray_test):
 	return isinstance(nparray_test, np.ndarray)
 
