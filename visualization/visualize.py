@@ -217,26 +217,46 @@ def visualize_image_with_bbox(image_path, bbox, vis=True, save=False, save_path=
 
 def visualize_ced(normed_mean_error_total, error_threshold, debug=debug, vis=vis, save=save, save_path=save_path):
     '''
-    
+    visualize the cumulative error distribution curve (alse called NME curve or pck curve)
+
+    parameter:
+        normed_mean_error_total:    (N, ) numpy array to represent error in evaluation
+        error_threshold:            threshold to display in x axis
     '''
-    y_axis = np.linspace(0,1,1000)
+    if debug:
+        assert isnparray(normed_mean_error_total) and len(normed_mean_error_total) > 0, 'the input error array is not correct'
+        assert error_threshold > 0, 'threshold is not well set'
+        if save:
+            assert save_path is not None and is_path_exists_or_creatable(save_path), 'please provide a valid path to save the results' 
+    dpi = 80  
+    width = image.shape[1]
+    height = image.shape[0]
+    figsize = width / float(dpi), height / float(dpi)
+    fig = plt.figure(figsize=figsize)
+    ax = fig.add_axes([0, 0, 1, 1])
+    ax.axis('off')
+
+    y_axis = np.linspace(0, 1, 1000)
     x_axis = np.zeros(1000)
-    print(pts_NME.shape[0])
+    print(normed_mean_error_total.shape[0])
     for i in range(1000):
-        x_axis[i] = (pts_NME < y_axis[i]).sum() / float(pts_NME.shape[0])
+        x_axis[i] = (normed_mean_error_total < y_axis[i]).sum() / float(normed_mean_error_total.shape[0])
     plt.xlim(0, error_threshold)
     plt.ylim(0, 100)
     plt.yticks(np.arange(0, 110, 10))
-    plt.xticks(np.arange(0, 8, 1))
+    plt.xticks(np.arange(0, error_threshold + 1, 1))
     plt.grid()
     plt.title('NME (%)', fontsize=20)
     plt.xlabel('NME (%)', fontsize=16)
     plt.ylabel('Test Images (%)', fontsize=16)
-    plt.plot(y_axis*100,x_axis*100,'b-',label='FAN (Ours)',lw=3)
+    plt.plot(y_axis*100, x_axis*100, 'b-', label='FAN (Ours)', lw=3)
     plt.legend(loc=4, fontsize=16)
-    plt.show()
-    print('AUC: ',np.sum(x_axis[:70])/70)
-
+    
+    if vis:
+        plt.show()
+    if save:
+        plt.savefig(save_path, dpi=dpi, transparent=True)
+    print('AUC: ', np.sum(x_axis[:70]) / 70)
 
 
 def nearest_neighbor_visualization(featuremap_dict, num_neighbor=5, top_number=5, vis=True, save_csv=False, csv_save_path=None, save_vis=False, save_img=False, save_thumb_name='nearest_neighbor.png', img_src_folder=None, ext_filter='.jpg', nn_save_folder=None, debug=True):

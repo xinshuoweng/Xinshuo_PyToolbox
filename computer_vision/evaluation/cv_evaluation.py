@@ -21,10 +21,6 @@ def facial_landmark_evaluation(pred_dict, anno_dict, num_pts, error_threshold, d
 		save:			determine if saving the visualization results
 		save_path:		a path to save the results
 	'''
-	if debug:
-		if save:
-			assert save_path is not None and is_path_exists_or_creatable(save_path), 'please provide a valid path to save the results'
-
 	num_images = len(pred_dict)
 	if debug:
 		assert num_images > 0, 'the predictions are empty'
