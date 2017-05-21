@@ -1,10 +1,7 @@
-# --------------------------------------------------------
-# Fast R-CNN
-# Copyright (c) 2015 Microsoft
-# Licensed under The MIT License [see LICENSE for details]
-# Written by Ross Girshick
-# --------------------------------------------------------
+# Author: Xinshuo Weng
+# email: xinshuo.weng@gmail.com
 
+# this file contains all functions related to operation of bounding box
 import __init__paths__
 import numpy as np
 import math

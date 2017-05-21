@@ -67,6 +67,29 @@ def get_intersection(line1, line2, debug=True):
         assert_almost_equal(x*line2[0] + y*line2[1] + 1, 0, err_msg='Intersection point is not on the line')
     return np.array([x, y], dtype=float)
 
+def pts_euclidean(pts1, pts2, debug=True):
+    '''
+    calculate the euclidean distance of two sets of points
+
+    parameter:
+        pts1, pts2: 2 x N numpy array, (x, y)
+
+    return
+        average euclidean distance
+    '''
+    if debug:
+        assert isnparray(pts1) and pts1.shape[0] == 2, 'the input points are not correct'
+        assert isnparray(pts2) and pts2.shape[0] == 2, 'the input points are not correct'
+        assert pts1.shape[1] == pts2.shape[1] and pts1.shape[1] > 0, 'number of ponts is not equal in two input'
+    
+    num_pts = pts1.shape[1]
+    ave_euclidean = 0
+    for pts_index in xrange(num_pts):
+        pts1_tmp = pts1[:, pts_index]
+        pts2_tmp = pts2[:, pts_index]
+        ave_euclidean += sqrt((pts1_tmp[0] - pts2_tmp[0])**2 + (pts1_tmp[1] - pts2_tmp[1])**2)
+    ave_euclidean = ave_euclidean / float(num_pts)
+    return ave_euclidean
 
 ################################################################## coordinates ##################################################################
 def cart2pol_2d_degree(pts, debug=True):

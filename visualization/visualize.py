@@ -215,6 +215,28 @@ def visualize_image_with_bbox(image_path, bbox, vis=True, save=False, save_path=
     plt.close(fig)
     return
 
+def visualize_ced(normed_mean_error_total, error_threshold, debug=debug, vis=vis, save=save, save_path=save_path):
+    '''
+    
+    '''
+    y_axis = np.linspace(0,1,1000)
+    x_axis = np.zeros(1000)
+    print(pts_NME.shape[0])
+    for i in range(1000):
+        x_axis[i] = (pts_NME < y_axis[i]).sum() / float(pts_NME.shape[0])
+    plt.xlim(0, error_threshold)
+    plt.ylim(0, 100)
+    plt.yticks(np.arange(0, 110, 10))
+    plt.xticks(np.arange(0, 8, 1))
+    plt.grid()
+    plt.title('NME (%)', fontsize=20)
+    plt.xlabel('NME (%)', fontsize=16)
+    plt.ylabel('Test Images (%)', fontsize=16)
+    plt.plot(y_axis*100,x_axis*100,'b-',label='FAN (Ours)',lw=3)
+    plt.legend(loc=4, fontsize=16)
+    plt.show()
+    print('AUC: ',np.sum(x_axis[:70])/70)
+
 
 
 def nearest_neighbor_visualization(featuremap_dict, num_neighbor=5, top_number=5, vis=True, save_csv=False, csv_save_path=None, save_vis=False, save_img=False, save_thumb_name='nearest_neighbor.png', img_src_folder=None, ext_filter='.jpg', nn_save_folder=None, debug=True):
