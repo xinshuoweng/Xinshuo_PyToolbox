@@ -228,23 +228,31 @@ def visualize_ced(normed_mean_error_total, error_threshold, debug=debug, vis=vis
         assert error_threshold > 0, 'threshold is not well set'
         if save:
             assert save_path is not None and is_path_exists_or_creatable(save_path), 'please provide a valid path to save the results' 
+    
+    # set display parameters
     dpi = 80  
-    width = image.shape[1]
-    height = image.shape[0]
+    width = 1000
+    height = 800
     figsize = width / float(dpi), height / float(dpi)
     fig = plt.figure(figsize=figsize)
     ax = fig.add_axes([0, 0, 1, 1])
     ax.axis('off')
 
-    y_axis = np.linspace(0, 1, 1000)
-    x_axis = np.zeros(1000)
-    print(normed_mean_error_total.shape[0])
-    for i in range(1000):
-        x_axis[i] = (normed_mean_error_total < y_axis[i]).sum() / float(normed_mean_error_total.shape[0])
+    # set figure handle
+    num_images = normed_mean_error_total.shape[0]
+    num_bins = 1000
+    y_axis = np.linspace(0, 1, num_bins)
+    x_axis = np.zeros(num_bins)
+    for i in range(num_bins):
+        x_axis[i] = float((normed_mean_error_total < y_axis[i]).sum()) / num_images
+
+    # plot
+    interval_y = 10
+    interval_x = 1
     plt.xlim(0, error_threshold)
     plt.ylim(0, 100)
-    plt.yticks(np.arange(0, 110, 10))
-    plt.xticks(np.arange(0, error_threshold + 1, 1))
+    plt.yticks(np.arange(0, 100 + interval_y, interval_y))
+    plt.xticks(np.arange(0, error_threshold + interval_x, interval_x))
     plt.grid()
     plt.title('NME (%)', fontsize=20)
     plt.xlabel('NME (%)', fontsize=16)
@@ -256,7 +264,7 @@ def visualize_ced(normed_mean_error_total, error_threshold, debug=debug, vis=vis
         plt.show()
     if save:
         plt.savefig(save_path, dpi=dpi, transparent=True)
-    print('AUC: ', np.sum(x_axis[:70]) / 70)
+    print('AUC: ', np.sum(x_axis[:error_threshold * 10]) / error_threshold * 10)
 
 
 def nearest_neighbor_visualization(featuremap_dict, num_neighbor=5, top_number=5, vis=True, save_csv=False, csv_save_path=None, save_vis=False, save_img=False, save_thumb_name='nearest_neighbor.png', img_src_folder=None, ext_filter='.jpg', nn_save_folder=None, debug=True):
