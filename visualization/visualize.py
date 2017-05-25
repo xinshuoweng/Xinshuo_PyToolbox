@@ -215,7 +215,7 @@ def visualize_image_with_bbox(image_path, bbox, vis=True, save=False, save_path=
     plt.close(fig)
     return
 
-def visualize_ced(normed_mean_error_total, error_threshold, debug=debug, vis=vis, save=save, save_path=save_path):
+def visualize_ced(normed_mean_error_total, error_threshold, debug=True, vis=True, save=False, save_path=None):
     '''
     visualize the cumulative error distribution curve (alse called NME curve or pck curve)
 

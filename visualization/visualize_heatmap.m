@@ -7,14 +7,13 @@ function visualize_heatmap(img, heatmap, debug_mode)
         debug_mode = true;
     end
 
-    if isintegerimage(img)
+    if isIntegerImage(img)
         img = im2double(img);
     end
-    heatmap(heatmap < 0) = 0;       % clip negative value
 
     if debug_mode
-        assert(isfloatimage(img), 'input image is not a float image.');
-        assert(isfloatimage(heatmap), 'input heatmap is not a float image.');
+        assert(isFloatImage_loose(img), 'input image is not a float image.');
+        assert(isFloatImage_loose(heatmap), 'input heatmap is not a float image.');
     end
     max_value = max(max(heatmap));
     im_to_disp = (img + mat2im(heatmap, jet(100), [0 max_value])) / 2;  % apply heatmap on the original image

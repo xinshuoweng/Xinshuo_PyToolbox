@@ -6,7 +6,15 @@
 % or input boxes could be a Nx4 (>= 4) matrix or a .mat
 % input format: LTWH (x, y)
 % output format: LTWH (x, y)
-function boxes = bboxcheck_LTWH(boxes, im_width, im_height)
+function [boxes, im_size] = bboxcheck_LTWH(boxes, im_size, debug_mode)
+	if nargin < 3 
+		debug_mode = true;
+	end
+
+	im_size = check_imageSize(im_size, debug_mode);
+	im_height = im_size(1);
+	im_width  = im_size(2);
+
 	if ischar(boxes)
 		try
 			fprintf('loading input boxes for clipping.');
@@ -21,9 +29,11 @@ function boxes = bboxcheck_LTWH(boxes, im_width, im_height)
 		boxes = boxes{1};
 	end
 
-	assert(ismatrix(boxes) && size(boxes, 2) >= 4, 'input boxes should at least have 4 columns')
-	test_width = boxes(:, 3) + boxes(:, 1);
-	test_height = boxes(:, 4) + boxes(:, 2);
-	assert(sum(test_width > im_width) == 0, 'The input format for boxes should be LTWH, left top point with width and height.');
-	assert(sum(test_height > im_height) == 0, 'The input format for boxes should be LTWH, left top point with width and height.');
+	if debug_mode
+		assert(ismatrix(boxes) && size(boxes, 2) >= 4, 'input boxes should at least have 4 columns')
+		test_width = boxes(:, 3) + boxes(:, 1);
+		test_height = boxes(:, 4) + boxes(:, 2);
+		assert(sum(test_width > im_width) == 0, 'The input format for boxes should be LTWH, left top point with width and height.');
+		assert(sum(test_height > im_height) == 0, 'The input format for boxes should be LTWH, left top point with width and height.');
+	end
 end
