@@ -2,7 +2,7 @@
 % email: xinshuo.weng@gmail.com
 
 % this function is to judge an image to be a float image or not
-function valid = isfloatimage(image_test)
+function valid = isFloatImage(image_test)
 	if ~isImage(image_test)
 		valid = false;
 	else

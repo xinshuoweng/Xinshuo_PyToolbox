@@ -8,8 +8,8 @@ function img_out = preprocess_image_caffe(img, mean_value, debug_mode)
 	end
 
 	if debug_mode
-		img = isImageorPath(img);
-		assert(isintegerimage(img), 'image should be in integer format.');
+		img = check_imageorPath(img);
+		assert(isIntegerImage(img), 'image should be in integer format.');
 		assert(length(mean_value) == 1 || length(mean_value) == 3, 'mean value should be length 1 or 3!');
 		assert(all(mean_value <= 1.0 && mean_value >= 0.0), 'mean value should be in range [0, 1].');
 	end

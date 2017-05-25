@@ -2,7 +2,7 @@
 % email: xinshuo.weng@gmail.com
 
 % this function is to judge an image to be a integer image or not
-function valid = isintegerimage(image_test)
+function valid = isIntegerImage(image_test)
 	if ~isImage(image_test)
 		valid = false;
 	else

@@ -17,7 +17,7 @@ function [X, Y, score] = find_peaks(heatmap, thre, debug_mode, vis)
     end
 
     if debug_mode
-        assert(isfloatimage_loose(heatmap), 'input heatmap is not a image.');
+        assert(isFloatImage_loose(heatmap), 'input heatmap is not a image.');
         assert(isscalar(thre) && thre <= 1 && thre >= 0, 'threshold is not correct.');
     end
 

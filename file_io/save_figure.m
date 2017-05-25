@@ -10,6 +10,7 @@ function save_figure(save_path, im_size)
     fig = getframe;
     img = fig.cdata;
     if exist('im_size', 'var')
+    	im_size = check_imageSize(im_size);
     	img = imresize(img, im_size);
     end
    
