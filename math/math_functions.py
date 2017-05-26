@@ -87,7 +87,7 @@ def pts_euclidean(pts1, pts2, debug=True):
     for pts_index in xrange(num_pts):
         pts1_tmp = pts1[:, pts_index]
         pts2_tmp = pts2[:, pts_index]
-        ave_euclidean += sqrt((pts1_tmp[0] - pts2_tmp[0])**2 + (pts1_tmp[1] - pts2_tmp[1])**2)
+        ave_euclidean += math.sqrt((pts1_tmp[0] - pts2_tmp[0])**2 + (pts1_tmp[1] - pts2_tmp[1])**2)
     ave_euclidean = ave_euclidean / float(num_pts)
     return ave_euclidean
 

@@ -222,6 +222,10 @@ def visualize_ced(normed_mean_error_total, error_threshold, debug=True, vis=True
     parameter:
         normed_mean_error_total:    (N, ) numpy array to represent error in evaluation
         error_threshold:            threshold to display in x axis
+
+    return:
+        AUC:                        area under the curve
+        MSE:                        mean square error
     '''
     if debug:
         assert isnparray(normed_mean_error_total) and len(normed_mean_error_total) > 0, 'the input error array is not correct'
@@ -234,9 +238,7 @@ def visualize_ced(normed_mean_error_total, error_threshold, debug=True, vis=True
     width = 1000
     height = 800
     figsize = width / float(dpi), height / float(dpi)
-    fig = plt.figure(figsize=figsize)
-    ax = fig.add_axes([0, 0, 1, 1])
-    ax.axis('off')
+    plt.figure(figsize=figsize)
 
     # set figure handle
     num_images = normed_mean_error_total.shape[0]
@@ -264,7 +266,12 @@ def visualize_ced(normed_mean_error_total, error_threshold, debug=True, vis=True
         plt.show()
     if save:
         plt.savefig(save_path, dpi=dpi, transparent=True)
-    print('AUC: ', np.sum(x_axis[:error_threshold * 10]) / error_threshold * 10)
+
+    AUC = np.sum(x_axis[:error_threshold * 10]) / error_threshold * 10
+    MSE = normed_mean_error_total
+    print('AUC: ', AUC)
+    print('MSE: ', MSE)
+    return AUC, MSE
 
 
 def nearest_neighbor_visualization(featuremap_dict, num_neighbor=5, top_number=5, vis=True, save_csv=False, csv_save_path=None, save_vis=False, save_img=False, save_thumb_name='nearest_neighbor.png', img_src_folder=None, ext_filter='.jpg', nn_save_folder=None, debug=True):

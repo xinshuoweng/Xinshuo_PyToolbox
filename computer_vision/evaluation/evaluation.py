@@ -6,9 +6,10 @@ import math
 import numpy as np
 
 from bbox_transform import bbox_TLBR2TLWH, pts2bbox
-from check import is_path_exists_or_creatable, isnparray
+from check import is_path_exists_or_creatable, isnparray, islist
 from math_functions import pts_euclidean
 from visualize import visualize_ced
+from file_io import fileparts
 
 def facial_landmark_evaluation(pred_dict, anno_dict, num_pts, error_threshold, debug=True, vis=False, save=True, save_path=None):
 	'''
@@ -30,12 +31,28 @@ def facial_landmark_evaluation(pred_dict, anno_dict, num_pts, error_threshold, d
 	normed_mean_error_total = np.zeros((num_images, ), dtype='float32')
 	count = 0
 	for image_path, pts_prediction in pred_dict.items():
-		pts_anno = anno_dict[image_path]		# 2 x N annotation
+		_, filename, _ = fileparts(image_path)
+		pts_anno = anno_dict[filename]				# 2 x N annotation
+		
+		# to avoid list object type, do conversion here
+		if islist(pts_anno):
+			pts_anno = np.asarray(pts_anno)
+		if islist(pts_prediction):
+			pts_prediction = np.asarray(pts_prediction)
+
+		# to avoid the point location includes the score or occlusion channel, only take the first two channels here
+		if pts_anno.shape[0] == 3 or pts_anno.shape[0] == 4:
+			pts_anno = pts_anno[0:2, :]
+		if pts_prediction.shape[0] == 3 or pts_prediction.shape[0] == 4:
+			pts_prediction = pts_prediction[0:2, :]
+
 		if debug:
 			assert isnparray(pts_anno) and pts_anno.shape[0] == 2 and pts_anno.shape[1] == num_pts, 'shape of annotations is not correct (%d x %d) vs (%d x %d)' % (2, num_pts, pts_anno[0], pts_anno[1])
 			assert pts_anno.shape == pts_prediction.shape, 'shape of predictions and annotation is not the same'
-		bbox_anno = pts2bbox(pts_anno, debug=debug)		
-		bbox_TLWH = bbox_TLBR2TLWH(bbox_anno, debug=debug)
+
+		# calculate normalized mean error
+		bbox_anno = pts2bbox(pts_anno, debug=debug)						# obtain the bbox
+		bbox_TLWH = bbox_TLBR2TLWH(bbox_anno, debug=debug)				
 		bbox_size = math.sqrt(bbox_TLWH[0, 2] * bbox_TLWH[0, 3])
 		normed_mean_error = pts_euclidean(pts_prediction, pts_anno, debug=debug) / bbox_size
 		normed_mean_error_total[count] = normed_mean_error
