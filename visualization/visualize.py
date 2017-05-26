@@ -218,6 +218,7 @@ def visualize_image_with_bbox(image_path, bbox, vis=True, save=False, save_path=
 def visualize_ced(normed_mean_error_total, error_threshold, debug=True, vis=True, save=False, save_path=None):
     '''
     visualize the cumulative error distribution curve (alse called NME curve or pck curve)
+    all parameters are represented by percentage
 
     parameter:
         normed_mean_error_total:    (N, ) numpy array to represent error in evaluation
@@ -242,11 +243,18 @@ def visualize_ced(normed_mean_error_total, error_threshold, debug=True, vis=True
 
     # set figure handle
     num_images = normed_mean_error_total.shape[0]
-    num_bins = 1000
-    y_axis = np.linspace(0, 1, num_bins)
-    x_axis = np.zeros(num_bins)
+    num_bins = 10000
+    x_axis = np.linspace(0, 1, num_bins)         # error axis
+    y_axis = np.zeros(num_bins)
     for i in range(num_bins):
-        x_axis[i] = float((normed_mean_error_total < y_axis[i]).sum()) / num_images
+        y_axis[i] = float((normed_mean_error_total < x_axis[i]).sum()) / num_images         # percentage of error
+
+    # calculate metrics
+    scale = num_bins / 100
+    AUC = np.sum(y_axis[:error_threshold * scale]) / (error_threshold * scale)              # bigger, better
+    MSE = np.mean(normed_mean_error_total)                                                  # smaller, better
+    print('AUC: %f' % AUC)
+    print('MSE: %f' % MSE)
 
     # plot
     interval_y = 10
@@ -256,21 +264,18 @@ def visualize_ced(normed_mean_error_total, error_threshold, debug=True, vis=True
     plt.yticks(np.arange(0, 100 + interval_y, interval_y))
     plt.xticks(np.arange(0, error_threshold + interval_x, interval_x))
     plt.grid()
-    plt.title('NME (%)', fontsize=20)
-    plt.xlabel('NME (%)', fontsize=16)
+    plt.title('2D PCK curve', fontsize=20)
+    plt.xlabel('Normalized distance (%)', fontsize=16)
     plt.ylabel('Test Images (%)', fontsize=16)
-    plt.plot(y_axis*100, x_axis*100, 'b-', label='FAN (Ours)', lw=3)
+    plt.plot(x_axis*100, y_axis*100, 'b-', label='Ours', lw=3)
     plt.legend(loc=4, fontsize=16)
     
     if vis:
         plt.show()
     if save:
         plt.savefig(save_path, dpi=dpi, transparent=True)
+    plt.close()
 
-    AUC = np.sum(x_axis[:error_threshold * 10]) / error_threshold * 10
-    MSE = normed_mean_error_total
-    print('AUC: ', AUC)
-    print('MSE: ', MSE)
     return AUC, MSE
 
 
