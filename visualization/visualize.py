@@ -12,6 +12,8 @@ from check import *
 from file_io import mkdir_if_missing, fileparts
 from bbox_transform import bbox_TLBR2TLWH, bboxcheck_TLBR
 
+color_set = ['b', 'g', 'y', 'k', 'r']
+
 def visualize_save_image(image, vis=True, save=False, save_path=None, debug=True):
     '''
     input image is a numpy array matrix
@@ -215,13 +217,13 @@ def visualize_image_with_bbox(image_path, bbox, vis=True, save=False, save_path=
     plt.close(fig)
     return
 
-def visualize_ced(normed_mean_error_total, error_threshold, debug=True, vis=True, save=False, save_path=None):
+def visualize_ced(normed_mean_error_dict, error_threshold, debug=True, vis=True, save=False, save_path=None):
     '''
     visualize the cumulative error distribution curve (alse called NME curve or pck curve)
     all parameters are represented by percentage
 
     parameter:
-        normed_mean_error_total:    (N, ) numpy array to represent error in evaluation
+        normed_mean_error_dict:     a dictionary whose keys are the method name and values are (N, ) numpy array to represent error in evaluation
         error_threshold:            threshold to display in x axis
 
     return:
@@ -229,8 +231,8 @@ def visualize_ced(normed_mean_error_total, error_threshold, debug=True, vis=True
         MSE:                        mean square error
     '''
     if debug:
-        assert isnparray(normed_mean_error_total) and len(normed_mean_error_total) > 0, 'the input error array is not correct'
-        assert error_threshold > 0, 'threshold is not well set'
+        assert isdict(normed_mean_error_dict), 'the input normalized mean error dictionary is not correct'
+        assert error_threshold > 0 and error_threshold < 100, 'threshold percentage is not well set'
         if save:
             assert save_path is not None and is_path_exists_or_creatable(save_path), 'please provide a valid path to save the results' 
     
@@ -242,21 +244,10 @@ def visualize_ced(normed_mean_error_total, error_threshold, debug=True, vis=True
     plt.figure(figsize=figsize)
 
     # set figure handle
-    num_images = normed_mean_error_total.shape[0]
     num_bins = 10000
-    x_axis = np.linspace(0, 1, num_bins)         # error axis
+    x_axis = np.linspace(0, 1, num_bins)            # error axis, percentage of normalization factor
     y_axis = np.zeros(num_bins)
-    for i in range(num_bins):
-        y_axis[i] = float((normed_mean_error_total < x_axis[i]).sum()) / num_images         # percentage of error
-
-    # calculate metrics
     scale = num_bins / 100
-    AUC = np.sum(y_axis[:error_threshold * scale]) / (error_threshold * scale)              # bigger, better
-    MSE = np.mean(normed_mean_error_total)                                                  # smaller, better
-    print('AUC: %f' % AUC)
-    print('MSE: %f' % MSE)
-
-    # plot
     interval_y = 10
     interval_x = 1
     plt.xlim(0, error_threshold)
@@ -267,9 +258,33 @@ def visualize_ced(normed_mean_error_total, error_threshold, debug=True, vis=True
     plt.title('2D PCK curve', fontsize=20)
     plt.xlabel('Normalized distance (%)', fontsize=16)
     plt.ylabel('Test Images (%)', fontsize=16)
-    plt.plot(x_axis*100, y_axis*100, 'b-', label='Ours', lw=3)
-    plt.legend(loc=4, fontsize=16)
-    
+
+    # calculate metrics for each method
+    num_methods = len(normed_mean_error_dict)
+    num_images = len(normed_mean_error_dict.values()[0])
+    AUC = dict()
+    MSE = dict()
+    method_index = 0
+    assert num_images > 0, 'number of error array should be larger than 0'
+    for method_name, normed_mean_error in normed_mean_error_dict.items():
+        if debug:
+            assert isnparray(normed_mean_error) and len(normed_mean_error) == num_images and normed_mean_error.ndim == 1, 'the input error array is not correct'
+
+        for i in range(num_bins):
+            y_axis[i] = float((normed_mean_error < x_axis[i]).sum()) / num_images         # percentage of error
+
+        AUC[method_name] = np.sum(y_axis[:error_threshold * scale]) / (error_threshold * scale)              # bigger, better
+        MSE[method_name] = np.mean(normed_mean_error)                                                  # smaller, better
+
+        # draw 
+        color_index = method_index % len(color_set) 
+        color_tmp = color_set[color_index]
+        plt.plot(x_axis*100, y_axis*100, '%s-' % color_tmp, label=method_name, lw=3)
+        plt.legend(loc=4, fontsize=16)
+        method_index += 1
+
+    # print('AUC: %f' % AUC)
+    # print('MSE: %f' % MSE)
     if vis:
         plt.show()
     if save:

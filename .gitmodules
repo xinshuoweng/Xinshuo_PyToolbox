@@ -10,3 +10,6 @@
 [submodule "external/python/matlab_wrapper"]
 	path = external/python/matlab_wrapper
 	url = git@github.com:mrkrd/matlab_wrapper.git
+[submodule "external/lua/fblualib"]
+	path = external/lua/fblualib
+	url = git@github.com:facebook/fblualib.git
