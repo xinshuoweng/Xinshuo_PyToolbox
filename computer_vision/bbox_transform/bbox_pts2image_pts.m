@@ -17,6 +17,7 @@ function pts_locations = bbox_pts2image_pts(pts_locations, im_size, bbox, debug_
 	if debug_mode
 		assert(size(pts_locations, 1) == 2, 'shape of point locations is not correct!');
 	end
+
 	[bbox, im_size] = bboxcheck_TLWH(bbox, im_size, debug_mode);
 
 	%% convert point coordinate

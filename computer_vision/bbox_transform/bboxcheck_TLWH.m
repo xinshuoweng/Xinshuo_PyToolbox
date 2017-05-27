@@ -31,8 +31,8 @@ function [boxes, im_size] = bboxcheck_LTWH(boxes, im_size, debug_mode)
 
 	if debug_mode
 		assert(ismatrix(boxes) && size(boxes, 2) >= 4, 'input boxes should at least have 4 columns')
-		test_width = boxes(:, 3) + boxes(:, 1);
-		test_height = boxes(:, 4) + boxes(:, 2);
+		test_width = boxes(:, 3) + boxes(:, 1) - 1;
+		test_height = boxes(:, 4) + boxes(:, 2) - 1;
 		assert(sum(test_width > im_width) == 0, 'The input format for boxes should be LTWH, left top point with width and height.');
 		assert(sum(test_height > im_height) == 0, 'The input format for boxes should be LTWH, left top point with width and height.');
 	end
