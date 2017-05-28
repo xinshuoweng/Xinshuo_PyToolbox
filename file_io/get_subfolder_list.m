@@ -3,8 +3,14 @@
 
 % this function return a cell array, which contains all valid subfolder under given folder path
 % depth control how deep we want to fetch the subfolder list, which should be a scalar
-function subfolder_list = get_subfolder_list(folder_path, depth)
-	assert(ischar(folder_path), 'The input path is not vaid while getting subfolder list');
+function subfolder_list = get_subfolder_list(folder_path, depth, debug_mode)
+    if nargin < 3
+        debug_mode = true;
+    end
+
+    if debug_mode
+    	assert(ischar(folder_path), 'The input path is not vaid while getting subfolder list');
+    end
 
     if ~exist('depth', 'var')
         depth = intmax;
@@ -14,7 +20,9 @@ function subfolder_list = get_subfolder_list(folder_path, depth)
 
     if depth > 0       
     	cell_list = dir(folder_path);
-        assert(~isempty(cell_list), 'The input path not found while obtaining subfolder list!');
+        if debug_mode
+            assert(~isempty(cell_list), 'The input path not found while obtaining subfolder list!');
+        end
     	dir_check = {cell_list(:).isdir};
         dir_name = {cell_list(:).name};
 
@@ -28,7 +36,7 @@ function subfolder_list = get_subfolder_list(folder_path, depth)
         
         % find subfolder recursively
         if ~isempty(cur_subfolder_path)
-            sub_subfolder_path = cellfun(@(x) get_subfolder_list(x, depth - 1), cur_subfolder_path, 'UniformOutput', false);	
+            sub_subfolder_path = cellfun(@(x) get_subfolder_list(x, depth - 1, debug_mode), cur_subfolder_path, 'UniformOutput', false);	
             if ~isempty(sub_subfolder_path)
                 sub_subfolder_list = {};
                 for i = 1:length(sub_subfolder_path)
