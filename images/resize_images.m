@@ -34,9 +34,12 @@ function num_images = resize_images(src_path, save_dir, resize_size, ext_filter,
         fprintf('processing %d/%d, filename: %s, elapsed time: %s, remaining time: %s\n', i, num_images, filename, elapsed_str, remaining_str);
 
         % process
+        save_path = fullfile(save_dir, sprintf('%s.png', filename));
+        if exist(save_path, 'file')
+        	continue;
+        end
 		image_temp = imread(image_path_temp);
 		resized = imresize(image_temp, resize_size);
-		save_path = fullfile(save_dir, sprintf('%s.png', filename));
 		imwrite(resized, save_path);
 	end
 

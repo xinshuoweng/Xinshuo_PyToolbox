@@ -204,7 +204,7 @@ def load_txt_file(file_path, debug=True):
     '''
     file_path = safepath(file_path)
     if debug:
-        assert is_path_exists(file_path), 'text file is not existing!'
+        assert is_path_exists(file_path), 'text file is not existing at path: %s!' % file_path
 
     with open(file_path, 'r') as file:
         data = file.read().splitlines()
