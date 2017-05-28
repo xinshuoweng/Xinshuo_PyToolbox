@@ -7,6 +7,7 @@ import numpy as np
 import math
 from itertools import islice
 import struct
+import functools
 
 from check import *
 
@@ -129,6 +130,15 @@ def string2ext_filter(string, debug=True):
 	else:
 		return '.' + string
 
+def print_np_shape(nparray, debug=True):
+	'''
+	print a string to represent the shape of a numpy array
+	'''
+	if debug:
+		assert isnparray(nparray), 'input is not a numpy array and does not have any shape'
+
+	return '(%s)' % (functools.reduce(lambda x, y: str(x) + ', ' + str(y), nparray.shape))
+
 ######################################################### data structure related #########################################################
 def get_subdict(dictionary, num, debug=True):	
 	if debug:
@@ -207,6 +217,15 @@ def float_list2bytes(float_list, debug=True):
 		print('Warnings!!!! Failed to convert to bytes!!!!!')
 
 	return binary
+
+def list2tuple(input_list, debug=True):
+	'''
+	convert a list to a tuple
+	'''
+	if debug:
+		assert islist(input_list), 'input is not a list'
+
+	return tuple(input_list)
 
 ######################################################### math related #########################################################
 def degree2radian(degree, debug=True):

@@ -11,10 +11,12 @@ import __init__paths__
 from check import *
 from file_io import mkdir_if_missing, fileparts
 from bbox_transform import bbox_TLBR2TLWH, bboxcheck_TLBR
+from conversions import print_np_shape, list2tuple
 
-color_set = ['b', 'g', 'y', 'k', 'r']
+color_set = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
+marker_set = ['o', 'v', '^', '<', '>', '1', '2', '3', '4', '8', 's', 'p', '*', 'h', 'H', '+', 'x', 'D', 'd']
 
-def visualize_save_image(image, vis=True, save=False, save_path=None, debug=True):
+def visualize_image(image, vis=True, save=False, save_path=None, debug=True):
     '''
     input image is a numpy array matrix
     '''
@@ -33,9 +35,9 @@ def visualize_save_image(image, vis=True, save=False, save_path=None, debug=True
         for image_tmp in imagelist:
             print('processing %d/%d' % (index+1, len(imagelist)))
             if save:
-                visualize_save_image(image_tmp, vis=vis, save_path=save_path[i], save=save, debug=debug)
+                visualize_image(image_tmp, vis=vis, save_path=save_path[i], save=save, debug=debug)
             else:
-                visualize_save_image(image_tmp, vis=vis, debug=debug)
+                visualize_image(image_tmp, vis=vis, debug=debug)
             index += 1
         return
 
@@ -148,6 +150,67 @@ def visualize_image_with_pts(image_path, pts, vis=True, save=False, save_path=No
     if vis:
         plt.show()
     plt.close(fig)
+
+    return
+
+def visualize_pts(pts, title=None, vis=True, save=False, save_path=None, debug=True):
+    '''
+    visualize point scatter plot
+
+    parameter:
+        pts:            2 x num_pts numpy array or a dictionary containing 2 x num_pts numpy array
+    '''
+
+    if debug:
+        if isdict(pts):
+            for pts_tmp in pts.values():
+                assert is2dptsarray(pts_tmp) , 'input points within dictionary are not correct: (2, num_pts) vs %s' % print_np_shape(pts_tmp)
+        else:
+            assert is2dptsarray(pts), 'input points are not correct: (2, num_pts) vs %s' % print_np_shape(pts)
+        if title is not None:
+            assert isstring(title), 'title is not correct'
+        else:
+            title = 'Point Error Vector Distritbution Map'
+
+    # figure setting
+    dpi = 80  
+    width = 1024
+    height = 1024
+    figsize = width / float(dpi), height / float(dpi)
+    fig = plt.figure(figsize=figsize)
+    plt.grid()
+    plt.title(title, fontsize=20)
+    plt.xlabel('x coordinate', fontsize=16)
+    plt.ylabel('y coordinate', fontsize=16)
+    plt.axis('equal')
+    pts_size = 5
+
+    # plot points
+    if isdict(pts):
+        num_methods = len(pts)
+        handle_dict = dict()    # for legend
+        assert len(color_set) >= num_methods, 'color in color set is not enough to use, please use different markers'
+        color_index = 0
+        for method_name, pts_tmp in pts.items():
+            handle_tmp = plt.scatter(pts_tmp[0, :], pts_tmp[1, :], color=color_set[color_index], s=pts_size, alpha=0.5)
+            handle_dict[method_name] = handle_tmp
+            color_index += 1
+
+        plt.legend(list2tuple(handle_dict.values()), list2tuple(handle_dict.keys()), scatterpoints=1, loc='lower left', fontsize=20)
+        
+    else:
+        plt.scatter(pts[0, :], pts[1, :], color='r')
+
+    # save and visualization
+    if save:
+        if debug:
+            assert is_path_exists_or_creatable(save_path) and isfile(save_path), 'save path is not valid: %s' % save_path
+            mkdir_if_missing(save_path)
+        fig.savefig(save_path, dpi=dpi)
+    if vis:
+        plt.show()
+    plt.close(fig)
+    
     return
 
 def visualize_image_with_bbox(image_path, bbox, vis=True, save=False, save_path=None, debug=True):
@@ -217,7 +280,7 @@ def visualize_image_with_bbox(image_path, bbox, vis=True, save=False, save_path=
     plt.close(fig)
     return
 
-def visualize_ced(normed_mean_error_dict, error_threshold, debug=True, vis=True, save=False, save_path=None):
+def visualize_ced(normed_mean_error_dict, error_threshold, title=None, debug=True, vis=True, save=False, save_path=None):
     '''
     visualize the cumulative error distribution curve (alse called NME curve or pck curve)
     all parameters are represented by percentage
@@ -235,13 +298,18 @@ def visualize_ced(normed_mean_error_dict, error_threshold, debug=True, vis=True,
         assert error_threshold > 0 and error_threshold < 100, 'threshold percentage is not well set'
         if save:
             assert save_path is not None and is_path_exists_or_creatable(save_path), 'please provide a valid path to save the results' 
-    
+        if title is not None:
+            assert isstring(title), 'title is not correct'
+        else:
+            title = '2D PCK curve'
+
     # set display parameters
     dpi = 80  
     width = 1000
     height = 800
     figsize = width / float(dpi), height / float(dpi)
-    plt.figure(figsize=figsize)
+    fig = plt.figure(figsize=figsize)
+    # ax = fig.add_axes([0, 0, 1, 1])
 
     # set figure handle
     num_bins = 10000
@@ -255,7 +323,7 @@ def visualize_ced(normed_mean_error_dict, error_threshold, debug=True, vis=True,
     plt.yticks(np.arange(0, 100 + interval_y, interval_y))
     plt.xticks(np.arange(0, error_threshold + interval_x, interval_x))
     plt.grid()
-    plt.title('2D PCK curve', fontsize=20)
+    plt.title(title, fontsize=20)
     plt.xlabel('Normalized distance (%)', fontsize=16)
     plt.ylabel('Test Images (%)', fontsize=16)
 
@@ -279,22 +347,23 @@ def visualize_ced(normed_mean_error_dict, error_threshold, debug=True, vis=True,
         # draw 
         color_index = method_index % len(color_set) 
         color_tmp = color_set[color_index]
-        plt.plot(x_axis*100, y_axis*100, '%s-' % color_tmp, label=method_name, lw=3)
+        label = '%s AUC: %.5f MSE: %.5f' % (method_name, AUC[method_name], MSE[method_name])
+        plt.plot(x_axis*100, y_axis*100, '%s-' % color_tmp, label=label, lw=3)
         plt.legend(loc=4, fontsize=16)
         method_index += 1
 
     # print('AUC: %f' % AUC)
     # print('MSE: %f' % MSE)
+    if save:
+        fig.savefig(save_path, dpi=dpi, transparent=True)
     if vis:
         plt.show()
-    if save:
-        plt.savefig(save_path, dpi=dpi, transparent=True)
-    plt.close()
+    plt.close(fig)
 
     return AUC, MSE
 
 
-def nearest_neighbor_visualization(featuremap_dict, num_neighbor=5, top_number=5, vis=True, save_csv=False, csv_save_path=None, save_vis=False, save_img=False, save_thumb_name='nearest_neighbor.png', img_src_folder=None, ext_filter='.jpg', nn_save_folder=None, debug=True):
+def visualize_nearest_neighbor(featuremap_dict, num_neighbor=5, top_number=5, vis=True, save_csv=False, csv_save_path=None, save_vis=False, save_img=False, save_thumb_name='nearest_neighbor.png', img_src_folder=None, ext_filter='.jpg', nn_save_folder=None, debug=True):
     '''
     visualize nearest neighbor for featuremap from images
 
@@ -415,7 +484,7 @@ def nearest_neighbor_visualization(featuremap_dict, num_neighbor=5, top_number=5
     return all_sorted_nearest_id, selected_nearest_id
 
 
-def distribution_vis(data, bin_size=None, vis=True, save=False, save_path=None, debug=True):
+def visualize_distribution(data, bin_size=None, vis=True, save=False, save_path=None, debug=True):
     '''
     visualize the histgram of a data, which can be a dictionary or list or numpy array or tuple
     '''

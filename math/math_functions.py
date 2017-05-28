@@ -72,16 +72,23 @@ def pts_euclidean(pts1, pts2, debug=True):
     calculate the euclidean distance of two sets of points
 
     parameter:
-        pts1, pts2: 2 x N numpy array, (x, y)
+        pts1, pts2: 2 x N or (2, ) numpy array, (x, y)
 
     return
         average euclidean distance
     '''
     if debug:
-        assert isnparray(pts1) and pts1.shape[0] == 2, 'the input points are not correct'
-        assert isnparray(pts2) and pts2.shape[0] == 2, 'the input points are not correct'
-        assert pts1.shape[1] == pts2.shape[1] and pts1.shape[1] > 0, 'number of ponts is not equal in two input'
+        assert isnparray(pts1) and isnparray(pts2) and pts1.shape[0] == 2, 'the input points are not correct'
+        assert pts1.shape == pts2.shape, 'shape of two points is not equal'
+        if len(pts1.shape) > 1:
+            assert len(pts1.shape) == 2 and pts1.shape[1] > 0, 'shape of input points is not correct'
     
+    # if the shape of input points is (2, ), reshape them to (2, 1)
+    if len(pts1.shape) == 1:
+        pts1 = np.reshape(pts1, (2, 1))
+        pts2 = np.reshape(pts2, (2, 1))
+
+    # calculate the distance
     num_pts = pts1.shape[1]
     ave_euclidean = 0
     for pts_index in xrange(num_pts):

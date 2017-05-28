@@ -9,6 +9,9 @@ def isstring(string_test):
 def isinteger(integer_test):
 	return isinstance(integer_test, int)
 
+def ispositiveinteger(integer_test):
+    return isinteger(integer_test) and integer_test > 0
+
 def isfloat(float_test):
     return isinstance(float_test, float)
 
@@ -40,6 +43,9 @@ def is2dline(line_test):
 
 def is2dpts(pts_test):
 	return (isnparray(pts_test) or islist(pts_test) or istuple(pts_test)) and np.array(pts_test).size == 2
+
+def is2dptsarray(pts_test):
+    return isnparray(pts_test) and pts_test.shape[0] == 2 and len(pts_test.shape) == 2 and pts_test.shape[1] > 0
 
 def isfunction(func_test):
 	return callable(func_test)
