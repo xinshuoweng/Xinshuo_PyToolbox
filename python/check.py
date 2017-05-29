@@ -47,6 +47,9 @@ def is2dpts(pts_test):
 def is2dptsarray(pts_test):
     return isnparray(pts_test) and pts_test.shape[0] == 2 and len(pts_test.shape) == 2 and pts_test.shape[1] > 0
 
+def is2dptsarray_occlusion(pts_test):
+    return isnparray(pts_test) and pts_test.shape[0] == 3 and len(pts_test.shape) == 2 and pts_test.shape[1] > 0
+
 def isfunction(func_test):
 	return callable(func_test)
 
@@ -220,7 +223,7 @@ def safepath(pathname):
     '''
     convert path to a normal representation
     '''
-    assert is_path_valid(pathname), 'path is not valid'
+    assert is_path_valid(pathname), 'path is not valid: %s' % pathname
     return os.path.normpath(pathname)
 
 def CHECK_EQ_LIST(input_list):
