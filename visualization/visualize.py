@@ -144,8 +144,8 @@ def visualize_image_with_pts(image_path, pts, vis=True, save=False, save_path=No
     if is2dptsarray(pts):
         ax.scatter(pts[0, :], pts[1, :], color='r')
     else:
-        pts_visible_index = pts[2, :] == 1
-        pts_invisible_index = pts[2, :] == -1
+        pts_visible_index = pts[2, :] == 1              # plot visible points in red color
+        pts_invisible_index = pts[2, :] == 0            # plot invisible points in blue color
         ax.scatter(pts[0, pts_visible_index], pts[1, pts_visible_index], color='r')
         ax.scatter(pts[0, pts_invisible_index], pts[1, pts_invisible_index], color='b')
 
