@@ -93,12 +93,14 @@ def visualize_image_with_pts(image_path, pts, vis=True, save=False, save_path=No
 
     parameter:
         image_path:     a path to an image
-        pts:            2 x num_pts numpy array
+        pts:            2 or 3 x num_pts numpy array
+                        when there are 3 channels in pts, the third one denotes the occlusion flag
+                        occlusion: 0 -> invisible, 1 -> visible, -1 -> not existing
     '''
 
     if debug:
         assert is_path_exists(image_path), 'image is not existing'
-        assert isnparray(pts) and pts.shape[0] == 2, 'input points are not correct'
+        assert is2dptsarray(pts) or is2dptsarray_occlusion(pts), 'input points are not correct'
 
     try:
         image = imread(image_path)
@@ -139,7 +141,13 @@ def visualize_image_with_pts(image_path, pts, vis=True, save=False, save_path=No
     ax.set(xlim=[0, width], ylim=[height, 0], aspect=1)
 
     # plot keypoints
-    ax.scatter(pts[0, :], pts[1, :], color='r')
+    if is2dptsarray(pts):
+        ax.scatter(pts[0, :], pts[1, :], color='r')
+    else:
+        pts_visible_index = pts[2, :] == 1
+        pts_invisible_index = pts[2, :] == -1
+        ax.scatter(pts[0, pts_visible_index], pts[1, pts_visible_index], color='r')
+        ax.scatter(pts[0, pts_invisible_index], pts[1, pts_invisible_index], color='b')
 
     # save and visualization
     if save:
