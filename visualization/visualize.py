@@ -87,7 +87,7 @@ def visualize_image(image, vis=True, save=False, save_path=None, debug=True):
     plt.close(fig)
     return
 
-def visualize_image_with_pts(image_path, pts, vis=True, save=False, save_path=None, debug=True):
+def visualize_image_with_pts(image_path, pts, label=False, label_list=None, vis=True, save=False, save_path=None, debug=True):
     '''
     visualize image and plot keypoints on top of it
 
@@ -96,11 +96,16 @@ def visualize_image_with_pts(image_path, pts, vis=True, save=False, save_path=No
         pts:            2 or 3 x num_pts numpy array
                         when there are 3 channels in pts, the third one denotes the occlusion flag
                         occlusion: 0 -> invisible, 1 -> visible, -1 -> not existing
+        label:          determine to add text label for each point
+        label_list:     label string for all points
     '''
 
     if debug:
         assert is_path_exists(image_path), 'image is not existing'
         assert is2dptsarray(pts) or is2dptsarray_occlusion(pts), 'input points are not correct'
+        assert islogical(label), 'label flag is not correct'
+        if label:
+            assert islist(label_list) and all(isstring(label_tmp) for label_tmp in label_list), 'labels are not correct'
 
     try:
         image = imread(image_path)
@@ -144,11 +149,22 @@ def visualize_image_with_pts(image_path, pts, vis=True, save=False, save_path=No
     if is2dptsarray(pts):
         ax.scatter(pts[0, :], pts[1, :], color='r')
     else:
-        pts_visible_index = pts[2, :] == 1              # plot visible points in red color
-        pts_invisible_index = pts[2, :] == 0            # plot invisible points in blue color
+        pts_visible_index   = np.where(pts[2, :] == 1)              # plot visible points in red color
+        pts_invisible_index = np.where(pts[2, :] == 0)              # plot invisible points in blue color
+        pts_ignore_index    = np.where(pts[2, :] == -1)             # do not plot points with annotation
         ax.scatter(pts[0, pts_visible_index], pts[1, pts_visible_index], color='r')
         ax.scatter(pts[0, pts_invisible_index], pts[1, pts_invisible_index], color='b')
-
+        if label:
+            num_pts = pts.shape[1]
+            for pts_index in xrange(num_pts):
+                label_tmp = label_list[pts_index]
+                if pts_index in pts_ignore_index[0]:
+                    continue
+                else:
+                    plt.annotate(label_tmp, xy=(pts[0, pts_index], pts[1, pts_index]), xytext=(-1, 1), color='y', textcoords='offset points', ha='right', va='bottom')
+                    # bbox=dict(boxstyle='round,pad=0.5', fc='yellow', alpha=0.5),
+                    # arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
+ 
     # save and visualization
     if save:
         if debug:
