@@ -2,7 +2,7 @@
 % email: xinshuo.weng@gmail.com
 
 % this script return a cell which contains a set of image path under folder recursively
-function [full_image_list, num_image] = load_list_from_folder(folder_path, ext_filter, save_fullpath, debug_mode)
+function [full_image_list, num_image] = load_list_from_folder(folder_path, ext_filter, debug_mode, save_fullpath)
     if nargin < 4
         debug_mode = true;
     end

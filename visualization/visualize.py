@@ -379,7 +379,7 @@ def visualize_ced(normed_mean_error_dict, error_threshold, title=None, debug=Tru
     # print('AUC: %f' % AUC)
     # print('MSE: %f' % MSE)
     if save:
-        fig.savefig(save_path, dpi=dpi, transparent=True)
+        fig.savefig(save_path, dpi=dpi)
     if vis:
         plt.show()
     plt.close(fig)

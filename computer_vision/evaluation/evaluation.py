@@ -41,7 +41,7 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 	num_images = len(pred_dict_all.values()[0])
 	if debug:
 		assert num_images > 0, 'the predictions are empty'
-		assert num_images == len(anno_dict), 'number of predictions is not equal to number of annotations'
+		assert num_images == len(anno_dict), 'number of images is not equal to number of annotations: %d vs %d' % (num_images, len(anno_dict))
 		assert all(num_images == len(pred_dict) for pred_dict in pred_dict_all.values()), 'number of images in results from different methods are not equal'
 
 	# calculate normalized mean error for each single image based on point-to-point Euclidean distance normalized by the bounding box size
@@ -58,7 +58,7 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 		count = 0
 		for image_path, pts_prediction in pred_dict.items():
 			_, filename, _ = fileparts(image_path)
-			pts_anno = anno_dict[filename]				# 2 x N annotation
+			pts_anno = anno_dict[image_path]				# 2 x N annotation
 			
 			# to avoid list object type, do conversion here
 			if islist(pts_anno):
