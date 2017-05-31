@@ -13,7 +13,7 @@ from file_io import mkdir_if_missing, fileparts
 from bbox_transform import bbox_TLBR2TLWH, bboxcheck_TLBR
 from conversions import print_np_shape, list2tuple
 
-color_set = ['b', 'g', 'r', 'c', 'm', 'y', 'k', 'w']
+color_set = ['b', 'r', 'g', 'c', 'm', 'y', 'k', 'w']
 marker_set = ['o', 'v', '^', '<', '>', '1', '2', '3', '4', '8', 's', 'p', '*', 'h', 'H', '+', 'x', 'D', 'd']
 
 def visualize_image(image, vis=True, save=False, save_path=None, debug=True):
