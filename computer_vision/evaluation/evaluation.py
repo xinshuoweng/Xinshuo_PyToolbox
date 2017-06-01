@@ -49,11 +49,13 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 	# calculate point error vector for each single image based on error vector normalized by the bounding box size
 	normed_mean_error_dict = dict()
 	normed_mean_error_pts_specific_dict = dict()
+	normed_mean_error_pts_specific_valid_dict = dict()
 	pts_error_vec_dict = dict()
 	pts_error_vec_pts_specific_dict = dict()
 	for method_name, pred_dict in pred_dict_all.items():
 		normed_mean_error_total = np.zeros((num_images, ), dtype='float32')
-		normed_mean_error_pts_specifc = np.zeros((num_images, num_pts), dtype='float32')
+		normed_mean_error_pts_specific = np.zeros((num_images, num_pts), dtype='float32')
+		normed_mean_error_pts_specific_valid = np.ones((num_images, num_pts), dtype='bool')
 		pts_error_vec = np.zeros((num_images, 2), dtype='float32')
 		pts_error_vec_pts_specific = np.zeros((num_images, 2, num_pts), dtype='float32')
 		count = 0
@@ -105,6 +107,7 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 			# calculate normalized error point specifically
 			for pts_index in xrange(num_pts):
 				if pts_index not in pts_keep_index:			# if current point not annotated in current image, just keep 0
+					normed_mean_error_pts_specific_valid[count, pts_index] = False
 					continue
 
 				pts_index_from_keep_list = pts_keep_index.index(pts_index)
@@ -113,7 +116,7 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 				normed_mean_error_pts_specifc_tmp = pts_euclidean(pts_prediction_tmp, pts_anno_tmp, debug=debug)
 				if normalization_ced:
 					normed_mean_error_pts_specifc_tmp /= bbox_size
-				normed_mean_error_pts_specifc[count, pts_index] = normed_mean_error_pts_specifc_tmp
+				normed_mean_error_pts_specific[count, pts_index] = normed_mean_error_pts_specifc_tmp
 
 			# calculate the point error vector
 			error_vector = pts_prediction - pts_anno 			# 2 x num_pts_tmp
@@ -126,9 +129,30 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 
 		# save results to dictionary
 		normed_mean_error_dict[method_name] = normed_mean_error_total
-		normed_mean_error_pts_specific_dict[method_name] = normed_mean_error_pts_specifc
+		normed_mean_error_pts_specific_dict[method_name] = normed_mean_error_pts_specific
+		normed_mean_error_pts_specific_valid_dict[method_name] = normed_mean_error_pts_specific_valid
 		pts_error_vec_dict[method_name] = np.transpose(pts_error_vec)
 		pts_error_vec_pts_specific_dict[method_name] = pts_error_vec_pts_specific
+
+	# visualize the ced (cumulative error distribution curve)
+	print('visualizing pck curve....\n')
+	pck_save_dir = os.path.join(save_path, 'pck')
+	mkdir_if_missing(pck_save_dir)
+	savepath_tmp = os.path.join(pck_save_dir, 'pck_curve_all.png')
+	visualize_ced(normed_mean_error_dict, error_threshold=error_threshold, normalized=normalization_ced, title='2D PCK curve for all 68 points', debug=debug, vis=vis, save=save, save_path=savepath_tmp)
+	for pts_index in xrange(num_pts):
+		normed_mean_error_dict_tmp = dict()
+		for method_name, error_array in normed_mean_error_pts_specific_dict.items():
+			normed_mean_error_pts_specific_valid_temp = normed_mean_error_pts_specific_valid_dict[method_name]
+			
+			# Some points at certain images might not be annotated. When calculating MSE for these specific point, we remove those images to avoid "false" mean average error
+			valid_array_per_pts_per_method = np.where(normed_mean_error_pts_specific_valid_temp[:, pts_index] == True)[0].tolist()
+			error_array_per_pts = error_array[:, pts_index]
+			error_array_per_pts = error_array_per_pts[valid_array_per_pts_per_method]
+			num_image_tmp = len(valid_array_per_pts_per_method)
+			normed_mean_error_dict_tmp[method_name] = np.reshape(error_array_per_pts, (num_image_tmp, ))
+		savepath_tmp = os.path.join(pck_save_dir, 'pck_curve_pts_%d.png' % (pts_index+1))
+		visualize_ced(normed_mean_error_dict_tmp, error_threshold=error_threshold, normalized=normalization_ced, title='2D PCK curve for point %d' % (pts_index+1), debug=debug, vis=vis, save=save, save_path=savepath_tmp)
 
 	# visualize the error vector map
 	print('visualizing error vector distribution map....\n')
@@ -142,16 +166,3 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 			pts_error_vec_pts_specific_dict_tmp[method_name] = np.transpose(error_vec_dict[:, :, pts_index])
 		savepath_tmp = os.path.join(error_vec_save_dir, 'error_vector_distribution_pts_%d.png' % (pts_index+1))
 		visualize_pts(pts_error_vec_pts_specific_dict_tmp, title='Point Error Vector Distribution for Point %d' % (pts_index+1), debug=debug, vis=vis, save=save, save_path=savepath_tmp)
-
-	# visualize the ced (cumulative error distribution curve)
-	print('visualizing pck curve....\n')
-	pck_save_dir = os.path.join(save_path, 'pck')
-	mkdir_if_missing(pck_save_dir)
-	savepath_tmp = os.path.join(pck_save_dir, 'pck_curve_all.png')
-	visualize_ced(normed_mean_error_dict, error_threshold=error_threshold, title='2D PCK curve for all 68 points', debug=debug, vis=vis, save=save, save_path=savepath_tmp)
-	for pts_index in xrange(num_pts):
-		normed_mean_error_dict_tmp = dict()
-		for method_name, error_dict in normed_mean_error_pts_specific_dict.items():
-			normed_mean_error_dict_tmp[method_name] = np.reshape(error_dict[:, pts_index], (num_images, ))
-		savepath_tmp = os.path.join(pck_save_dir, 'pck_curve_pts_%d.png' % (pts_index+1))
-		visualize_ced(normed_mean_error_dict_tmp, error_threshold=error_threshold, title='2D PCK curve for point %d' % (pts_index+1), debug=debug, vis=vis, save=save, save_path=savepath_tmp)
