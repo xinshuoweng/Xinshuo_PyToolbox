@@ -10,7 +10,7 @@ from math_functions import get_line, get_intersection
 from image_processing import imagecoor2cartesian, cartesian2imagecoor
 from numpy.testing import assert_almost_equal
 from math import radians as rad
-from check import isnparray
+from check import isnparray, is2dptsarray, is2dptsarray_occlusion
 import matplotlib.pyplot as plt
 
 def bbox_transform(ex_rois, gt_rois):
@@ -198,7 +198,7 @@ def pts2bbox(pts, debug=True, vis=False):
         bbox:   1 x 4 numpy array, TLBR format
     '''
     if debug:
-        assert isnparray(pts) and pts.shape[0] == 2, 'the input points should have shape 2 x num_pts'
+        assert is2dptsarray(pts) or is2dptsarray_occlusion(pts), 'the input points should have shape: 2 or 3 x num_pts vs %d x %s' % (pts.shape[0], pts.shape[1])
         assert pts.shape[1] >= 2, 'number of points should be larger or equal than 2'
 
     bbox = np.zeros((1, 4), dtype='float32')

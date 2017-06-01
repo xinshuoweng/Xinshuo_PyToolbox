@@ -149,9 +149,9 @@ def visualize_image_with_pts(image_path, pts, label=False, label_list=None, vis=
     if is2dptsarray(pts):
         ax.scatter(pts[0, :], pts[1, :], color='r')
     else:
-        pts_visible_index   = np.where(pts[2, :] == 1)              # plot visible points in red color
-        pts_invisible_index = np.where(pts[2, :] == 0)              # plot invisible points in blue color
-        pts_ignore_index    = np.where(pts[2, :] == -1)             # do not plot points with annotation
+        pts_visible_index   = np.where(pts[2, :] == 1)[0].tolist()              # plot visible points in red color
+        pts_invisible_index = np.where(pts[2, :] == 0)[0].tolist()              # plot invisible points in blue color
+        pts_ignore_index    = np.where(pts[2, :] == -1)[0].tolist()             # do not plot points with annotation
         ax.scatter(pts[0, pts_visible_index], pts[1, pts_visible_index], color='r')
         ax.scatter(pts[0, pts_invisible_index], pts[1, pts_invisible_index], color='b')
         if label:
@@ -380,6 +380,7 @@ def visualize_ced(normed_mean_error_dict, error_threshold, title=None, debug=Tru
     # print('MSE: %f' % MSE)
     if save:
         fig.savefig(save_path, dpi=dpi)
+        print 'save PCK curve to %s' % save_path
     if vis:
         plt.show()
     plt.close(fig)

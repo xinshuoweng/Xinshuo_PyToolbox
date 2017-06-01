@@ -1,13 +1,14 @@
 # Author: Xinshuo Weng
 # Email: xinshuo.weng@gmail.com
 
-# this file contains all functions abount evaluation in computer vision
+# this file contains all functions about evaluation in computer vision
 import math
 import numpy as np
 import os
+import time
 
 from bbox_transform import bbox_TLBR2TLWH, pts2bbox
-from check import is_path_exists_or_creatable, isnparray, islist, isdict, ispositiveinteger, isscalar, islogical
+from check import is_path_exists_or_creatable, isnparray, islist, isdict, ispositiveinteger, isscalar, islogical, is2dptsarray, is2dptsarray_occlusion
 from math_functions import pts_euclidean
 from visualize import visualize_ced, visualize_pts
 from file_io import fileparts, mkdir_if_missing
@@ -59,50 +60,67 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 		for image_path, pts_prediction in pred_dict.items():
 			_, filename, _ = fileparts(image_path)
 			pts_anno = anno_dict[image_path]				# 2 x N annotation
-			
+			pts_keep_index = range(num_pts)
+
 			# to avoid list object type, do conversion here
 			if islist(pts_anno):
 				pts_anno = np.asarray(pts_anno)
 			if islist(pts_prediction):
 				pts_prediction = np.asarray(pts_prediction)
+			if debug:
+				assert (is2dptsarray(pts_anno) or is2dptsarray_occlusion(pts_anno)) and pts_anno.shape[1] == num_pts, 'shape of annotations is not correct (%d x %d) vs (%d x %d)' % (2, num_pts, pts_anno.shape[0], pts_anno.shape[1])
 
-			# to avoid the point location includes the score or occlusion channel, only take the first two channels here
-			if pts_anno.shape[0] == 3 or pts_anno.shape[0] == 4:
-				pts_anno = pts_anno[0:2, :]
+			# if the annotation has 3 channels (include extra occlusion channel, we keep only the points with annotations)
+			# occlusion: -1 -> not annotated, 0 -> invisible, 1 -> visible, we keep both visible and invisible points
+			if pts_anno.shape[0] == 3:	
+				pts_keep_index = np.where(np.logical_or(pts_anno[2, :] == 1, pts_anno[2, :] == 0))[0].tolist()
+				if len(pts_keep_index) <= 0:		# if no point is annotated in current image
+					continue
+				pts_anno = pts_anno[0:2, pts_keep_index]		
+				pts_prediction = pts_prediction[:, pts_keep_index]
+			
+			# to avoid the point location includes the score or occlusion channel, only take the first two channels here	
 			if pts_prediction.shape[0] == 3 or pts_prediction.shape[0] == 4:
 				pts_prediction = pts_prediction[0:2, :]
 
+			num_pts_tmp = len(pts_keep_index)
 			if debug:
-				assert isnparray(pts_anno) and pts_anno.shape[0] == 2 and pts_anno.shape[1] == num_pts, 'shape of annotations is not correct (%d x %d) vs (%d x %d)' % (2, num_pts, pts_anno[0], pts_anno[1])
+				assert pts_anno.shape[1] <= num_pts, 'number of points is not correct: %d vs %d' % (pts_anno.shape[1], num_pts)
 				assert pts_anno.shape == pts_prediction.shape, 'shape of predictions and annotation is not the same'
+				print 'number of points to keep is %d' % num_pts_tmp
 
 			# calculate bbox for normalization
 			if normalization_ced or normalization_vec:
-				bbox_anno = pts2bbox(pts_anno, debug=debug)					
-				bbox_TLWH = bbox_TLBR2TLWH(bbox_anno, debug=debug)				
-				bbox_size = math.sqrt(bbox_TLWH[0, 2] * bbox_TLWH[0, 3])
+				assert len(pts_keep_index) == num_pts, 'some points are not annotated. Normalization on PCK curve is not allowed.'
+				bbox_anno = pts2bbox(pts_anno, debug=debug)							# 1 x 4
+				bbox_TLWH = bbox_TLBR2TLWH(bbox_anno, debug=debug)					# 1 x 4
+				bbox_size = math.sqrt(bbox_TLWH[0, 2] * bbox_TLWH[0, 3])			# scalar
 			
 			# calculate normalized error for all points
-			normed_mean_error = pts_euclidean(pts_prediction, pts_anno, debug=debug)
+			normed_mean_error = pts_euclidean(pts_prediction, pts_anno, debug=debug)	# scalar
 			if normalization_ced:
 				normed_mean_error /= bbox_size
 			normed_mean_error_total[count] = normed_mean_error
 
 			# calculate normalized error point specifically
 			for pts_index in xrange(num_pts):
-				pts_prediction_tmp = pts_prediction[:, pts_index]
-				pts_anno_tmp = pts_anno[:, pts_index]
+				if pts_index not in pts_keep_index:			# if current point not annotated in current image, just keep 0
+					continue
+
+				pts_index_from_keep_list = pts_keep_index.index(pts_index)
+				pts_prediction_tmp = pts_prediction[:, pts_index_from_keep_list]
+				pts_anno_tmp = pts_anno[:, pts_index_from_keep_list]
 				normed_mean_error_pts_specifc_tmp = pts_euclidean(pts_prediction_tmp, pts_anno_tmp, debug=debug)
 				if normalization_ced:
 					normed_mean_error_pts_specifc_tmp /= bbox_size
 				normed_mean_error_pts_specifc[count, pts_index] = normed_mean_error_pts_specifc_tmp
 
 			# calculate the point error vector
-			error_vector = pts_prediction - pts_anno 			# 2 x num_pts
+			error_vector = pts_prediction - pts_anno 			# 2 x num_pts_tmp
 			if normalization_vec:
 				error_vector /= bbox_size
-			pts_error_vec_pts_specific[count, :, :] = error_vector 
-			pts_error_vec[count, :] = np.sum(error_vector, axis=1) / num_pts
+			pts_error_vec_pts_specific[count, :, pts_keep_index] = np.transpose(error_vector)
+			pts_error_vec[count, :] = np.sum(error_vector, axis=1) / num_pts_tmp
 
 			count += 1
 
