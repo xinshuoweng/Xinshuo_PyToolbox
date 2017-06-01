@@ -105,6 +105,9 @@ def visualize_image_with_pts(image_path, pts, label=False, label_list=None, vis=
         assert is2dptsarray(pts) or is2dptsarray_occlusion(pts), 'input points are not correct'
         assert islogical(label), 'label flag is not correct'
         if label:
+            if label_list is None:
+                num_pts = pts.shape[1]
+                label_list = [str(i+1) for i in xrange(num_pts)];
             assert islist(label_list) and all(isstring(label_tmp) for label_tmp in label_list), 'labels are not correct'
 
     try:
@@ -128,7 +131,7 @@ def visualize_image_with_pts(image_path, pts, label=False, label_list=None, vis=
         ax.imshow(image, interpolation='nearest')
     elif isgrayimage(image, debug=debug):
         if debug:
-            print 'visualizing grayscale image'
+            print 'visualizing gray scale image'
         if image.ndim == 3 and image.shape[-1] == 1:
             image = np.reshape(image, image.shape[:-1])
 

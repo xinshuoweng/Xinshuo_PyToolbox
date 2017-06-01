@@ -4,7 +4,7 @@
 % this function takes a file of points and an image as input
 % then draw the points on top of the image as visualization
 % this function assumer each row fo file has [x, y] coordinate
-function img_with_pts = visualize_pts_single_file(img, pts_path)
+function img_with_pts = visualize_image_with_pts_from_file(img, pts_path)
 	img = isImageorPath(img);
 	fid = get_fileID_for_loading(pts_path);
 	figure;

@@ -8,8 +8,7 @@ import array
 
 def get_nparray_from_array(tuple_array):
 	'''
-	this function convert a tuple of 1-d array to 
-	a 2-d numpy arrya
+	this function convert a tuple of 1-d array to a 2-d numpy array
 	'''
 	assert isinstance(tuple_array, tuple), 'input should be a tuple'
 	assert all(isinstance(array_tmp, array.array) for array_tmp in tuple_array), 'input is not a tuple of array'
