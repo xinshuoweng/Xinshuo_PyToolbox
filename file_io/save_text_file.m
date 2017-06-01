@@ -1,8 +1,8 @@
 % Author: Xinshuo Weng
 % email: xinshuo.weng@gmail.com
 
-% this function store a set of stuff to a file
-% this function assume all stuff to save is in a 1d cell of 1d cell 
+% this function stores a set of stuff to a file
+% this function assumes all stuff to save is in a 1d cell of 1d cell 
 % each stuff is separated by whitespace
 function nrows = save_text_file(content_cell, file_path)
 	assert(ischar(file_path), 'The input path should be a string to a file.');
