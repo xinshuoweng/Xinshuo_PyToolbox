@@ -46,7 +46,9 @@ function padded = pad_around(img, pad_rect, pad_value, debug_mode)
     new_width   = im_width + pad_left + pad_right;
     
     % pad
-    padded = zeros(new_height, new_width);
-    padded(:, :) = pad_value;
-    padded(pad_top+1 : new_height-pad_bottom, pad_left+1 : new_width-pad_right) = img;
+    channel = size(img, 3);
+    padded = zeros(new_height, new_width, channel);
+    padded(:) = pad_value;
+    padded(pad_top+1 : new_height-pad_bottom, pad_left+1 : new_width-pad_right, :) = img;
+    padded = padded / 255.;         % convert to float image (since zeros() create double matrix)
 end
