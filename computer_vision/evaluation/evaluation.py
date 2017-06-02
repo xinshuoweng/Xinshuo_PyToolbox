@@ -12,6 +12,7 @@ from check import is_path_exists_or_creatable, isnparray, islist, isdict, isposi
 from math_functions import pts_euclidean
 from visualize import visualize_ced, visualize_pts
 from file_io import fileparts, mkdir_if_missing
+from conversions import print_np_shape
 
 def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshold, normalization_ced=True, normalization_vec=True, debug=True, vis=False, save=True, save_path=None):
 	'''
@@ -61,7 +62,7 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 		count = 0
 		for image_path, pts_prediction in pred_dict.items():
 			_, filename, _ = fileparts(image_path)
-			pts_anno = anno_dict[image_path]				# 2 x N annotation
+			pts_anno = anno_dict[filename]				# 2 x N annotation
 			pts_keep_index = range(num_pts)
 
 			# to avoid list object type, do conversion here
@@ -88,7 +89,7 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 			num_pts_tmp = len(pts_keep_index)
 			if debug:
 				assert pts_anno.shape[1] <= num_pts, 'number of points is not correct: %d vs %d' % (pts_anno.shape[1], num_pts)
-				assert pts_anno.shape == pts_prediction.shape, 'shape of predictions and annotation is not the same'
+				assert pts_anno.shape == pts_prediction.shape, 'shape of predictions and annotation is not the same {%s} vs {%s}'.format(print_np_shape(pts_anno, debug=debug), print_np_shape(pts_prediction, debug=debug))
 				print 'number of points to keep is %d' % num_pts_tmp
 
 			# calculate bbox for normalization
