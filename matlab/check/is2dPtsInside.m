@@ -1,8 +1,8 @@
 % Author: Xinshuo Weng
 % email: xinshuo.weng@gmail.com
 
-% this function obtain the point inside an image
-function pts = check_ptsInside(pts_test, im_size, debug_mode)
+% this function is to check if the point is inside the image
+function valid = is2dPtsInside(pts_test, im_size, debug_mode)
 	if nargin < 3
 		debug_mode = true;
 	end
@@ -14,6 +14,11 @@ function pts = check_ptsInside(pts_test, im_size, debug_mode)
 	im_width = im_size(2);
 	im_height = im_size(1);
 	
-	pts(1) = min(max(pts_test(1), 0), im_width);
-	pts(2) = min(max(pts_test(2), 0), im_height);
+	x = pts_test(1);
+	y = pts_test(2);
+	if x > 0 && x <= im_width && y > 0 && y <= im_height
+		valid = true;
+	else
+		valid = false;
+	end
 end
