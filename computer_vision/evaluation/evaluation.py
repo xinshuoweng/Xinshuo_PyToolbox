@@ -167,3 +167,5 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 			pts_error_vec_pts_specific_dict_tmp[method_name] = np.transpose(error_vec_dict[:, :, pts_index])
 		savepath_tmp = os.path.join(error_vec_save_dir, 'error_vector_distribution_pts_%d.png' % (pts_index+1))
 		visualize_pts(pts_error_vec_pts_specific_dict_tmp, title='Point Error Vector Distribution for Point %d' % (pts_index+1), debug=debug, vis=vis, save=save, save_path=savepath_tmp)
+
+	print('\ndone!!!!!\n\n')
