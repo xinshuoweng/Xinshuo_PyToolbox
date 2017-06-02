@@ -16,9 +16,10 @@ function num_images = resize_images(src_path, save_dir, resize_size, ext_filter,
 		assert(ischar(save_dir), 'save path is not correct');
 	end
 	mkdir_if_missing(save_dir);
+	ext_filter = check_extension(ext_filter, debug_mode);
 
 	% load imagelist
-	[image_list, num_images] = load_list_from_folder(src_path, ext_filter);
+	[image_list, num_images] = load_list_from_folder(src_path, ext_filter, debug_mode);
 	fprintf('number of images to process is %d\n\n', num_images);
 
 	% resize all images
@@ -34,7 +35,7 @@ function num_images = resize_images(src_path, save_dir, resize_size, ext_filter,
         fprintf('processing %d/%d, filename: %s, elapsed time: %s, remaining time: %s\n', i, num_images, filename, elapsed_str, remaining_str);
 
         % process
-        save_path = fullfile(save_dir, sprintf('%s.png', filename));
+        save_path = fullfile(save_dir, strcat(filename, ext_filter));
         if exist(save_path, 'file')
         	continue;
         end
@@ -42,5 +43,4 @@ function num_images = resize_images(src_path, save_dir, resize_size, ext_filter,
 		resized = imresize(image_temp, resize_size);
 		imwrite(resized, save_path);
 	end
-
 end

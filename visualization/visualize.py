@@ -161,7 +161,7 @@ def visualize_image_with_pts(image_path, pts, label=False, label_list=None, vis=
             num_pts = pts.shape[1]
             for pts_index in xrange(num_pts):
                 label_tmp = label_list[pts_index]
-                if pts_index in pts_ignore_index[0]:
+                if pts_index in pts_ignore_index:
                     continue
                 else:
                     plt.annotate(label_tmp, xy=(pts[0, pts_index], pts[1, pts_index]), xytext=(-1, 1), color='y', textcoords='offset points', ha='right', va='bottom')

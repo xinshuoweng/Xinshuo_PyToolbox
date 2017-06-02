@@ -9,8 +9,8 @@ function full_image_list = load_list_from_cur_folder(folder_path, ext_filter, de
 
     if debug_mode
 		assert(ischar(folder_path), 'Input path is not valid for obtaining list');
-		assert(ischar(ext_filter), 'extension is not correct');
 	end
+	ext_filter = check_extension(ext_filter, debug_mode);
 
 	% fprintf('Warning! Only jpeg jpg png bmp extension are supported!\n');
 	image_list = dir(folder_path);
