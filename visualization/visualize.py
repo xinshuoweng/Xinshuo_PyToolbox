@@ -164,6 +164,7 @@ def visualize_image_with_pts(image_path, pts, label=False, label_list=None, vis=
                 if pts_index in pts_ignore_index:
                     continue
                 else:
+                    # note that the annotation is based on the coordinate instead of the order of plotting the points, so the orider in pts_index does not matter
                     plt.annotate(label_tmp, xy=(pts[0, pts_index], pts[1, pts_index]), xytext=(-1, 1), color='y', textcoords='offset points', ha='right', va='bottom')
                     # bbox=dict(boxstyle='round,pad=0.5', fc='yellow', alpha=0.5),
                     # arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))

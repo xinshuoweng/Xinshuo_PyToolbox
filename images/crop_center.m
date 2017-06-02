@@ -14,13 +14,9 @@ function cropped = crop_center(img, rect, pad_value, debug_mode)
     end
 
     if debug_mode
-        img = check_imageorPath(img);
+        img = check_imageorPath(img, debug_mode);
         assert(size(rect, 1) == 1 && (size(rect, 2) == 2 || size(rect, 2) == 4), 'the shape of crop array is wrong');
         assert(~iscell(rect), 'The input of rectangular should be a matrix.');
-        if isFloatImage_loose(img)
-        pad_value = 0.5;
-        end
-        assert(pad_value >= 0 && pad_value <= 255, 'pad value is not in a good range.');
     end
 
     im_size = size(img);
