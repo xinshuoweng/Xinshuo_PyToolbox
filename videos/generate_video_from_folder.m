@@ -20,7 +20,7 @@ function [num_images] = generate_video_from_folder(img_src, save_path, framerate
 		assert(ischar(save_path), 'save path is not correct.');
 	end
 
-	imagelist = load_list_from_folder(img_src, ext_filter, debug_mode);
+	[imagelist, num_images] = load_list_from_folder(img_src, ext_filter, debug_mode);
 	[parent_dir, filename, ~] = fileparts(save_path);
 	video = VideoWriter(fullfile(parent_dir, sprintf('%s.avi', filename)), 'Uncompressed AVI');
 	video.FrameRate = framerate;
