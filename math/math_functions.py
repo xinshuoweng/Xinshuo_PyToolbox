@@ -78,7 +78,7 @@ def pts_euclidean(pts1, pts2, debug=True):
         average euclidean distance
     '''
     if debug:
-        assert isnparray(pts1) and isnparray(pts2) and pts1.shape[0] == 2, 'the input points are not correct'
+        assert is2dptsarray(pts1) and is2dptsarray(pts2), 'the input points are not correct'
         assert pts1.shape == pts2.shape, 'shape of two points is not equal'
         if len(pts1.shape) > 1:
             assert len(pts1.shape) == 2 and pts1.shape[1] > 0, 'shape of input points is not correct'

@@ -89,7 +89,7 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 			num_pts_tmp = len(pts_keep_index)
 			if debug:
 				assert pts_anno.shape[1] <= num_pts, 'number of points is not correct: %d vs %d' % (pts_anno.shape[1], num_pts)
-				assert pts_anno.shape == pts_prediction.shape, 'shape of predictions and annotation is not the same {%s} vs {%s}'.format(print_np_shape(pts_anno, debug=debug), print_np_shape(pts_prediction, debug=debug))
+				assert pts_anno.shape == pts_prediction.shape, 'shape of annotations and predictions are not the same {} vs {}'.format(print_np_shape(pts_anno, debug=debug), print_np_shape(pts_prediction, debug=debug))
 				print 'number of points to keep is %d' % num_pts_tmp
 
 			# calculate bbox for normalization
@@ -112,8 +112,8 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 					continue
 
 				pts_index_from_keep_list = pts_keep_index.index(pts_index)
-				pts_prediction_tmp = pts_prediction[:, pts_index_from_keep_list]
-				pts_anno_tmp = pts_anno[:, pts_index_from_keep_list]
+				pts_prediction_tmp = np.reshape(pts_prediction[:, pts_index_from_keep_list], (2, 1))
+				pts_anno_tmp = np.reshape(pts_anno[:, pts_index_from_keep_list], (2, 1))
 				normed_mean_error_pts_specifc_tmp = pts_euclidean(pts_prediction_tmp, pts_anno_tmp, debug=debug)
 				if normalization_ced:
 					normed_mean_error_pts_specifc_tmp /= bbox_size
