@@ -38,6 +38,7 @@ function num_images = rotate_images(src_path, save_dir, angle_degree, ext_filter
 	ext_filter = check_extension(ext_filter, debug_mode);
 
 	% load image list
+	fprintf('\nloading images from %s\n\n', src_path);
 	[image_list, num_images] = load_list_from_folder(src_path, ext_filter, debug_mode);
 	fprintf('\nnumber of images to rotate is %d\n\n', num_images);
 

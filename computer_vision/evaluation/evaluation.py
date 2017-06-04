@@ -14,6 +14,11 @@ from visualize import visualize_ced, visualize_pts
 from file_io import fileparts, mkdir_if_missing
 from conversions import print_np_shape
 
+# for better visualization in error distribution, we center the distribution map and set fixed visualization range for fair comparison
+display_range = True
+xlim = [-50, 50]
+ylim = [-50, 50]
+
 def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshold, normalization_ced=True, normalization_vec=True, debug=True, vis=False, save=True, save_path=None):
 	'''
 	evaluate the performance of facial landmark detection
@@ -90,7 +95,7 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 			if debug:
 				assert pts_anno.shape[1] <= num_pts, 'number of points is not correct: %d vs %d' % (pts_anno.shape[1], num_pts)
 				assert pts_anno.shape == pts_prediction.shape, 'shape of annotations and predictions are not the same {} vs {}'.format(print_np_shape(pts_anno, debug=debug), print_np_shape(pts_prediction, debug=debug))
-				print 'number of points to keep is %d' % num_pts_tmp
+				# print 'number of points to keep is %d' % num_pts_tmp
 
 			# calculate bbox for normalization
 			if normalization_ced or normalization_vec:
@@ -160,12 +165,12 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 	error_vec_save_dir = os.path.join(save_path, 'error_vec')
 	mkdir_if_missing(error_vec_save_dir)
 	savepath_tmp = os.path.join(error_vec_save_dir, 'error_vector_distribution_all.png')
-	visualize_pts(pts_error_vec_dict, title='Point Error Vector Distribution (all points)', debug=debug, vis=vis, save=save, save_path=savepath_tmp)
+	visualize_pts(pts_error_vec_dict, title='Point Error Vector Distribution (all points)', display_range=display_range, xlim=xlim, ylim=ylim, debug=debug, vis=vis, save=save, save_path=savepath_tmp)
 	for pts_index in xrange(num_pts):
 		pts_error_vec_pts_specific_dict_tmp = dict()
 		for method_name, error_vec_dict in pts_error_vec_pts_specific_dict.items():
 			pts_error_vec_pts_specific_dict_tmp[method_name] = np.transpose(error_vec_dict[:, :, pts_index])
 		savepath_tmp = os.path.join(error_vec_save_dir, 'error_vector_distribution_pts_%d.png' % (pts_index+1))
-		visualize_pts(pts_error_vec_pts_specific_dict_tmp, title='Point Error Vector Distribution for Point %d' % (pts_index+1), debug=debug, vis=vis, save=save, save_path=savepath_tmp)
+		visualize_pts(pts_error_vec_pts_specific_dict_tmp, title='Point Error Vector Distribution for Point %d' % (pts_index+1), display_range=display_range, xlim=xlim, ylim=ylim, debug=debug, vis=vis, save=save, save_path=savepath_tmp)
 
 	print('\ndone!!!!!\n\n')

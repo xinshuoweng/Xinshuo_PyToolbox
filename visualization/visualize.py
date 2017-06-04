@@ -181,7 +181,7 @@ def visualize_image_with_pts(image_path, pts, label=False, label_list=None, vis=
 
     return
 
-def visualize_pts(pts, title=None, vis=True, save=False, save_path=None, debug=True):
+def visualize_pts(pts, title=None, display_range=False, xlim=[-100, 100], ylim=[-100, 100], vis=True, save=False, save_path=None, debug=True):
     '''
     visualize point scatter plot
 
@@ -198,7 +198,11 @@ def visualize_pts(pts, title=None, vis=True, save=False, save_path=None, debug=T
         if title is not None:
             assert isstring(title), 'title is not correct'
         else:
-            title = 'Point Error Vector Distritbution Map'
+            title = 'Point Error Vector Distribution Map'
+        assert islogical(display_range), 'the flag determine if to display in a specific range should be logical value'
+        if display_range:
+            assert islist(xlim) and islist(ylim) and len(xlim) == 2 and len(ylim) == 2, 'the input range for x and y is not correct'
+            assert xlim[1] > xlim[0] and ylim[1] > ylim[0], 'the input range for x and y is not correct'
 
     # figure setting
     dpi = 80  
@@ -206,7 +210,7 @@ def visualize_pts(pts, title=None, vis=True, save=False, save_path=None, debug=T
     height = 1024
     figsize = width / float(dpi), height / float(dpi)
     fig = plt.figure(figsize=figsize)
-    plt.grid()
+
     plt.title(title, fontsize=20)
     plt.xlabel('x coordinate', fontsize=16)
     plt.ylabel('y coordinate', fontsize=16)
@@ -228,6 +232,16 @@ def visualize_pts(pts, title=None, vis=True, save=False, save_path=None, debug=T
         
     else:
         plt.scatter(pts[0, :], pts[1, :], color='r')
+
+    if display_range:
+        axis_bin = 10
+        interval_x = (xlim[1] - xlim[0]) / axis_bin
+        interval_y = (ylim[1] - ylim[0]) / axis_bin
+        plt.xlim(xlim[0], xlim[1])
+        plt.ylim(ylim[0], ylim[1])
+        plt.xticks(np.arange(xlim[0], xlim[1] + interval_x, interval_x))
+        plt.yticks(np.arange(ylim[0], ylim[1] + interval_y, interval_y))
+    plt.grid()
 
     # save and visualization
     if save:
