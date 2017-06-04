@@ -17,6 +17,7 @@ function cropped = crop_center(img, rect, pad_value, debug_mode)
         img = check_imageorPath(img, debug_mode);
         assert(size(rect, 1) == 1 && (size(rect, 2) == 2 || size(rect, 2) == 4), 'the shape of crop array is wrong');
         assert(~iscell(rect), 'The input of rectangular should be a matrix.');
+        assert(all(arrayfun(@(x) isInteger(x), rect)), 'the padding array should be all integers.');
     end
 
     im_size = size(img);
@@ -68,7 +69,6 @@ function cropped = crop_center(img, rect, pad_value, debug_mode)
         end
 
     else                            % crop around the center of the image
-        rect = int16(rect);
         crop_width = rect(1);
         crop_height = rect(2);
         xmin = (im_width - crop_width) / 2;
