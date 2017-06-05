@@ -8,17 +8,13 @@
 %	pts_array:	2 x num_pts matrix to represent (x, y) locations
 %	label:		a logical value to judge if display a text for every points
 %	label_str:	a cell array where every cell has a string inside
-function img_with_pts = visualize_image_with_pts_customized(img, pts_array, vis, debug_mode, save_path, label, label_str)
+function img_with_pts = visualize_image_with_pts_customized(img, pts_array, vis, debug_mode, save_path)
 	if ~exist('debug_mode', 'var')
 		debug_mode = true;
 	end
 
 	if ~exist('vis', 'var')
 		vis = false;
-	end
-
-	if ~exist('label', 'var')
-		label = true;
 	end
 
 	if debug_mode
@@ -34,13 +30,15 @@ function img_with_pts = visualize_image_with_pts_customized(img, pts_array, vis,
 	else
 		color_pixel = reshape([1, 0, 0], [1, 1, 3]);
 	end
+	radius = 1;
 
 	x = pts_array(1, :);
 	y = pts_array(2, :);
 	for pts_index = 1:num_pts
-		img(y(pts_index), x(pts_index), :) = color_pixel;
+		img(y(pts_index)-radius:y(pts_index)+radius, x(pts_index), :) = repmat(color_pixel, [3, 1, 1]);
+		img(y(pts_index), x(pts_index)-radius:x(pts_index)+radius, :) = repmat(color_pixel, [1, 3, 1]);
 	end
-	imshow(img); hold on;
+	imshow(img);
 	
 	% % add labels
 	% if label
