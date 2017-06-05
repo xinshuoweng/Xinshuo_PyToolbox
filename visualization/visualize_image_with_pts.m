@@ -29,7 +29,7 @@ function img_with_pts = visualize_image_with_pts(img, pts_array, vis, debug_mode
 	title('points prediction.'); imshow(img); hold on;
 	x = pts_array(1, :);
 	y = pts_array(2, :);
-	plot(x, y, 'rx', 'MarkerSize', 10);
+	plot(x, y, 'ro', 'MarkerSize', 1, 'MarkerFaceColor', 'r');
 	
 	% add labels
 	if label
@@ -53,12 +53,14 @@ function img_with_pts = visualize_image_with_pts(img, pts_array, vis, debug_mode
 	% get the current frame to return
 	img_with_pts = getframe;
 	img_with_pts = img_with_pts.cdata;
+	if debug_mode
+		assert(all(size(img_with_pts) == size(img)), 'the size of the image visualized is not equal to original size.');
+	end
 
 	% save
 	if exist('save_path', 'var')
 		assert(ischar(save_path), 'save path is not correct.');
-		im_size = size(img);
-		save_figure(save_path, im_size);
+		imwrite(img_with_pts, save_path);
 		fprintf('save image to %s\n', save_path);
 	end
 end

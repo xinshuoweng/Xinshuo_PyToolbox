@@ -1,13 +1,17 @@
 % Author: Xinshuo Weng
 % email: xinshuo.weng@gmail.com
 
-% this function is to pad given value to an image in provided region
+% this function is to pad given value to an image in provided region, all images in this function are floating images
 % parameters:
 %   pad_rect:   4 element array, which describes where to pad the value. The order is [left, top, right, bottom]
 %   pad_value:  a scalar defines what value we should pad
 function padded = pad_around(img, pad_rect, pad_value, debug_mode)
     if ~exist('debug_mode', 'var')
         debug_mode = true;
+    end
+
+    if ~exist('pad_value', 'var')
+        pad_value = 0.5;
     end
 
     if debug_mode
@@ -19,18 +23,15 @@ function padded = pad_around(img, pad_rect, pad_value, debug_mode)
 
         % handle edge case for padding value
         if isIntegerImage(img)
-            if ~exist('pad_value', 'var')
-                pad_value = 128;
-            else
-                assert(pad_value >= 0 && pad_value <= 255, sprintf('padding value: %d is not correct for an integer image.', pad_value));
-            end  
+            assert(pad_value >= 0 && pad_value <= 255, sprintf('padding value: %d is not correct for an integer image.', pad_value));
         else
-            if ~exist('pad_value', 'var')
-                pad_value = 0.5;
-            else
-                assert(pad_value >= 0 && pad_value <= 1, sprintf('padding value: %f is not correct for a floating image.', pad_value));
-            end
+            assert(pad_value >= 0 && pad_value <= 1, sprintf('padding value: %f is not correct for a floating image.', pad_value));
         end
+    end
+
+    if isIntegerImage(img)
+        img = im2double(img);
+        pad_value = pad_value / 255;
     end
 
     im_size = size(img);
@@ -50,5 +51,5 @@ function padded = pad_around(img, pad_rect, pad_value, debug_mode)
     padded = zeros(new_height, new_width, channel);
     padded(:) = pad_value;
     padded(pad_top+1 : new_height-pad_bottom, pad_left+1 : new_width-pad_right, :) = img;
-    padded = padded / 255.;         % convert to float image (since zeros() create double matrix)
+    % padded = padded / 255.;         % convert to float image (since zeros() create double matrix)
 end
