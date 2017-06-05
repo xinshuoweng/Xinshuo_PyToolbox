@@ -2,6 +2,7 @@
 % email: xinshuo.weng@gmail.com
 
 % this function takes an image in and plot points on top of it
+% note that the size of image might change!!!!
 % parameter:
 %	img:		an image read from imread()
 %	pts_array:	2 x num_pts matrix to represent (x, y) locations
@@ -53,6 +54,11 @@ function img_with_pts = visualize_image_with_pts(img, pts_array, vis, debug_mode
 	% get the current frame to return
 	img_with_pts = getframe;
 	img_with_pts = img_with_pts.cdata;
+
+	% resize the image obtained from the handle
+	im_size = check_imageSize(img, debug_mode);
+	img_with_pts = imresize(img_with_pts, im_size);
+
 	if debug_mode
 		assert(all(size(img_with_pts) == size(img)), 'the size of the image visualized is not equal to original size.');
 	end

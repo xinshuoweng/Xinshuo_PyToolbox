@@ -3,6 +3,7 @@
 
 % this function is to pad given value to an image in provided region, all images in this function are floating images
 % parameters:
+%   img:        a floating image
 %   pad_rect:   4 element array, which describes where to pad the value. The order is [left, top, right, bottom]
 %   pad_value:  a scalar defines what value we should pad
 function padded = pad_around(img, pad_rect, pad_value, debug_mode)
@@ -20,18 +21,8 @@ function padded = pad_around(img, pad_rect, pad_value, debug_mode)
         assert(~iscell(pad_rect), 'The input of rectangular should be a matrix.');
         assert(all(pad_rect >= 0), 'the padding array should be non-negative value');
         assert(all(arrayfun(@(x) isInteger(x), pad_rect)), 'the padding array should be all integers.');
-
-        % handle edge case for padding value
-        if isIntegerImage(img)
-            assert(pad_value >= 0 && pad_value <= 255, sprintf('padding value: %d is not correct for an integer image.', pad_value));
-        else
-            assert(pad_value >= 0 && pad_value <= 1, sprintf('padding value: %f is not correct for a floating image.', pad_value));
-        end
-    end
-
-    if isIntegerImage(img)
-        img = im2double(img);
-        pad_value = pad_value / 255;
+        assert(isFloatImage_loose(img), 'the input image is not a float image.');
+        assert(pad_value >= 0 && pad_value <= 1, sprintf('padding value: %f is not correct for a floating image.', pad_value));
     end
 
     im_size = size(img);
@@ -51,5 +42,4 @@ function padded = pad_around(img, pad_rect, pad_value, debug_mode)
     padded = zeros(new_height, new_width, channel);
     padded(:) = pad_value;
     padded(pad_top+1 : new_height-pad_bottom, pad_left+1 : new_width-pad_right, :) = img;
-    % padded = padded / 255.;         % convert to float image (since zeros() create double matrix)
 end

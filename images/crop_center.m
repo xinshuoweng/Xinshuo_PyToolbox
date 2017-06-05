@@ -3,9 +3,10 @@
 
 % this function is to crop the image around a specific center with padded value around the empty area, all images in this function are floating images
 % parameters:
-% rect is an array, which defines how to crop the image around center
-%       1. rect with WH format, then crop around the center of image
-%       2. rect with XYWH format, then crop around (X, Y) with given height and width
+%   img:        a floating image
+%   rect:       an array, which defines how to crop the image around center
+%                   1. rect with WH format, then crop around the center of image
+%                   2. rect with XYWH format, then crop around (X, Y) with given height and width
 % Note that if the cropped region is out of boundary, we pad gray value around outside
 % Note that the cropping is right aligned, which means, if the crop width or height is even, we crop one more pixel right to the center
 function cropped = crop_center(img, rect, pad_value, debug_mode)
@@ -22,12 +23,7 @@ function cropped = crop_center(img, rect, pad_value, debug_mode)
         assert(size(rect, 1) == 1 && (size(rect, 2) == 2 || size(rect, 2) == 4), 'the shape of crop array is wrong');
         assert(~iscell(rect), 'The input of rectangular should be a matrix.');
         assert(all(arrayfun(@(x) isInteger(x), rect)), 'the padding array should be all integers.');
-    end
-
-    % convert image format
-    if isIntegerImage(img)
-        img = im2double(img);
-        pad_value = pad_value / 255;
+        assert(isFloatImage_loose(img), 'the input image is not a floating image.');
     end
 
     im_size = size(img);

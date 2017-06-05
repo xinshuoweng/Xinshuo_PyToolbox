@@ -9,6 +9,7 @@ function img = check_imageorPath(img, debug_mode)
 
     if ischar(img)
         img = imread(img);
+        img = im2double(img);
     
     if debug_mode
 	    assert(isImage(img), 'The input image doesn''t have a good dimension.');
