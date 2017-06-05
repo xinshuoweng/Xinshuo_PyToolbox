@@ -228,7 +228,7 @@ def visualize_pts(pts, title=None, display_range=False, xlim=[-100, 100], ylim=[
             handle_dict[method_name] = handle_tmp
             color_index += 1
 
-        plt.legend(list2tuple(handle_dict.values()), list2tuple(handle_dict.keys()), scatterpoints=1, loc='lower left', fontsize=20)
+        plt.legend(list2tuple(handle_dict.values()), list2tuple(handle_dict.keys()), scatterpoints=1, markerscale=4, loc='lower left', fontsize=20)
         
     else:
         plt.scatter(pts[0, :], pts[1, :], color='r')
