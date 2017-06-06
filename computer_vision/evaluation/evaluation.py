@@ -16,10 +16,12 @@ from conversions import print_np_shape
 
 # for better visualization in error distribution, we center the distribution map and set fixed visualization range for fair comparison
 display_range = True
-xlim = [-50, 50]
-ylim = [-50, 50]
+# xlim = [-100, 100]
+# ylim = [-100, 100]
+xlim = [-200, 200]
+ylim = [-200, 200]
 
-def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshold, normalization_ced=True, normalization_vec=True, debug=True, vis=False, save=True, save_path=None):
+def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshold, normalization_ced=True, normalization_vec=False, covariance=True, debug=True, vis=False, save=True, save_path=None):
 	'''
 	evaluate the performance of facial landmark detection
 
@@ -140,6 +142,19 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 		pts_error_vec_dict[method_name] = np.transpose(pts_error_vec)
 		pts_error_vec_pts_specific_dict[method_name] = pts_error_vec_pts_specific
 
+	# visualize the error vector map
+	print('visualizing error vector distribution map....\n')
+	error_vec_save_dir = os.path.join(save_path, 'error_vec')
+	mkdir_if_missing(error_vec_save_dir)
+	savepath_tmp = os.path.join(error_vec_save_dir, 'error_vector_distribution_all.png')
+	visualize_pts(pts_error_vec_dict, title='Point Error Vector Distribution (all points)', display_range=display_range, xlim=xlim, ylim=ylim, covariance=covariance, debug=debug, vis=vis, save=save, save_path=savepath_tmp)
+	for pts_index in xrange(num_pts):
+		pts_error_vec_pts_specific_dict_tmp = dict()
+		for method_name, error_vec_dict in pts_error_vec_pts_specific_dict.items():
+			pts_error_vec_pts_specific_dict_tmp[method_name] = np.transpose(error_vec_dict[:, :, pts_index])
+		savepath_tmp = os.path.join(error_vec_save_dir, 'error_vector_distribution_pts_%d.png' % (pts_index+1))
+		visualize_pts(pts_error_vec_pts_specific_dict_tmp, title='Point Error Vector Distribution for Point %d' % (pts_index+1), display_range=display_range, xlim=xlim, ylim=ylim, covariance=covariance, debug=debug, vis=vis, save=save, save_path=savepath_tmp)
+
 	# visualize the ced (cumulative error distribution curve)
 	print('visualizing pck curve....\n')
 	pck_save_dir = os.path.join(save_path, 'pck')
@@ -159,18 +174,5 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 			normed_mean_error_dict_tmp[method_name] = np.reshape(error_array_per_pts, (num_image_tmp, ))
 		savepath_tmp = os.path.join(pck_save_dir, 'pck_curve_pts_%d.png' % (pts_index+1))
 		visualize_ced(normed_mean_error_dict_tmp, error_threshold=error_threshold, normalized=normalization_ced, title='2D PCK curve for point %d' % (pts_index+1), debug=debug, vis=vis, save=save, save_path=savepath_tmp)
-
-	# visualize the error vector map
-	print('visualizing error vector distribution map....\n')
-	error_vec_save_dir = os.path.join(save_path, 'error_vec')
-	mkdir_if_missing(error_vec_save_dir)
-	savepath_tmp = os.path.join(error_vec_save_dir, 'error_vector_distribution_all.png')
-	visualize_pts(pts_error_vec_dict, title='Point Error Vector Distribution (all points)', display_range=display_range, xlim=xlim, ylim=ylim, debug=debug, vis=vis, save=save, save_path=savepath_tmp)
-	for pts_index in xrange(num_pts):
-		pts_error_vec_pts_specific_dict_tmp = dict()
-		for method_name, error_vec_dict in pts_error_vec_pts_specific_dict.items():
-			pts_error_vec_pts_specific_dict_tmp[method_name] = np.transpose(error_vec_dict[:, :, pts_index])
-		savepath_tmp = os.path.join(error_vec_save_dir, 'error_vector_distribution_pts_%d.png' % (pts_index+1))
-		visualize_pts(pts_error_vec_pts_specific_dict_tmp, title='Point Error Vector Distribution for Point %d' % (pts_index+1), display_range=display_range, xlim=xlim, ylim=ylim, debug=debug, vis=vis, save=save, save_path=savepath_tmp)
 
 	print('\ndone!!!!!\n\n')

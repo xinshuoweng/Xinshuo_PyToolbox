@@ -1,10 +1,12 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
 import matplotlib.pyplot as plt
+from matplotlib.patches import Ellipse
 import numpy as np
 import shutil
 from sklearn.neighbors import NearestNeighbors
 from scipy.misc import imread
+from scipy.stats import norm, chi2
 import time
 
 import __init__paths__
@@ -181,7 +183,92 @@ def visualize_image_with_pts(image_path, pts, label=False, label_list=None, vis=
 
     return
 
-def visualize_pts(pts, title=None, display_range=False, xlim=[-100, 100], ylim=[-100, 100], vis=True, save=False, save_path=None, debug=True):
+def visualize_pts_covariance(pts_array, conf=None, std=None, ax=None, debug=True, **kwargs):
+    """
+    Plots an `nstd` sigma ellipse based on the mean and covariance of a point
+    "cloud" (points, an Nx2 array).
+
+    Parameters
+    ----------
+        pts_array       : 2 x N numpy array of the data points.
+        std            : The radius of the ellipse in numbers of standard deviations.
+            Defaults to 2 standard deviations.
+        ax : The axis that the ellipse will be plotted on. Defaults to the 
+            current axis.
+        Additional keyword arguments are pass on to the ellipse patch.
+
+    Returns
+    -------
+        A matplotlib ellipse artist
+    """
+    if debug:
+        assert is2dptsarray(pts_array), 'input points are not correct: (2, num_pts) vs %s' % print_np_shape(pts_array)
+        if conf is not None:
+            assert isscalar(conf) and conf >= 0 and conf <= 1, 'the confidence is not in a good range'
+        if std is not None:
+            assert ispositiveinteger(std), 'the number of standard deviation should be a positive integer'
+
+    pts_array = np.transpose(pts_array)
+    center = pts_array.mean(axis=0)
+    covariance = np.cov(pts_array, rowvar=False)
+    return visualize_covariance_ellipse(covariance=covariance, center=center, conf=conf, std=std, ax=ax, debug=debug, **kwargs)
+
+def visualize_covariance_ellipse(covariance, center, conf=None, std=None, ax=None, debug=True, **kwargs):
+    """
+    Plots an `nstd` sigma error ellipse based on the specified covariance
+    matrix (`cov`). Additional keyword arguments are passed on to the 
+    ellipse patch artist.
+
+    Parameters
+        covariance      : The 2x2 covariance matrix to base the ellipse on
+        center          : The location of the center of the ellipse. Expects a 2-element sequence of [x0, y0].
+        conf            : a floating number between [0, 1]
+        std             : The radius of the ellipse in numbers of standard deviations. Defaults to 2 standard deviations.
+        ax              : The axis that the ellipse will be plotted on. Defaults to the current axis.
+        Additional keyword arguments are pass on to the ellipse patch.
+
+    Returns
+        A covariance ellipse
+    """
+    if debug:
+        if conf is not None:
+            assert isscalar(conf) and conf >= 0 and conf <= 1, 'the confidence is not in a good range'
+        if std is not None:
+            assert ispositiveinteger(std), 'the number of standard deviation should be a positive integer'
+
+    def eigsorted(covariance):
+        vals, vecs = np.linalg.eigh(covariance)
+        # order = vals.argsort()[::-1]
+        # return vals[order], vecs[:,order]
+        return vals, vecs
+
+    if conf is not None:
+        conf = np.asarray(conf)
+    elif std is not None:
+        conf = 2 * norm.cdf(std) - 1
+    else:
+        raise ValueError('One of `conf` and `std` should be specified.')
+    r2 = chi2.ppf(conf, 2)
+
+    if ax is None:
+        ax = plt.gca()
+
+    vals, vecs = eigsorted(covariance)
+    # theta = np.degrees(np.arctan2(*vecs[:,0][::-1]))
+    theta = np.degrees(np.arctan2(*vecs[::-1, 0]))
+
+    # Width and height are "full" widths, not radius
+    # width, height = 2 * std * np.sqrt(vals)
+    # width, height = 2 * np.sqrt(chi2.ppf(volume, 2)) * np.sqrt(vals)
+    width, height = 2 * np.sqrt(vals[:, None] * r2)
+
+    ellipse = Ellipse(xy=center, width=width, height=height, angle=theta, **kwargs)
+    ellipse.set_facecolor('none')
+
+    ax.add_artist(ellipse)
+    return ellipse
+
+def visualize_pts(pts, title=None, display_range=False, xlim=[-100, 100], ylim=[-100, 100], covariance=False, vis=True, save=False, save_path=None, debug=True):
     '''
     visualize point scatter plot
 
@@ -216,6 +303,8 @@ def visualize_pts(pts, title=None, display_range=False, xlim=[-100, 100], ylim=[
     plt.ylabel('y coordinate', fontsize=16)
     plt.axis('equal')
     pts_size = 5
+    std = None
+    conf = 0.95
 
     # plot points
     if isdict(pts):
@@ -224,17 +313,27 @@ def visualize_pts(pts, title=None, display_range=False, xlim=[-100, 100], ylim=[
         assert len(color_set) >= num_methods, 'color in color set is not enough to use, please use different markers'
         color_index = 0
         for method_name, pts_tmp in pts.items():
-            handle_tmp = plt.scatter(pts_tmp[0, :], pts_tmp[1, :], color=color_set[color_index], s=pts_size, alpha=0.5)
+            color_tmp = color_set[color_index]
+
+            # plot covariance ellipse
+            if covariance:
+                visualize_pts_covariance(pts_tmp[0:2, :], std=std, conf=conf, debug=debug, color=color_tmp)
+            
+            handle_tmp = plt.scatter(pts_tmp[0, :], pts_tmp[1, :], color=color_tmp, s=pts_size, alpha=0.5)    
             handle_dict[method_name] = handle_tmp
             color_index += 1
 
         plt.legend(list2tuple(handle_dict.values()), list2tuple(handle_dict.keys()), scatterpoints=1, markerscale=4, loc='lower left', fontsize=20)
         
     else:
-        plt.scatter(pts[0, :], pts[1, :], color='r')
+        plt.scatter(pts[0, :], pts[1, :], color='r')    
+        # plot covariance ellipse
+        if covariance:
+            visualize_pts_covariance(pts_tmp[0:2, :], std=std, conf=conf, debug=debug, color='r')
 
+    # display only specific range
     if display_range:
-        axis_bin = 10
+        axis_bin = 10 * 2
         interval_x = (xlim[1] - xlim[0]) / axis_bin
         interval_y = (ylim[1] - ylim[0]) / axis_bin
         plt.xlim(xlim[0], xlim[1])
