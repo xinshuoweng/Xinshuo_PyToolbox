@@ -16,10 +16,11 @@ from conversions import print_np_shape
 
 # for better visualization in error distribution, we center the distribution map and set fixed visualization range for fair comparison
 display_range = True
-# xlim = [-100, 100]
-# ylim = [-100, 100]
-xlim = [-200, 200]
-ylim = [-200, 200]
+limit = 100
+xlim = [-1 * limit, limit]
+ylim = [-1 * limit, limit]
+# xlim = [-200, 200]
+# ylim = [-200, 200]
 
 def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshold, normalization_ced=True, normalization_vec=False, covariance=True, debug=True, vis=False, save=True, save_path=None):
 	'''
@@ -147,7 +148,7 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 	error_vec_save_dir = os.path.join(save_path, 'error_vec')
 	mkdir_if_missing(error_vec_save_dir)
 	savepath_tmp = os.path.join(error_vec_save_dir, 'error_vector_distribution_all.png')
-	visualize_pts(pts_error_vec_dict, title='Point Error Vector Distribution (all points)', display_range=display_range, xlim=xlim, ylim=ylim, covariance=covariance, debug=debug, vis=vis, save=save, save_path=savepath_tmp)
+	visualize_pts(pts_error_vec_dict, title='Point Error Vector Distribution (all %d points)' % num_pts, display_range=display_range, xlim=xlim, ylim=ylim, covariance=covariance, debug=debug, vis=vis, save=save, save_path=savepath_tmp)
 	for pts_index in xrange(num_pts):
 		pts_error_vec_pts_specific_dict_tmp = dict()
 		for method_name, error_vec_dict in pts_error_vec_pts_specific_dict.items():
@@ -160,7 +161,7 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 	pck_save_dir = os.path.join(save_path, 'pck')
 	mkdir_if_missing(pck_save_dir)
 	savepath_tmp = os.path.join(pck_save_dir, 'pck_curve_all.png')
-	visualize_ced(normed_mean_error_dict, error_threshold=error_threshold, normalized=normalization_ced, title='2D PCK curve for all 68 points', debug=debug, vis=vis, save=save, save_path=savepath_tmp)
+	visualize_ced(normed_mean_error_dict, error_threshold=error_threshold, normalized=normalization_ced, title='2D PCK curve (all %d points)' % num_pts, debug=debug, vis=vis, save=save, save_path=savepath_tmp)
 	for pts_index in xrange(num_pts):
 		normed_mean_error_dict_tmp = dict()
 		for method_name, error_array in normed_mean_error_pts_specific_dict.items():
