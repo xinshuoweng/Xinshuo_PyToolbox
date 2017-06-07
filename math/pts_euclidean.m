@@ -1,3 +1,6 @@
+% Author: Xinshuo Weng
+% email: xinshuo.weng@gmail.com
+
 function error_per_image = pts_euclidean(ground_truth_all, detected_points_all)
 %compute_error
 %   compute the average point-to-point Euclidean error normalized by the
