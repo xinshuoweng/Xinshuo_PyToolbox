@@ -65,7 +65,7 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 		normed_mean_error_total = np.zeros((num_images, ), dtype='float32')
 		normed_mean_error_pts_specific = np.zeros((num_images, num_pts), dtype='float32')
 		normed_mean_error_pts_specific_valid = np.ones((num_images, num_pts), dtype='bool')
-		pts_error_vec = np.zeros((num_images, 2), dtype='float32')
+		pts_error_vec = np.zeros((num_images, 2), dtype='float32')					
 		pts_error_vec_pts_specific = np.zeros((num_images, 2, num_pts), dtype='float32')
 		count = 0
 		for image_path, pts_prediction in pred_dict.items():
@@ -141,7 +141,7 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 		normed_mean_error_dict[method_name] = normed_mean_error_total
 		normed_mean_error_pts_specific_dict[method_name] = normed_mean_error_pts_specific
 		normed_mean_error_pts_specific_valid_dict[method_name] = normed_mean_error_pts_specific_valid
-		pts_error_vec_dict[method_name] = np.transpose(pts_error_vec)
+		pts_error_vec_dict[method_name] = np.transpose(pts_error_vec)												# 2 x num_images
 		pts_error_vec_pts_specific_dict[method_name] = pts_error_vec_pts_specific
 
 	# visualize the error vector map

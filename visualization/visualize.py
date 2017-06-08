@@ -14,6 +14,7 @@ from check import *
 from file_io import mkdir_if_missing, fileparts
 from bbox_transform import bbox_TLBR2TLWH, bboxcheck_TLBR
 from conversions import print_np_shape, list2tuple
+from math_functions import pts_euclidean
 
 color_set = ['r', 'b', 'g', 'c', 'm', 'y', 'k', 'w']
 marker_set = ['o', 'v', '^', '<', '>', '1', '2', '3', '4', '8', 's', 'p', '*', 'h', 'H', '+', 'x', 'D', 'd']
@@ -301,7 +302,7 @@ def visualize_covariance_ellipse(covariance, center, conf=None, std=None, ax=Non
     ax.add_artist(ellipse)
     return ellipse
 
-def visualize_pts(pts, title=None, ax=None, display_range=False, xlim=[-100, 100], ylim=[-100, 100], covariance=False, vis=True, save=False, save_path=None, debug=True):
+def visualize_pts(pts, title=None, ax=None, display_range=False, xlim=[-100, 100], ylim=[-100, 100], covariance=False, mse=False, mse_value=None, vis=True, save=False, save_path=None, debug=True):
     '''
     visualize point scatter plot
 
@@ -332,8 +333,13 @@ def visualize_pts(pts, title=None, ax=None, display_range=False, xlim=[-100, 100
     if ax is None:
         fig = plt.figure(figsize=figsize)
         plt.title(title, fontsize=20)
-        plt.xlabel('x coordinate', fontsize=16)
-        plt.ylabel('y coordinate', fontsize=16)
+
+        if isdict(pts):
+            plt.xlabel('x coordinate', fontsize=16)
+            plt.ylabel('y coordinate', fontsize=16)
+        else:
+            plt.xlabel('x coordinate (%d points)' % pts.shape[1], fontsize=16)
+            plt.ylabel('y coordinate (%d points)' % pts.shape[1], fontsize=16)
         plt.axis('equal')
         ax = plt.gca()
     
@@ -345,9 +351,9 @@ def visualize_pts(pts, title=None, ax=None, display_range=False, xlim=[-100, 100
     alpha = 0.5
 
     # plot points
+    handle_dict = dict()    # for legend
     if isdict(pts):
         num_methods = len(pts)
-        handle_dict = dict()    # for legend
         assert len(color_set) >= num_methods, 'color in color set is not enough to use, please use different markers'
         for method_name, pts_tmp in pts.items():
             color_tmp = color_set[color_index]
@@ -357,18 +363,35 @@ def visualize_pts(pts, title=None, ax=None, display_range=False, xlim=[-100, 100
                 visualize_pts_covariance(pts_tmp[0:2, :], std=std, conf=conf, ax=ax, debug=debug, color=color_tmp)
             
             handle_tmp = ax.scatter(pts_tmp[0, :], pts_tmp[1, :], color=color_tmp, s=pts_size, alpha=alpha)    
-            handle_dict[method_name] = handle_tmp
+            if mse:
+                num_pts = pts_tmp.shape[1]
+                mse_tmp = pts_euclidean(pts_tmp[0:2, :], np.zeros((2, num_pts), dtype='float32'), debug=debug)
+                display_string = '%s, MSE: %.7f' % (method_name, mse_tmp)
+            else:
+                display_string = method_name
+            handle_dict[display_string] = handle_tmp
             color_index += 1
 
         plt.legend(list2tuple(handle_dict.values()), list2tuple(handle_dict.keys()), scatterpoints=1, markerscale=4, loc='lower left', fontsize=20)
         
     else:
         color_tmp = color_set[color_index]
-        ax.scatter(pts[0, :], pts[1, :], color=color_tmp, s=pts_size, alpha=alpha)    
+        handle_tmp = ax.scatter(pts[0, :], pts[1, :], color=color_tmp, s=pts_size, alpha=alpha)    
+
         # plot covariance ellipse
         if covariance:
-            visualize_pts_covariance(pts_tmp[0:2, :], std=std, conf=conf, ax=ax, debug=debug, color=color_tmp)
+            visualize_pts_covariance(pts[0:2, :], std=std, conf=conf, ax=ax, debug=debug, color=color_tmp)
 
+        if mse:
+            if mse_value is None:
+                num_pts = pts.shape[1]
+                mse_tmp = pts_euclidean(pts[0:2, :], np.zeros((2, num_pts), dtype='float32'), debug=debug)
+                display_string = 'MSE: %.7f' % (mse_tmp)
+            else:
+                display_string = 'MSE: %.7f' % (mse_value)
+            handle_dict[display_string] = handle_tmp
+            plt.legend(list2tuple(handle_dict.values()), list2tuple(handle_dict.keys()), scatterpoints=1, markerscale=4, loc='lower left', fontsize=20)
+            
     # display only specific range
     if display_range:
         axis_bin = 10 * 2
