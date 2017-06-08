@@ -15,7 +15,7 @@ from file_io import mkdir_if_missing, fileparts
 from bbox_transform import bbox_TLBR2TLWH, bboxcheck_TLBR
 from conversions import print_np_shape, list2tuple
 
-color_set = ['b', 'r', 'g', 'c', 'm', 'y', 'k', 'w']
+color_set = ['r', 'b', 'g', 'c', 'm', 'y', 'k', 'w']
 marker_set = ['o', 'v', '^', '<', '>', '1', '2', '3', '4', '8', 's', 'p', '*', 'h', 'H', '+', 'x', 'D', 'd']
 
 def visualize_image(image, vis=True, save=False, save_path=None, debug=True):
@@ -89,27 +89,71 @@ def visualize_image(image, vis=True, save=False, save_path=None, debug=True):
     plt.close(fig)
     return
 
-def visualize_image_with_pts(image_path, pts, label=False, label_list=None, vis=True, save=False, save_path=None, debug=True):
+def visualize_image_with_pts(image_path, pts, covariance=False, label=False, label_list=None, vis=True, save=False, save_path=None, debug=True):
     '''
     visualize image and plot keypoints on top of it
 
     parameter:
         image_path:     a path to an image
-        pts:            2 or 3 x num_pts numpy array
+        pts:            a dictionary or 2 or 3 x num_pts numpy array
                         when there are 3 channels in pts, the third one denotes the occlusion flag
                         occlusion: 0 -> invisible, 1 -> visible, -1 -> not existing
         label:          determine to add text label for each point
         label_list:     label string for all points
     '''
 
+    # plot keypoints
+    def visualize_pts_array(pts_array, covariance=False, color_index=0, ax=None, label=False, label_list=None, occlusion=True):
+        pts_size = 5
+        std = None
+        conf = 0.95
+        color_tmp = color_set[color_index]
+
+        if is2dptsarray(pts_array):    
+            ax.scatter(pts_array[0, :], pts_array[1, :], color=color_tmp)
+        else:
+            pts_visible_index   = np.where(pts_array[2, :] == 1)[0].tolist()              # plot visible points in red color
+            pts_invisible_index = np.where(pts_array[2, :] == 0)[0].tolist()              # plot invisible points in blue color
+            pts_ignore_index    = np.where(pts_array[2, :] == -1)[0].tolist()             # do not plot points with annotation
+            ax.scatter(pts_array[0, pts_visible_index], pts_array[1, pts_visible_index], color=color_tmp, s=pts_size)
+            if occlusion:
+                ax.scatter(pts_array[0, pts_invisible_index], pts_array[1, pts_invisible_index], color=color_set[color_index+1], s=pts_size)
+            else:
+                ax.scatter(pts_array[0, pts_invisible_index], pts_array[1, pts_invisible_index], color=color_tmp, s=pts_size)
+            if covariance:
+                visualize_pts_covariance(pts_array[0:2, :], std=std, conf=conf, ax=ax, debug=False, color=color_tmp)
+
+            if label:
+                num_pts = pts_array.shape[1]
+                for pts_index in xrange(num_pts):
+                    label_tmp = label_list[pts_index]
+                    if pts_index in pts_ignore_index:
+                        continue
+                    else:
+                        # note that the annotation is based on the coordinate instead of the order of plotting the points, so the orider in pts_index does not matter
+                        plt.annotate(label_tmp, xy=(pts_array[0, pts_index], pts_array[1, pts_index]), xytext=(-1, 1), color=color_set[color_index+5], textcoords='offset points', ha='right', va='bottom')
+                        # bbox=dict(boxstyle='round,pad=0.5', fc='yellow', alpha=0.5),
+                        # arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
+
+    if label and (label_list is None):
+        if not isdict(pts):
+            num_pts = pts.shape[1]
+        else:
+            pts_tmp = pts.values()[0]
+            num_pts = np.asarray(pts_tmp).shape[1] if islist(pts_tmp) else pts_tmp.shape[1]
+        label_list = [str(i+1) for i in xrange(num_pts)];
+
     if debug:
         assert is_path_exists(image_path), 'image is not existing'
-        assert is2dptsarray(pts) or is2dptsarray_occlusion(pts), 'input points are not correct'
+        if isdict(pts):
+            for pts_tmp in pts.values():
+                if islist(pts_tmp):
+                    pts_tmp = np.asarray(pts_tmp)
+                assert is2dptsarray(pts_tmp) or is2dptsarray_occlusion(pts_tmp), 'input points within dictionary are not correct: (2 (3), num_pts) vs %s' % print_np_shape(pts_tmp)
+        else:
+            assert is2dptsarray(pts) or is2dptsarray_occlusion(pts), 'input points are not correct'
         assert islogical(label), 'label flag is not correct'
         if label:
-            if label_list is None:
-                num_pts = pts.shape[1]
-                label_list = [str(i+1) for i in xrange(num_pts)];
             assert islist(label_list) and all(isstring(label_tmp) for label_tmp in label_list), 'labels are not correct'
 
     try:
@@ -150,27 +194,16 @@ def visualize_image_with_pts(image_path, pts, label=False, label_list=None, vis=
         assert False, 'image is not correct'
     ax.set(xlim=[0, width], ylim=[height, 0], aspect=1)
 
-    # plot keypoints
-    if is2dptsarray(pts):
-        ax.scatter(pts[0, :], pts[1, :], color='r')
-    else:
-        pts_visible_index   = np.where(pts[2, :] == 1)[0].tolist()              # plot visible points in red color
-        pts_invisible_index = np.where(pts[2, :] == 0)[0].tolist()              # plot invisible points in blue color
-        pts_ignore_index    = np.where(pts[2, :] == -1)[0].tolist()             # do not plot points with annotation
-        ax.scatter(pts[0, pts_visible_index], pts[1, pts_visible_index], color='r')
-        ax.scatter(pts[0, pts_invisible_index], pts[1, pts_invisible_index], color='b')
-        if label:
-            num_pts = pts.shape[1]
-            for pts_index in xrange(num_pts):
-                label_tmp = label_list[pts_index]
-                if pts_index in pts_ignore_index:
-                    continue
-                else:
-                    # note that the annotation is based on the coordinate instead of the order of plotting the points, so the orider in pts_index does not matter
-                    plt.annotate(label_tmp, xy=(pts[0, pts_index], pts[1, pts_index]), xytext=(-1, 1), color='y', textcoords='offset points', ha='right', va='bottom')
-                    # bbox=dict(boxstyle='round,pad=0.5', fc='yellow', alpha=0.5),
-                    # arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
- 
+    if isdict(pts):
+        color_index = 0
+        for pts_id, pts_array in pts.items():
+            if islist(pts_array):
+                pts_array = np.asarray(pts_array)
+            visualize_pts_array(pts_array, ax=ax, covariance=covariance, color_index=color_index, label=label, label_list=label_list, occlusion=False)
+            color_index += 1
+    else:   
+        visualize_pts_array(pts, ax=ax, covariance=covariance, label=label, label_list=label_list)
+
     # save and visualization
     if save:
         if debug:
@@ -268,7 +301,7 @@ def visualize_covariance_ellipse(covariance, center, conf=None, std=None, ax=Non
     ax.add_artist(ellipse)
     return ellipse
 
-def visualize_pts(pts, title=None, display_range=False, xlim=[-100, 100], ylim=[-100, 100], covariance=False, vis=True, save=False, save_path=None, debug=True):
+def visualize_pts(pts, title=None, ax=None, display_range=False, xlim=[-100, 100], ylim=[-100, 100], covariance=False, vis=True, save=False, save_path=None, debug=True):
     '''
     visualize point scatter plot
 
@@ -296,40 +329,45 @@ def visualize_pts(pts, title=None, display_range=False, xlim=[-100, 100], ylim=[
     width = 1024
     height = 1024
     figsize = width / float(dpi), height / float(dpi)
-    fig = plt.figure(figsize=figsize)
-
-    plt.title(title, fontsize=20)
-    plt.xlabel('x coordinate', fontsize=16)
-    plt.ylabel('y coordinate', fontsize=16)
-    plt.axis('equal')
+    if ax is None:
+        fig = plt.figure(figsize=figsize)
+        plt.title(title, fontsize=20)
+        plt.xlabel('x coordinate', fontsize=16)
+        plt.ylabel('y coordinate', fontsize=16)
+        plt.axis('equal')
+        ax = plt.gca()
+    
+    # internal parameters
     pts_size = 5
     std = None
     conf = 0.95
+    color_index = 0
+    alpha = 0.5
 
     # plot points
     if isdict(pts):
         num_methods = len(pts)
         handle_dict = dict()    # for legend
         assert len(color_set) >= num_methods, 'color in color set is not enough to use, please use different markers'
-        color_index = 0
         for method_name, pts_tmp in pts.items():
             color_tmp = color_set[color_index]
 
             # plot covariance ellipse
             if covariance:
-                visualize_pts_covariance(pts_tmp[0:2, :], std=std, conf=conf, debug=debug, color=color_tmp)
+                visualize_pts_covariance(pts_tmp[0:2, :], std=std, conf=conf, ax=ax, debug=debug, color=color_tmp)
             
-            handle_tmp = plt.scatter(pts_tmp[0, :], pts_tmp[1, :], color=color_tmp, s=pts_size, alpha=0.5)    
+            handle_tmp = ax.scatter(pts_tmp[0, :], pts_tmp[1, :], color=color_tmp, s=pts_size, alpha=alpha)    
             handle_dict[method_name] = handle_tmp
             color_index += 1
 
         plt.legend(list2tuple(handle_dict.values()), list2tuple(handle_dict.keys()), scatterpoints=1, markerscale=4, loc='lower left', fontsize=20)
         
     else:
-        plt.scatter(pts[0, :], pts[1, :], color='r')    
+        color_tmp = color_set[color_index]
+        ax.scatter(pts[0, :], pts[1, :], color=color_tmp, s=pts_size, alpha=alpha)    
         # plot covariance ellipse
         if covariance:
-            visualize_pts_covariance(pts_tmp[0:2, :], std=std, conf=conf, debug=debug, color='r')
+            visualize_pts_covariance(pts_tmp[0:2, :], std=std, conf=conf, ax=ax, debug=debug, color=color_tmp)
 
     # display only specific range
     if display_range:
@@ -340,7 +378,7 @@ def visualize_pts(pts, title=None, display_range=False, xlim=[-100, 100], ylim=[
         plt.ylim(ylim[0], ylim[1])
         plt.xticks(np.arange(xlim[0], xlim[1] + interval_x, interval_x))
         plt.yticks(np.arange(ylim[0], ylim[1] + interval_y, interval_y))
-    plt.grid()
+        plt.grid()
 
     # save and visualization
     if save:

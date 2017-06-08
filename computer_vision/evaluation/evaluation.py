@@ -123,6 +123,7 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 				pts_prediction_tmp = np.reshape(pts_prediction[:, pts_index_from_keep_list], (2, 1))
 				pts_anno_tmp = np.reshape(pts_anno[:, pts_index_from_keep_list], (2, 1))
 				normed_mean_error_pts_specifc_tmp = pts_euclidean(pts_prediction_tmp, pts_anno_tmp, debug=debug)
+
 				if normalization_ced:
 					normed_mean_error_pts_specifc_tmp /= bbox_size
 				normed_mean_error_pts_specific[count, pts_index] = normed_mean_error_pts_specifc_tmp
