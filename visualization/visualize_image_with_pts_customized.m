@@ -20,25 +20,25 @@ function img_with_pts = visualize_image_with_pts_customized(img, pts_array, vis,
 	if debug_mode
 		assert(isImage(img), 'the input is not an image format.');
 		assert(size(pts_array, 1) == 2 && size(pts_array, 2) >= 0, 'shape of points to draw is not correct.');
+		assert(isIntegerImage(img), 'the input image should be an integer image.\n');
 	end
 
 	% draw image and points
-	title('points prediction.'); 
-	num_pts = size(pts_array, 2);
-	if isIntegerImage(img)
-		color_pixel = reshape([255, 0, 0], [1, 1, 3]);		% red
-	else
-		color_pixel = reshape([1, 0, 0], [1, 1, 3]);
-	end
 	radius = 1;
-
+	num_pts = size(pts_array, 2);
+	color_pixel = reshape([255, 0, 0], [1, 1, 3]);		% red
+	
 	x = pts_array(1, :);
 	y = pts_array(2, :);
 	for pts_index = 1:num_pts
 		img(y(pts_index)-radius:y(pts_index)+radius, x(pts_index), :) = repmat(color_pixel, [3, 1, 1]);
 		img(y(pts_index), x(pts_index)-radius:x(pts_index)+radius, :) = repmat(color_pixel, [1, 3, 1]);
 	end
-	imshow(img);
+
+	if vis
+		title('points prediction.'); 
+		imshow(img);
+	end
 	
 	% % add labels
 	% if label
