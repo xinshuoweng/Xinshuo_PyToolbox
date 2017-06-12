@@ -288,13 +288,13 @@ def visualize_covariance_ellipse(covariance, center, conf=None, std=None, ax=Non
         ax = plt.gca()
 
     vals, vecs = eigsorted(covariance)
-    # theta = np.degrees(np.arctan2(*vecs[:,0][::-1]))
-    theta = np.degrees(np.arctan2(*vecs[::-1, 0]))
+    theta = np.degrees(np.arctan2(*vecs[:,0][::-1]))
+    # theta = np.degrees(np.arctan2(*vecs[::-1, 0]))
 
     # Width and height are "full" widths, not radius
     # width, height = 2 * std * np.sqrt(vals)
-    # width, height = 2 * np.sqrt(chi2.ppf(volume, 2)) * np.sqrt(vals)
-    width, height = 2 * np.sqrt(vals[:, None] * r2)
+    width, height = 2 * np.sqrt(np.sqrt(vals) * r2)
+    # width, height = 2 * np.sqrt(vals[:, None] * r2)
 
     ellipse = Ellipse(xy=center, width=width, height=height, angle=theta, **kwargs)
     ellipse.set_facecolor('none')
@@ -348,7 +348,9 @@ def visualize_pts(pts, title=None, ax=None, display_range=False, xlim=[-100, 100
     std = None
     conf = 0.95
     color_index = 0
-    alpha = 0.5
+    alpha = 0.2
+    legend_fontsize = 10
+    scale_distance = 48.8
 
     # plot points
     handle_dict = dict()    # for legend
@@ -364,15 +366,18 @@ def visualize_pts(pts, title=None, ax=None, display_range=False, xlim=[-100, 100
             
             handle_tmp = ax.scatter(pts_tmp[0, :], pts_tmp[1, :], color=color_tmp, s=pts_size, alpha=alpha)    
             if mse:
-                num_pts = pts_tmp.shape[1]
-                mse_tmp = pts_euclidean(pts_tmp[0:2, :], np.zeros((2, num_pts), dtype='float32'), debug=debug)
-                display_string = '%s, MSE: %.7f' % (method_name, mse_tmp)
+                if mse_value is None:
+                    num_pts = pts_tmp.shape[1]
+                    mse_tmp = pts_euclidean(pts_tmp[0:2, :], np.zeros((2, num_pts), dtype='float32'), debug=debug)
+                else:
+                    mse_tmp = mse_value[method_name]
+                display_string = '%s, MSE: %.7f (%.1f um)' % (method_name, mse_tmp, mse_tmp * scale_distance)
             else:
                 display_string = method_name
             handle_dict[display_string] = handle_tmp
             color_index += 1
 
-        plt.legend(list2tuple(handle_dict.values()), list2tuple(handle_dict.keys()), scatterpoints=1, markerscale=4, loc='lower left', fontsize=20)
+        plt.legend(list2tuple(handle_dict.values()), list2tuple(handle_dict.keys()), scatterpoints=1, markerscale=4, loc='lower left', fontsize=legend_fontsize)
         
     else:
         color_tmp = color_set[color_index]
@@ -386,11 +391,11 @@ def visualize_pts(pts, title=None, ax=None, display_range=False, xlim=[-100, 100
             if mse_value is None:
                 num_pts = pts.shape[1]
                 mse_tmp = pts_euclidean(pts[0:2, :], np.zeros((2, num_pts), dtype='float32'), debug=debug)
-                display_string = 'MSE: %.7f' % (mse_tmp)
+                display_string = 'MSE: %.7f (%.1f um)' % (mse_tmp, mse_tmp * scale_distance)
             else:
-                display_string = 'MSE: %.7f' % (mse_value)
+                display_string = 'MSE: %.7f (%.1f um)' % (mse_value, mse_value * scale_distance)
             handle_dict[display_string] = handle_tmp
-            plt.legend(list2tuple(handle_dict.values()), list2tuple(handle_dict.keys()), scatterpoints=1, markerscale=4, loc='lower left', fontsize=20)
+            plt.legend(list2tuple(handle_dict.values()), list2tuple(handle_dict.keys()), scatterpoints=1, markerscale=4, loc='lower left', fontsize=legend_fontsize)
             
     # display only specific range
     if display_range:
@@ -511,6 +516,9 @@ def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, titl
     dpi = 80  
     width = 1000
     height = 800
+    legend_fontsize = 10
+    scale_distance = 48.8
+
     figsize = width / float(dpi), height / float(dpi)
     fig = plt.figure(figsize=figsize)
 
@@ -559,13 +567,13 @@ def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, titl
         # draw 
         color_index = method_index % len(color_set) 
         color_tmp = color_set[color_index]
-        label = '%s, AUC: %.5f, MSE: %.5f' % (method_name, AUC[method_name], MSE[method_name])
+        label = '%s, AUC: %.5f, MSE: %.5f (%.1f um)' % (method_name, AUC[method_name], MSE[method_name], MSE[method_name] * scale_distance)
         print label
         if normalized:
             plt.plot(x_axis*100, y_axis*100, '%s-' % color_tmp, label=label, lw=3)
         else:
             plt.plot(x_axis, y_axis*100, '%s-' % color_tmp, label=label, lw=3)
-        plt.legend(loc=4, fontsize=16)
+        plt.legend(loc=4, fontsize=legend_fontsize)
         method_index += 1
 
     plt.ylabel('{} Test Images (%)'.format(num_images), fontsize=16)

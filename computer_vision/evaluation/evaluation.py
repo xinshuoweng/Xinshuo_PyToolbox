@@ -16,7 +16,7 @@ from conversions import print_np_shape
 
 # for better visualization in error distribution, we center the distribution map and set fixed visualization range for fair comparison
 display_range = True
-limit = 100
+limit = 50
 xlim = [-1 * limit, limit]
 ylim = [-1 * limit, limit]
 # xlim = [-200, 200]
@@ -144,18 +144,23 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 		pts_error_vec_dict[method_name] = np.transpose(pts_error_vec)												# 2 x num_images
 		pts_error_vec_pts_specific_dict[method_name] = pts_error_vec_pts_specific
 
+	# calculate mean value
+	mse_value = dict()
+	for method_name, error_array in normed_mean_error_dict.items():
+		mse_value[method_name] = np.mean(error_array)
+
 	# visualize the error vector map
 	print('visualizing error vector distribution map....\n')
 	error_vec_save_dir = os.path.join(save_path, 'error_vec')
 	mkdir_if_missing(error_vec_save_dir)
 	savepath_tmp = os.path.join(error_vec_save_dir, 'error_vector_distribution_all.png')
-	visualize_pts(pts_error_vec_dict, title='Point Error Vector Distribution (all %d points)' % num_pts, display_range=display_range, xlim=xlim, ylim=ylim, covariance=covariance, debug=debug, vis=vis, save=save, save_path=savepath_tmp)
+	visualize_pts(pts_error_vec_dict, title='Point Error Vector Distribution (all %d points)' % num_pts, mse=True, mse_value=mse_value, display_range=display_range, xlim=xlim, ylim=ylim, covariance=covariance, debug=debug, vis=vis, save=save, save_path=savepath_tmp)
 	for pts_index in xrange(num_pts):
 		pts_error_vec_pts_specific_dict_tmp = dict()
 		for method_name, error_vec_dict in pts_error_vec_pts_specific_dict.items():
 			pts_error_vec_pts_specific_dict_tmp[method_name] = np.transpose(error_vec_dict[:, :, pts_index])
 		savepath_tmp = os.path.join(error_vec_save_dir, 'error_vector_distribution_pts_%d.png' % (pts_index+1))
-		visualize_pts(pts_error_vec_pts_specific_dict_tmp, title='Point Error Vector Distribution for Point %d' % (pts_index+1), display_range=display_range, xlim=xlim, ylim=ylim, covariance=covariance, debug=debug, vis=vis, save=save, save_path=savepath_tmp)
+		visualize_pts(pts_error_vec_pts_specific_dict_tmp, title='Point Error Vector Distribution for Point %d' % (pts_index+1), mse=False, display_range=display_range, xlim=xlim, ylim=ylim, covariance=covariance, debug=debug, vis=vis, save=save, save_path=savepath_tmp)
 
 	# visualize the ced (cumulative error distribution curve)
 	print('visualizing pck curve....\n')
