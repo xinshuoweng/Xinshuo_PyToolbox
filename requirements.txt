@@ -2,4 +2,5 @@ humanize
 matplotlib
 graphviz
 matlab_wrapper
+scikit-learn
 glob2
