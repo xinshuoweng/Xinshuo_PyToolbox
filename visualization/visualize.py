@@ -145,7 +145,7 @@ def visualize_image_with_pts(image_path, pts, covariance=False, label=False, lab
         label_list = [str(i+1) for i in xrange(num_pts)];
 
     if debug:
-        assert is_path_exists(image_path), 'image is not existing'
+        assert is_path_exists(image_path), 'image is not existing at %s' % image_path
         if isdict(pts):
             for pts_tmp in pts.values():
                 if islist(pts_tmp):
