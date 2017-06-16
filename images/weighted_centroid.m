@@ -13,7 +13,11 @@
 %
 % return
 %   centroids:      a 2 x N matrix of coordinates of all candidate peaks 
-function centroids = weighted_centroid(heatmap, thres, debug_mode)
+function centroids = weighted_centroid(heatmap, thres, debug_mode, vis)
+    if nargin < 4
+        vis = false;
+    end
+
     if nargin < 3
         debug_mode = true;
     end
@@ -71,6 +75,13 @@ function centroids = weighted_centroid(heatmap, thres, debug_mode)
                 centroids(1, region_id) = centroid_x;
                 centroids(2, region_id) = centroid_y;
             end 
+
+            if vis
+                heatmap
+                figure; imshow(heatmap); title('heatmap');
+                figure; imshow(binary_mask); title('binary mask'); hold on;
+                plot(centroids(1, :), centroids(2, :), 'rx', 'MarkerSize', 10);
+            end
         end
     end
 end
