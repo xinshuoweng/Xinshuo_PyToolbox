@@ -177,6 +177,23 @@ def remove_item_from_list(list_to_remove, item, debug=True):
 
 	return list_to_remove
 
+def remove_list_from_list(list_to_remove, list_items, debug=True):
+	'''
+	remove a list of items from a list
+	'''
+	if debug:
+		assert islist(list_to_remove), 'input list is not a list'
+		assert islist(list_items), 'remove list is not a list'
+		
+	for item in list_items:
+		try:
+			list_to_remove.remove(item)
+		except ValueError:
+			print('Warning!!!!!! Item to remove is not in the list. Remove operation is not done.')
+
+	return list_to_remove
+
+
 def remove_empty_item_from_list(list_to_remove, debug=True):
 	'''
 	remove an empty string from a list
