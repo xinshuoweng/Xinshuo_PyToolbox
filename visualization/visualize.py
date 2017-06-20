@@ -118,7 +118,7 @@ def visualize_image_with_pts(image_path, pts, covariance=False, label=False, lab
             pts_ignore_index    = np.where(pts_array[2, :] == -1)[0].tolist()             # do not plot points with annotation
             ax.scatter(pts_array[0, pts_visible_index], pts_array[1, pts_visible_index], color=color_tmp, s=pts_size)
             if occlusion:
-                ax.scatter(pts_array[0, pts_invisible_index], pts_array[1, pts_invisible_index], color=color_set[color_index+1], s=pts_size)
+                ax.scatter(pts_array[0, pts_invisible_index], pts_array[1, pts_invisible_index], color=color_set[(color_index+1) % len(color_set)], s=pts_size)
             else:
                 ax.scatter(pts_array[0, pts_invisible_index], pts_array[1, pts_invisible_index], color=color_tmp, s=pts_size)
             if covariance:
@@ -132,7 +132,7 @@ def visualize_image_with_pts(image_path, pts, covariance=False, label=False, lab
                         continue
                     else:
                         # note that the annotation is based on the coordinate instead of the order of plotting the points, so the orider in pts_index does not matter
-                        plt.annotate(label_tmp, xy=(pts_array[0, pts_index], pts_array[1, pts_index]), xytext=(-1, 1), color=color_set[color_index+5], textcoords='offset points', ha='right', va='bottom')
+                        plt.annotate(label_tmp, xy=(pts_array[0, pts_index], pts_array[1, pts_index]), xytext=(-1, 1), color=color_set[(color_index+5) % len(color_set)], textcoords='offset points', ha='right', va='bottom')
                         # bbox=dict(boxstyle='round,pad=0.5', fc='yellow', alpha=0.5),
                         # arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
 
