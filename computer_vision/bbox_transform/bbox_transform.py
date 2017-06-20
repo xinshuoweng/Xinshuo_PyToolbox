@@ -291,3 +291,26 @@ def bbox_TLBR2TLWH(bbox, debug=True):
     bbox_TLWH[:, 2] = bbox[:, 2] - bbox[:, 0]
     bbox_TLWH[:, 3] = bbox[:, 3] - bbox[:, 1]
     return bbox_TLWH
+
+
+def bbox_enlarge(bbox, width_ratio=0.2, height_ratio=0.2, debug=True):
+    '''
+    enlarge the bbox around the edge
+
+    parameters:
+        bbox:   N X 4 numpy array, TLBR format
+        ratio:  how much to enlarge, for example, the ratio=0.2, then the width and height will be increased by 0.2 times of original width and height
+    '''
+
+    if debug:
+        assert bboxcheck_TLBR(bbox), 'the input bounding box should be TLBR format'
+
+    width = (bbox[:, 2] - bbox[:, 0]) * width_ratio
+    height = (bbox[:, 3] - bbox[:, 1]) * height_ratio
+    bbox[:, 0] -= width / 2.0
+    bbox[:, 2] += width / 2.0
+    bbox[:, 3] += height / 2.0
+    bbox[:, 1] -= height / 2.0
+
+    return bbox
+
