@@ -293,7 +293,7 @@ def bbox_TLBR2TLWH(bbox, debug=True):
     return bbox_TLWH
 
 
-def bbox_enlarge(bbox, width_ratio=0.2, height_ratio=0.2, debug=True):
+def bbox_enlarge(bbox, ratio=0.2, width_ratio=None, height_ratio=None, min_length=128, min_width=None, min_height=None, debug=True):
     '''
     enlarge the bbox around the edge
 
@@ -305,8 +305,20 @@ def bbox_enlarge(bbox, width_ratio=0.2, height_ratio=0.2, debug=True):
     if debug:
         assert bboxcheck_TLBR(bbox), 'the input bounding box should be TLBR format'
 
-    width = (bbox[:, 2] - bbox[:, 0]) * width_ratio
-    height = (bbox[:, 3] - bbox[:, 1]) * height_ratio
+    if width_ratio is not None and height_ratio is not None:
+        width = (bbox[:, 2] - bbox[:, 0]) * width_ratio
+        height = (bbox[:, 3] - bbox[:, 1]) * height_ratio
+    else:
+        width = (bbox[:, 2] - bbox[:, 0]) * ratio
+        height = (bbox[:, 3] - bbox[:, 1]) * ratio
+
+    if min_height is not None and min_width is not None:
+        width = max(width, min_width)
+        height = max(height, min_height)
+    else:
+        width = max(width, min_length)
+        height = max(height, min_length)
+
     bbox[:, 0] -= width / 2.0
     bbox[:, 2] += width / 2.0
     bbox[:, 3] += height / 2.0
