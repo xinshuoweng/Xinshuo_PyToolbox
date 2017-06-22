@@ -335,8 +335,14 @@ def visualize_pts(pts, title=None, ax=None, display_range=False, xlim=[-100, 100
         plt.title(title, fontsize=20)
 
         if isdict(pts):
-            plt.xlabel('x coordinate', fontsize=16)
-            plt.ylabel('y coordinate', fontsize=16)
+            num_pts_all = pts.values()[0].shape[1]
+            if all(pts_tmp.shape[1] == num_pts_all for pts_tmp in pts.values()):
+                plt.xlabel('x coordinate (%d points)' % pts.values()[0].shape[1], fontsize=16)
+                plt.ylabel('y coordinate (%d points)' % pts.values()[0].shape[1], fontsize=16)
+            else:
+                print('number of points is different across different methods')
+                plt.xlabel('x coordinate', fontsize=16)
+                plt.ylabel('y coordinate', fontsize=16)
         else:
             plt.xlabel('x coordinate (%d points)' % pts.shape[1], fontsize=16)
             plt.ylabel('y coordinate (%d points)' % pts.shape[1], fontsize=16)
@@ -357,6 +363,7 @@ def visualize_pts(pts, title=None, ax=None, display_range=False, xlim=[-100, 100
     if isdict(pts):
         num_methods = len(pts)
         assert len(color_set) >= num_methods, 'color in color set is not enough to use, please use different markers'
+        mse_return = dict()
         for method_name, pts_tmp in pts.items():
             color_tmp = color_set[color_index]
 
@@ -372,6 +379,7 @@ def visualize_pts(pts, title=None, ax=None, display_range=False, xlim=[-100, 100
                 else:
                     mse_tmp = mse_value[method_name]
                 display_string = '%s, MSE: %.7f (%.1f um)' % (method_name, mse_tmp, mse_tmp * scale_distance)
+                mse_return[method_name] = mse_tmp
             else:
                 display_string = method_name
             handle_dict[display_string] = handle_tmp
@@ -392,8 +400,10 @@ def visualize_pts(pts, title=None, ax=None, display_range=False, xlim=[-100, 100
                 num_pts = pts.shape[1]
                 mse_tmp = pts_euclidean(pts[0:2, :], np.zeros((2, num_pts), dtype='float32'), debug=debug)
                 display_string = 'MSE: %.7f (%.1f um)' % (mse_tmp, mse_tmp * scale_distance)
+                mse_return = mse_tmp
             else:
                 display_string = 'MSE: %.7f (%.1f um)' % (mse_value, mse_value * scale_distance)
+                mse_return = mse_value
             handle_dict[display_string] = handle_tmp
             plt.legend(list2tuple(handle_dict.values()), list2tuple(handle_dict.keys()), scatterpoints=1, markerscale=4, loc='lower left', fontsize=legend_fontsize)
             
@@ -418,7 +428,10 @@ def visualize_pts(pts, title=None, ax=None, display_range=False, xlim=[-100, 100
         plt.show()
     plt.close(fig)
     
-    return
+    if mse:
+        return mse_return
+    else:
+        return
 
 def visualize_image_with_bbox(image_path, bbox, vis=True, save=False, save_path=None, debug=True):
     '''

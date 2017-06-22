@@ -4,7 +4,7 @@
 # this file contains all functions about evaluation in computer vision
 import math
 import numpy as np
-import os
+import os, sys, json
 import time
 
 from bbox_transform import bbox_TLBR2TLWH, pts2bbox
@@ -21,6 +21,7 @@ xlim = [-1 * limit, limit]
 ylim = [-1 * limit, limit]
 # xlim = [-200, 200]
 # ylim = [-200, 200]
+mse = True
 
 def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshold, normalization_ced=True, normalization_vec=False, covariance=True, debug=True, vis=False, save=True, save_path=None):
 	'''
@@ -145,22 +146,37 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 		pts_error_vec_pts_specific_dict[method_name] = pts_error_vec_pts_specific
 
 	# calculate mean value
-	mse_value = dict()
-	for method_name, error_array in normed_mean_error_dict.items():
-		mse_value[method_name] = np.mean(error_array)
+	if mse:
+		mse_value = dict()		# dictionary to record all average MSE for different methods
+		mse_dict = dict()		# dictionary to record all point-wise MSE for different keypoints
+		for method_name, error_array in normed_mean_error_dict.items():
+			mse_value[method_name] = np.mean(error_array)
+	else:
+		mse_value = None
 
 	# visualize the error vector map
 	print('visualizing error vector distribution map....\n')
 	error_vec_save_dir = os.path.join(save_path, 'error_vec')
 	mkdir_if_missing(error_vec_save_dir)
 	savepath_tmp = os.path.join(error_vec_save_dir, 'error_vector_distribution_all.png')
-	visualize_pts(pts_error_vec_dict, title='Point Error Vector Distribution (all %d points)' % num_pts, mse=True, mse_value=mse_value, display_range=display_range, xlim=xlim, ylim=ylim, covariance=covariance, debug=debug, vis=vis, save=save, save_path=savepath_tmp)
+	visualize_pts(pts_error_vec_dict, title='Point Error Vector Distribution (all %d points)' % num_pts, mse=mse, mse_value=mse_value, display_range=display_range, xlim=xlim, ylim=ylim, covariance=covariance, debug=debug, vis=vis, save=save, save_path=savepath_tmp)
 	for pts_index in xrange(num_pts):
 		pts_error_vec_pts_specific_dict_tmp = dict()
 		for method_name, error_vec_dict in pts_error_vec_pts_specific_dict.items():
-			pts_error_vec_pts_specific_dict_tmp[method_name] = np.transpose(error_vec_dict[:, :, pts_index])
+			pts_error_vec_pts_specific_valid = normed_mean_error_pts_specific_valid_dict[method_name]		# get valid flag
+			valid_image_index_per_pts = np.where(pts_error_vec_pts_specific_valid[:, pts_index] == True)[0].tolist()		# get images where the points with current index are annotated
+
+			pts_error_vec_pts_specific_dict_tmp[method_name] = np.transpose(error_vec_dict[valid_image_index_per_pts, :, pts_index])		# 2 x num_images
 		savepath_tmp = os.path.join(error_vec_save_dir, 'error_vector_distribution_pts_%d.png' % (pts_index+1))
-		visualize_pts(pts_error_vec_pts_specific_dict_tmp, title='Point Error Vector Distribution for Point %d' % (pts_index+1), mse=False, display_range=display_range, xlim=xlim, ylim=ylim, covariance=covariance, debug=debug, vis=vis, save=save, save_path=savepath_tmp)
+		if mse:
+			mse_dict_tmp = visualize_pts(pts_error_vec_pts_specific_dict_tmp, title='Point Error Vector Distribution for Point %d' % (pts_index+1), mse=mse, display_range=display_range, xlim=xlim, ylim=ylim, covariance=covariance, debug=debug, vis=vis, save=save, save_path=savepath_tmp)
+			mse_best = min(mse_dict_tmp.values())
+			mse_single = dict()
+			mse_single['mse'] = mse_best
+			mse_single['num_images'] = len(valid_image_index_per_pts)			# assume number of valid images is equal for all methods
+			mse_dict[pts_index] = mse_single
+		else:
+			visualize_pts(pts_error_vec_pts_specific_dict_tmp, title='Point Error Vector Distribution for Point %d' % (pts_index+1), mse=mse, display_range=display_range, xlim=xlim, ylim=ylim, covariance=covariance, debug=debug, vis=vis, save=save, save_path=savepath_tmp)
 
 	# visualize the ced (cumulative error distribution curve)
 	print('visualizing pck curve....\n')
@@ -181,5 +197,13 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 			normed_mean_error_dict_tmp[method_name] = np.reshape(error_array_per_pts, (num_image_tmp, ))
 		savepath_tmp = os.path.join(pck_save_dir, 'pck_curve_pts_%d.png' % (pts_index+1))
 		visualize_ced(normed_mean_error_dict_tmp, error_threshold=error_threshold, normalized=normalization_ced, title='2D PCK curve for point %d' % (pts_index+1), debug=debug, vis=vis, save=save, save_path=savepath_tmp)
+
+	# save mse to json file for further use
+	if mse:
+		json_path = os.path.join(save_path, 'mse_pts.json')
+		with open(json_path, 'w') as file:
+			print('save mse for all keypoings to {}'.format(json_path))
+			json.dump(mse_dict, file)
+			file.close()
 
 	print('\ndone!!!!!\n\n')

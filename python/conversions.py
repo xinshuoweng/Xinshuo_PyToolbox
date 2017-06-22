@@ -244,6 +244,16 @@ def list2tuple(input_list, debug=True):
 
 	return tuple(input_list)
 
+def find_common_from_lists(list1, list2, debug=True):
+	'''
+	find common items from 2 lists
+	'''
+	if debug:
+		assert islist(list1), 'input is not a list'
+		assert islist(list2), 'input is not a list'
+
+	return list(set(list1).intersection(list2))
+
 ######################################################### math related #########################################################
 def degree2radian(degree, debug=True):
 	'''
