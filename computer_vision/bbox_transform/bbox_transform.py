@@ -326,3 +326,38 @@ def bbox_enlarge(bbox, ratio=0.2, width_ratio=None, height_ratio=None, min_lengt
 
     return bbox
 
+def pts_conversion_bbox(pts_array, bbox, debug=True):
+    '''
+    convert pts in the original image to pts in the cropped image
+
+    parameters:
+        bbox:       N X 4 numpy array, TLBR or TLWH format
+        pts_array:  2(3) x N numpy array, N should >= 1
+    '''
+
+    if debug:
+        assert is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array), 'the input points should have shape: 2 or 3 x num_pts vs %d x %s' % (pts_array.shape[0], pts_array.shape[1])
+        assert bboxcheck(bbox), 'the input bounding box is not correct'
+
+    pts_array[0, :] = pts_array[0, :] - bbox[0, 0]
+    pts_array[1, :] = pts_array[1, :] - bbox[0, 1]
+
+    return pts_array
+
+def pts_conversion_back_bbox(pts_array, bbox, debug=True):
+    '''
+    convert pts in the cropped image to the pts in the original image 
+
+    parameters:
+        bbox:       N X 4 numpy array, TLBR or TLWH format
+        pts_array:  2(3) x N numpy array, N should >= 1
+    '''
+
+    if debug:
+        assert is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array), 'the input points should have shape: 2 or 3 x num_pts vs %d x %s' % (pts_array.shape[0], pts_array.shape[1])
+        assert bboxcheck(bbox), 'the input bounding box is not correct'
+
+    pts_array[0, :] = pts_array[0, :] + bbox[0, 0]
+    pts_array[1, :] = pts_array[1, :] + bbox[0, 1]
+
+    return pts_array
