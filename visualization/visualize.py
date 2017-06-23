@@ -1,6 +1,7 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 from matplotlib.patches import Ellipse
 import numpy as np
 import shutil
@@ -799,6 +800,7 @@ def visualize_bar_graph(data=None, title=None, label=False, label_list=None, vis
             assert all(isstring(key_tmp) for key_tmp in data.keys()), 'the keys are not all strings'
             assert all(isscalar(value_tmp) for value_tmp in data.values()), 'the keys are not all strings'
         else:
+            assert len(data) <= len(color_set), 'number of data set is larger than number of color to use'
             keys = data[0].keys()
             for dict_tmp in data:
                 assert dict_tmp.keys() == keys, 'the keys are not equal across different input set'
@@ -806,41 +808,50 @@ def visualize_bar_graph(data=None, title=None, label=False, label_list=None, vis
                 assert all(isscalar(value_tmp) for value_tmp in dict_tmp.values()), 'the values are not all scalars'   
 
     # convert dictionary to DataFrame
+    data_new = dict()
     if isdict(data):
-        data_new = {'names': data.keys(), 'values': data.values()}
+        key_list = data.keys()
+        sorted_index = sorted(range(len(key_list)), key=lambda k: key_list[k])
+        data_new['names'] = (np.asarray(key_list)[sorted_index]).tolist()
+        data_new['values'] = (np.asarray(data.values())[sorted_index]).tolist()
     else:
-        data_new = dict()
-        data_new['names'] = data[0].keys()
+        key_list = data[0].keys()
+        sorted_index = sorted(range(len(key_list)), key=lambda k: key_list[k])
+        data_new['names'] = (np.asarray(key_list)[sorted_index]).tolist()
         num_sets = len(data)        
         for set_index in range(num_sets):
-            data_new['value_%03d'%set_index] = data[set_index].values()
+            data_new['value_%03d'%set_index] = (np.asarray(data[set_index].values())[sorted_index]).tolist()
     dataframe = DataFrame(data_new)
 
     # plot
+    dpi = 200  
+    width = 2000
+    height = 2000
+    figsize = width / float(dpi), height / float(dpi)
+    fig = plt.figure(figsize=figsize)
     sns.set(style='whitegrid')
     if isdict(data):
-        sns.barplot(y='values', x='names', data=dataframe, label='data', color='b')
-        plt.legend(ncol=1, loc='lower right', frameon=True)
+        g = sns.barplot(x='values', y='names', data=dataframe, label='data', color='b')
+        plt.legend(ncol=1, loc='lower right', frameon=True, fontsize=5)
     else:
         num_sets = len(data)
         for set_index in range(num_sets):
             if label:
-                sns.barplot(y='value_%03d'%set_index, x='names', data=dataframe, label=label_list[set_index], color=color_set[set_index])
+                sns.barplot(x='value_%03d'%set_index, y='names', data=dataframe, label=label_list[set_index], color=color_set[set_index])
             else:
-                sns.barplot(y='value_%03d'%set_index, x='names', data=dataframe, color=solor_set[set_index])
-        plt.legend(ncol=len(data), loc='lower right', frameon=True)
+                sns.barplot(x='value_%03d'%set_index, y='names', data=dataframe, color=solor_set[set_index])
+        plt.legend(ncol=len(data), loc='lower right', frameon=True, fontsize=5)
 
-    plt.title(title, fontsize=20)
-    plt.ylabel('value')
-    plt.xlabel('label')
     sns.despine(left=True, bottom=True)
-
-    if vis:
-        plt.show()
+    plt.title(title, fontsize=20)
+    plt.xlabel('pixel error')
+    plt.ylabel('keypoint index')
+    plt.yticks(fontsize=3)
 
     if save:
         if debug:
             assert is_path_exists_or_creatable(save_path) and isfile(save_path), 'save path is not correct' 
-        plt.savefig(save_path)
-
+        fig.savefig(save_path, dpi=dpi, transparent=True)
+    if vis:
+        plt.show()
     plt.close()
