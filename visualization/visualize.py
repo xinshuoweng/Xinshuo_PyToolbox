@@ -351,6 +351,7 @@ def visualize_pts(pts, title=None, ax=None, display_range=False, xlim=[-100, 100
             plt.ylabel('y coordinate (%d points)' % pts.shape[1], fontsize=16)
         plt.axis('equal')
         ax = plt.gca()
+        ax.grid()
     
     # internal parameters
     pts_size = 5
@@ -419,7 +420,7 @@ def visualize_pts(pts, title=None, ax=None, display_range=False, xlim=[-100, 100
         plt.ylim(ylim[0], ylim[1])
         plt.xticks(np.arange(xlim[0], xlim[1] + interval_x, interval_x))
         plt.yticks(np.arange(ylim[0], ylim[1] + interval_y, interval_y))
-        plt.grid()
+    plt.grid()
 
     # save and visualization
     if save:
@@ -801,9 +802,12 @@ def visualize_bar_graph(data=None, title=None, label=False, label_list=None, vis
             assert all(isscalar(value_tmp) for value_tmp in data.values()), 'the keys are not all strings'
         else:
             assert len(data) <= len(color_set), 'number of data set is larger than number of color to use'
-            keys = data[0].keys()
+            keys = sorted(data[0].keys())
             for dict_tmp in data:
-                assert dict_tmp.keys() == keys, 'the keys are not equal across different input set'
+                if not (sorted(dict_tmp.keys()) == keys):
+                    print dict_tmp.keys()
+                    print keys
+                    assert False, 'the keys are not equal across different input set'
                 assert all(isstring(key_tmp) for key_tmp in dict_tmp.keys()), 'the keys are not all strings'
                 assert all(isscalar(value_tmp) for value_tmp in dict_tmp.values()), 'the values are not all scalars'   
 
@@ -844,9 +848,13 @@ def visualize_bar_graph(data=None, title=None, label=False, label_list=None, vis
 
     sns.despine(left=True, bottom=True)
     plt.title(title, fontsize=20)
+    plt.xlim([0, 50])
     plt.xlabel('pixel error')
     plt.ylabel('keypoint index')
-    plt.yticks(fontsize=3)
+
+    num_yticks = len(data_new['names'])
+    adaptive_fontsize = -0.0555556 * num_yticks + 16.111
+    plt.yticks(fontsize=adaptive_fontsize)
 
     if save:
         if debug:
