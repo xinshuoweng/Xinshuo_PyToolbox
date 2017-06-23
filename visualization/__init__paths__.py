@@ -15,3 +15,12 @@ add_path(python_path)
 
 file_path = os.path.join(this_dir, '../file_io')
 add_path(file_path)
+
+math_path = os.path.join(this_dir, '../math')
+add_path(math_path)
+
+bbox_path = os.path.join(this_dir, '../computer_vision', 'bbox_transform')
+add_path(bbox_path)
+
+image_path = os.path.join(this_dir, '../images')
+add_path(image_path)

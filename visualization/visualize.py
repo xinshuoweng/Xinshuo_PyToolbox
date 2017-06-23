@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse
 import numpy as np
 import shutil
+import seaborn as sns
+from pandas import DataFrame
 from sklearn.neighbors import NearestNeighbors
 from scipy.misc import imread
 from scipy.stats import norm, chi2
@@ -723,31 +725,115 @@ def visualize_nearest_neighbor(featuremap_dict, num_neighbor=5, top_number=5, vi
 
 def visualize_distribution(data, bin_size=None, vis=True, save=False, save_path=None, debug=True):
     '''
-    visualize the histgram of a data, which can be a dictionary or list or numpy array or tuple
+    visualize the histogram of a data, which can be a dictionary or list or numpy array or tuple or a list of list
     '''
     if debug:
         assert istuple(data) or isdict(data) or islist(data) or isnparray(data), 'input data is not correct'
 
-    if isdict(data):
+    # convert data type
+    if istuple(data):
+        data = list(data)
+    elif isdict(data):
         data = data.values()
+    elif isnparray(data):
+        data = data.tolist()
 
+    # calculate bin size
     if bin_size is None:
-        max_value = np.max(data)
-        min_value = np.min(data)
-        bin_size = (max_value - min_value) / 10
+        if islistoflist(data):
+            max_value = np.max(np.max(data))
+            min_value = np.min(np.min(data))
+        else:
+            max_value = np.max(data)
+            min_value = np.min(data)
+        bin_size = (max_value - min_value) / 10.0
+        print bin_size
     else:
         try:
             bin_size = int(bin_size)
         except TypeError:
             print('size of bin should be integer')
 
-    # fixed bin size
-    bins = np.arange(min(data) - bin_size, max(data) + bin_size, bin_size) # fixed bin size
-    plt.xlim([min(data) - bin_size, max(data) + bin_size])
-    plt.hist(data, bins=bins, alpha=0.5)
+    # plot
+    if islistoflist(data):
+        max_value = np.max(np.max(data))
+        min_value = np.min(np.min(data))
+        bins = np.arange(min_value - bin_size, max_value + bin_size, bin_size)      # fixed bin size
+        plt.xlim([min_value - bin_size, max_value + bin_size])
+        for data_list_tmp in data:
+            if debug:
+                assert islist(data_list_tmp), 'the nested list is not correct!'
+            # plt.hist(data_list_tmp, bins=bins, alpha=0.3)
+            sns.distplot(data_list_tmp, bins=bins, kde=False)
+            # sns.distplot(data_list_tmp, bins=bins, kde=False)
+    else:
+        bins = np.arange(min(data) - bin_size, max(data) + bin_size, bin_size)      # fixed bin size
+        plt.xlim([min(data) - bin_size, max(data) + bin_size])
+        plt.hist(data, bins=bins, alpha=0.5)
     plt.title('distribution of data')
-    plt.xlabel('data (bin size = %d)' % int(bin_size))
+    plt.xlabel('data (bin size = %f)' % bin_size)
     plt.ylabel('count')
+
+    if vis:
+        plt.show()
+
+    if save:
+        if debug:
+            assert is_path_exists_or_creatable(save_path) and isfile(save_path), 'save path is not correct' 
+        plt.savefig(save_path)
+
+    plt.close()
+
+def visualize_bar_graph(data=None, title=None, label=False, label_list=None, vis=True, save=False, save_path=None, debug=True):
+    '''
+    visualize the bar graph of a data, which can be a dictionary or list of dictionary
+    inside each dictionary, the keys (string) should be the same which is the y label, the values should be scalar
+    '''
+    if debug:
+        if title is not None:
+            assert isstring(title), 'title is not correct'
+        else:
+            title = 'Bar Graph of Key-Value Pair'
+        assert isdict(data) or islistofdict(data), 'input data is not correct'
+        if isdict(data):
+            assert all(isstring(key_tmp) for key_tmp in data.keys()), 'the keys are not all strings'
+            assert all(isscalar(value_tmp) for value_tmp in data.values()), 'the keys are not all strings'
+        else:
+            keys = data[0].keys()
+            for dict_tmp in data:
+                assert dict_tmp.keys() == keys, 'the keys are not equal across different input set'
+                assert all(isstring(key_tmp) for key_tmp in dict_tmp.keys()), 'the keys are not all strings'
+                assert all(isscalar(value_tmp) for value_tmp in dict_tmp.values()), 'the values are not all scalars'   
+
+    # convert dictionary to DataFrame
+    if isdict(data):
+        data_new = {'names': data.keys(), 'values': data.values()}
+    else:
+        data_new = dict()
+        data_new['names'] = data[0].keys()
+        num_sets = len(data)        
+        for set_index in range(num_sets):
+            data_new['value_%03d'%set_index] = data[set_index].values()
+    dataframe = DataFrame(data_new)
+
+    # plot
+    sns.set(style='whitegrid')
+    if isdict(data):
+        sns.barplot(y='values', x='names', data=dataframe, label='data', color='b')
+        plt.legend(ncol=1, loc='lower right', frameon=True)
+    else:
+        num_sets = len(data)
+        for set_index in range(num_sets):
+            if label:
+                sns.barplot(y='value_%03d'%set_index, x='names', data=dataframe, label=label_list[set_index], color=color_set[set_index])
+            else:
+                sns.barplot(y='value_%03d'%set_index, x='names', data=dataframe, color=solor_set[set_index])
+        plt.legend(ncol=len(data), loc='lower right', frameon=True)
+
+    plt.title(title, fontsize=20)
+    plt.ylabel('value')
+    plt.xlabel('label')
+    sns.despine(left=True, bottom=True)
 
     if vis:
         plt.show()

@@ -29,6 +29,14 @@ def islistoflist(list_test):
     else:
         return False
 
+def islistofdict(list_test):
+    if not islist(list_test):
+        return False
+    if all(isdict(tmp) for tmp in list_test):
+        return True
+    else:
+        return False  
+
 def isscalar(scalar_test):
     return isinteger(scalar_test) or isfloat(scalar_test)
 
