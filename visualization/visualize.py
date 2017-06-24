@@ -593,12 +593,13 @@ def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, titl
         plt.legend(loc=4, fontsize=legend_fontsize)
         method_index += 1
 
+    plt.grid()
     plt.ylabel('{} Test Images (%)'.format(num_images), fontsize=16)
+    if vis:
+        plt.show()
     if save:
         fig.savefig(save_path, dpi=dpi)
         print 'save PCK curve to %s' % save_path
-    if vis:
-        plt.show()
     plt.close(fig)
 
     return AUC, MSE
