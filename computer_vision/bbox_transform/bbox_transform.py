@@ -331,7 +331,7 @@ def pts_conversion_bbox(pts_array, bbox, debug=True):
     convert pts in the original image to pts in the cropped image
 
     parameters:
-        bbox:       N X 4 numpy array, TLBR or TLWH format
+        bbox:       1 X 4 numpy array, TLBR or TLWH format
         pts_array:  2(3) x N numpy array, N should >= 1
     '''
 
@@ -349,7 +349,7 @@ def pts_conversion_back_bbox(pts_array, bbox, debug=True):
     convert pts in the cropped image to the pts in the original image 
 
     parameters:
-        bbox:       N X 4 numpy array, TLBR or TLWH format
+        bbox:       1 X 4 numpy array, TLBR or TLWH format
         pts_array:  2(3) x N numpy array, N should >= 1
     '''
 

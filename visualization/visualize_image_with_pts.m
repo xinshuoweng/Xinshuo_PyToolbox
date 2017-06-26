@@ -56,7 +56,7 @@ function img_with_pts = visualize_image_with_pts(img, pts_array, vis, debug_mode
 	img_with_pts = img_with_pts.cdata;
 
 	% resize the image obtained from the handle
-	im_size = check_imageSize(img, debug_mode);
+	im_size = check_imageSize(size(img), debug_mode);
 	img_with_pts = imresize(img_with_pts, im_size);
 
 	if debug_mode
