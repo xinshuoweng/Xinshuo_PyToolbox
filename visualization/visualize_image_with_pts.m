@@ -27,7 +27,8 @@ function img_with_pts = visualize_image_with_pts(img, pts_array, vis, debug_mode
 	end
 
 	% draw image and points
-	title('points prediction.'); imshow(img); hold on;
+	% title('points prediction.'); 
+	imshow(img); hold on;
 	x = pts_array(1, :);
 	y = pts_array(2, :);
 	plot(x, y, 'ro', 'MarkerSize', 1, 'MarkerFaceColor', 'r');
