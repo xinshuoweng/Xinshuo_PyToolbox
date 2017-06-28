@@ -88,6 +88,7 @@ def pts_euclidean(pts1, pts2, debug=True):
         pts1 = np.reshape(pts1, (2, 1))
         pts2 = np.reshape(pts2, (2, 1))
 
+    eculidean_list = np.zeros((pts1.shape[1], ), dtype='float32')
     # calculate the distance
     num_pts = pts1.shape[1]
     ave_euclidean = 0
@@ -95,10 +96,43 @@ def pts_euclidean(pts1, pts2, debug=True):
         pts1_tmp = pts1[:, pts_index]
         pts2_tmp = pts2[:, pts_index]
         n = float(pts_index + 1)
-        ave_euclidean = (n-1) / n * ave_euclidean + math.sqrt((pts1_tmp[0] - pts2_tmp[0])**2 + (pts1_tmp[1] - pts2_tmp[1])**2) / n
+        distance_tmp = math.sqrt((pts1_tmp[0] - pts2_tmp[0])**2 + (pts1_tmp[1] - pts2_tmp[1])**2)
+        ave_euclidean = (n-1) / n * ave_euclidean + distance_tmp / n
+        eculidean_list[pts_index] = distance_tmp
 
     # ave_euclidean = ave_euclidean / float(num_pts)
-    return ave_euclidean
+    return ave_euclidean, eculidean_list.tolist()
+
+def calculate_truncated_mse(error_list, truncated_list, debug=True):
+    '''
+    calculate the mse truncated by a set of thresholds, and return the truncated MSE and the percentage of how many points' error is lower than the threshold
+
+    parameters:
+        error_list:         a list of error
+        truncated_list:     a list of threshold
+
+    return
+        tmse_dict:          a dictionary where each entry is a dict and has key 'T-MSE' & 'percentage'
+    '''
+    if debug:
+        assert islist(error_list) and all(isscalar(error_tmp) for error_tmp in error_list), 'the input error list is not correct'
+        assert islist(truncated_list) and all(isscalar(thres_tmp) for thres_tmp in truncated_list), 'the input truncated list is not correct'
+        assert len(truncated_list) > 0, 'there is not entry in truncated list'
+
+    tmse_dict = dict()
+    num_entry = len(error_list)
+    error_array = np.asarray(error_list)
+    
+    for threshold in truncated_list:
+        error_index = np.where(error_array[:] < threshold)[0].tolist()              # plot visible points in red color
+        error_interested = error_array[error_index]
+        
+        entry = dict()
+        entry['T-MSE'] = np.mean(error_interested)
+        entry['percentage'] = len(error_index) / float(num_entry)
+        tmse_dict[threshold] = entry
+
+    return tmse_dict
 
 ################################################################## coordinates ##################################################################
 def cart2pol_2d_degree(pts, debug=True):

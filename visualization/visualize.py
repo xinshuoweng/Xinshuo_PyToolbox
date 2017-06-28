@@ -1,5 +1,6 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
+import time
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.patches import Ellipse
@@ -10,17 +11,19 @@ from pandas import DataFrame
 from sklearn.neighbors import NearestNeighbors
 from scipy.misc import imread
 from scipy.stats import norm, chi2
-import time
+from terminaltables import AsciiTable
 
 import __init__paths__
 from check import *
 from file_io import mkdir_if_missing, fileparts
 from bbox_transform import bbox_TLBR2TLWH, bboxcheck_TLBR
 from conversions import print_np_shape, list2tuple
-from math_functions import pts_euclidean
+from math_functions import pts_euclidean, calculate_truncated_mse
 
 color_set = ['r', 'b', 'g', 'c', 'm', 'y', 'k', 'w']
 marker_set = ['o', 'v', '^', '<', '>', '1', '2', '3', '4', '8', 's', 'p', '*', 'h', 'H', '+', 'x', 'D', 'd']
+hatch_set = [None, 'o', '/', '\\', '|', '-', '+', '*', 'x', 'O', '.']
+linestyle_set = ['-', '--', '-.', ':', None, ' ', 'solid', 'dashed']
 
 def visualize_image(image, vis=True, save=False, save_path=None, debug=True):
     '''
@@ -358,28 +361,33 @@ def visualize_pts(pts, title=None, ax=None, display_range=False, xlim=[-100, 100
     std = None
     conf = 0.95
     color_index = 0
+    marker_index = 0
+    hatch_index = 0
     alpha = 0.2
     legend_fontsize = 10
     scale_distance = 48.8
+    linewidth = 2
 
     # plot points
     handle_dict = dict()    # for legend
     if isdict(pts):
         num_methods = len(pts)
-        assert len(color_set) >= num_methods, 'color in color set is not enough to use, please use different markers'
+        assert len(color_set) * len(marker_set) >= num_methods and len(color_set) * len(hatch_set) >= num_methods, 'color in color set is not enough to use, please use different markers'
         mse_return = dict()
         for method_name, pts_tmp in pts.items():
             color_tmp = color_set[color_index]
+            marker_tmp = marker_set[marker_index]
+            hatch_tmp = hatch_set[hatch_index]
 
             # plot covariance ellipse
             if covariance:
-                visualize_pts_covariance(pts_tmp[0:2, :], std=std, conf=conf, ax=ax, debug=debug, color=color_tmp)
+                visualize_pts_covariance(pts_tmp[0:2, :], std=std, conf=conf, ax=ax, debug=debug, color=color_tmp, hatch=hatch_tmp, linewidth=linewidth)
             
-            handle_tmp = ax.scatter(pts_tmp[0, :], pts_tmp[1, :], color=color_tmp, s=pts_size, alpha=alpha)    
+            handle_tmp = ax.scatter(pts_tmp[0, :], pts_tmp[1, :], color=color_tmp, marker=marker_tmp, s=pts_size, alpha=alpha)    
             if mse:
                 if mse_value is None:
                     num_pts = pts_tmp.shape[1]
-                    mse_tmp = pts_euclidean(pts_tmp[0:2, :], np.zeros((2, num_pts), dtype='float32'), debug=debug)
+                    mse_tmp, _ = pts_euclidean(pts_tmp[0:2, :], np.zeros((2, num_pts), dtype='float32'), debug=debug)
                 else:
                     mse_tmp = mse_value[method_name]
                 display_string = '%s, MSE: %.7f (%.1f um)' % (method_name, mse_tmp, mse_tmp * scale_distance)
@@ -388,21 +396,28 @@ def visualize_pts(pts, title=None, ax=None, display_range=False, xlim=[-100, 100
                 display_string = method_name
             handle_dict[display_string] = handle_tmp
             color_index += 1
+            if color_index / len(color_set) == 1:            
+                marker_index += 1
+                hatch_index += 1
+                color_index = color_index % len(color_set)
 
         plt.legend(list2tuple(handle_dict.values()), list2tuple(handle_dict.keys()), scatterpoints=1, markerscale=4, loc='lower left', fontsize=legend_fontsize)
         
     else:
         color_tmp = color_set[color_index]
-        handle_tmp = ax.scatter(pts[0, :], pts[1, :], color=color_tmp, s=pts_size, alpha=alpha)    
+        marker_tmp = marker_set[marker_index]
+        hatch_tmp = hatch_set[hatch_index]
+
+        handle_tmp = ax.scatter(pts[0, :], pts[1, :], color=color_tmp, marker=marker_tmp, s=pts_size, alpha=alpha)    
 
         # plot covariance ellipse
         if covariance:
-            visualize_pts_covariance(pts[0:2, :], std=std, conf=conf, ax=ax, debug=debug, color=color_tmp)
+            visualize_pts_covariance(pts[0:2, :], std=std, conf=conf, ax=ax, debug=debug, color=color_tmp, hatch=hatch_tmp, linewidth=linewidth)
 
         if mse:
             if mse_value is None:
                 num_pts = pts.shape[1]
-                mse_tmp = pts_euclidean(pts[0:2, :], np.zeros((2, num_pts), dtype='float32'), debug=debug)
+                mse_tmp, _ = pts_euclidean(pts[0:2, :], np.zeros((2, num_pts), dtype='float32'), debug=debug)
                 display_string = 'MSE: %.7f (%.1f um)' % (mse_tmp, mse_tmp * scale_distance)
                 mse_return = mse_tmp
             else:
@@ -504,7 +519,7 @@ def visualize_image_with_bbox(image_path, bbox, vis=True, save=False, save_path=
     plt.close(fig)
     return
 
-def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, title=None, debug=True, vis=True, save=False, save_path=None):
+def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, truncated_list=None, display2terminal=True, title=None, debug=True, vis=True, save=False, save_path=None):
     '''
     visualize the cumulative error distribution curve (alse called NME curve or pck curve)
     all parameters are represented by percentage
@@ -528,6 +543,8 @@ def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, titl
             assert isstring(title), 'title is not correct'
         else:
             title = '2D PCK curve'
+        if truncated_list is not None:
+            assert islist(truncated_list) and all(isscalar(thres_tmp) for thres_tmp in truncated_list), 'the input truncated list is not correct'
 
     # set display parameters
     dpi = 80  
@@ -535,6 +552,8 @@ def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, titl
     height = 800
     legend_fontsize = 10
     scale_distance = 48.8
+    line_index = 0
+    color_index = 0
 
     figsize = width / float(dpi), height / float(dpi)
     fig = plt.figure(figsize=figsize)
@@ -565,33 +584,61 @@ def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, titl
     # calculate metrics for each method
     num_methods = len(normed_mean_error_dict)
     num_images = len(normed_mean_error_dict.values()[0])
-    AUC = dict()
-    MSE = dict()
-    method_index = 0
+    metrics_dict = dict()
+    metrics_table = list()
+    table_title = ['Method Name', 'AUC', 'MSE']
+    append2title = False
     assert num_images > 0, 'number of error array should be larger than 0'
     for method_name, normed_mean_error in normed_mean_error_dict.items():
         if debug:
             assert isnparray(normed_mean_error) and normed_mean_error.ndim == 1, 'shape of error distance is not good'
             assert len(normed_mean_error) == num_images, 'number of testing images should be equal for all methods'
+            assert len(linestyle_set) * len(color_set) >= len(normed_mean_error_dict)
 
+        color_tmp = color_set[color_index]
+        line_tmp = linestyle_set[line_index]
+        
         for i in range(num_bins):
-            y_axis[i] = float((normed_mean_error < x_axis[i]).sum()) / num_images         # percentage of error
+            y_axis[i] = float((normed_mean_error < x_axis[i]).sum()) / num_images                       # percentage of error
 
         # calculate area under the curve and mean square error
-        AUC[method_name] = np.sum(y_axis[:error_threshold * scale]) / (error_threshold * scale)              # bigger, better
-        MSE[method_name] = np.mean(normed_mean_error)                                                  # smaller, better
+        entry = dict()
+        entry['AUC'] = np.sum(y_axis[:error_threshold * scale]) / (error_threshold * scale)         # bigger, better
+        entry['MSE'] = np.mean(normed_mean_error)                                                                      # smaller, better
+        metrics_table_tmp = [str(method_name), '%.2f' % (entry['AUC']), '%.1f' % (entry['MSE'])]
+        if truncated_list is not None:
+            tmse_dict = calculate_truncated_mse(normed_mean_error.tolist(), truncated_list, debug=debug)
+            for threshold in truncated_list:
+                entry['AUC/%s'%threshold] = np.sum(y_axis[:error_threshold * scale]) / (error_threshold * scale)         # bigger, better
+                entry['MSE/%s'%threshold] = tmse_dict[threshold]['T-MSE']
+                entry['percentage/%s'%threshold] = tmse_dict[threshold]['percentage']
+                
+                if not append2title:
+                    table_title.append('AUC/%s'%threshold)
+                    table_title.append('MSE/%s'%threshold)
+                    table_title.append('pct/%s'%threshold)
+                metrics_table_tmp.append('%.2f' % (entry['AUC/%s'%threshold]))
+                metrics_table_tmp.append('%.1f' % (entry['MSE/%s'%threshold]))
+                metrics_table_tmp.append('%.1f' % (100 * entry['percentage/%s'%threshold]) + '%')
+
+        # print metrics_table_tmp
+        metrics_table.append(metrics_table_tmp)
+        append2title = True
+        metrics_dict[method_name] = entry
 
         # draw 
-        color_index = method_index % len(color_set) 
-        color_tmp = color_set[color_index]
-        label = '%s, AUC: %.5f, MSE: %.5f (%.1f um)' % (method_name, AUC[method_name], MSE[method_name], MSE[method_name] * scale_distance)
-        print label
+        label = '%s, AUC: %.5f, MSE: %.5f (%.1f um)' % (method_name, entry['AUC'], entry['MSE'], entry['MSE'] * scale_distance)
+        # print label
         if normalized:
-            plt.plot(x_axis*100, y_axis*100, '%s-' % color_tmp, label=label, lw=3)
+            plt.plot(x_axis*100, y_axis*100, color=color_tmp, linestyle=line_tmp, label=label, lw=3)
         else:
-            plt.plot(x_axis, y_axis*100, '%s-' % color_tmp, label=label, lw=3)
+            plt.plot(x_axis, y_axis*100, color=color_tmp, linestyle=line_tmp, label=label, lw=3)
         plt.legend(loc=4, fontsize=legend_fontsize)
-        method_index += 1
+        
+        color_index += 1
+        if color_index / len(color_set) == 1:            
+            line_index += 1
+            color_index = color_index % len(color_set)
 
     plt.grid()
     plt.ylabel('{} Test Images (%)'.format(num_images), fontsize=16)
@@ -599,10 +646,18 @@ def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, titl
         plt.show()
     if save:
         fig.savefig(save_path, dpi=dpi)
-        print 'save PCK curve to %s' % save_path
+        if display2terminal:
+            print 'save PCK curve to %s' % save_path
     plt.close(fig)
 
-    return AUC, MSE
+    metrics_table = [table_title] + metrics_table
+    # print metrics_table
+    table = AsciiTable(metrics_table)
+    if display2terminal:
+        print '\nprint detailed metrics'
+        print table.table
+
+    return metrics_dict
 
 
 def visualize_nearest_neighbor(featuremap_dict, num_neighbor=5, top_number=5, vis=True, save_csv=False, csv_save_path=None, save_vis=False, save_img=False, save_thumb_name='nearest_neighbor.png', img_src_folder=None, ext_filter='.jpg', nn_save_folder=None, debug=True):

@@ -5,3 +5,4 @@ matlab_wrapper
 scikit-learn
 glob2
 seaborn
+terminaltables
