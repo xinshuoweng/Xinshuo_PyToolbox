@@ -94,30 +94,6 @@ def ord2string(ord_list):
 	
 	return L
 
-def str2float_from_list(str_list, debug=True):
-	'''
-	convert a list of string to a list of floating number
-	'''
-	if debug:
-		assert islist(str_list), 'input is not a list'
-		assert all(isstring(str_tmp) for str_tmp in str_list), 'input is not a list of string'
-	if any(len(str_tmp) == 0 for str_tmp in str_list):
-		if debug:
-			print('warning: the list of string contains empty element which will be removed before converting to floating number')
-		str_list = filter(None, str_list)
-	return [float(str_tmp) for str_tmp in str_list]
-
-
-def float2percent(number, debug=True):
-	'''
-	convert a floating number to a string representing percentage
-	'''
-	try:
-		number = float(number)
-	except ValueError:
-		print('could not convert to a floating number')
-	return '{:.1%}'.format(number)
-
 def string2ext_filter(string, debug=True):
 	'''
 	convert a string to an extension filter
@@ -130,16 +106,7 @@ def string2ext_filter(string, debug=True):
 	else:
 		return '.' + string
 
-def print_np_shape(nparray, debug=True):
-	'''
-	print a string to represent the shape of a numpy array
-	'''
-	if debug:
-		assert isnparray(nparray), 'input is not a numpy array and does not have any shape'
-
-	return '(%s)' % (functools.reduce(lambda x, y: str(x) + ', ' + str(y), nparray.shape))
-
-######################################################### data structure related #########################################################
+######################################################### dict related #########################################################
 def get_subdict(dictionary, num, debug=True):	
 	if debug:
 		assert isdict(dictionary), 'dictionary is not correct'
@@ -149,6 +116,21 @@ def get_subdict(dictionary, num, debug=True):
 		return dict(islice(iterable, num))
 
 	return take(num, dictionary.iteritems())
+
+
+######################################################### list related #########################################################
+def str2float_from_list(str_list, debug=True):
+	'''
+	convert a list of string to a list of floating number
+	'''
+	if debug:
+		assert islist(str_list), 'input is not a list'
+		assert all(isstring(str_tmp) for str_tmp in str_list), 'input is not a list of string'
+	if any(len(str_tmp) == 0 for str_tmp in str_list):
+		if debug:
+			print('warning: the list of string contains empty element which will be removed before converting to floating number')
+		str_list = filter(None, str_list)
+	return [float(str_tmp) for str_tmp in str_list]
 
 def merge_listoflist(listoflist, debug=True):
 	'''
@@ -254,6 +236,17 @@ def find_common_from_lists(list1, list2, debug=True):
 
 	return list(set(list1).intersection(list2))
 
+def list_reorder(input_list, order_index, debug=True):
+	'''
+	reorder a list based on a list of index
+	'''
+	if debug:
+		assert islist(input_list) and islist(order_index), 'inputs are not two lists'
+		assert len(input_list) == len(order_index), 'length of input lists is not equal'
+		assert all(isscalar(index_tmp) for index_tmp in order_index), 'the list of order is not correct'
+
+	return [ordered for whatever, ordered in sorted(zip(order_index, input_list))]
+
 ######################################################### math related #########################################################
 def degree2radian(degree, debug=True):
 	'''
@@ -284,3 +277,22 @@ def radian2degree(radian, debug=True):
 		degree -= 360.0
 
 	return degree
+
+def float2percent(number, debug=True):
+	'''
+	convert a floating number to a string representing percentage
+	'''
+	try:
+		number = float(number)
+	except ValueError:
+		print('could not convert to a floating number')
+	return '{:.1%}'.format(number)
+
+def print_np_shape(nparray, debug=True):
+	'''
+	print a string to represent the shape of a numpy array
+	'''
+	if debug:
+		assert isnparray(nparray), 'input is not a numpy array and does not have any shape'
+
+	return '(%s)' % (functools.reduce(lambda x, y: str(x) + ', ' + str(y), nparray.shape))

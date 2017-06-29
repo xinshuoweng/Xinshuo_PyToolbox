@@ -234,19 +234,21 @@ def safepath(pathname):
     assert is_path_valid(pathname), 'path is not valid: %s' % pathname
     return os.path.normpath(pathname)
 
-def CHECK_EQ_LIST(input_list):
+def CHECK_EQ_LIST_SELF(input_list, debug=True):
 	'''
 	check all elements in a list are equal
 	'''
-	assert islist(input_list), 'input is not a list'
+	if debug:
+		assert islist(input_list), 'input is not a list'
 	return input_list[1:] == input_list[:-1]
 
-def CHECK_EQ_DICT(input_dict1, input_dict2):
+def CHECK_EQ_DICT(input_dict1, input_dict2, debug=True):
     '''
     check all elements in a list are equal
     '''
-    assert isdict(input_dict1) and isdict(input_dict2), 'input is not a dictionary'
-    assert len(input_dict1) == len(input_dict2), 'length of input dictionary is not equal'
+    if debug:
+        assert isdict(input_dict1) and isdict(input_dict2), 'input is not a dictionary'
+        assert len(input_dict1) == len(input_dict2), 'length of input dictionary is not equal'
 
     for key, value in input_dict1.items():
         if input_dict2.has_key(key) and input_dict2[key] == value:
@@ -254,3 +256,21 @@ def CHECK_EQ_DICT(input_dict1, input_dict2):
         else:
             return False
     return True
+
+def CHECK_EQ_LIST_ORDERED(input_list1, input_list2, debug=True):
+    '''
+    check two lists are equal in ordered way
+    '''
+    if debug:
+        assert islist(input_list1) and islist(input_list2), 'input lists are not correct'
+
+    return input_list1 == input_list2
+
+def CHECK_EQ_LIST_UNORDERED(input_list1, input_list2, debug=True):
+    '''
+    check two lists are equal in ordered way
+    '''
+    if debug:
+        assert islist(input_list1) and islist(input_list2), 'input lists are not correct'
+
+    return set(input_list1) == set(input_list2)

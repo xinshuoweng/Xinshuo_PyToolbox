@@ -17,7 +17,7 @@ import __init__paths__
 from check import *
 from file_io import mkdir_if_missing, fileparts
 from bbox_transform import bbox_TLBR2TLWH, bboxcheck_TLBR
-from conversions import print_np_shape, list2tuple
+from conversions import print_np_shape, list2tuple, list_reorder
 from math_functions import pts_euclidean, calculate_truncated_mse
 
 color_set = ['r', 'b', 'g', 'c', 'm', 'y', 'k', 'w']
@@ -308,7 +308,7 @@ def visualize_covariance_ellipse(covariance, center, conf=None, std=None, ax=Non
     ax.add_artist(ellipse)
     return ellipse
 
-def visualize_pts(pts, title=None, ax=None, display_range=False, xlim=[-100, 100], ylim=[-100, 100], covariance=False, mse=False, mse_value=None, vis=True, save=False, save_path=None, debug=True):
+def visualize_pts(pts, title=None, ax=None, display_range=False, xlim=[-100, 100], ylim=[-100, 100], display_list=None, covariance=False, mse=False, mse_value=None, vis=True, save=False, save_path=None, debug=True):
     '''
     visualize point scatter plot
 
@@ -320,6 +320,11 @@ def visualize_pts(pts, title=None, ax=None, display_range=False, xlim=[-100, 100
         if isdict(pts):
             for pts_tmp in pts.values():
                 assert is2dptsarray(pts_tmp) , 'input points within dictionary are not correct: (2, num_pts) vs %s' % print_np_shape(pts_tmp)
+            if display_list is not None:
+                assert islist(display_list) and len(display_list) == len(pts), 'the input display list is not correct'
+                assert CHECK_EQ_LIST_UNORDERED(display_list, pts.keys(), debug=debug), 'the input display list does not match the points key list'
+            else:
+                display_list = pts.keys()
         else:
             assert is2dptsarray(pts), 'input points are not correct: (2, num_pts) vs %s' % print_np_shape(pts)
         if title is not None:
@@ -330,6 +335,7 @@ def visualize_pts(pts, title=None, ax=None, display_range=False, xlim=[-100, 100
         if display_range:
             assert islist(xlim) and islist(ylim) and len(xlim) == 2 and len(ylim) == 2, 'the input range for x and y is not correct'
             assert xlim[1] > xlim[0] and ylim[1] > ylim[0], 'the input range for x and y is not correct'
+
 
     # figure setting
     dpi = 80  
@@ -401,7 +407,13 @@ def visualize_pts(pts, title=None, ax=None, display_range=False, xlim=[-100, 100
                 hatch_index += 1
                 color_index = color_index % len(color_set)
 
-        plt.legend(list2tuple(handle_dict.values()), list2tuple(handle_dict.keys()), scatterpoints=1, markerscale=4, loc='lower left', fontsize=legend_fontsize)
+        # reorder the handle before plot
+        handle_key_list = handle_dict.keys()
+        handle_value_list = handle_dict.values()
+        order_index_list = [display_list.index(method_name_tmp.split(', ')[0]) for method_name_tmp in handle_dict.keys()]
+        ordered_handle_key_list = list_reorder(handle_key_list, order_index_list, debug=debug)
+        ordered_handle_value_list = list_reorder(handle_value_list, order_index_list, debug=debug)
+        plt.legend(list2tuple(ordered_handle_value_list), list2tuple(ordered_handle_key_list), scatterpoints=1, markerscale=4, loc='lower left', fontsize=legend_fontsize)
         
     else:
         color_tmp = color_set[color_index]
@@ -418,10 +430,10 @@ def visualize_pts(pts, title=None, ax=None, display_range=False, xlim=[-100, 100
             if mse_value is None:
                 num_pts = pts.shape[1]
                 mse_tmp, _ = pts_euclidean(pts[0:2, :], np.zeros((2, num_pts), dtype='float32'), debug=debug)
-                display_string = 'MSE: %.7f (%.1f um)' % (mse_tmp, mse_tmp * scale_distance)
+                display_string = 'MSE: %.1f (%.1f um)' % (mse_tmp, mse_tmp * scale_distance)
                 mse_return = mse_tmp
             else:
-                display_string = 'MSE: %.7f (%.1f um)' % (mse_value, mse_value * scale_distance)
+                display_string = 'MSE: %.1f (%.1f um)' % (mse_value, mse_value * scale_distance)
                 mse_return = mse_value
             handle_dict[display_string] = handle_tmp
             plt.legend(list2tuple(handle_dict.values()), list2tuple(handle_dict.keys()), scatterpoints=1, markerscale=4, loc='lower left', fontsize=legend_fontsize)
@@ -519,7 +531,7 @@ def visualize_image_with_bbox(image_path, bbox, vis=True, save=False, save_path=
     plt.close(fig)
     return
 
-def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, truncated_list=None, display2terminal=True, title=None, debug=True, vis=True, save=False, save_path=None):
+def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, truncated_list=None, display2terminal=True, display_list=None, title=None, debug=True, vis=True, save=False, save_path=None):
     '''
     visualize the cumulative error distribution curve (alse called NME curve or pck curve)
     all parameters are represented by percentage
@@ -545,6 +557,11 @@ def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, trun
             title = '2D PCK curve'
         if truncated_list is not None:
             assert islist(truncated_list) and all(isscalar(thres_tmp) for thres_tmp in truncated_list), 'the input truncated list is not correct'
+        if display_list is not None:
+            assert islist(display_list) and len(display_list) == len(normed_mean_error_dict), 'the input display list is not correct'
+            assert CHECK_EQ_LIST_UNORDERED(display_list, normed_mean_error_dict.keys(), debug=debug), 'the input display list does not match the error dictionary key list'
+        else:
+            display_list = normed_mean_error_dict.keys()
 
     # set display parameters
     dpi = 80  
@@ -586,10 +603,13 @@ def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, trun
     num_images = len(normed_mean_error_dict.values()[0])
     metrics_dict = dict()
     metrics_table = list()
-    table_title = ['Method Name', 'AUC', 'MSE']
+    table_title = ['Method Name / Metrics', 'AUC', 'MSE']
     append2title = False
     assert num_images > 0, 'number of error array should be larger than 0'
-    for method_name, normed_mean_error in normed_mean_error_dict.items():
+    for ordered_index in range(num_methods):
+        method_name = display_list[ordered_index]
+        normed_mean_error = normed_mean_error_dict[method_name]
+
         if debug:
             assert isnparray(normed_mean_error) and normed_mean_error.ndim == 1, 'shape of error distance is not good'
             assert len(normed_mean_error) == num_images, 'number of testing images should be equal for all methods'
@@ -627,7 +647,7 @@ def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, trun
         metrics_dict[method_name] = entry
 
         # draw 
-        label = '%s, AUC: %.5f, MSE: %.5f (%.1f um)' % (method_name, entry['AUC'], entry['MSE'], entry['MSE'] * scale_distance)
+        label = '%s, AUC: %.2f, MSE: %.1f (%.0f um)' % (method_name, entry['AUC'], entry['MSE'], entry['MSE'] * scale_distance)
         # print label
         if normalized:
             plt.plot(x_axis*100, y_axis*100, color=color_tmp, linestyle=line_tmp, label=label, lw=3)
@@ -650,8 +670,13 @@ def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, trun
             print 'save PCK curve to %s' % save_path
     plt.close(fig)
 
+    # reorder the table
+    order_index_list = [display_list.index(method_name_tmp) for method_name_tmp in normed_mean_error_dict.keys()]
+    order_index_list = [0] + [order_index_tmp + 1 for order_index_tmp in order_index_list]
+
+    # print table to terminal
     metrics_table = [table_title] + metrics_table
-    # print metrics_table
+    # metrics_table = list_reorder([table_title] + metrics_table, order_index_list, debug=debug)
     table = AsciiTable(metrics_table)
     if display2terminal:
         print '\nprint detailed metrics'
