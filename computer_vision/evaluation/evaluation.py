@@ -7,6 +7,7 @@ import numpy as np
 import os, sys, json
 import time
 from terminaltables import AsciiTable
+from tabulate import tabulate
 
 from bbox_transform import bbox_TLBR2TLWH, pts2bbox
 from check import is_path_exists_or_creatable, isnparray, islist, isdict, ispositiveinteger, isscalar, islogical, is2dptsarray, is2dptsarray_occlusion
@@ -42,6 +43,10 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 		1. 2d pck curve (total and point specific) for all points for all methods
 		2. point error vector (total and point specific) for all points and for all methods
 		3. mean square error
+
+	return:
+		metrics_all:	a list of list to have detailed metrics over all methods
+		ptswise_mse:	a list of list to have average MSE over all key-points for all methods
 	'''
 	num_methods = len(pred_dict_all)
 	if debug:
@@ -171,12 +176,15 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 
 	# visualize the ced (cumulative error distribution curve)
 	print('visualizing pck curve....\n')
-	pck_save_dir = os.path.join(save_path, 'pck')
-	mkdir_if_missing(pck_save_dir)
-	savepath_tmp = os.path.join(pck_save_dir, 'pck_curve_all.png')
-	visualize_ced(normed_mean_error_dict, error_threshold=error_threshold, normalized=normalization_ced, truncated_list=truncated_list, title='2D PCK curve (all %d points)' % num_pts, display_list=display_list, debug=debug, vis=vis, save=save, save_path=savepath_tmp)
+	pck_savedir = os.path.join(save_path, 'pck')
+	mkdir_if_missing(pck_savedir)
+	pck_savepath = os.path.join(pck_savedir, 'pck_curve_overall.png')
+	table_savedir = os.path.join(save_path, 'metrics')
+	mkdir_if_missing(table_savedir)
+	table_savepath = os.path.join(table_savedir, 'detailed_metrics_overall.txt')
+	_, metrics_all = visualize_ced(normed_mean_error_dict, error_threshold=error_threshold, normalized=normalization_ced, truncated_list=truncated_list, title='2D PCK curve (all %d points)' % num_pts, display_list=display_list, debug=debug, vis=vis, save=save, pck_savepath=pck_savepath, table_savepath=table_savepath)
 	metrics_title = ['Method Name / Point Index']
-	metrics_table = [[normed_mean_error_pts_specific_dict.keys()[index_tmp]] for index_tmp in xrange(num_methods)]
+	ptswise_mse_table = [[normed_mean_error_pts_specific_dict.keys()[index_tmp]] for index_tmp in xrange(num_methods)]
 	for pts_index in xrange(num_pts):
 		metrics_title.append(str(pts_index + 1))
 		normed_mean_error_dict_tmp = dict()
@@ -190,21 +198,29 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 			error_array_per_pts = error_array_per_pts[valid_array_per_pts_per_method]
 			num_image_tmp = len(valid_array_per_pts_per_method)
 			normed_mean_error_dict_tmp[method_name] = np.reshape(error_array_per_pts, (num_image_tmp, ))
-		savepath_tmp = os.path.join(pck_save_dir, 'pck_curve_pts_%d.png' % (pts_index+1))
-		metrics_dict = visualize_ced(normed_mean_error_dict_tmp, error_threshold=error_threshold, normalized=normalization_ced, display2terminal=False, title='2D PCK curve for point %d' % (pts_index+1), display_list=display_list, debug=debug, vis=vis, save=save, save_path=savepath_tmp)
+		pck_savepath = os.path.join(pck_savedir, 'pck_curve_pts_%d.png' % (pts_index+1))
+		table_savepath = os.path.join(table_savedir, 'detailed_metrics_pts_%d.txt' % (pts_index+1))
+		metrics_dict, _ = visualize_ced(normed_mean_error_dict_tmp, error_threshold=error_threshold, normalized=normalization_ced, truncated_list=truncated_list, display2terminal=False, title='2D PCK curve for point %d' % (pts_index+1), display_list=display_list, debug=debug, vis=vis, save=save, pck_savepath=pck_savepath, table_savepath=table_savepath)
 		for method_index in range(num_methods):
 			method_name = normed_mean_error_pts_specific_dict.keys()[method_index]
-			metrics_table[method_index].append('%.1f' % metrics_dict[method_name]['MSE'])
+			ptswise_mse_table[method_index].append('%.1f' % metrics_dict[method_name]['MSE'])
 	
 	# reorder the table
 	order_index_list = [display_list.index(method_name_tmp) for method_name_tmp in normed_mean_error_pts_specific_dict.keys()]
 	order_index_list = [0] + [order_index_tmp + 1 for order_index_tmp in order_index_list]
 
 	# print table to terminal
-	metrics_table = list_reorder([metrics_title] + metrics_table, order_index_list, debug=debug)
-	table = AsciiTable(metrics_table)
+	ptswise_mse_table = list_reorder([metrics_title] + ptswise_mse_table, order_index_list, debug=debug)
+	table = AsciiTable(ptswise_mse_table)
 	print '\nprint point-wise average MSE'
 	print table.table
+
+	# save table to file
+	ptswise_savepath = os.path.join(table_savedir, 'pointwise_average_MSE.txt')
+	table_file = open(ptswise_savepath, 'w')
+	table_file.write(table.table)
+	table_file.close()
+	print '\nsave point-wise average MSE to %s' % ptswise_savepath
 
 	# visualize the error vector map
 	print('visualizing error vector distribution map....\n')
@@ -238,4 +254,6 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 			json.dump(mse_dict, file)
 			file.close()
 
-	print('\ndone!!!!!\n\n')
+	print('\ndone!!!!!\n')
+
+	return metrics_all, ptswise_mse_table

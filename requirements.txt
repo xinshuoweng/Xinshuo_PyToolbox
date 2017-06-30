@@ -6,3 +6,5 @@ scikit-learn
 glob2
 seaborn
 terminaltables
+tabulate
+google-api-python-client

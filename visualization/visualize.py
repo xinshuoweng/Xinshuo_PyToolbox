@@ -531,7 +531,7 @@ def visualize_image_with_bbox(image_path, bbox, vis=True, save=False, save_path=
     plt.close(fig)
     return
 
-def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, truncated_list=None, display2terminal=True, display_list=None, title=None, debug=True, vis=True, save=False, save_path=None):
+def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, truncated_list=None, display2terminal=True, display_list=None, title=None, debug=True, vis=True, save=False, pck_savepath=None, table_savepath=None):
     '''
     visualize the cumulative error distribution curve (alse called NME curve or pck curve)
     all parameters are represented by percentage
@@ -550,7 +550,8 @@ def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, trun
         if normalized:
             assert error_threshold > 0 and error_threshold < 100, 'threshold percentage is not well set'
         if save:
-            assert save_path is not None and is_path_exists_or_creatable(save_path), 'please provide a valid path to save the results' 
+            assert pck_savepath is not None and is_path_exists_or_creatable(pck_savepath), 'please provide a valid path to save the pck results' 
+            assert table_savepath is not None and is_path_exists_or_creatable(table_savepath), 'please provide a valid path to save the table results' 
         if title is not None:
             assert isstring(title), 'title is not correct'
         else:
@@ -665,9 +666,9 @@ def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, trun
     if vis:
         plt.show()
     if save:
-        fig.savefig(save_path, dpi=dpi)
+        fig.savefig(pck_savepath, dpi=dpi)
         if display2terminal:
-            print 'save PCK curve to %s' % save_path
+            print 'save PCK curve to %s' % pck_savepath
     plt.close(fig)
 
     # reorder the table
@@ -681,8 +682,16 @@ def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, trun
     if display2terminal:
         print '\nprint detailed metrics'
         print table.table
-
-    return metrics_dict
+        
+    # save table to file
+    if save:
+        table_file = open(table_savepath, 'w')
+        table_file.write(table.table)
+        table_file.close()
+        if display2terminal:
+            print '\nsave detailed metrics to %s' % table_savepath
+    
+    return metrics_dict, metrics_table
 
 
 def visualize_nearest_neighbor(featuremap_dict, num_neighbor=5, top_number=5, vis=True, save_csv=False, csv_save_path=None, save_vis=False, save_img=False, save_thumb_name='nearest_neighbor.png', img_src_folder=None, ext_filter='.jpg', nn_save_folder=None, debug=True):
