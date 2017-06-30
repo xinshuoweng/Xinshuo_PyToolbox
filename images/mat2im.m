@@ -89,7 +89,6 @@ mat=mat+1;
 %convert to indecies 
 mat=round(mat); 
 
-
 %Vectorised way of making the image matrix 
 im=reshape(cmap(mat(:),:),[size(mat),3]);
 

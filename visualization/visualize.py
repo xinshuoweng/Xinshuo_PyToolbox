@@ -921,6 +921,7 @@ def visualize_bar_graph(data=None, title=None, label=False, label_list=None, vis
     dpi = 200  
     width = 2000
     height = 2000
+    alpha = 0.5
     figsize = width / float(dpi), height / float(dpi)
     fig = plt.figure(figsize=figsize)
     sns.set(style='whitegrid')
@@ -930,10 +931,15 @@ def visualize_bar_graph(data=None, title=None, label=False, label_list=None, vis
     else:
         num_sets = len(data)
         for set_index in range(num_sets):
-            if label:
-                sns.barplot(x='value_%03d'%set_index, y='names', data=dataframe, label=label_list[set_index], color=color_set[set_index])
+            if set_index == 0:
+                sns.set_color_codes('pastel')
             else:
-                sns.barplot(x='value_%03d'%set_index, y='names', data=dataframe, color=solor_set[set_index])
+                sns.set_color_codes('muted')
+
+            if label:
+                sns.barplot(x='value_%03d'%set_index, y='names', data=dataframe, label=label_list[set_index], color=color_set[set_index], alpha=alpha)
+            else:
+                sns.barplot(x='value_%03d'%set_index, y='names', data=dataframe, color=solor_set[set_index], alpha=alpha)
         plt.legend(ncol=len(data), loc='lower right', frameon=True, fontsize=5)
 
     sns.despine(left=True, bottom=True)
