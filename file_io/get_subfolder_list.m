@@ -21,7 +21,7 @@ function subfolder_list = get_subfolder_list(folder_path, depth, debug_mode)
     if depth > 0       
     	cell_list = dir(folder_path);
         if debug_mode
-            assert(~isempty(cell_list), 'The input path not found while obtaining subfolder list!');
+            assert(~isempty(cell_list), sprintf('The input path not found at %s', folder_path));
         end
     	dir_check = {cell_list(:).isdir};
         dir_name = {cell_list(:).name};

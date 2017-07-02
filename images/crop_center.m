@@ -23,7 +23,9 @@ function [cropped, crop_rect] = crop_center(img, rect, pad_value, debug_mode)
         assert(size(rect, 1) == 1 && (size(rect, 2) == 2 || size(rect, 2) == 4), 'the shape of crop array is wrong');
         assert(~iscell(rect), 'The input of rectangular should be a matrix.');
         assert(all(arrayfun(@(x) isInteger(x), rect)), 'the padding array should be all integers.');
-        assert(isFloatImage_loose(img), 'the input image is not a floating image.');
+        if ~ischar(img)
+            assert(isFloatImage_loose(img), 'the input image is not a floating image.');
+        end
     end
 
     % calculate crop rectangles
@@ -35,7 +37,7 @@ function [cropped, crop_rect] = crop_center(img, rect, pad_value, debug_mode)
         center_y = rect(2);
         crop_width = rect(3);
         crop_height = rect(4);
-    else                            % crop around the center of the image, TODO: wait to check the left/right aligned
+    else                            % crop around the center of the image
         center_x = ceil(im_width/2);
         center_y = ceil(im_height/2);
         crop_width = rect(1);
@@ -52,6 +54,10 @@ function [cropped, crop_rect] = crop_center(img, rect, pad_value, debug_mode)
     ymin = center_y - ceil(crop_height/2) + 1;
     xmax = xmin + crop_width - 1;
     ymax = ymin + crop_height - 1;
+    if debug_mode
+        disp('cropping bbox is as following (TLBR format)');
+        disp([xmin, ymin, xmax, ymax]);
+    end
     crop_rect = [xmin, ymin, crop_width - 1, crop_height - 1];
 
     % crop
