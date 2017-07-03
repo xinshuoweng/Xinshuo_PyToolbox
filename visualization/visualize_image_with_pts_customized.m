@@ -24,16 +24,44 @@ function img_with_pts = visualize_image_with_pts_customized(img, pts_array, vis,
 	end
 
 	% draw image and points
+	time = tic;
+	elapsed = toc(time);
 	radius = 1;
 	num_pts = size(pts_array, 2);
-	color_pixel = reshape([255, 0, 0], [1, 1, 3]);		% red
+	color_pixel = [255, 0, 0];			% red
 	
 	x = pts_array(1, :);
 	y = pts_array(2, :);
-	for pts_index = 1:num_pts
-		img(y(pts_index)-radius:y(pts_index)+radius, x(pts_index), :) = repmat(color_pixel, [3, 1, 1]);
-		img(y(pts_index), x(pts_index)-radius:x(pts_index)+radius, :) = repmat(color_pixel, [1, 3, 1]);
+
+	% color_pixel = reshape(color_pixel, [1, 1, 3]);		
+	% for pts_index = 1:num_pts
+	% 	img(y(pts_index)-radius:y(pts_index)+radius, x(pts_index), :) = repmat(color_pixel, [3, 1, 1]);
+	% 	img(y(pts_index), x(pts_index)-radius:x(pts_index)+radius, :) = repmat(color_pixel, [1, 3, 1]);
+	% end
+
+	x_index_list = [];
+	y_index_list = [];
+	z_index_list = [];
+	for pts_index = 1:num_pts 
+		for x_index = x(pts_index)-radius:1:x(pts_index)+radius
+			for z_index = 1:3
+				y_index_list = [y_index_list, y(pts_index)];
+				x_index_list = [x_index_list, x_index];
+				z_index_list = [z_index_list, z_index];
+			end
+		end
+
+		for y_index = y(pts_index)-radius:1:y(pts_index)+radius
+			for z_index = 1:3
+				y_index_list = [y_index_list, y_index];
+				x_index_list = [x_index_list, x(pts_index)];
+				z_index_list = [z_index_list, z_index];
+			end
+		end
 	end
+	img(sub2ind(size(img), y_index_list, x_index_list, z_index_list)) = repmat(color_pixel, [1, length(y_index_list)/3]);
+	assign_time = toc(time);
+	fprintf('time spent on assigning value is %f seconds\n', assign_time - elapsed);
 
 	if vis
 		title('points prediction.'); 
@@ -64,6 +92,8 @@ function img_with_pts = visualize_image_with_pts_customized(img, pts_array, vis,
 		imwrite(img, save_path);
 		fprintf('save image to %s\n', save_path);
 	end
+	save_time = toc(time);
+	fprintf('time spent on saving is %f seconds\n', save_time - assign_time);
 
 	img_with_pts = img;
 end
