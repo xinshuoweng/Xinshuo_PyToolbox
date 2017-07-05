@@ -117,7 +117,7 @@ def visualize_image_with_pts(image_path, pts, covariance=False, label=False, lab
         color_tmp = color_set[color_index]
 
         if is2dptsarray(pts_array):    
-            ax.scatter(pts_array[0, :], pts_array[1, :], color=color_tmp)
+            ax.scatter(pts_array[0, :], pts_array[1, :], color=color_tmp, s=pts_size)
         else:
             pts_visible_index   = np.where(pts_array[2, :] == 1)[0].tolist()              # plot visible points in red color
             pts_invisible_index = np.where(pts_array[2, :] == 0)[0].tolist()              # plot invisible points in blue color
