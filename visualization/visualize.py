@@ -29,6 +29,15 @@ def visualize_image(image, vis=True, save=False, save_path=None, debug=True):
     '''
     input image is a numpy array matrix
     '''
+    if debug and isstring(image):
+        assert is_path_exists(image), 'image is not existing at %s' % image
+
+    try:
+        image = imread(image)
+    except IOError:
+        print('path is not a valid image path. Please check: %s' % image)
+        return
+
     if islist(image):
         imagelist = image
         save_path_list = save_path
@@ -93,8 +102,7 @@ def visualize_image(image, vis=True, save=False, save_path=None, debug=True):
     if vis:
         plt.show()
 
-    plt.close(fig)
-    return
+    return fig
 
 def visualize_image_with_pts(image_path, pts, covariance=False, label=False, label_list=None, vis=True, save=False, save_path=None, debug=True):
     '''
@@ -219,9 +227,9 @@ def visualize_image_with_pts(image_path, pts, covariance=False, label=False, lab
         fig.savefig(save_path, dpi=dpi, transparent=True)
     if vis:
         plt.show()
-    plt.close(fig)
+    # plt.close(fig)
 
-    return
+    return fig
 
 def visualize_pts_covariance(pts_array, conf=None, std=None, ax=None, debug=True, **kwargs):
     """
