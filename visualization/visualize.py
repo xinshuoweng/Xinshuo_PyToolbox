@@ -32,11 +32,12 @@ def visualize_image(image, vis=True, save=False, save_path=None, debug=True):
     if debug and isstring(image):
         assert is_path_exists(image), 'image is not existing at %s' % image
 
-    try:
-        image = imread(image)
-    except IOError:
-        print('path is not a valid image path. Please check: %s' % image)
-        return
+    if isstring(image):
+        try:
+            image = imread(image)
+        except IOError:
+            print('path is not a valid image path. Please check: %s' % image)
+            return
 
     if islist(image):
         imagelist = image
