@@ -69,7 +69,9 @@ def load_list_from_folder(folder_path, ext_filter=None, depth=1, recursive=False
             True: return all levels till to the depth
     '''
     folder_path = safepath(folder_path)
-    assert isfolder(folder_path) and is_path_exists(folder_path), 'input folder path is not correct: %s' % folder_path
+    assert isfolder(folder_path), 'input folder path is not correct: %s' % folder_path
+    if not is_path_exists(folder_path):
+        return [], 0
     assert islogical(recursive), 'recursive should be a logical variable: {}'.format(recursive)
     assert (isinteger(depth) and depth >= 1) or depth is None, 'input depth is not correct {}'.format(depth)
     assert ext_filter is None or (islist(ext_filter) and all(isstring(ext_tmp) for ext_tmp in ext_filter)) or isstring(ext_filter), 'extension filter is not correct'
@@ -220,6 +222,20 @@ def load_txt_file(file_path, debug=True):
     file.close()
 
     return data, num_lines
+
+# def save_2dmatrix_to_file(data, savepath, debug=True):
+#     save_path = safepath(save_path)
+#     if debug:
+#         assert isimage(data), 'input data is not image format'
+#         assert is_path_exists_or_creatable(save_path), 'save path is not correct'
+#         mkdir_if_missing(save_path)
+#         assert isnparray(data) and len(data.shape) <= 2, 'the data is not correct'
+
+#     if len(data.shape) == 2:
+#         num_elem = data.size
+#         data = np.reshape(data, (1, num_elem))
+
+
 
 
 
