@@ -72,66 +72,96 @@ def isext(ext_test):
 
 def iscolorimage(image_test, debug=False):
     if debug:
-        print('is numpy array when testing color image?')
+        print 'is numpy array when testing color image? ', 
     if not isnparray(image_test):
+        print 'No'
         return False
+    else:
+        print 'Yes'
 
     if debug:
-        print('image is numpy array. is dimension correct when testing color image?')
+        print 'is dimension correct when testing color image? ', 
     shape_check = (image_test.ndim == 3 and image_test.shape[2] == 3)
-
-    return True if shape_check else False
+    if shape_check:
+        print 'Yes'
+        return True 
+    else:
+        print 'No'
+        return False
 
 def isgrayimage(image_test, debug=False):
     if debug:
-        print('is numpy array when testing grayscale image?')
+        print 'is numpy array when testing grayscale image? ', 
     if not isnparray(image_test):
+        print 'No'
         return False
+    else:
+        print 'Yes'
 
     if debug:
-        print('image is numpy array. is dimension correct when testing grayscale image?')
+        print 'is dimension correct when testing grayscale image? ', 
     shape_check = (image_test.ndim == 2 or (image_test.ndim == 3 and image_test.shape[2] == 1))
-
-    return True if shape_check else False
+    if shape_check:
+        print 'Yes'
+        return True 
+    else:
+        print 'No'
+        return False
 
 def isuintimage(image_test, debug=False):
     if debug:
-        print('is shape correct when testing uint8 image?')
+        print 'is shape correct when testing uint8 image? ', 
     if not (isgrayimage(image_test, debug=debug) or iscolorimage(image_test, debug=debug)):
+        print 'No, shape is not correct'
         return False
+    else:
+        print 'Yes, shape is correct'
 
     if debug:
-        print('shapre is correct. is type correct when testing uint8 image?')
+        print 'is type correct when testing uint8 image? ', 
     if not image_test.dtype == 'uint8':
+        print 'No'
         return False
+    else:
+        print 'Yes'
 
     if debug:
-        print('type is also correct. is value inside array correct when testing uint8 image?')
+        print 'is value inside array correct when testing uint8 image? ', 
     item_check_le = (image_test <= 255)
     item_check_se = (image_test >= 0)
     if item_check_le.all() and item_check_se.all():
+        print 'Yes'
         return True
     else:
+        print 'No'
         return False
 
 def isfloatimage(image_test, debug=False):
     if debug:
-        print('is shape correct when testing float32 image?')
+        print 'is shape correct when testing float32 image? ', 
     if not (isgrayimage(image_test, debug=debug) or iscolorimage(image_test, debug=debug)):
+        print 'No, shape is not correct'
         return False
+    else:
+        print 'Yes, shape is correct'
 
     if debug:
-        print('shapre is correct. is type correct when testing float32 image?')
+        print 'is type correct when testing float32 image? ', 
     if not image_test.dtype == 'float32':
+        print 'No'
         return False
+    else:
+        print 'Yes'
 
     if debug:
-        print('type is also correct. is value inside array correct when testing float32 image?')
+        print 'is value inside array correct ([0, 1]) when testing float32 image? ', 
     item_check_le = (image_test <= 1.0)
     item_check_se = (image_test >= 0.0)
     if item_check_le.all() and item_check_se.all():
+        print 'Yes'
         return True
     else:
+        print 'No'
         return False
 
 def isimage(image_test, debug=False):
