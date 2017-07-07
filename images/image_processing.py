@@ -80,3 +80,33 @@ def imagecoor2cartesian_center(image_shape, debug=True):
 		return img_pts
 		
 	return forward_map, backward_map
+
+def generate_mean_image(images_dir, save_path, debug=True, vis=False):
+	'''
+	this function generates the mean image over all images. It assume the image has the same size
+
+	parameters:
+			images_dir: 		path to all images
+	'''
+	if debug:
+		assert is_path_exists(images_dir), 'the image path is not existing at %s' % images_dir
+		assert is_path_exists_or_creable(save_path), 'the path for saving is not correct: %s' % save_path
+
+	print('loading image data from %s' % images_dir)
+	imagelist, num_images = load_list_from_folders(images_dir, ext_filter=['png', 'jpg', 'jpeg'], depth=None)
+	print('{} images loaded'.format(num_images))
+
+	# load the first image to see the image size
+	img = Image.open(imagelist[0]).convert('L')
+	width, height = img.size
+
+	image_blob = np.zeros((height, width, num_images), dtype='float32')
+	count = 0
+	for image_path in imagelist:
+		print('generating sharpness: processing %d/%d' % (count+1, num_images))
+		img = Image.open(image_path).convert('L')	
+		image_blob[:, :, count] = np.asarray(img, dtype='float32') / 255
+		count += 1
+
+	mean_im = np.mean(image_blob, axis=2)
+	visualize_image(mean_im, debug=debug, vis=vis, save=True, save_path=save_path)
