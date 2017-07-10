@@ -92,6 +92,7 @@ function img_with_pts = visualize_image_with_pts_customized(img, pts_array, vis,
 	% save
 	if exist('save_path', 'var')
 		assert(ischar(save_path), 'save path is not correct.');
+		mkdir_if_missing(fileparts(save_path));
 		imwrite(img, save_path);
 		fprintf('save image to %s\n', save_path);
 	end

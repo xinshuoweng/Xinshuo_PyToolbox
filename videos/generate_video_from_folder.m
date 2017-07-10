@@ -12,7 +12,7 @@ function [num_images] = generate_video_from_folder(img_src, save_path, framerate
 		assert(isInteger(framerate), 'framerate shoule be an integer.');
 	end
 	if ~exist('ext_filter', 'var')
-		ext_filter = '.jpg';
+		ext_filter = ['.jpg', '.png', '.bmp', '.jpeg'];
 	end
 
 	if debug_mode
