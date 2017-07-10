@@ -60,8 +60,11 @@ function img_with_pts = visualize_image_with_pts_customized(img, pts_array, vis,
 		end
 	end
 	img(sub2ind(size(img), y_index_list, x_index_list, z_index_list)) = repmat(color_pixel, [1, length(y_index_list)/3]);
-	assign_time = toc(time);
-	fprintf('time spent on assigning value is %f seconds\n', assign_time - elapsed);
+	
+	if debug_mode
+		assign_time = toc(time);
+		fprintf('time spent on assigning value is %f seconds\n', assign_time - elapsed);
+	end
 
 	if vis
 		title('points prediction.'); 
@@ -92,8 +95,11 @@ function img_with_pts = visualize_image_with_pts_customized(img, pts_array, vis,
 		imwrite(img, save_path);
 		fprintf('save image to %s\n', save_path);
 	end
-	save_time = toc(time);
-	fprintf('time spent on saving is %f seconds\n', save_time - assign_time);
+
+	if debug_mode
+		save_time = toc(time);
+		fprintf('time spent on saving is %f seconds\n', save_time - assign_time);
+	end
 
 	img_with_pts = img;
 end

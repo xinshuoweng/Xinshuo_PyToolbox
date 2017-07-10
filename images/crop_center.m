@@ -9,7 +9,7 @@
 %                   2. rect with XYWH format, then crop around (X, Y) with given height and width
 % Note that if the cropped region is out of boundary, we pad gray value around outside
 % Note that the cropping is right aligned, which means, if the crop width or height is even, we crop one more pixel right to the center
-function [cropped, crop_rect] = crop_center(img, rect, pad_value, debug_mode)
+function [cropped, crop_rect, crop_rect_ori] = crop_center(img, rect, pad_value, debug_mode)
     if ~exist('debug_mode', 'var')
         debug_mode = true;
     end
@@ -79,4 +79,7 @@ function [cropped, crop_rect] = crop_center(img, rect, pad_value, debug_mode)
         % padding
         cropped = pad_around(cropped, pad_rect, pad_value, debug_mode);
     end
+
+    [im_height, im_width, ~] = size(img);
+    crop_rect_ori = clip_bboxes_TLWH(crop_rect, im_width, im_height, debug_mode);
 end

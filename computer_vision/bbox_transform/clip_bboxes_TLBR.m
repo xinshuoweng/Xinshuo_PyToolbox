@@ -6,8 +6,8 @@
 % or input boxes could be a Nx4 matrix or Nx5 matrix
 % input format: LTRB (x, y)
 % output format: LTRB (x, y)
-function boxes = clip_boxes(boxes, im_width, im_height)
-	boxes = boxcheck_LTRB(boxes);
+function boxes = clip_bboxes_TLBR(boxes, im_width, im_height)
+	boxes = boxcheck_TLBR(boxes);
     % x1 >= 1 & <= im_width
     boxes(:, 1:4:end) = max(min(boxes(:, 1:4:end), im_width), 1);
     % y1 >= 1 & <= im_height
