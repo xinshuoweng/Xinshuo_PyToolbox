@@ -13,6 +13,10 @@ function [full_image_list, num_image] = load_list_from_folder(folder_path, ext_f
     	assert(ischar(folder_path), 'Input path is not valid for obtaining list');
     end
 
+    if ~exist('ext_filter', 'var')
+        ext_filter = {'.jpg', '.png', '.bmp', '.jpeg'};
+    end
+
 	subfolder_list = get_subfolder_list(folder_path, depth, debug_mode);
     imagelist_subfolder = remove_empty_cell(cellfun(@(x) load_list_from_cur_folder(x, ext_filter, debug_mode), subfolder_list, 'UniformOutput', false), debug_mode);
     imagelist_curfolder = load_list_from_cur_folder(folder_path, ext_filter, debug_mode);
