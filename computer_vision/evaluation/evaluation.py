@@ -4,7 +4,7 @@
 # this file contains all functions about evaluation in computer vision
 import math
 import numpy as np
-import os, sys, json
+import os, sys, json, operator
 import time
 from terminaltables import AsciiTable
 from tabulate import tabulate
@@ -18,7 +18,7 @@ from conversions import print_np_shape, list_reorder
 
 # for better visualization in error distribution, we center the distribution map and set fixed visualization range for fair comparison
 display_range = True
-limit = 50
+limit = 500
 xlim = [-1 * limit, limit]
 ylim = [-1 * limit, limit]
 # xlim = [-200, 200]
@@ -71,12 +71,14 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 	normed_mean_error_pts_specific_valid_dict = dict()
 	pts_error_vec_dict = dict()
 	pts_error_vec_pts_specific_dict = dict()
+	mse_error_dict_dict = dict()
 	for method_name, pred_dict in pred_dict_all.items():
 		normed_mean_error_total = np.zeros((num_images, ), dtype='float32')
 		normed_mean_error_pts_specific = np.zeros((num_images, num_pts), dtype='float32')
 		normed_mean_error_pts_specific_valid = np.zeros((num_images, num_pts), dtype='bool')
 		pts_error_vec = np.zeros((num_images, 2), dtype='float32')					
 		pts_error_vec_pts_specific = np.zeros((num_images, 2, num_pts), dtype='float32')
+		mse_error_dict = dict()
 		count = 0
 		count_skip_num_images = 0						# it's possible that no annotation exists on some images, than no error should be counted for those images, we count the number of those images
 		for image_path, pts_prediction in pred_dict.items():
@@ -124,7 +126,8 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 			if normalization_ced:
 				normed_mean_error /= bbox_size
 			normed_mean_error_total[count] = normed_mean_error
-			
+			mse_error_dict[image_path] = normed_mean_error
+
 			if normed_mean_error == 0:
 				print pts_prediction
 				print pts_anno
@@ -164,6 +167,7 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 		normed_mean_error_pts_specific_valid_dict[method_name] = normed_mean_error_pts_specific_valid[:count, :]
 		pts_error_vec_dict[method_name] = np.transpose(pts_error_vec[:count, :])												# 2 x num_images
 		pts_error_vec_pts_specific_dict[method_name] = pts_error_vec_pts_specific[:count, :, :]
+		mse_error_dict_dict[method_name] = mse_error_dict
 
 	# calculate mean value
 	if mse:
@@ -221,6 +225,21 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 	table_file.write(table.table)
 	table_file.close()
 	print '\nsave point-wise average MSE to %s' % ptswise_savepath
+
+	# save mse error list to file for each method
+	error_list_savedir = os.path.join(save_path, 'error_list')
+	mkdir_if_missing(error_list_savedir)
+	for method_name, mse_error_dict in mse_error_dict_dict.items():
+		mse_error_list_path = os.path.join(error_list_savedir, 'error_%s.txt' % method_name)
+		mse_error_list = open(mse_error_list_path, 'w')
+		
+		sorted_tuple_list = sorted(mse_error_dict.items(), key=operator.itemgetter(1), reverse=True)
+		for tuple_index in range(len(sorted_tuple_list)):
+			image_path_tmp = sorted_tuple_list[tuple_index][0]
+			mse_error_tmp = sorted_tuple_list[tuple_index][1]
+			mse_error_list.write('{:<200} {}\n'.format(image_path_tmp, '%.2f' % mse_error_tmp))
+		mse_error_list.close()
+		print '\nsave mse error list for %s to %s' % (method_name, mse_error_list_path)
 
 	# visualize the error vector map
 	print('visualizing error vector distribution map....\n')

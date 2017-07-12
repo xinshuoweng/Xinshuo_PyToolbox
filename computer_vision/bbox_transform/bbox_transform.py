@@ -312,12 +312,14 @@ def bbox_enlarge(bbox, ratio=0.2, width_ratio=None, height_ratio=None, min_lengt
         width = (bbox[:, 2] - bbox[:, 0]) * ratio
         height = (bbox[:, 3] - bbox[:, 1]) * ratio
 
+    cur_width = bbox[:, 2] - bbox[:, 0]
+    cur_height = bbox[:, 3] - bbox[:, 1]
     if min_height is not None and min_width is not None:
-        width = max(width, min_width)
-        height = max(height, min_height)
+        width = max(width, min_width - cur_width)
+        height = max(height, min_height - cur_height)
     else:
-        width = max(width, min_length)
-        height = max(height, min_length)
+        width = max(width, min_length - cur_width)
+        height = max(height, min_length - cur_height)
 
     bbox[:, 0] -= width / 2.0
     bbox[:, 2] += width / 2.0
