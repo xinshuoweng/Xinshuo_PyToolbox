@@ -32,6 +32,7 @@ function [cropped, crop_rect, crop_rect_ori] = crop_center(img, rect, pad_value,
     im_size = size(img);
     im_width = size(img, 2);
     im_height = size(img, 1);
+    rect = int16(rect);
     if length(rect) == 4            % crop around the given center and width and height
         center_x = rect(1);
         center_y = rect(2);
