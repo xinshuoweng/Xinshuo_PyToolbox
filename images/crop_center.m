@@ -39,7 +39,7 @@ function [cropped, crop_rect, crop_rect_ori] = crop_center(img, rect, pad_value,
         crop_height = rect(4);
     else                            % crop around the center of the image
         center_x = ceil(im_width/2);
-        center_y = ceil(im_height/2);
+        center_y = ceil(im_height/2);   
         crop_width = rect(1);
         crop_height = rect(2);
     end
@@ -80,6 +80,7 @@ function [cropped, crop_rect, crop_rect_ori] = crop_center(img, rect, pad_value,
         cropped = pad_around(cropped, pad_rect, pad_value, debug_mode);
     end
 
+    % TODO: with padding
     [im_height, im_width, ~] = size(img);
     crop_rect_ori = clip_bboxes_TLWH(crop_rect, im_width, im_height, debug_mode);
 end

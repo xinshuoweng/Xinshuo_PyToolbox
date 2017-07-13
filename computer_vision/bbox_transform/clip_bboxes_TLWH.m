@@ -12,7 +12,7 @@ function boxes = clip_bboxes_TLWH(boxes, im_width, im_height, debug_mode)
 	end
 
 	if debug_mode
-		boxes = boxcheck_TLWH(boxes);
+		boxes = bboxcheck_TLWH(boxes, [im_height, im_width], debug_mode);
 	end		
 
     % x1 >= 1 & <= im_width

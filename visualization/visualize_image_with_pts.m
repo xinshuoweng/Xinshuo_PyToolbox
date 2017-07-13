@@ -28,11 +28,18 @@ function img_with_pts = visualize_image_with_pts(img, pts_array, vis, debug_mode
 
 	% draw image and points
 	% title('points prediction.'); 
+	if vis
+		fig = figure; 
+	else
+		fig = figure('Visible', 'off');
+	end
+
 	imshow(img); hold on;
+	% end
 	x = pts_array(1, :);
 	y = pts_array(2, :);
 	plot(x, y, 'ro', 'MarkerSize', 1, 'MarkerFaceColor', 'r');
-	
+
 	% add labels
 	if label
 		num_pts = size(pts_array, 2);
@@ -51,10 +58,12 @@ function img_with_pts = visualize_image_with_pts(img, pts_array, vis, debug_mode
 
 		text(x, y, label_str, 'Color', 'y');
 	end
+	hold off;
 
 	% get the current frame to return
 	img_with_pts = getframe;
 	img_with_pts = img_with_pts.cdata;
+	close(fig);
 
 	% resize the image obtained from the handle
 	im_size = check_imageSize(size(img), debug_mode);

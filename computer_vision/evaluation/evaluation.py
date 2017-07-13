@@ -157,6 +157,7 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 
 			count += 1
 
+		print 'number of skipped images is %d' % count_skip_num_images
 		assert count + count_skip_num_images == num_images, 'all cells in the array must be filled %d vs %d' % (count + count_skip_num_images, num_images)
 		# print normed_mean_error_total
 		# time.sleep(1000)
@@ -177,6 +178,21 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 			mse_value[method_name] = np.mean(error_array)
 	else:
 		mse_value = None
+
+	# save mse error list to file for each method
+	error_list_savedir = os.path.join(save_path, 'error_list')
+	mkdir_if_missing(error_list_savedir)
+	for method_name, mse_error_dict in mse_error_dict_dict.items():
+		mse_error_list_path = os.path.join(error_list_savedir, 'error_%s.txt' % method_name)
+		mse_error_list = open(mse_error_list_path, 'w')
+		
+		sorted_tuple_list = sorted(mse_error_dict.items(), key=operator.itemgetter(1), reverse=True)
+		for tuple_index in range(len(sorted_tuple_list)):
+			image_path_tmp = sorted_tuple_list[tuple_index][0]
+			mse_error_tmp = sorted_tuple_list[tuple_index][1]
+			mse_error_list.write('{:<200} {}\n'.format(image_path_tmp, '%.2f' % mse_error_tmp))
+		mse_error_list.close()
+		print '\nsave mse error list for %s to %s' % (method_name, mse_error_list_path)
 
 	# visualize the ced (cumulative error distribution curve)
 	print('visualizing pck curve....\n')
@@ -218,28 +234,12 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 	table = AsciiTable(ptswise_mse_table)
 	print '\nprint point-wise average MSE'
 	print table.table
-
 	# save table to file
 	ptswise_savepath = os.path.join(table_savedir, 'pointwise_average_MSE.txt')
 	table_file = open(ptswise_savepath, 'w')
 	table_file.write(table.table)
 	table_file.close()
 	print '\nsave point-wise average MSE to %s' % ptswise_savepath
-
-	# save mse error list to file for each method
-	error_list_savedir = os.path.join(save_path, 'error_list')
-	mkdir_if_missing(error_list_savedir)
-	for method_name, mse_error_dict in mse_error_dict_dict.items():
-		mse_error_list_path = os.path.join(error_list_savedir, 'error_%s.txt' % method_name)
-		mse_error_list = open(mse_error_list_path, 'w')
-		
-		sorted_tuple_list = sorted(mse_error_dict.items(), key=operator.itemgetter(1), reverse=True)
-		for tuple_index in range(len(sorted_tuple_list)):
-			image_path_tmp = sorted_tuple_list[tuple_index][0]
-			mse_error_tmp = sorted_tuple_list[tuple_index][1]
-			mse_error_list.write('{:<200} {}\n'.format(image_path_tmp, '%.2f' % mse_error_tmp))
-		mse_error_list.close()
-		print '\nsave mse error list for %s to %s' % (method_name, mse_error_list_path)
 
 	# visualize the error vector map
 	print('visualizing error vector distribution map....\n')
