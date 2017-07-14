@@ -260,7 +260,7 @@ def visualize_pts_covariance(pts_array, conf=None, std=None, ax=None, debug=True
     pts_array = np.transpose(pts_array)
     center = pts_array.mean(axis=0)
     covariance = np.cov(pts_array, rowvar=False)
-    return visualize_covariance_ellipse(covariance=covariance, center=center, conf=conf, std=std, ax=ax, debug=debug, **kwargs)
+    return visualize_covariance_ellipse(covariance=covariance, center=center, conf=conf, std=std, ax=ax, debug=debug, **kwargs), np.sqrt(covariance[0, 0]**2 + covariance[1, 1]**2)
 
 def visualize_covariance_ellipse(covariance, center, conf=None, std=None, ax=None, debug=True, **kwargs):
     """
@@ -374,7 +374,7 @@ def visualize_pts(pts, title=None, ax=None, display_range=False, xlim=[-100, 100
     # internal parameters
     pts_size = 5
     std = None
-    conf = 0.95
+    conf = 0.98
     color_index = 0
     marker_index = 0
     hatch_index = 0
@@ -396,7 +396,7 @@ def visualize_pts(pts, title=None, ax=None, display_range=False, xlim=[-100, 100
 
             # plot covariance ellipse
             if covariance:
-                visualize_pts_covariance(pts_tmp[0:2, :], std=std, conf=conf, ax=ax, debug=debug, color=color_tmp, hatch=hatch_tmp, linewidth=linewidth)
+                _, covariance_number = visualize_pts_covariance(pts_tmp[0:2, :], std=std, conf=conf, ax=ax, debug=debug, color=color_tmp, hatch=hatch_tmp, linewidth=linewidth)
             
             handle_tmp = ax.scatter(pts_tmp[0, :], pts_tmp[1, :], color=color_tmp, marker=marker_tmp, s=pts_size, alpha=alpha)    
             if mse:
@@ -405,7 +405,7 @@ def visualize_pts(pts, title=None, ax=None, display_range=False, xlim=[-100, 100
                     mse_tmp, _ = pts_euclidean(pts_tmp[0:2, :], np.zeros((2, num_pts), dtype='float32'), debug=debug)
                 else:
                     mse_tmp = mse_value[method_name]
-                display_string = '%s, MSE: %.7f (%.1f um)' % (method_name, mse_tmp, mse_tmp * scale_distance)
+                display_string = '%s, MSE: %.1f (%.1f um), Covariance: %.1f' % (method_name, mse_tmp, mse_tmp * scale_distance, covariance_number)
                 mse_return[method_name] = mse_tmp
             else:
                 display_string = method_name
@@ -433,16 +433,16 @@ def visualize_pts(pts, title=None, ax=None, display_range=False, xlim=[-100, 100
 
         # plot covariance ellipse
         if covariance:
-            visualize_pts_covariance(pts[0:2, :], std=std, conf=conf, ax=ax, debug=debug, color=color_tmp, hatch=hatch_tmp, linewidth=linewidth)
+            _, covariance_number = visualize_pts_covariance(pts[0:2, :], std=std, conf=conf, ax=ax, debug=debug, color=color_tmp, hatch=hatch_tmp, linewidth=linewidth)
 
         if mse:
             if mse_value is None:
                 num_pts = pts.shape[1]
                 mse_tmp, _ = pts_euclidean(pts[0:2, :], np.zeros((2, num_pts), dtype='float32'), debug=debug)
-                display_string = 'MSE: %.1f (%.1f um)' % (mse_tmp, mse_tmp * scale_distance)
+                display_string = 'MSE: %.1f (%.1f um), Covariance: %.1f' % (mse_tmp, mse_tmp * scale_distance, covariance_number)
                 mse_return = mse_tmp
             else:
-                display_string = 'MSE: %.1f (%.1f um)' % (mse_value, mse_value * scale_distance)
+                display_string = 'MSE: %.1f (%.1f um), Covariance: %.1f' % (mse_value, mse_value * scale_distance, covariance_number)
                 mse_return = mse_value
             handle_dict[display_string] = handle_tmp
             plt.legend(list2tuple(handle_dict.values()), list2tuple(handle_dict.keys()), scatterpoints=1, markerscale=4, loc='lower left', fontsize=legend_fontsize)

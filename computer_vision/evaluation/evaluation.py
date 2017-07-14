@@ -18,7 +18,7 @@ from conversions import print_np_shape, list_reorder
 
 # for better visualization in error distribution, we center the distribution map and set fixed visualization range for fair comparison
 display_range = True
-limit = 500
+limit = 50
 xlim = [-1 * limit, limit]
 ylim = [-1 * limit, limit]
 # xlim = [-200, 200]
