@@ -14,11 +14,6 @@ cd xinshuo_toolbox
 pip install -r requirements.txt
 ~~~
 
-#### Example Usage:
-
-stay tuned.
-
-
 #### TODO:
 
 *coding*
