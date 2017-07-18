@@ -958,7 +958,7 @@ def visualize_bar_graph(data=None, title=None, label=False, label_list=None, vis
     plt.ylabel('keypoint index')
 
     num_yticks = len(data_new['names'])
-    adaptive_fontsize = -0.0555556 * num_yticks + 16.111
+    adaptive_fontsize = -0.0555556 * num_yticks + 15.111
     plt.yticks(fontsize=adaptive_fontsize)
 
     if save:

@@ -10,7 +10,7 @@ from terminaltables import AsciiTable
 from tabulate import tabulate
 
 from bbox_transform import bbox_TLBR2TLWH, pts2bbox
-from check import is_path_exists_or_creatable, isnparray, islist, isdict, ispositiveinteger, isscalar, islogical, is2dptsarray, is2dptsarray_occlusion
+from check import *
 from math_functions import pts_euclidean
 from visualize import visualize_ced, visualize_pts
 from file_io import fileparts, mkdir_if_missing
@@ -268,10 +268,30 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 	# save mse to json file for further use
 	if mse:
 		json_path = os.path.join(save_path, 'mse_pts.json')
-		with open(json_path, 'w') as file:
-			print('save mse for all keypoings to {}'.format(json_path))
-			json.dump(mse_dict, file)
-			file.close()
+
+		# if existing, compare and select the best
+		if is_path_exists(json_path):
+			with open(json_path, 'r') as file:
+				mse_dict_old = json.load(file)
+				file.close()
+
+			for pts_index, mse_single in mse_dict_old.items():
+				mse_dict_new = mse_dict[int(pts_index)]
+				mse_new = mse_dict_new['mse']
+				if mse_new < mse_single['mse']:
+					mse_single['mse'] = mse_new
+				mse_dict_old[pts_index] = mse_single
+
+			with open(json_path, 'w') as file:
+				print('overwrite old mse to {}'.format(json_path))
+				json.dump(mse_dict_old, file)
+				file.close()
+
+		else:
+			with open(json_path, 'w') as file:
+				print('save mse for all keypoings to {}'.format(json_path))
+				json.dump(mse_dict, file)
+				file.close()
 
 	print('\ndone!!!!!\n')
 
