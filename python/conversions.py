@@ -247,6 +247,15 @@ def list_reorder(input_list, order_index, debug=True):
 
 	return [ordered for whatever, ordered in sorted(zip(order_index, input_list))]
 
+def reverse_list(input_list, debug=True):
+	'''
+	reverse a list
+	'''
+	if debug:
+		assert islist(input_list), 'input is not a list'
+
+	return input_list[::-1]
+
 ######################################################### math related #########################################################
 def degree2radian(degree, debug=True):
 	'''

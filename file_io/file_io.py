@@ -223,20 +223,27 @@ def load_txt_file(file_path, debug=True):
 
     return data, num_lines
 
-# def save_2dmatrix_to_file(data, savepath, debug=True):
-#     save_path = safepath(save_path)
-#     if debug:
-#         assert isimage(data), 'input data is not image format'
-#         assert is_path_exists_or_creatable(save_path), 'save path is not correct'
-#         mkdir_if_missing(save_path)
-#         assert isnparray(data) and len(data.shape) <= 2, 'the data is not correct'
+def save_2dmatrix_to_file(data, save_path, formatting='%.1f', debug=True):
+    save_path = safepath(save_path)
+    if debug:
+        assert isnparray(data) and len(data.shape) == 2, 'input data is not 2d numpy array'
+        assert is_path_exists_or_creatable(save_path), 'save path is not correct'
+        mkdir_if_missing(save_path)
+        # assert isnparray(data) and len(data.shape) <= 2, 'the data is not correct'
 
-#     if len(data.shape) == 2:
-#         num_elem = data.size
-#         data = np.reshape(data, (1, num_elem))
+    # if len(data.shape) == 2:
+        # num_elem = data.size
+        # data = np.reshape(data, (1, num_elem))
+    # if 
+    np.savetxt(save_path, data, delimiter=' ', fmt=formatting)
 
+def load_2dmatrix_from_file(src_path, delimiter=' ', dtype='float32', debug=True):
+    src_path = safepath(src_path)
+    if debug:
+        assert is_path_exists(src_path), 'txt path is not correct at %s' % src_path
 
-
+    data = np.loadtxt(src_path, delimiter=delimiter, dtype=dtype)
+    return data
 
 
 ######################################################### web related #########################################################

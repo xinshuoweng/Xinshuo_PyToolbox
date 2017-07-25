@@ -105,7 +105,7 @@ def visualize_image(image, vis=True, save=False, save_path=None, debug=True):
 
     return fig
 
-def visualize_image_with_pts(image_path, pts, covariance=False, label=False, label_list=None, vis=True, save=False, save_path=None, debug=True):
+def visualize_image_with_pts(image_path, pts, covariance=False, label=False, label_list=None, vis=True, vis_threshold=-10000, save=False, save_path=None, debug=True):
     '''
     visualize image and plot keypoints on top of it
 
@@ -119,18 +119,31 @@ def visualize_image_with_pts(image_path, pts, covariance=False, label=False, lab
     '''
 
     # plot keypoints
-    def visualize_pts_array(pts_array, covariance=False, color_index=0, ax=None, label=False, label_list=None, occlusion=True):
+    def visualize_pts_array(pts_array, covariance=False, color_index=0, ax=None, label=False, label_list=None, occlusion=True, vis_threshold=vis_threshold, debug=debug):
         pts_size = 5
+        fontsize = 5
         std = None
         conf = 0.95
         color_tmp = color_set[color_index]
+        num_pts = pts_array.shape[1]
 
         if is2dptsarray(pts_array):    
             ax.scatter(pts_array[0, :], pts_array[1, :], color=color_tmp, s=pts_size)
+            pts_ignore_index = []
         else:
-            pts_visible_index   = np.where(pts_array[2, :] == 1)[0].tolist()              # plot visible points in red color
-            pts_invisible_index = np.where(pts_array[2, :] == 0)[0].tolist()              # plot invisible points in blue color
-            pts_ignore_index    = np.where(pts_array[2, :] == -1)[0].tolist()             # do not plot points with annotation
+            num_float_elements = np.where(np.logical_and(pts_array[2, :] > 0, pts_array[2, :] < 1))[0].tolist()
+            if len(num_float_elements) > float(num_pts) / 2:
+                type_3row = 'conf'
+            else:
+                type_3row = 'occu'
+
+            if type_3row == 'occu':
+                pts_visible_index   = np.where(pts_array[2, :] == 1)[0].tolist()              # plot visible points in red color
+                pts_invisible_index = np.where(pts_array[2, :] == 0)[0].tolist()              # plot invisible points in blue color
+                pts_ignore_index    = np.where(pts_array[2, :] == -1)[0].tolist()             # do not plot points with annotation
+            else:
+                pts_visible_index   = np.where(pts_array[2, :] > vis_threshold)[0].tolist()
+                pts_ignore_index    = np.where(pts_array[2, :] <= vis_threshold)[0].tolist()
             ax.scatter(pts_array[0, pts_visible_index], pts_array[1, pts_visible_index], color=color_tmp, s=pts_size)
             if occlusion:
                 ax.scatter(pts_array[0, pts_invisible_index], pts_array[1, pts_invisible_index], color=color_set[(color_index+1) % len(color_set)], s=pts_size)
@@ -139,17 +152,23 @@ def visualize_image_with_pts(image_path, pts, covariance=False, label=False, lab
             if covariance:
                 visualize_pts_covariance(pts_array[0:2, :], std=std, conf=conf, ax=ax, debug=False, color=color_tmp)
 
-            if label:
-                num_pts = pts_array.shape[1]
-                for pts_index in xrange(num_pts):
-                    label_tmp = label_list[pts_index]
-                    if pts_index in pts_ignore_index:
-                        continue
-                    else:
-                        # note that the annotation is based on the coordinate instead of the order of plotting the points, so the orider in pts_index does not matter
-                        plt.annotate(label_tmp, xy=(pts_array[0, pts_index], pts_array[1, pts_index]), xytext=(-1, 1), color=color_set[(color_index+5) % len(color_set)], textcoords='offset points', ha='right', va='bottom')
-                        # bbox=dict(boxstyle='round,pad=0.5', fc='yellow', alpha=0.5),
-                        # arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
+        if debug:
+            print 'visible index list', 
+            print(pts_visible_index)
+            print 'invisible index list', 
+            print(pts_invisible_index)
+            print 'ignored index list', 
+            print(pts_ignore_index)
+        if label:
+            for pts_index in xrange(num_pts):
+                label_tmp = label_list[pts_index]
+                if pts_index in pts_ignore_index:
+                    continue
+                else:
+                    # note that the annotation is based on the coordinate instead of the order of plotting the points, so the orider in pts_index does not matter
+                    plt.annotate(label_tmp, xy=(pts_array[0, pts_index], pts_array[1, pts_index]), xytext=(-1, 1), color=color_set[(color_index+5) % len(color_set)], textcoords='offset points', ha='right', va='bottom', fontsize=fontsize)
+                    # bbox=dict(boxstyle='round,pad=0.5', fc='yellow', alpha=0.5),
+                    # arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
 
     if label and (label_list is None):
         if not isdict(pts):
@@ -160,7 +179,10 @@ def visualize_image_with_pts(image_path, pts, covariance=False, label=False, lab
         label_list = [str(i+1) for i in xrange(num_pts)];
 
     if debug:
-        assert is_path_exists(image_path), 'image is not existing at %s' % image_path
+        if isstring(image_path):
+            assert is_path_exists(image_path), 'image is not existing at %s' % image_path
+        else:
+            assert isimage(image_path, debug=debug), 'the input is not a good image'
         if isdict(pts):
             for pts_tmp in pts.values():
                 if islist(pts_tmp):
@@ -172,11 +194,14 @@ def visualize_image_with_pts(image_path, pts, covariance=False, label=False, lab
         if label:
             assert islist(label_list) and all(isstring(label_tmp) for label_tmp in label_list), 'labels are not correct'
 
-    try:
-        image = imread(image_path)
-    except IOError:
-        print('path is not a valid image path. Please check: %s' % image_path)
-        return
+    if isstring(image_path):
+        try:
+            image = imread(image_path)
+        except IOError:
+            print('path is not a valid image path. Please check: %s' % image_path)
+            return
+    else:
+        image = image_path
 
     dpi = 80  
     width = image.shape[1]
