@@ -144,6 +144,7 @@ def visualize_image_with_pts(image_path, pts, covariance=False, label=False, lab
             else:
                 pts_visible_index   = np.where(pts_array[2, :] > vis_threshold)[0].tolist()
                 pts_ignore_index    = np.where(pts_array[2, :] <= vis_threshold)[0].tolist()
+                pts_invisible_index = []
             ax.scatter(pts_array[0, pts_visible_index], pts_array[1, pts_visible_index], color=color_tmp, s=pts_size)
             if occlusion:
                 ax.scatter(pts_array[0, pts_invisible_index], pts_array[1, pts_invisible_index], color=color_set[(color_index+1) % len(color_set)], s=pts_size)

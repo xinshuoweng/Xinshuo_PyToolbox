@@ -245,7 +245,6 @@ def load_2dmatrix_from_file(src_path, delimiter=' ', dtype='float32', debug=True
     data = np.loadtxt(src_path, delimiter=delimiter, dtype=dtype)
     return data
 
-
 ######################################################### web related #########################################################
 """
 BEFORE RUNNING:
