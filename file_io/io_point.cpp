@@ -1,11 +1,10 @@
 // Author: Xinshuo Weng
 // Email: xinshuow@andrew.cmu.edu
 
-#include "io_point.h"
-#include "pts_2d_conf.h"
-#include "mycamera.h"
+#include <file_io/io_point.h>
+#include <computer_vision/geometry/pts_2d_conf.h>
+#include <computer_vision/geometry/mycamera.h>
 
-// TODO: test for correctness
 void fileparts(std::string str, std::string separator, std::string *path, std::string *filename, std::string *extension)
 {
 	std::string spath, sfile, sext;

@@ -3,9 +3,9 @@
 // Email: xinshuow@andrew.cmu.edu
 
 //#include <iterator> // for ostream_iterator
-#include "IdDataParser.h"
-#include "mycamera.h"
-#include "debug_tool.h"
+#include <file_io/camera_io.h>
+#include <computer_vision/geometry/mycamera.h>
+#include <miscellaneous/debug_tool.h>
 
 
 //using namespace std;

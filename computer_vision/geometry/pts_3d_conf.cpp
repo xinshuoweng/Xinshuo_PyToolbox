@@ -1,7 +1,7 @@
 // Author: Xinshuo
 // Email: xinshuow@andrew.cmu.edu
 
-#include "pts_3d_conf.h"
+#include <computer_vision/geometry/pts_3d_conf.h>
 
 // TODO: test for correctness
 cv::Point3d pts_3d_conf::convert_to_point3d() {
@@ -27,7 +27,6 @@ std::vector<double> pts_3d_conf::convert_to_pts_vec_conf() {
 	return pts_vec_conf;
 }
 
-// TODO: test for correctness
 void pts_3d_conf::print(int prec) {
 	std::cout << "[";
 	std::cout << std::setprecision(prec) << this->x << ", ";

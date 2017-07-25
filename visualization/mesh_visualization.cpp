@@ -3,8 +3,8 @@
 // Email: xinshuow@andrew.cmu.edu
 
 
-#include "mesh_visualization.h"
-#include "math_functions.h"
+#include <visualization/mesh_visualization.h>
+#include <math/math_functions.h>
 
 
 // visualize keypoints and mesh for debuging reprojection from 2d to 3d

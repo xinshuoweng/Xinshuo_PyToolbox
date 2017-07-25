@@ -6,8 +6,8 @@
 #define __PTS_ON_MESH_H_INCLUDED__
 
 
-#include "myheader.h"
-#include "pts_3d_conf.h"
+#include <myheader.h>
+#include <computer_vision/geometry/pts_3d_conf.h>
 
 class pts_3d_conf;
 

@@ -1,25 +1,19 @@
 // Author: Xinshuo
 // Email: xinshuow@andrew.cmu.edu
 
-
-// in-project library
-#include "MyMesh.h"
-#include "pts_on_mesh.h"
-
-
 // pcl library
 #include <pcl/conversions.h>
 #include <pcl/io/auto_io.h>
 
 
 // self_contained library
-#include "debug_tool.h"
-#include "mycamera.h"
-#include "camera_geometry.h"
-//#include "pts_2d_conf.h"
-//#include "pts_3d_conf.h"
-#include "type_conversion.h"
-#include "math_functions.h"
+#include <computer_vision/geometry/MyMesh.h>
+#include <computer_vision/geometry/pts_on_mesh.h>
+#include <computer_vision/geometry/mycamera.h>
+#include <computer_vision/geometry/camera_geometry.h>
+#include <miscellaneous/debug_tool.h>
+#include <miscellaneous/type_conversion.h>
+#include <math/math_functions.h>
 
 
 MyMesh::MyMesh(char* filename, int scale) {

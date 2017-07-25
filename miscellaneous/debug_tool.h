@@ -5,7 +5,7 @@
 #ifndef __DEBUG_TOOL_H_INCLUDED__
 #define __DEBUG_TOOL_H_INCLUDED__
 
-#include "myheader.h"
+#include <myheader.h>
 
 class pts_2d_conf;
 class pts_3d_conf;

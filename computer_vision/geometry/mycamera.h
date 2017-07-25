@@ -9,7 +9,7 @@
 
 
 
-#include "myheader.h"
+#include <myheader.h>
 
 class mycamera
 {

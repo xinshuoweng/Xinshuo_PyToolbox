@@ -5,7 +5,7 @@
 #ifndef __MATH_FUNCTIONS_H_INCLUDED__
 #define __MATH_FUNCTIONS_H_INCLUDED__
 
-#include "myheader.h"
+#include <myheader.h>
 
 // pcl library
 #include <pcl/point_types.h>

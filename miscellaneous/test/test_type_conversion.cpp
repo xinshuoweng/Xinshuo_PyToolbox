@@ -2,9 +2,9 @@
 // Email: xinshuow@andrew.cmu.edu
 
 
-#include "myheader.h"
-#include "type_conversion.h"
-#include "debug_tool.h"
+#include <myheader.h>
+#include <miscellaneous/type_conversion.h>
+#include <miscellaneous/debug_tool.h>
 
 #include <opencv2/highgui/highgui.hpp>
 

@@ -1,7 +1,7 @@
 // Author: Xinshuo
 // Email: xinshuow@andrew.cmu.edu
 
-#include "pts_2d_tool.h"
+#include <computer_vision/geometry/pts_2d_tool.h>
 
 pts_2d_conf pts_2d_tool::convert_to_pts_2d_conf() {
 	return pts_2d_conf(this->x, this->y, this->conf);

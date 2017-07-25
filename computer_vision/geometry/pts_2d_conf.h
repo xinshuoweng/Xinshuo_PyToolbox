@@ -5,7 +5,7 @@
 #ifndef __PTS_2D_CONF_H_INCLUDED__
 #define __PTS_2D_CONF_H_INCLUDED__
 
-#include "myheader.h"
+#include <myheader.h>
 
 
 class pts_2d_conf {

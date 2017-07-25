@@ -1,17 +1,14 @@
 ﻿// Author: Xinshuo Weng
 // Email: xinshuow@andrew.cmu.edu
 
-
-// in-project library
-#include "camera_geometry.h"
-#include "debug_tool.h"
-#include "mycamera.h"
-#include "pts_2d_conf.h"
-#include "pts_3d_conf.h"
-
 // self-contained library
-#include "math_functions.h"
-#include "type_conversion.h"
+#include <computer_vision/geometry/camera_geometry.h>
+#include <computer_vision/geometry/mycamera.h>
+#include <computer_vision/geometry/pts_2d_conf.h>
+#include <computer_vision/geometry/pts_3d_conf.h>
+#include <math/math_functions.h>
+#include <miscellaneous/debug_tool.h>
+#include <miscellaneous/type_conversion.h>
 
 // opencv library
 #include <opencv2/calib3d/calib3d.hpp>

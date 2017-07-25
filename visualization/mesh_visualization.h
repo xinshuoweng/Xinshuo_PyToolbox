@@ -8,7 +8,7 @@
 #define __MESH_VISUALIZATION_H_INCLUDED__
 
 
-#include "myheader.h"
+#include <myheader.h>
 
 // pcl library
 #include <pcl/visualization/pcl_visualizer.h>

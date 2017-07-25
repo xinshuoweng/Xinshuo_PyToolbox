@@ -5,7 +5,7 @@
 #ifndef __TYPE_CONVERSION_H_INCLUDED__
 #define __TYPE_CONVERSION_H_INCLUDED__
 
-#include "myheader.h"
+#include <myheader.h>
 
 #include <pcl/point_types.h>
 

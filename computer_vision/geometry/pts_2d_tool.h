@@ -7,8 +7,8 @@
 #define __PTS_2D_TOOL_H_INCLUDED__
 
 
-#include "myheader.h"
-#include "pts_2d_conf.h"
+#include <myheader.h>
+#include <computer_vision/geometry/pts_2d_conf.h>
 
 
 

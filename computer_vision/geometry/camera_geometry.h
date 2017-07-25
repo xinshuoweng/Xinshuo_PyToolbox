@@ -4,7 +4,7 @@
 #define __CAMERA_GEOMETRY_H_INCLUDED__
 
 
-#include "myheader.h"
+#include <myheader.h>
 
 
 class mycamera;

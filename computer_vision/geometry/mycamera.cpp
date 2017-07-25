@@ -2,9 +2,11 @@
 // Email: xinshuow@andrew.cmu.edu
 
 
-#include "mycamera.h"
+
 #include <opencv2/calib3d/calib3d.hpp>
-#include "debug_tool.h"
+
+#include <computer_vision/geometry/mycamera.h>
+#include <miscellaneous/debug_tool.h>
 
 mycamera::mycamera() {
 	//this->intrinsic = cv::Mat(3, 3, CV_64FC1);

@@ -4,7 +4,7 @@
 #define __MYMESH_H_INCLUDED__
 
 
-#include "myheader.h"
+#include <myheader.h>
 
 // pcl library
 #include <pcl/point_cloud.h>

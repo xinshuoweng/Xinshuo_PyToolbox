@@ -1,10 +1,10 @@
 // Author: Xinshuo
 // Email: xinshuow@andrew.cmu.edu
 
-#include "type_conversion.h"
-#include "pts_2d_conf.h"
-#include "pts_2d_tool.h"
-#include "pts_3d_conf.h"
+#include <miscellaneous/type_conversion.h>
+#include <computer_vision/geometry/pts_2d_conf.h>
+#include <computer_vision/geometry/pts_2d_tool.h>
+#include <computer_vision/geometry/pts_3d_conf.h>
 
 /************************************************** intra-class conversion ************************************************/
 // TODO: test for correctness
