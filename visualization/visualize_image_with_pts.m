@@ -8,7 +8,7 @@
 %	pts_array:	2 x num_pts matrix to represent (x, y) locations
 %	label:		a logical value to judge if display a text for every points
 %	label_str:	a cell array where every cell has a string inside
-function img_with_pts = visualize_image_with_pts(img, pts_array, vis, debug_mode, save_path, label, label_str)
+function img_with_pts = visualize_image_with_pts(img, pts_array, vis, debug_mode, save_path, label, label_str, vis_radius, vis_resize_factor)
 	if ~exist('debug_mode', 'var')
 		debug_mode = true;
 	end
@@ -20,6 +20,15 @@ function img_with_pts = visualize_image_with_pts(img, pts_array, vis, debug_mode
 	if ~exist('label', 'var')
 		label = true;
 	end
+
+	if ~exist('vis_resize_factor', 'var')
+		vis_resize_factor = 1;
+	end
+
+	if ~exist('vis_radius', 'var')
+		vis_radius = 1;
+	end
+
 
 	if debug_mode
 		assert(isImage(img), 'the input is not an image format.');
@@ -38,7 +47,7 @@ function img_with_pts = visualize_image_with_pts(img, pts_array, vis, debug_mode
 	% end
 	x = pts_array(1, :);
 	y = pts_array(2, :);
-	plot(x, y, 'ro', 'MarkerSize', 1, 'MarkerFaceColor', 'r');
+	plot(x, y, 'ro', 'MarkerSize', vis_radius, 'MarkerFaceColor', 'r');
 
 	% add labels
 	if label
@@ -76,7 +85,7 @@ function img_with_pts = visualize_image_with_pts(img, pts_array, vis, debug_mode
 	% save
 	if exist('save_path', 'var')
 		assert(ischar(save_path), 'save path is not correct.');
-		imwrite(img_with_pts, save_path);
+		imwrite(imresize(img_with_pts, vis_resize_factor), save_path);
 		fprintf('save image to %s\n', save_path);
 	end
 end

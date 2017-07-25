@@ -8,7 +8,7 @@
 %	pts_array:	2 x num_pts matrix to represent (x, y) locations
 %	label:		a logical value to judge if display a text for every points
 %	label_str:	a cell array where every cell has a string inside
-function img_with_pts = visualize_image_with_pts_customized(img, pts_array, label, label_str, vis, debug_mode, save_path, resize_factor)
+function img_with_pts = visualize_image_with_pts_customized(img, pts_array, label, label_str, vis, debug_mode, save_path, vis_radius, vis_resize_factor, vis_type)
 	if ~exist('debug_mode', 'var')
 		debug_mode = true;
 	end
@@ -21,8 +21,16 @@ function img_with_pts = visualize_image_with_pts_customized(img, pts_array, labe
 		vis = false;
 	end
 
-	if ~exist('resize_factor', 'var')
-		resize_factor = 1;
+	if ~exist('vis_resize_factor', 'var')
+		vis_resize_factor = 1;
+	end
+
+	if ~exist('vis_radius', 'var')
+		vis_radius = 1;
+	end
+
+	if ~exist('vis_type', 'var')
+		vis_type = 'x';
 	end
 
 	if debug_mode
@@ -34,7 +42,6 @@ function img_with_pts = visualize_image_with_pts_customized(img, pts_array, labe
 	% draw image and points
 	time = tic;
 	elapsed = toc(time);
-	radius = 1;
 	num_pts = size(pts_array, 2);
 	color_pixel = [255, 0, 0];			% red
 	im_size = size(img);
@@ -42,36 +49,52 @@ function img_with_pts = visualize_image_with_pts_customized(img, pts_array, labe
 	x = pts_array(1, :);
 	y = pts_array(2, :);
 
-	% color_pixel = reshape(color_pixel, [1, 1, 3]);		
-	% for pts_index = 1:num_pts
-	% 	img(y(pts_index)-radius:y(pts_index)+radius, x(pts_index), :) = repmat(color_pixel, [3, 1, 1]);
-	% 	img(y(pts_index), x(pts_index)-radius:x(pts_index)+radius, :) = repmat(color_pixel, [1, 3, 1]);
-	% end
+	x = int16(x);
+	y = int16(y);
 
 	x_index_list = [];
 	y_index_list = [];
 	z_index_list = [];
-	for pts_index = 1:num_pts 
-		for x_index = x(pts_index)-radius:1:x(pts_index)+radius
-			for z_index = 1:3
-				y_index_list = [y_index_list, y(pts_index)];
-				x_index_list = [x_index_list, x_index];
-				z_index_list = [z_index_list, z_index];
+	for pts_index = 1:num_pts
+		if strcmp(vis_type, 'x') 
+			for x_index = x(pts_index)-vis_radius:1:x(pts_index)+vis_radius
+				for z_index = 1:3
+					y_index_list = [y_index_list, y(pts_index)];
+					x_index_list = [x_index_list, x_index];
+					z_index_list = [z_index_list, z_index];
+				end
 			end
-		end
 
-		for y_index = y(pts_index)-radius:1:y(pts_index)+radius
-			for z_index = 1:3
-				y_index_list = [y_index_list, y_index];
-				x_index_list = [x_index_list, x(pts_index)];
-				z_index_list = [z_index_list, z_index];
+			for y_index = y(pts_index)-vis_radius:1:y(pts_index)+vis_radius
+				for z_index = 1:3
+					y_index_list = [y_index_list, y_index];
+					x_index_list = [x_index_list, x(pts_index)];
+					z_index_list = [z_index_list, z_index];
+				end
 			end
+		elseif strcmp(vis_type, 'o')
+			for x_index = x(pts_index)-vis_radius:1:x(pts_index)+vis_radius
+				for y_index = y(pts_index)-vis_radius:1:y(pts_index)+vis_radius
+					distance_2d = sqrt(double((x_index - x(pts_index)) ^ 2 + (y_index - y(pts_index)) ^ 2));
+					
+					% if the current index is falling into the circle
+					if distance_2d <= vis_radius
+						for z_index = 1:3
+							y_index_list = [y_index_list, y_index];
+							x_index_list = [x_index_list, x_index];
+							z_index_list = [z_index_list, z_index];
+						end
+					end
+				end
+			end
+		else
+			assert(false, sprintf('visualization type %s is not supported\n', vis_type));
 		end
 	end
 
-	x_index_list = int16(x_index_list);
-	y_index_list = int16(y_index_list);
-	z_index_list = int16(z_index_list);
+	% x_index_list = int16(x_index_list);
+	% y_index_list = int16(y_index_list);
+	% z_index_list = int16(z_index_list);
 	img(sub2ind(size(img), y_index_list, x_index_list, z_index_list)) = repmat(color_pixel, [1, length(y_index_list)/3]);
 	img_with_pts = img;
 
@@ -120,7 +143,7 @@ function img_with_pts = visualize_image_with_pts_customized(img, pts_array, labe
 		im_size = check_imageSize(im_size, debug_mode);
 		img = imresize(img, im_size);
 
-		imwrite(imresize(img, resize_factor), save_path);
+		imwrite(imresize(img, vis_resize_factor), save_path);
 		fprintf('save image to %s\n', save_path);
 	end
 	close(fig)
