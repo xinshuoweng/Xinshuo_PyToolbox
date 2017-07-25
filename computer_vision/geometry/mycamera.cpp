@@ -3,7 +3,7 @@
 
 
 #include "mycamera.h"
-#include <opencv2/calib3d.hpp>
+#include <opencv2/calib3d/calib3d.hpp>
 #include "debug_tool.h"
 
 mycamera::mycamera() {
@@ -68,7 +68,7 @@ cv::Mat mycamera::getTranslationVector() {
 cv::Mat mycamera::getProjectionMatrix() {
 	ASSERT_WITH_MSG(this->extrinsic.empty() == 0, "The extrinsic matrix is null!");
 	ASSERT_WITH_MSG(this->intrinsic.empty() == 0, "The intrinsic matrix is null!");
-	cv::Mat projection(3, 4, CV_64F);
+	cv::Mat projection(3, 4, CV_64FC1);
 	projection = this->intrinsic * this->extrinsic;
 	return projection;
 }

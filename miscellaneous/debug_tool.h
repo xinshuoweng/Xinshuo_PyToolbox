@@ -25,16 +25,16 @@ void print_vec_pts2d(std::vector<cv::Point2d>& v);
 void print_vec_pts2d(std::vector<cv::Point2f>& v);
 void print_vec_pts2d(std::vector<cv::Point2i>& v);
 
-__declspec(dllexport) void print_vec(std::vector<double>& v, int prec = default_precision);
-__declspec(dllexport) void print_vec(std::vector<float>& v, int prec = default_precision);
-__declspec(dllexport) void print_vec(std::vector<int>& v, int prec = default_precision);
+void print_vec(std::vector<double>& v, int prec = default_precision);
+void print_vec(std::vector<float>& v, int prec = default_precision);
+void print_vec(std::vector<int>& v, int prec = default_precision);
 
-__declspec(dllexport) void print_pts2d(cv::Point2d& pts);
-__declspec(dllexport) void print_pts2d(cv::Point2f& pts);
-__declspec(dllexport) void print_pts2d(cv::Point2i& pts);
-__declspec(dllexport) void print_pts3d(cv::Point3d& pts);
-__declspec(dllexport) void print_pts3d(cv::Point3f& pts);
-__declspec(dllexport) void print_pts3d(cv::Point3i& pts);
+void print_pts2d(cv::Point2d& pts);
+void print_pts2d(cv::Point2f& pts);
+void print_pts2d(cv::Point2i& pts);
+void print_pts3d(cv::Point3d& pts);
+void print_pts3d(cv::Point3f& pts);
+void print_pts3d(cv::Point3i& pts);
 
 void print_vec_pts_2d_conf(std::vector<pts_2d_conf> pts);
 void print_vec_pts_3d_conf(std::vector<pts_3d_conf> pts);

@@ -110,7 +110,8 @@ double l2_norm(std::vector<double>& vec) {
 }
 double l2_norm(std::vector<float>& vec) {
 	ASSERT_WITH_MSG(vec.size() > 0, "The size of input vector should be bigger than 0 while calculating l2 norm!");
-	return l2_norm(float2double_vec(vec));
+	std::vector<double> double_vec_tmp = float2double_vec(vec);
+	return l2_norm(double_vec_tmp);
 }
 
 std::vector<double> cross(std::vector<double>& a, std::vector<double>& b) {
@@ -125,7 +126,11 @@ std::vector<double> cross(std::vector<double>& a, std::vector<double>& b) {
 std::vector<float> cross(std::vector<float>& a, std::vector<float>& b) {
 	ASSERT_WITH_MSG(a.size() == b.size(), "The size of vector to do cross product is not equal!");
 	ASSERT_WITH_MSG(a.size() == 3, "current cross product function only support vector with size 3!");
-	return double2float_vec(cross(float2double_vec(a), float2double_vec(b)));
+
+	std::vector<double> double_vec_a = float2double_vec(a);
+	std::vector<double> double_vec_b = float2double_vec(b);
+	std::vector<double> double_vec_tmp = cross(double_vec_a, double_vec_b);
+	return double2float_vec(double_vec_tmp);
 }
 
 double inner(std::vector<double>& a, std::vector<double>& b) {
@@ -139,7 +144,10 @@ double inner(std::vector<double>& a, std::vector<double>& b) {
 float inner(std::vector<float>& a, std::vector<float>& b) {
 	ASSERT_WITH_MSG(a.size() > 0, "The size of input vector should be larger than 0 while calculating inner product.");
 	ASSERT_WITH_MSG(a.size() == b.size(), "The size of two input vector should be equal while calculating inner product.");
-	return float(inner(float2double_vec(a), float2double_vec(b)));
+
+	std::vector<double> double_vec_a = float2double_vec(a);
+	std::vector<double> double_vec_b = float2double_vec(b);
+	return float(inner(double_vec_a, double_vec_b));
 }
 
 
@@ -200,7 +208,10 @@ bool point_triangle_test_3d(std::vector<double>& pts, std::vector<double>& tri_a
 
 void get_2d_line(pcl::PointXY& a, pcl::PointXY& b, cv::Mat& line) {
 	std::vector<double> line_vec;
-	get_2d_line(pcl2cv_pts2d(a), pcl2cv_pts2d(b), line_vec);
+
+	cv::Point2d pts_2d_a = pcl2cv_pts2d(a);
+	cv::Point2d pts_2d_b = pcl2cv_pts2d(b);
+	get_2d_line(pts_2d_a, pts_2d_b, line_vec);
 	ASSERT_WITH_MSG(line_vec.size() == 3, "The size of line vector should be three while getting the line.");
 	ASSERT_WITH_MSG(line.type() == CV_32F || line.type() == CV_64F, "Only CV_32F or CV_64F are supported now while getting 2d line.");
 	std::vector<double> line_norm = normalize_line_plane(line_vec);
@@ -288,19 +299,23 @@ double get_3d_plane(cv::Point3d& a, cv::Point3d& b, cv::Point3d& c, std::vector<
 	p[3] = p[0] * a.x + p[1] * a.y + p[2] * a.z;
 	p[3] = -p[3];
 	long double residual;
-	residual = abs(a.x * p[0] + a.y * p[1] + a.z * p[2] + p[3]);
-	ASSERT_WITH_MSG(residual < EPS_MYSELF, "Point is not on the plane. Please check! The residual for a is " + std::to_string(residual) + ".\na: [" + std::to_string(a.x) + ", " + std::to_string(a.y) + ", " + std::to_string(a.z) + "]\nb: [" + std::to_string(b.x) + ", " + std::to_string(b.y) + ", " + std::to_string(b.z) + "]\nc: [" + std::to_string(c.x) + ", " + std::to_string(c.y) + ", " + std::to_string(c.z) + "]\np: [" + std::to_string(p[0]) + ", " + std::to_string(p[1]) + ", " + std::to_string(p[2]) + ", " + std::to_string(p[3]) + "]\nlength: " + std::to_string(length));
-	residual = abs(b.x * p[0] + b.y * p[1] + b.z * p[2] + p[3]);
-	ASSERT_WITH_MSG(residual < EPS_MYSELF, "Point is not on the plane. Please check! The residual for b is " + std::to_string(residual) + ".\na: [" + std::to_string(a.x) + ", " + std::to_string(a.y) + ", " + std::to_string(a.z) + "]\nb: [" + std::to_string(b.x) + ", " + std::to_string(b.y) + ", " + std::to_string(b.z) + "]\nc: [" + std::to_string(c.x) + ", " + std::to_string(c.y) + ", " + std::to_string(c.z) + "]\np: [" + std::to_string(p[0]) + ", " + std::to_string(p[1]) + ", " + std::to_string(p[2]) + ", " + std::to_string(p[3]) + "]\nlength: " + std::to_string(length));
-	residual = abs(c.x * p[0] + c.y * p[1] + c.z * p[2] + p[3]);
-	ASSERT_WITH_MSG(residual < EPS_MYSELF, "Point is not on the plane. Please check! The residual for c is " + std::to_string(residual) + ".\na: [" + std::to_string(a.x) + ", " + std::to_string(a.y) + ", " + std::to_string(a.z) + "]\nb: [" + std::to_string(b.x) + ", " + std::to_string(b.y) + ", " + std::to_string(b.z) + "]\nc: [" + std::to_string(c.x) + ", " + std::to_string(c.y) + ", " + std::to_string(c.z) + "]\np: [" + std::to_string(p[0]) + ", " + std::to_string(p[1]) + ", " + std::to_string(p[2]) + ", " + std::to_string(p[3]) + "]\nlength: " + std::to_string(length));
-	residual = abs(p[0] * p[0] + p[1] * p[1] + p[2] * p[2] - 1);
-	ASSERT_WITH_MSG(residual < EPS_MYSELF, "The parameter of the plane is not unit! The residual is " + std::to_string(residual) + ".\na: [" + std::to_string(a.x) + ", " + std::to_string(a.y) + ", " + std::to_string(a.z) + "]\nb: [" + std::to_string(b.x) + ", " + std::to_string(b.y) + ", " + std::to_string(b.z) + "]\nc: [" + std::to_string(c.x) + ", " + std::to_string(c.y) + ", " + std::to_string(c.z) + "]\np: [" + std::to_string(p[0]) + ", " + std::to_string(p[1]) + ", " + std::to_string(p[2]) + ", " + std::to_string(p[3]) + "]\nlength: " + std::to_string(length));
+//	residual = std::abs(a.x * p[0] + a.y * p[1] + a.z * p[2] + p[3]);
+//	ASSERT_WITH_MSG(residual < EPS_MYSELF, "Point is not on the plane. Please check! The residual for a is " + std::to_string(residual) + ".\na: [" + std::to_string(a.x) + ", " + std::to_string(a.y) + ", " + std::to_string(a.z) + "]\nb: [" + std::to_string(b.x) + ", " + std::to_string(b.y) + ", " + std::to_string(b.z) + "]\nc: [" + std::to_string(c.x) + ", " + std::to_string(c.y) + ", " + std::to_string(c.z) + "]\np: [" + std::to_string(p[0]) + ", " + std::to_string(p[1]) + ", " + std::to_string(p[2]) + ", " + std::to_string(p[3]) + "]\nlength: " + std::to_string(length));
+//	residual = std::abs(b.x * p[0] + b.y * p[1] + b.z * p[2] + p[3]);
+//	ASSERT_WITH_MSG(residual < EPS_MYSELF, "Point is not on the plane. Please check! The residual for b is " + std::to_string(residual) + ".\na: [" + std::to_string(a.x) + ", " + std::to_string(a.y) + ", " + std::to_string(a.z) + "]\nb: [" + std::to_string(b.x) + ", " + std::to_string(b.y) + ", " + std::to_string(b.z) + "]\nc: [" + std::to_string(c.x) + ", " + std::to_string(c.y) + ", " + std::to_string(c.z) + "]\np: [" + std::to_string(p[0]) + ", " + std::to_string(p[1]) + ", " + std::to_string(p[2]) + ", " + std::to_string(p[3]) + "]\nlength: " + std::to_string(length));
+//	residual = std::abs(c.x * p[0] + c.y * p[1] + c.z * p[2] + p[3]);
+//	ASSERT_WITH_MSG(residual < EPS_MYSELF, "Point is not on the plane. Please check! The residual for c is " + std::to_string(residual) + ".\na: [" + std::to_string(a.x) + ", " + std::to_string(a.y) + ", " + std::to_string(a.z) + "]\nb: [" + std::to_string(b.x) + ", " + std::to_string(b.y) + ", " + std::to_string(b.z) + "]\nc: [" + std::to_string(c.x) + ", " + std::to_string(c.y) + ", " + std::to_string(c.z) + "]\np: [" + std::to_string(p[0]) + ", " + std::to_string(p[1]) + ", " + std::to_string(p[2]) + ", " + std::to_string(p[3]) + "]\nlength: " + std::to_string(length));
+//	residual = std::abs(p[0] * p[0] + p[1] * p[1] + p[2] * p[2] - 1);
+//	ASSERT_WITH_MSG(residual < EPS_MYSELF, "The parameter of the plane is not unit! The residual is " + std::to_string(residual) + ".\na: [" + std::to_string(a.x) + ", " + std::to_string(a.y) + ", " + std::to_string(a.z) + "]\nb: [" + std::to_string(b.x) + ", " + std::to_string(b.y) + ", " + std::to_string(b.z) + "]\nc: [" + std::to_string(c.x) + ", " + std::to_string(c.y) + ", " + std::to_string(c.z) + "]\np: [" + std::to_string(p[0]) + ", " + std::to_string(p[1]) + ", " + std::to_string(p[2]) + ", " + std::to_string(p[3]) + "]\nlength: " + std::to_string(length));
 	return length;
 }
 
 double get_3d_plane(pcl::PointXYZ& a, pcl::PointXYZ& b, pcl::PointXYZ& c, std::vector<double>& p) {
-	return get_3d_plane(pcl2cv_pts3d(a), pcl2cv_pts3d(b), pcl2cv_pts3d(c), p);
+	cv::Point3d pts_3d_a = pcl2cv_pts3d(a);
+	cv::Point3d pts_3d_b = pcl2cv_pts3d(b);
+	cv::Point3d pts_3d_c = pcl2cv_pts3d(c);
+
+	return get_3d_plane(pts_3d_a, pts_3d_b, pts_3d_c, p);
 }
 
 // TODO: test for correctness
@@ -393,7 +408,7 @@ void mean_shift(std::vector<std::vector<double>>& pts_estimate, pcl::PointXYZ& o
 
 		int same = 1;
 		for (int j = 0; j < 3; j++) {
-			if (abs(now[j] - acc[j]) > EPS_MYSELF) {
+			if (std::abs(now[j] - acc[j]) > EPS_MYSELF) {
 				same = 0;
 			}
 			now[j] = acc[j];

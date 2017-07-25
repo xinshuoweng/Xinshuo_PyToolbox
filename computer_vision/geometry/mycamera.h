@@ -11,7 +11,7 @@
 
 #include "myheader.h"
 
-class __declspec(dllexport) mycamera
+class mycamera
 {
 public:
 	cv::Mat intrinsic;	// 3x3 cv::Matrix for intrinsic parameter
