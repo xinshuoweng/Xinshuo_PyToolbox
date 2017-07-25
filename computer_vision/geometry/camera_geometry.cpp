@@ -14,8 +14,8 @@
 #include "type_conversion.h"
 
 // opencv library
-#include <opencv2/calib3d.hpp>
-#include <opencv2/imgproc.hpp>
+#include <opencv2/calib3d/calib3d.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 // TODO: optimization using only corrected points
 // TODO: eliminate conf mode for calculating projection error
@@ -26,7 +26,10 @@ mycamera& camera2, std::vector<cv::Point3d>& pts_dst, const bool consider_dist) 
 	ASSERT_WITH_MSG(pts_src1.size() > 0, "The size of 2d points from two view should be larger than 0 while doing two view triangulation.");
 	ASSERT_WITH_MSG(pts_src1.size() == pts_src2.size(), "The size of 2d points from two view should be equal while doing two view triangulation.");
 	std::vector<pts_3d_conf> pts_tmp;
-	triangulation_from_two_views(cv2conf_vec_pts2d(pts_src1), cv2conf_vec_pts2d(pts_src2), camera1, camera2, pts_tmp, consider_dist);
+
+    std::vector<pts_2d_conf> pts_src1_converted = cv2conf_vec_pts2d(pts_src1);
+    std::vector<pts_2d_conf> pts_src2_converted = cv2conf_vec_pts2d(pts_src2);
+	triangulation_from_two_views(pts_src1_converted, pts_src2_converted, camera1, camera2, pts_tmp, consider_dist);
 	pts_dst = conf2cv_vec_pts3d(pts_tmp);
 }
 
@@ -52,7 +55,9 @@ mycamera& camera2, std::vector<pts_3d_conf>& pts_dst, const bool consider_dist) 
 		pts_world.row(i) = pts_world.row(i) / pts_world.at<double>(i, 3);
 	}
 	for (size_t i = 0; i < length; ++i) {
-		cv::Point3d pts_3d_tmp = pts_world.row(i).colRange(0, 3);
+		cv::Mat pts_3d_mat_tmp = pts_world.row(i).colRange(0, 3);
+        std::vector<double> pts_3d_vec_tmp = mat2vec(pts_3d_mat_tmp);
+        cv::Point3d pts_3d_tmp = vec2cv_pts3d(pts_3d_vec_tmp);
 		pts_dst.push_back(pts_3d_conf(pts_3d_tmp, (pts_src1[i].conf + pts_src2[i].conf)/2));
 	}
 }
@@ -217,7 +222,9 @@ cv::Point3d& pts_dst, const bool consider_dist, const int num_ransac) {
 		std::vector<pts_3d_conf> pts_src;
 		triangulation_from_two_views(pts_tmp1, pts_tmp2, camera_tmp1, camera_tmp2, pts_src, consider_dist);		// two view triangluation for single point
 		ASSERT_WITH_MSG(pts_src.size() == 1, "The size of 3d point should be only 1 while doing multiview RANSAC for single point.");
-		error_tmp = calculate_projection_error(pts_src[0].convert_to_point3d(), camera_cluster, pts_2d_given, consider_dist);
+
+        cv::Point3d pts_3d_tmp = pts_src[0].convert_to_point3d();
+        error_tmp = calculate_projection_error(pts_3d_tmp, camera_cluster, pts_2d_given, consider_dist);
 		//print_sca(error_tmp);
 
 		//print_sca(view_selected[0]);
@@ -302,6 +309,7 @@ std::map<std::string, std::vector<pts_2d_conf>>& pts_2d, const bool consider_dis
 
 /****************************************************************************************************** miscellaneous ***********************************************************************************************************/
 void get_3d_ray(pts_2d_conf& pts_2d, mycamera& mycamera, cv::Point3d& C, std::vector<double>& ray, const bool consider_dist) {
+//	std::cout << "getting 3d ray...." << std::endl;
 	pts_2d_conf pts_undist = pts_2d;
 	if (consider_dist)
 		ASSERT_WITH_MSG(!mycamera.distCoeffs.empty(), "The size of distortion coefficients in the camera should not be 0 \
@@ -309,7 +317,12 @@ void get_3d_ray(pts_2d_conf& pts_2d, mycamera& mycamera, cv::Point3d& C, std::ve
 	else
 		ASSERT_WITH_MSG(mycamera.distCoeffs.empty(), "The size of distortion coefficients in the camera should be 0 \
 			while getting 3d ray under the condition of not considering distortion.");
-	undistort_single_point(pts_2d, mycamera, pts_undist, consider_dist);
+
+    std::cout << "distorted 2d point is:  ";
+    pts_2d.print();
+    undistort_single_point(pts_2d, mycamera, pts_undist, consider_dist);
+    std::cout << "undistorted 2d point is:  ";
+    pts_undist.print();
 
 	double x = pts_undist.x;
 	double y = pts_undist.y;

@@ -39,8 +39,8 @@ cv::Point3i double2int_pts3d(cv::Point3d& pts_src);
 
 
 
-__declspec(dllexport) std::vector<double> float2double_vec(std::vector<float>& pts_src);
-__declspec(dllexport) std::vector<float> double2float_vec(std::vector<double>& pts_src);
+std::vector<double> float2double_vec(std::vector<float>& pts_src);
+std::vector<float> double2float_vec(std::vector<double>& pts_src);
 std::vector<double> int2double_vec(std::vector<int>& pts_src);
 std::vector<int> double2int_vec(std::vector<double>& pts_src);
 
@@ -48,8 +48,8 @@ std::vector<int> double2int_vec(std::vector<double>& pts_src);
 
 
 // inter-class conversion
-__declspec(dllexport) cv::Point2d pcl2cv_pts2d(pcl::PointXY& pts_src);
-__declspec(dllexport) cv::Point3d pcl2cv_pts3d(pcl::PointXYZ& pts_src);
+cv::Point2d pcl2cv_pts2d(pcl::PointXY& pts_src);
+cv::Point3d pcl2cv_pts3d(pcl::PointXYZ& pts_src);
 pcl::PointXY cv2pcl_pts2d(cv::Point2d& pts_src);
 pcl::PointXYZ cv2pcl_pts3d(cv::Point3d& pts_src);
 
@@ -63,7 +63,7 @@ std::vector<pts_3d_conf> cv2conf_vec_pts3d(std::vector<cv::Point3d>& pts_src);
 cv::Point3d vec2cv_pts3d(std::vector<double>& pts_src);
 cv::Point2d vec2cv_pts2d(std::vector<double>& pts_src);
 std::vector<double> cv2vec_pts2d(cv::Point2d& pts_src);
-__declspec(dllexport) std::vector<double> cv2vec_pts3d(cv::Point3d& pts_src);
+std::vector<double> cv2vec_pts3d(cv::Point3d& pts_src);
 
 std::vector<double> mat2vec(cv::Mat pts_src);
 

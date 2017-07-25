@@ -68,12 +68,16 @@ void print_sca(int sca) {
 // TODO: test for correctness
 void print_vec_pts3d(std::vector<cv::Point3f>& v) {
 	ASSERT_WITH_MSG(v.size() > 0, "The input vector is empty while printing the vector of point3f.");
-	print_vec_pts3d(float2double_vec_pts3d(v));
+
+	std::vector<cv::Point3d> pts_3d_vec = float2double_vec_pts3d(v);
+	print_vec_pts3d(pts_3d_vec);
 }
 // TODO: test for correctness
 void print_vec_pts3d(std::vector<cv::Point3i>& v) {
 	ASSERT_WITH_MSG(v.size() > 0, "The input vector is empty while printing the vector of point3i.");
-	print_vec_pts3d(int2double_vec_pts3d(v));
+
+	std::vector<cv::Point3d> pts_3d_vec = int2double_vec_pts3d(v);
+	print_vec_pts3d(pts_3d_vec);
 }
 
 void print_vec_pts2d(std::vector<cv::Point2d>& v) {
@@ -86,12 +90,16 @@ void print_vec_pts2d(std::vector<cv::Point2d>& v) {
 // TODO: test for correctness
 void print_vec_pts2d(std::vector<cv::Point2f>& v) {
 	ASSERT_WITH_MSG(v.size() > 0, "The input vector is empty while printing the vector of point2f.");
-	print_vec_pts2d(float2double_vec_pts2d(v));
+
+	std::vector<cv::Point2d> pts_2d_vec = float2double_vec_pts2d(v);
+	print_vec_pts2d(pts_2d_vec);
 }
 // TODO: test for correctness
 void print_vec_pts2d(std::vector<cv::Point2i>& v) {
 	ASSERT_WITH_MSG(v.size() > 0, "The input vector is empty while printing the vector of point2i.");
-	print_vec_pts2d(int2double_vec_pts2d(v));
+
+	std::vector<cv::Point2d> pts_2d_vec = int2double_vec_pts2d(v);
+	print_vec_pts2d(pts_2d_vec);
 }
 
 
@@ -107,12 +115,16 @@ void print_vec(std::vector<double>& v, int prec) {
 
 void print_vec(std::vector<float>& v, int prec) {
 	ASSERT_WITH_MSG(v.size() > 0, "The input vector is empty while printing the vector of float.");
-	print_vec(float2double_vec(v), prec);
+
+	std::vector<double> double_vec = float2double_vec(v);
+	print_vec(double_vec, prec);
 }
 
 void print_vec(std::vector<int>& v, int prec) {
 	ASSERT_WITH_MSG(v.size() > 0, "The input vector is empty while printing the vector of int.");
-	print_vec(int2double_vec(v), prec);
+
+	std::vector<double> double_vec = int2double_vec(v);
+	print_vec(double_vec, prec);
 }
 
 
@@ -168,11 +180,17 @@ bool CHECK_VEC_EQ(std::vector<double>& vec1, std::vector<double>& vec2) {
 }
 
 bool CHECK_VEC_EQ(std::vector<float>& vec1, std::vector<float>& vec2) {
-	return CHECK_VEC_EQ(float2double_vec(vec1), float2double_vec(vec2));
+	std::vector<double> double_vec_tmp1 = float2double_vec(vec1);
+	std::vector<double> double_vec_tmp2 = float2double_vec(vec2);
+
+	return CHECK_VEC_EQ(double_vec_tmp1, double_vec_tmp2);
 }
 // TODO: test for correctness
 bool CHECK_VEC_EQ(std::vector<int>& vec1, std::vector<int>& vec2) {
-	return CHECK_VEC_EQ(int2double_vec(vec1), int2double_vec(vec2));
+	std::vector<double> double_vec_tmp1 = int2double_vec(vec1);
+	std::vector<double> double_vec_tmp2 = int2double_vec(vec2);
+
+	return CHECK_VEC_EQ(double_vec_tmp1, double_vec_tmp2);
 }
 
 bool CHECK_MAT_EQ(cv::Mat& mat1, cv::Mat& mat2) {
@@ -219,23 +237,33 @@ bool CHECK_CV_PTS_EQ(cv::Point3d& pts1, cv::Point3d& pts2) {
 }
 // TODO: test for correctness
 bool CHECK_CV_PTS_EQ(cv::Point3f& pts1, cv::Point3f& pts2) {
-	return CHECK_CV_PTS_EQ(float2double_pts3d(pts1), float2double_pts3d(pts2));
+	cv::Point3d pts_3d_tmp1 = float2double_pts3d(pts1);
+	cv::Point3d pts_3d_tmp2 = float2double_pts3d(pts2);
+	return CHECK_CV_PTS_EQ(pts_3d_tmp1, pts_3d_tmp2);
 }
 // TODO: test for correctness
 bool CHECK_CV_PTS_EQ(cv::Point3i& pts1, cv::Point3i& pts2) {
-	return CHECK_CV_PTS_EQ(int2double_pts3d(pts1), int2double_pts3d(pts2));
+	cv::Point3d pts_3d_tmp1 = int2double_pts3d(pts1);
+	cv::Point3d pts_3d_tmp2 = int2double_pts3d(pts2);
+	return CHECK_CV_PTS_EQ(pts_3d_tmp1, pts_3d_tmp2);
 }
 
 bool CHECK_CV_PTS_EQ(cv::Point2d& pts1, cv::Point2d& pts2) {
-	return CHECK_CV_PTS_EQ(cv::Point3d(pts1.x, pts1.y, 0), cv::Point3d(pts2.x, pts2.y, 0));
+	cv::Point3d pts_3d_tmp1 = cv::Point3d(pts1.x, pts1.y, 0);
+	cv::Point3d pts_3d_tmp2 = cv::Point3d(pts2.x, pts2.y, 0);
+	return CHECK_CV_PTS_EQ(pts_3d_tmp1, pts_3d_tmp2);
 }
 // TODO: test for correctness
 bool CHECK_CV_PTS_EQ(cv::Point2f& pts1, cv::Point2f& pts2) {
-	return CHECK_CV_PTS_EQ(float2double_pts2d(pts1), float2double_pts2d(pts2));
+	cv::Point2d pts_2d_tmp1 = float2double_pts2d(pts1);
+	cv::Point2d pts_2d_tmp2 = float2double_pts2d(pts2);
+	return CHECK_CV_PTS_EQ(pts_2d_tmp1, pts_2d_tmp2);
 }
 // TODO: test for correctness
 bool CHECK_CV_PTS_EQ(cv::Point2i& pts1, cv::Point2i& pts2) {
-	return CHECK_CV_PTS_EQ(int2double_pts2d(pts1), int2double_pts2d(pts2));
+	cv::Point2d pts_2d_tmp1 = int2double_pts2d(pts1);
+	cv::Point2d pts_2d_tmp2 = int2double_pts2d(pts2);
+	return CHECK_CV_PTS_EQ(pts_2d_tmp1, pts_2d_tmp2);
 }
 
 
