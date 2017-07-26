@@ -105,7 +105,7 @@ def visualize_image(image, vis=True, save=False, save_path=None, debug=True):
 
     return fig
 
-def visualize_image_with_pts(image_path, pts, covariance=False, label=False, label_list=None, vis=True, vis_threshold=-10000, save=False, save_path=None, debug=True):
+def visualize_image_with_pts(image_path, pts, covariance=False, label=False, label_list=None, color_index=0, vis=True, vis_threshold=-10000, save=False, save_path=None, debug=True):
     '''
     visualize image and plot keypoints on top of it
 
@@ -116,6 +116,7 @@ def visualize_image_with_pts(image_path, pts, covariance=False, label=False, lab
                         occlusion: 0 -> invisible, 1 -> visible, -1 -> not existing
         label:          determine to add text label for each point
         label_list:     label string for all points
+        color_index:    a scalar or a list of color indexes
     '''
 
     # plot keypoints
@@ -124,11 +125,20 @@ def visualize_image_with_pts(image_path, pts, covariance=False, label=False, lab
         fontsize = 5
         std = None
         conf = 0.95
-        color_tmp = color_set[color_index]
+        if islist(color_index):
+            if debug:
+                assert not occlusion, 'the occlusion is not compatible with plotting different colors during scattering'
+                assert not covariance, 'the covariance is not compatible with plotting different colors during scattering'
+            color_tmp = [color_set[index_tmp] for index_tmp in color_index]
+        else:
+            color_tmp = color_set[color_index]
         num_pts = pts_array.shape[1]
 
         if is2dptsarray(pts_array):    
             ax.scatter(pts_array[0, :], pts_array[1, :], color=color_tmp, s=pts_size)
+
+            if debug and islist(color_tmp):
+                assert len(color_tmp) == pts_array.shape[1], 'number of points to plot is not equal to number of colors provided'
             pts_ignore_index = []
         else:
             num_float_elements = np.where(np.logical_and(pts_array[2, :] > 0, pts_array[2, :] < 1))[0].tolist()
@@ -145,11 +155,15 @@ def visualize_image_with_pts(image_path, pts, covariance=False, label=False, lab
                 pts_visible_index   = np.where(pts_array[2, :] > vis_threshold)[0].tolist()
                 pts_ignore_index    = np.where(pts_array[2, :] <= vis_threshold)[0].tolist()
                 pts_invisible_index = []
+
+            if debug and islist(color_tmp):
+                assert len(color_tmp) == len(pts_visible_index), 'number of points to plot is not equal to number of colors provided'
+
             ax.scatter(pts_array[0, pts_visible_index], pts_array[1, pts_visible_index], color=color_tmp, s=pts_size)
             if occlusion:
                 ax.scatter(pts_array[0, pts_invisible_index], pts_array[1, pts_invisible_index], color=color_set[(color_index+1) % len(color_set)], s=pts_size)
-            else:
-                ax.scatter(pts_array[0, pts_invisible_index], pts_array[1, pts_invisible_index], color=color_tmp, s=pts_size)
+            # else:
+                # ax.scatter(pts_array[0, pts_invisible_index], pts_array[1, pts_invisible_index], color=color_tmp, s=pts_size)
             if covariance:
                 visualize_pts_covariance(pts_array[0:2, :], std=std, conf=conf, ax=ax, debug=False, color=color_tmp)
 
@@ -167,7 +181,10 @@ def visualize_image_with_pts(image_path, pts, covariance=False, label=False, lab
                     continue
                 else:
                     # note that the annotation is based on the coordinate instead of the order of plotting the points, so the orider in pts_index does not matter
-                    plt.annotate(label_tmp, xy=(pts_array[0, pts_index], pts_array[1, pts_index]), xytext=(-1, 1), color=color_set[(color_index+5) % len(color_set)], textcoords='offset points', ha='right', va='bottom', fontsize=fontsize)
+                    if islist(color_index):
+                        plt.annotate(label_tmp, xy=(pts_array[0, pts_index], pts_array[1, pts_index]), xytext=(-1, 1), color=color_set[(color_index[pts_index]+5) % len(color_set)], textcoords='offset points', ha='right', va='bottom', fontsize=fontsize)
+                    else:
+                        plt.annotate(label_tmp, xy=(pts_array[0, pts_index], pts_array[1, pts_index]), xytext=(-1, 1), color=color_set[(color_index+5) % len(color_set)], textcoords='offset points', ha='right', va='bottom', fontsize=fontsize)
                     # bbox=dict(boxstyle='round,pad=0.5', fc='yellow', alpha=0.5),
                     # arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
 
@@ -237,14 +254,14 @@ def visualize_image_with_pts(image_path, pts, covariance=False, label=False, lab
     ax.set(xlim=[0, width], ylim=[height, 0], aspect=1)
 
     if isdict(pts):
-        color_index = 0
+        color_index = color_index
         for pts_id, pts_array in pts.items():
             if islist(pts_array):
                 pts_array = np.asarray(pts_array)
             visualize_pts_array(pts_array, ax=ax, covariance=covariance, color_index=color_index, label=label, label_list=label_list, occlusion=False)
             color_index += 1
     else:   
-        visualize_pts_array(pts, ax=ax, covariance=covariance, label=label, label_list=label_list)
+        visualize_pts_array(pts, ax=ax, covariance=covariance, label=label, label_list=label_list, color_index=color_index, occlusion=False)
 
     # save and visualization
     if save:
