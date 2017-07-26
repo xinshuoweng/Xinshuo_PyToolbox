@@ -103,9 +103,9 @@ def visualize_image(image, vis=True, save=False, save_path=None, debug=True):
     if vis:
         plt.show()
 
-    return fig
+    return fig, ax
 
-def visualize_image_with_pts(image_path, pts, covariance=False, label=False, label_list=None, color_index=0, vis=True, vis_threshold=-10000, save=False, save_path=None, debug=True):
+def visualize_image_with_pts(image_path, pts, covariance=False, pts_size=20, label=False, label_list=None, color_index=0, vis=True, vis_threshold=-10000, save=False, save_path=None, debug=True):
     '''
     visualize image and plot keypoints on top of it
 
@@ -120,7 +120,7 @@ def visualize_image_with_pts(image_path, pts, covariance=False, label=False, lab
     '''
 
     # plot keypoints
-    def visualize_pts_array(pts_array, covariance=False, color_index=0, ax=None, label=False, label_list=None, occlusion=True, vis_threshold=vis_threshold, debug=debug):
+    def visualize_pts_array(pts_array, covariance=False, color_index=0, ax=None, pts_size=20, label=False, label_list=None, occlusion=True, vis_threshold=-10000, debug=True):
         pts_size = 20
         fontsize = 20
         std = None
@@ -258,10 +258,10 @@ def visualize_image_with_pts(image_path, pts, covariance=False, label=False, lab
         for pts_id, pts_array in pts.items():
             if islist(pts_array):
                 pts_array = np.asarray(pts_array)
-            visualize_pts_array(pts_array, ax=ax, covariance=covariance, color_index=color_index, label=label, label_list=label_list, occlusion=False)
+            visualize_pts_array(pts_array, ax=ax, covariance=covariance, color_index=color_index, pts_size=pts_size, label=label, label_list=label_list, occlusion=False, debug=debug, vis_threshold=vis_threshold)
             color_index += 1
     else:   
-        visualize_pts_array(pts, ax=ax, covariance=covariance, label=label, label_list=label_list, color_index=color_index, occlusion=False)
+        visualize_pts_array(pts, ax=ax, covariance=covariance, pts_size=pts_size, label=label, label_list=label_list, color_index=color_index, occlusion=False, debug=debug, vis_threshold=vis_threshold)
 
     # save and visualization
     if save:
@@ -360,7 +360,7 @@ def visualize_covariance_ellipse(covariance, center, conf=None, std=None, ax=Non
     ax.add_artist(ellipse)
     return ellipse
 
-def visualize_pts(pts, title=None, ax=None, display_range=False, xlim=[-100, 100], ylim=[-100, 100], display_list=None, covariance=False, mse=False, mse_value=None, vis=True, save=False, save_path=None, debug=True):
+def visualize_pts(pts, title=None, fig=None, ax=None, display_range=False, xlim=[-100, 100], ylim=[-100, 100], display_list=None, covariance=False, mse=False, mse_value=None, vis=True, save=False, save_path=None, debug=True):
     '''
     visualize point scatter plot
 
@@ -394,8 +394,10 @@ def visualize_pts(pts, title=None, ax=None, display_range=False, xlim=[-100, 100
     width = 1024
     height = 1024
     figsize = width / float(dpi), height / float(dpi)
-    if ax is None:
+    if fig is None:
         fig = plt.figure(figsize=figsize)
+
+    if ax is None:
         plt.title(title, fontsize=20)
 
         if isdict(pts):
