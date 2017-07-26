@@ -121,8 +121,8 @@ def visualize_image_with_pts(image_path, pts, covariance=False, label=False, lab
 
     # plot keypoints
     def visualize_pts_array(pts_array, covariance=False, color_index=0, ax=None, label=False, label_list=None, occlusion=True, vis_threshold=vis_threshold, debug=debug):
-        pts_size = 5
-        fontsize = 5
+        pts_size = 20
+        fontsize = 20
         std = None
         conf = 0.95
         if islist(color_index):
@@ -273,7 +273,7 @@ def visualize_image_with_pts(image_path, pts, covariance=False, label=False, lab
         plt.show()
     # plt.close(fig)
 
-    return fig
+    return fig, ax
 
 def visualize_pts_covariance(pts_array, conf=None, std=None, ax=None, debug=True, **kwargs):
     """
@@ -516,7 +516,7 @@ def visualize_pts(pts, title=None, ax=None, display_range=False, xlim=[-100, 100
     else:
         return
 
-def visualize_image_with_bbox(image_path, bbox, vis=True, save=False, save_path=None, debug=True):
+def visualize_image_with_bbox(image_path, bbox, ax=None, vis=True, save=False, save_path=None, debug=True):
     '''
     visualize image and plot keypoints on top of it
 
@@ -527,7 +527,6 @@ def visualize_image_with_bbox(image_path, bbox, vis=True, save=False, save_path=
 
     if debug:
         assert is_path_exists(image_path), 'image is not existing'
-        assert bboxcheck_TLBR(bbox), 'input bounding boxes are not correct'
 
     try:
         image = imread(image_path)
@@ -566,11 +565,25 @@ def visualize_image_with_bbox(image_path, bbox, vis=True, save=False, save_path=
         assert False, 'image is not correct'
     ax.set(xlim=[0, width], ylim=[height, 0], aspect=1)
 
+    return visualize_bbox(bbox, fig=fig, ax=ax, vis=vis, save=save, save_path=save_path, debug=debug)
+
+
+def visualize_bbox(bbox, fig=None, ax=None, vis=True, save=False, save_path=None, debug=True):
+    if debug:    
+        assert bboxcheck_TLBR(bbox), 'input bounding boxes are not correct'
+
+    dpi = 80  
+    if fig is None:
+        fig = plt.gcf()
+
+    if ax is None:
+        ax = plt.gca()   
+
     # plot bounding box
     bbox = bbox_TLBR2TLWH(bbox)              # convert TLBR format to TLWH format
     for bbox_index in range(bbox.shape[0]):
         bbox_tmp = bbox[bbox_index, :]     
-        ax.add_patch(plt.Rectangle((bbox_tmp[0], bbox_tmp[1]), bbox_tmp[2], bbox_tmp[3], fill=False, edgecolor='red', linewidth=3.5))
+        ax.add_patch(plt.Rectangle((bbox_tmp[0], bbox_tmp[1]), bbox_tmp[2], bbox_tmp[3], fill=False, edgecolor='yellow', linewidth=3.5))
 
     # save and visualization
     if save:
@@ -580,8 +593,9 @@ def visualize_image_with_bbox(image_path, bbox, vis=True, save=False, save_path=
         fig.savefig(save_path, dpi=dpi, transparent=True)
     if vis:
         plt.show()
-    plt.close(fig)
-    return
+
+    return fig, ax
+
 
 def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, truncated_list=None, display2terminal=True, display_list=None, title=None, debug=True, vis=True, save=False, pck_savepath=None, table_savepath=None):
     '''
