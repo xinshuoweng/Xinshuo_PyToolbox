@@ -121,7 +121,7 @@ def visualize_image_with_pts(image_path, pts, covariance=False, pts_size=20, lab
 
     # plot keypoints
     def visualize_pts_array(pts_array, covariance=False, color_index=0, ax=None, pts_size=20, label=False, label_list=None, occlusion=True, vis_threshold=-10000, debug=True):
-        pts_size = 20
+        # pts_size = 20
         fontsize = 20
         std = None
         conf = 0.95
