@@ -142,10 +142,12 @@ def visualize_image_with_pts(image_path, pts, covariance=False, pts_size=20, lab
             pts_ignore_index = []
         else:
             num_float_elements = np.where(np.logical_and(pts_array[2, :] > 0, pts_array[2, :] < 1))[0].tolist()
-            if len(num_float_elements) > float(num_pts) / 2:
+            if len(num_float_elements) > 0:
                 type_3row = 'conf'
+                print('third row is confidence')
             else:
                 type_3row = 'occu'
+                print('third row is occlusion')
 
             if type_3row == 'occu':
                 pts_visible_index   = np.where(pts_array[2, :] == 1)[0].tolist()              # plot visible points in red color
