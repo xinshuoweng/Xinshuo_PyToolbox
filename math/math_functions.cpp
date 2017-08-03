@@ -114,6 +114,18 @@ double l2_norm(std::vector<float>& vec) {
 	return l2_norm(double_vec_tmp);
 }
 
+
+double compute_distance(std::vector<double>& vec1, std::vector<double>& vec2) {
+	ASSERT_WITH_MSG(vec1.size() > 0, "The size of input vector should be bigger than 0 while calculating distance!");
+	ASSERT_WITH_MSG(vec1.size() == vec2.size(), "The size of two input vectors should be equal while calculating distance!");
+
+	double accum = 0.;
+	for (int i = 0; i < vec1.size(); ++i) {
+		accum += (vec1[i] - vec2[i]) * (vec1[i] - vec2[i]);
+	}
+	return sqrt(accum);
+}
+
 std::vector<double> cross(std::vector<double>& a, std::vector<double>& b) {
 	ASSERT_WITH_MSG(a.size() == b.size(), "The size of vector to do cross product is not equal!");
 	ASSERT_WITH_MSG(a.size() == 3, "current cross product function only support vector with size 3!");

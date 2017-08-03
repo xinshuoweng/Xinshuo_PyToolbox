@@ -12,7 +12,6 @@
 #include <pcl/PolygonMesh.h>
 
 class mycamera;
-
 class pts_on_mesh;
 class pts_2d_conf;
 class pts_3d_conf;
@@ -34,6 +33,7 @@ public:
 	// reproject 2d ray to 3d mesh and find the intersection point
 	// ray intersection to find points on mesh
 	pts_on_mesh* get_pts_on_mesh(cv::Point3d C, std::vector<double>& ray, double conf);
+    pts_on_mesh* get_pts_on_mesh(cv::Point3d C, std::vector<double>& ray, double conf, cv::Point3d C_ref);
 
 	// given an arbitraty 3d point in 3d space, find the closest one on the mesh
 	// given a 3d point, find closest 3d point on mesh
@@ -44,7 +44,8 @@ public:
 
 	// pts_2d may include confidence inside it, support only one point
 	// no optimization
-	pts_on_mesh* pts_back_projection_single_view(pts_2d_conf& pts_2d, mycamera& mycamera, const bool consider_dist = true);		
+	pts_on_mesh* pts_back_projection_single_view(pts_2d_conf& pts_2d, mycamera& camera_src, const bool consider_dist = true);
+	pts_on_mesh* pts_back_projection_single_view(pts_2d_conf& pts_2d, pts_2d_conf& pts_2d_ref, mycamera& camera_src, mycamera& camera_ref, const bool consider_dist = true);
 
 	// optimize the multiview triangulation in 3d space, current strategy is to select one best 3d point from all view
 	// support only one point

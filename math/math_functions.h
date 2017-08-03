@@ -40,6 +40,8 @@ std::vector<int> random_sample(std::vector<double>& samples, int size = 1, int s
 /*********************************************** algebra ******************************************************/
 double l2_norm(std::vector<double>& vec);
 double l2_norm(std::vector<float>& vec);
+double compute_distance(std::vector<double>& vec1, std::vector<double>& vec2);
+
 std::vector<double> cross(std::vector<double>& a, std::vector<double>& b);			// return the cross product of two vectors
 std::vector<float> cross(std::vector<float>& a, std::vector<float>& b);				// return the cross product of two vectors
 double inner(std::vector<double>& a, std::vector<double>& b);						// return the inner product of two vectors

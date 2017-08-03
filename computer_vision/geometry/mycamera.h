@@ -6,9 +6,6 @@
 #ifndef __MYCAEMRA_H_INCLUDED__
 #define __MYCAMERA_H_INCLUDED__
 
-
-
-
 #include <myheader.h>
 
 class mycamera

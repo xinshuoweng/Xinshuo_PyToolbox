@@ -315,11 +315,11 @@ void get_3d_ray(pts_2d_conf& pts_2d, mycamera& mycamera, cv::Point3d& C, std::ve
 		ASSERT_WITH_MSG(mycamera.distCoeffs.empty(), "The size of distortion coefficients in the camera should be 0 \
 			while getting 3d ray under the condition of not considering distortion.");
 
-    std::cout << "distorted 2d point is:  ";
-    pts_2d.print();
+//    std::cout << "distorted 2d point is:  ";
+//    pts_2d.print();
     undistort_single_point(pts_2d, mycamera, pts_undist, consider_dist);
-    std::cout << "undistorted 2d point is:  ";
-    pts_undist.print();
+//    std::cout << "undistorted 2d point is:  ";
+//    pts_undist.print();
 
 	double x = pts_undist.x;
 	double y = pts_undist.y;

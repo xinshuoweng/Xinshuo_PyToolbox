@@ -3,7 +3,7 @@
 
 #include <miscellaneous/type_conversion.h>
 #include <computer_vision/geometry/pts_2d_conf.h>
-#include <computer_vision/geometry/pts_2d_tool.h>
+//#include <computer_vision/geometry/pts_2d_tool.h>
 #include <computer_vision/geometry/pts_3d_conf.h>
 
 /************************************************** intra-class conversion ************************************************/
