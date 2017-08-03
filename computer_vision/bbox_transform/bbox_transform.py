@@ -267,6 +267,8 @@ def bboxcheck_TLBR(bbox, debug=True):
     return:
         True or False
     '''
+    
+    
     if not bboxcheck(bbox):
         return False
 
@@ -363,3 +365,26 @@ def pts_conversion_back_bbox(pts_array, bbox, debug=True):
     pts_array[1, :] = pts_array[1, :] + bbox[0, 1]
 
     return pts_array
+
+def get_centered_bbox(pts_array, width, height, debug=True):
+    '''
+    given a set of points, return a set of bbox which are centered at the points
+    
+    parameters:
+        pts_array:      2 x num_pts
+
+    return:
+        bbox:           N x 4 (TLBR format)
+
+    '''
+    
+    if debug:
+        assert is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array), 'the input points should have shape: 2 or 3 x num_pts vs %d x %s' % (pts_array.shape[0], pts_array.shape[1])
+
+    xmin = pts_array[0, :] - np.ceil(width/2.0) + 1    
+    ymin = pts_array[1, :] - np.ceil(height/2.0) + 1
+    xmax = xmin + width - 1;
+    ymax = ymin + height - 1;
+    
+    bbox = np.vstack((xmin, ymin, xmax, ymax))
+    return np.transpose(bbox)

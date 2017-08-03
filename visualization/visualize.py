@@ -103,9 +103,9 @@ def visualize_image(image, vis=True, save=False, save_path=None, debug=True):
     if vis:
         plt.show()
 
-    return fig
+    return fig, ax
 
-def visualize_image_with_pts(image_path, pts, covariance=False, label=False, label_list=None, vis=True, vis_threshold=-10000, save=False, save_path=None, debug=True):
+def visualize_image_with_pts(image_path, pts, covariance=False, pts_size=20, label=False, label_list=None, color_index=0, vis=True, vis_threshold=-10000, save=False, save_path=None, debug=True):
     '''
     visualize image and plot keypoints on top of it
 
@@ -116,26 +116,38 @@ def visualize_image_with_pts(image_path, pts, covariance=False, label=False, lab
                         occlusion: 0 -> invisible, 1 -> visible, -1 -> not existing
         label:          determine to add text label for each point
         label_list:     label string for all points
+        color_index:    a scalar or a list of color indexes
     '''
 
     # plot keypoints
-    def visualize_pts_array(pts_array, covariance=False, color_index=0, ax=None, label=False, label_list=None, occlusion=True, vis_threshold=vis_threshold, debug=debug):
-        pts_size = 5
-        fontsize = 5
+    def visualize_pts_array(pts_array, covariance=False, color_index=0, ax=None, pts_size=20, label=False, label_list=None, occlusion=True, vis_threshold=-10000, debug=True):
+        # pts_size = 20
+        fontsize = 20
         std = None
         conf = 0.95
-        color_tmp = color_set[color_index]
+        if islist(color_index):
+            if debug:
+                assert not occlusion, 'the occlusion is not compatible with plotting different colors during scattering'
+                assert not covariance, 'the covariance is not compatible with plotting different colors during scattering'
+            color_tmp = [color_set[index_tmp] for index_tmp in color_index]
+        else:
+            color_tmp = color_set[color_index]
         num_pts = pts_array.shape[1]
 
         if is2dptsarray(pts_array):    
             ax.scatter(pts_array[0, :], pts_array[1, :], color=color_tmp, s=pts_size)
+
+            if debug and islist(color_tmp):
+                assert len(color_tmp) == pts_array.shape[1], 'number of points to plot is not equal to number of colors provided'
             pts_ignore_index = []
         else:
             num_float_elements = np.where(np.logical_and(pts_array[2, :] > 0, pts_array[2, :] < 1))[0].tolist()
-            if len(num_float_elements) > float(num_pts) / 2:
+            if len(num_float_elements) > 0:
                 type_3row = 'conf'
+                print('third row is confidence')
             else:
                 type_3row = 'occu'
+                print('third row is occlusion')
 
             if type_3row == 'occu':
                 pts_visible_index   = np.where(pts_array[2, :] == 1)[0].tolist()              # plot visible points in red color
@@ -144,11 +156,16 @@ def visualize_image_with_pts(image_path, pts, covariance=False, label=False, lab
             else:
                 pts_visible_index   = np.where(pts_array[2, :] > vis_threshold)[0].tolist()
                 pts_ignore_index    = np.where(pts_array[2, :] <= vis_threshold)[0].tolist()
+                pts_invisible_index = []
+
+            if debug and islist(color_tmp):
+                assert len(color_tmp) == len(pts_visible_index), 'number of points to plot is not equal to number of colors provided'
+
             ax.scatter(pts_array[0, pts_visible_index], pts_array[1, pts_visible_index], color=color_tmp, s=pts_size)
             if occlusion:
                 ax.scatter(pts_array[0, pts_invisible_index], pts_array[1, pts_invisible_index], color=color_set[(color_index+1) % len(color_set)], s=pts_size)
-            else:
-                ax.scatter(pts_array[0, pts_invisible_index], pts_array[1, pts_invisible_index], color=color_tmp, s=pts_size)
+            # else:
+                # ax.scatter(pts_array[0, pts_invisible_index], pts_array[1, pts_invisible_index], color=color_tmp, s=pts_size)
             if covariance:
                 visualize_pts_covariance(pts_array[0:2, :], std=std, conf=conf, ax=ax, debug=False, color=color_tmp)
 
@@ -166,7 +183,10 @@ def visualize_image_with_pts(image_path, pts, covariance=False, label=False, lab
                     continue
                 else:
                     # note that the annotation is based on the coordinate instead of the order of plotting the points, so the orider in pts_index does not matter
-                    plt.annotate(label_tmp, xy=(pts_array[0, pts_index], pts_array[1, pts_index]), xytext=(-1, 1), color=color_set[(color_index+5) % len(color_set)], textcoords='offset points', ha='right', va='bottom', fontsize=fontsize)
+                    if islist(color_index):
+                        plt.annotate(label_tmp, xy=(pts_array[0, pts_index], pts_array[1, pts_index]), xytext=(-1, 1), color=color_set[(color_index[pts_index]+5) % len(color_set)], textcoords='offset points', ha='right', va='bottom', fontsize=fontsize)
+                    else:
+                        plt.annotate(label_tmp, xy=(pts_array[0, pts_index], pts_array[1, pts_index]), xytext=(-1, 1), color=color_set[(color_index+5) % len(color_set)], textcoords='offset points', ha='right', va='bottom', fontsize=fontsize)
                     # bbox=dict(boxstyle='round,pad=0.5', fc='yellow', alpha=0.5),
                     # arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
 
@@ -236,14 +256,14 @@ def visualize_image_with_pts(image_path, pts, covariance=False, label=False, lab
     ax.set(xlim=[0, width], ylim=[height, 0], aspect=1)
 
     if isdict(pts):
-        color_index = 0
+        color_index = color_index
         for pts_id, pts_array in pts.items():
             if islist(pts_array):
                 pts_array = np.asarray(pts_array)
-            visualize_pts_array(pts_array, ax=ax, covariance=covariance, color_index=color_index, label=label, label_list=label_list, occlusion=False)
+            visualize_pts_array(pts_array, ax=ax, covariance=covariance, color_index=color_index, pts_size=pts_size, label=label, label_list=label_list, occlusion=False, debug=debug, vis_threshold=vis_threshold)
             color_index += 1
     else:   
-        visualize_pts_array(pts, ax=ax, covariance=covariance, label=label, label_list=label_list)
+        visualize_pts_array(pts, ax=ax, covariance=covariance, pts_size=pts_size, label=label, label_list=label_list, color_index=color_index, occlusion=False, debug=debug, vis_threshold=vis_threshold)
 
     # save and visualization
     if save:
@@ -255,7 +275,7 @@ def visualize_image_with_pts(image_path, pts, covariance=False, label=False, lab
         plt.show()
     # plt.close(fig)
 
-    return fig
+    return fig, ax
 
 def visualize_pts_covariance(pts_array, conf=None, std=None, ax=None, debug=True, **kwargs):
     """
@@ -342,7 +362,7 @@ def visualize_covariance_ellipse(covariance, center, conf=None, std=None, ax=Non
     ax.add_artist(ellipse)
     return ellipse
 
-def visualize_pts(pts, title=None, ax=None, display_range=False, xlim=[-100, 100], ylim=[-100, 100], display_list=None, covariance=False, mse=False, mse_value=None, vis=True, save=False, save_path=None, debug=True):
+def visualize_pts(pts, title=None, fig=None, ax=None, display_range=False, xlim=[-100, 100], ylim=[-100, 100], display_list=None, covariance=False, mse=False, mse_value=None, vis=True, save=False, save_path=None, debug=True):
     '''
     visualize point scatter plot
 
@@ -376,8 +396,10 @@ def visualize_pts(pts, title=None, ax=None, display_range=False, xlim=[-100, 100
     width = 1024
     height = 1024
     figsize = width / float(dpi), height / float(dpi)
-    if ax is None:
+    if fig is None:
         fig = plt.figure(figsize=figsize)
+
+    if ax is None:
         plt.title(title, fontsize=20)
 
         if isdict(pts):
@@ -498,7 +520,7 @@ def visualize_pts(pts, title=None, ax=None, display_range=False, xlim=[-100, 100
     else:
         return
 
-def visualize_image_with_bbox(image_path, bbox, vis=True, save=False, save_path=None, debug=True):
+def visualize_image_with_bbox(image_path, bbox, ax=None, vis=True, save=False, save_path=None, debug=True):
     '''
     visualize image and plot keypoints on top of it
 
@@ -509,7 +531,6 @@ def visualize_image_with_bbox(image_path, bbox, vis=True, save=False, save_path=
 
     if debug:
         assert is_path_exists(image_path), 'image is not existing'
-        assert bboxcheck_TLBR(bbox), 'input bounding boxes are not correct'
 
     try:
         image = imread(image_path)
@@ -548,11 +569,25 @@ def visualize_image_with_bbox(image_path, bbox, vis=True, save=False, save_path=
         assert False, 'image is not correct'
     ax.set(xlim=[0, width], ylim=[height, 0], aspect=1)
 
+    return visualize_bbox(bbox, fig=fig, ax=ax, vis=vis, save=save, save_path=save_path, debug=debug)
+
+
+def visualize_bbox(bbox, fig=None, ax=None, vis=True, save=False, save_path=None, debug=True):
+    if debug:    
+        assert bboxcheck_TLBR(bbox), 'input bounding boxes are not correct'
+
+    dpi = 80  
+    if fig is None:
+        fig = plt.gcf()
+
+    if ax is None:
+        ax = plt.gca()   
+
     # plot bounding box
     bbox = bbox_TLBR2TLWH(bbox)              # convert TLBR format to TLWH format
     for bbox_index in range(bbox.shape[0]):
         bbox_tmp = bbox[bbox_index, :]     
-        ax.add_patch(plt.Rectangle((bbox_tmp[0], bbox_tmp[1]), bbox_tmp[2], bbox_tmp[3], fill=False, edgecolor='red', linewidth=3.5))
+        ax.add_patch(plt.Rectangle((bbox_tmp[0], bbox_tmp[1]), bbox_tmp[2], bbox_tmp[3], fill=False, edgecolor='yellow', linewidth=3.5))
 
     # save and visualization
     if save:
@@ -562,8 +597,9 @@ def visualize_image_with_bbox(image_path, bbox, vis=True, save=False, save_path=
         fig.savefig(save_path, dpi=dpi, transparent=True)
     if vis:
         plt.show()
-    plt.close(fig)
-    return
+
+    return fig, ax
+
 
 def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, truncated_list=None, display2terminal=True, display_list=None, title=None, debug=True, vis=True, save=False, pck_savepath=None, table_savepath=None):
     '''

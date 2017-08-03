@@ -65,7 +65,7 @@ function img_with_pts = visualize_image_with_pts(img, pts_array, vis, debug_mode
 			end
 		end
 
-		text(x, y, label_str, 'Color', 'y');
+		text(x, y, label_str, 'Color', 'y', 'FontSize', 4);
 	end
 	hold off;
 
@@ -85,6 +85,7 @@ function img_with_pts = visualize_image_with_pts(img, pts_array, vis, debug_mode
 	% save
 	if exist('save_path', 'var')
 		assert(ischar(save_path), 'save path is not correct.');
+		mkdir_if_missing(fileparts(save_path));
 		imwrite(imresize(img_with_pts, vis_resize_factor), save_path);
 		fprintf('save image to %s\n', save_path);
 	end
