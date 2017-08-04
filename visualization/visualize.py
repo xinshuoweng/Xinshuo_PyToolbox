@@ -2,6 +2,7 @@
 # email: xinshuo.weng@gmail.com
 import time
 import matplotlib.pyplot as plt
+import matplotlib.collections as plycollections
 import matplotlib as mpl
 from matplotlib.patches import Ellipse
 import numpy as np
@@ -24,6 +25,48 @@ color_set = ['r', 'b', 'g', 'c', 'm', 'y', 'k', 'w']
 marker_set = ['o', 'v', '^', '<', '>', '1', '2', '3', '4', '8', 's', 'p', '*', 'h', 'H', '+', 'x', 'D', 'd']
 hatch_set = [None, 'o', '/', '\\', '|', '-', '+', '*', 'x', 'O', '.']
 linestyle_set = ['-', '--', '-.', ':', None, ' ', 'solid', 'dashed']
+
+
+
+def visualize_lines(lines_array, color_index=0, line_width=3, fig=None, ax=None, vis=True, save=False, save_path=None, debug=True):
+    '''
+    plot lines 
+
+    parameters:
+        lines_array:            4 x num_lines, each column denotes (x1, y1, x2, y2)
+    '''
+
+    if debug:    
+        assert islinesarray(lines_array), 'input array of lines are not correct'
+
+    dpi = 80  
+    if fig is None:
+        fig = plt.gcf()
+
+    if ax is None:
+        ax = plt.gca()   
+
+    # plot lines
+    num_lines = lines_array.shape[1]
+    lines_all = []
+    for line_index in range(num_lines):
+        line_tmp = lines_array[:, line_index]
+        lines_all.append([tuple([line_tmp[0], line_tmp[1]]), tuple([line_tmp[2], line_tmp[3]])])
+
+    line_col = plycollections.LineCollection(lines_all, linewidths=line_width, colors=color_set[color_index])
+    ax.add_collection(line_col)
+        # ax.plot([line_tmp[0], line_tmp[2]], [line_tmp[1], line_tmp[3]], color=color_set[color_index], linewidth=line_width)
+
+    # save and visualization
+    if save:
+        if debug:
+            assert is_path_exists_or_creatable(save_path) and isfile(save_path), 'save path is not valid: %s' % save_path
+            mkdir_if_missing(save_path)
+        fig.savefig(save_path, dpi=dpi, transparent=True)
+    if vis:
+        plt.show()
+
+    return fig, ax
 
 def visualize_image(image, vis=True, save=False, save_path=None, debug=True):
     '''
@@ -139,15 +182,19 @@ def visualize_image_with_pts(image_path, pts, covariance=False, pts_size=20, lab
 
             if debug and islist(color_tmp):
                 assert len(color_tmp) == pts_array.shape[1], 'number of points to plot is not equal to number of colors provided'
+            pts_visible_index = range(pts_array.shape[1])
             pts_ignore_index = []
+            pts_invisible_index = []
         else:
             num_float_elements = np.where(np.logical_and(pts_array[2, :] > 0, pts_array[2, :] < 1))[0].tolist()
             if len(num_float_elements) > 0:
                 type_3row = 'conf'
-                print('third row is confidence')
+                if debug:
+                    print('third row is confidence')
             else:
                 type_3row = 'occu'
-                print('third row is occlusion')
+                if debug:
+                    print('third row is occlusion')
 
             if type_3row == 'occu':
                 pts_visible_index   = np.where(pts_array[2, :] == 1)[0].tolist()              # plot visible points in red color
