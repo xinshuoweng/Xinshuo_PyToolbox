@@ -23,8 +23,8 @@ function [num_images] = generate_video_from_folder(img_src, save_path, framerate
 	[imagelist, num_images] = load_list_from_folder(img_src, ext_filter, debug_mode);
 	fprintf('%d images loaded from %s\n', num_images, img_src);
 	[parent_dir, filename, ~] = fileparts(save_path);
-	% video = VideoWriter(fullfile(parent_dir, sprintf('%s.avi', filename)), 'Uncompressed AVI');
-	video = VideoWriter(fullfile(parent_dir, sprintf('%s.avi', filename)), 'MPEG-4');
+	video = VideoWriter(fullfile(parent_dir, sprintf('%s.avi', filename)), 'Uncompressed AVI');
+	% video = VideoWriter(fullfile(parent_dir, sprintf('%s.avi', filename)), 'MPEG-4');
 	% video = VideoWriter(fullfile(parent_dir, sprintf('%s.avi', filename)), 'Archival');
 	video.FrameRate = framerate;
 
