@@ -21,7 +21,7 @@ from bbox_transform import bbox_TLBR2TLWH, bboxcheck_TLBR
 from conversions import print_np_shape, list2tuple, list_reorder
 from math_functions import pts_euclidean, calculate_truncated_mse
 
-color_set = ['r', 'b', 'g', 'c', 'm', 'y', 'k', 'w']
+color_set = ['r', 'b', 'g', 'c', 'm', 'y', 'k', 'w', 'lime', 'cyan', 'aqua']
 marker_set = ['o', 'v', '^', '<', '>', '1', '2', '3', '4', '8', 's', 'p', '*', 'h', 'H', '+', 'x', 'D', 'd']
 hatch_set = [None, 'o', '/', '\\', '|', '-', '+', '*', 'x', 'O', '.']
 linestyle_set = ['-', '--', '-.', ':', None, ' ', 'solid', 'dashed']
