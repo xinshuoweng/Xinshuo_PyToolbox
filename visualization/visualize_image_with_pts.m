@@ -43,6 +43,8 @@ function img_with_pts = visualize_image_with_pts(img, pts_array, vis, debug_mode
 		fig = figure('Visible', 'off');
 	end
 
+	% pts_size = 5;
+	font_size = 6;
 	imshow(img); hold on;
 	% end
 	x = pts_array(1, :);
@@ -65,7 +67,7 @@ function img_with_pts = visualize_image_with_pts(img, pts_array, vis, debug_mode
 			end
 		end
 
-		text(x, y, label_str, 'Color', 'y', 'FontSize', 4);
+		text(x, y, label_str, 'Color', 'y', 'FontSize', font_size);
 	end
 	hold off;
 
