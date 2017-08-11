@@ -20,7 +20,8 @@ function full_image_list = load_list_from_cur_folder(folder_path, ext_filter, de
 	for ext_index = 1:length(ext_filter)
 		ext_filter_tmp = ext_filter{ext_index};
 		ext_filter_tmp = check_extension(ext_filter_tmp, debug_mode);
-		keep_logical_tmp = cellfun(@(x) ~isempty(x), strfind(image_id_list, ext_filter_tmp));
+		% keep_logical_tmp = cellfun(@(x) ~isempty(x), strfind(image_id_list, ext_filter_tmp));
+		keep_logical_tmp = cellfun(@(x) strcmp(x(max(end-length(ext_filter_tmp)+1, 1):end), ext_filter_tmp), image_id_list);
 		keep_logical = keep_logical | keep_logical_tmp;
 		% disp(keep_logical);
 	end
