@@ -14,12 +14,13 @@ from googleapiclient import discovery
 import os, sys
 import glob, glob2
 import numpy as np
-# from PIL import Image
 from scipy.misc import imsave
 import time
 import __init__paths__
 from check import *
 from conversions import string2ext_filter
+from PIL import Image
+
 
 def fileparts(pathname, debug=True):
 	'''
@@ -56,7 +57,7 @@ def load_list_from_file(file_path):
 
     return fulllist, num_elem
 
-def load_list_from_folder(folder_path, ext_filter=None, depth=1, recursive=False, save_path=None):
+def load_list_from_folder(folder_path, ext_filter=None, depth=1, recursive=False, sorted=True, save_path=None):
     '''
     load a list of files or folders from a system path
 
@@ -85,10 +86,17 @@ def load_list_from_folder(folder_path, ext_filter=None, depth=1, recursive=False
         if ext_filter is not None:
             for ext_tmp in ext_filter:
                 wildcard = os.path.join(wildcard_prefix, '*' + string2ext_filter(ext_tmp))
-                fulllist += glob2.glob(os.path.join(folder_path, wildcard))  
+                curlist = glob2.glob(os.path.join(folder_path, wildcard))
+                if sort:
+                    curlist = sorted(curlist)
+                fulllist += curlist
+
         else:
             wildcard = wildcard_prefix
-            fulllist += glob2.glob(os.path.join(folder_path, wildcard))  
+            curlist = glob2.glob(os.path.join(folder_path, wildcard))
+            if sort:
+                curlist = sorted(curlist)
+            fulllist += curlist
     else:                    # find files based on depth and recursive flag
         wildcard_prefix = '*'
         for index in range(depth-1):
@@ -96,10 +104,16 @@ def load_list_from_folder(folder_path, ext_filter=None, depth=1, recursive=False
         if ext_filter is not None:
             for ext_tmp in ext_filter:
                 wildcard = wildcard_prefix + string2ext_filter(ext_tmp)
-                fulllist += glob.glob(os.path.join(folder_path, wildcard))
+                curlist = glob.glob(os.path.join(folder_path, wildcard))
+                if sort:
+                    curlist = sorted(curlist)
+                fulllist += curlist
         else:
             wildcard = wildcard_prefix
-            fulllist += glob.glob(os.path.join(folder_path, wildcard))
+            curlist = glob.glob(os.path.join(folder_path, wildcard))
+            if sort:
+                curlist = sorted(curlist)
+            fulllist += curlist
         if recursive and depth > 1:
             newlist, _ = load_list_from_folder(folder_path=folder_path, ext_filter=ext_filter, depth=depth-1, recursive=True)
             fulllist += newlist
@@ -244,6 +258,19 @@ def load_2dmatrix_from_file(src_path, delimiter=' ', dtype='float32', debug=True
 
     data = np.loadtxt(src_path, delimiter=delimiter, dtype=dtype)
     return data
+
+
+
+######################################################### web related #########################################################
+def load_image(src_path, debug=True):
+    # open path as file to avoid ResourceWarning (https://github.com/python-pillow/Pillow/issues/835)
+    src_path = safepath(src_path)
+    if debug:
+        assert is_path_exists(src_path), 'txt path is not correct at %s' % src_path
+
+    with open(src_path, 'rb') as f:
+        with Image.open(f) as img:
+          return img.convert('RGB')
 
 ######################################################### web related #########################################################
 """
