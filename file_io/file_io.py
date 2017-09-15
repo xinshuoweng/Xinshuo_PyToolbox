@@ -57,7 +57,7 @@ def load_list_from_file(file_path):
 
     return fulllist, num_elem
 
-def load_list_from_folder(folder_path, ext_filter=None, depth=1, recursive=False, sorted=True, save_path=None):
+def load_list_from_folder(folder_path, ext_filter=None, depth=1, recursive=False, sort=True, save_path=None):
     '''
     load a list of files or folders from a system path
 
