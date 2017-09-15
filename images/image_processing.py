@@ -110,3 +110,16 @@ def generate_mean_image(images_dir, save_path, debug=True, vis=False):
 
 	mean_im = np.mean(image_blob, axis=2)
 	visualize_image(mean_im, debug=debug, vis=vis, save=True, save_path=save_path)
+
+
+def pil2cv_colorimage(pil_image, debug=True, vis=False):
+	'''
+	this function converts a PIL image to a cv2 image, which has RGB and BGR format respectively
+	'''
+	if debug:
+		assert ispilimage(pil_image), 'the input image is not a PIL image'
+
+	cv_image = np.array(pil_image)
+	cv_image = cv_image[:, :, ::-1].copy() 			# convert RGB to BGR
+
+	return cv_image

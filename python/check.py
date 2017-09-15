@@ -2,6 +2,7 @@
 # email: xinshuo.weng@gmail.com
 import os, sys
 import numpy as np
+from PIL import Image
 
 def isstring(string_test):
 	return isinstance(string_test, basestring)
@@ -72,6 +73,9 @@ def istuple(tuple_test):
 
 def isext(ext_test):
     return isstring(ext_test) and ext_test[0] == '.'
+
+def ispilimage(image_test):
+    return isinstance(image_test, Image.Image)
 
 def iscolorimage(image_test, debug=False):
     if debug:
