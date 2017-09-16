@@ -192,7 +192,7 @@ def isfloatimage(image_test, debug=False):
         return False
 
 def isimage(image_test, debug=False):
-    return isfloatimage(image_test, debug=debug) or isuintimage(image_test, debug=debug)
+    return isfloatimage(image_test, debug=debug) or isuintimage(image_test, debug=debug) or ispilimage(image_test)
 
 def isscaledimage(image_test):
     if not isimage(image_test):

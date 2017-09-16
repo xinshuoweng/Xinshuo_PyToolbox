@@ -104,8 +104,12 @@ def visualize_image(image, vis=True, save=False, save_path=None, debug=True):
         return
 
     if debug:
-        assert isnparray(image), 'input image is not a numpy array {}'.format(type(image))
+        # assert isnparray(image), 'input image is not a numpy array {}'.format(type(image))
         assert isimage(image, debug=debug), 'input is not a good image, shape is {}'.format(image.shape)
+
+    if ispilimage(image):
+    	image = np.array(image)
+
 
     dpi = 80  
     width = image.shape[1]
@@ -269,6 +273,9 @@ def visualize_image_with_pts(image_path, pts, covariance=False, pts_size=20, lab
             return
     else:
         image = image_path
+        if ispilimage(image):
+        	image = np.array(image)
+    
 
     dpi = 80  
     width = image.shape[1]
