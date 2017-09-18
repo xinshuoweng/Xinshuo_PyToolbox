@@ -14,28 +14,28 @@ function [output, act_h, act_a] = Forward(W, b, X)
 % W2 3x1
 
 
-number_layer = length(W) + 1;
-input_temp = X;
-act_a = cell(number_layer-2, 1);
-act_h = cell(number_layer-2, 1);
-for i = 1:number_layer-1
-    weight = W{i};
-    bias = b{i};
-    output_pre = weight * input_temp + bias;
-    
-    if i < number_layer-1
-        act_a{i} = output_pre;     % save the pre-activations
-    end
-    
-    output_pos = mysigmoid(output_pre);
-    if i < number_layer - 1
-        act_h{i} = output_pos;     % save the post-activations
-    elseif i == number_layer-1      % output the final softmax result
-        output = mysoftmax(output_pre);
-        break;
-    end
-    input_temp = output_pos;
-end
+	number_layer = length(W) + 1;
+	input_temp = X;
+	act_a = cell(number_layer-2, 1);
+	act_h = cell(number_layer-2, 1);
+	for i = 1:number_layer-1
+		weight = W{i};
+		bias = b{i};
+		output_pre = weight * input_temp + bias;
+
+		if i < number_layer-1
+			act_a{i} = output_pre;     % save the pre-activations
+		end
+
+		output_pos = mysigmoid(output_pre);
+		if i < number_layer - 1
+			act_h{i} = output_pos;     % save the post-activations
+		elseif i == number_layer-1      % output the final softmax result
+			output = mysoftmax(output_pre);
+			break;
+		end
+		input_temp = output_pos;
+	end
 
 
 end
