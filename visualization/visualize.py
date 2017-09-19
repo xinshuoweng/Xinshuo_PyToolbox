@@ -153,7 +153,7 @@ def visualize_image(image, vis=True, save=False, save_path=None, debug=True):
 
     return fig, ax
 
-def visualize_image_with_pts(image_path, pts, covariance=False, pts_size=20, label=False, label_list=None, color_index=0, vis=True, vis_threshold=-10000, save=False, save_path=None, debug=True):
+def visualize_image_with_pts(image_path, pts, covariance=False, pts_size=20, label=False, label_list=None, color_index=0, vis=True, vis_threshold=-10000, save=False, save_path=None, debug=True, closefig=True):
     '''
     visualize image and plot keypoints on top of it
 
@@ -328,9 +328,11 @@ def visualize_image_with_pts(image_path, pts, covariance=False, pts_size=20, lab
         fig.savefig(save_path, dpi=dpi, transparent=True)
     if vis:
         plt.show()
-    # plt.close(fig)
-
-    return fig, ax
+    
+    if closefig:
+        plt.close(fig)
+    else:
+        return fig, ax
 
 def visualize_pts_covariance(pts_array, conf=None, std=None, ax=None, debug=True, **kwargs):
     """
