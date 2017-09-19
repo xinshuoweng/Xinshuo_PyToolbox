@@ -29,7 +29,7 @@ linestyle_set = ['-', '--', '-.', ':', None, ' ', 'solid', 'dashed']
 
 
 
-def visualize_lines(lines_array, color_index=0, line_width=3, fig=None, ax=None, vis=True, save=False, save_path=None, debug=True):
+def visualize_lines(lines_array, color_index=0, line_width=3, fig=None, ax=None, vis=True, save=False, save_path=None, debug=True, closefig=True):
     '''
     plot lines 
 
@@ -67,9 +67,12 @@ def visualize_lines(lines_array, color_index=0, line_width=3, fig=None, ax=None,
     if vis:
         plt.show()
 
-    return fig, ax
+    if closefig:
+        plt.close(fig)
+    else:
+        return fig, ax
 
-def visualize_image(image, vis=True, save=False, save_path=None, debug=True):
+def visualize_image(image, vis=True, save=False, save_path=None, debug=True, closefig=True):
     '''
     input image is a numpy array matrix
     '''
@@ -151,7 +154,10 @@ def visualize_image(image, vis=True, save=False, save_path=None, debug=True):
     if vis:
         plt.show()
 
-    return fig, ax
+    if closefig:
+        plt.close(fig)
+    else:
+        return fig, ax
 
 def visualize_image_with_pts(image_path, pts, covariance=False, pts_size=20, label=False, label_list=None, color_index=0, vis=True, vis_threshold=-10000, save=False, save_path=None, debug=True, closefig=True):
     '''
@@ -577,7 +583,7 @@ def visualize_pts(pts, title=None, fig=None, ax=None, display_range=False, xlim=
     else:
         return
 
-def visualize_image_with_bbox(image_path, bbox, ax=None, vis=True, save=False, save_path=None, debug=True):
+def visualize_image_with_bbox(image_path, bbox, ax=None, vis=True, save=False, save_path=None, debug=True, closefig=True):
     '''
     visualize image and plot keypoints on top of it
 
@@ -626,10 +632,10 @@ def visualize_image_with_bbox(image_path, bbox, ax=None, vis=True, save=False, s
         assert False, 'image is not correct'
     ax.set(xlim=[0, width], ylim=[height, 0], aspect=1)
 
-    return visualize_bbox(bbox, fig=fig, ax=ax, vis=vis, save=save, save_path=save_path, debug=debug)
+    return visualize_bbox(bbox, fig=fig, ax=ax, vis=vis, save=save, save_path=save_path, debug=debug, closefig=closefig)
 
 
-def visualize_bbox(bbox, fig=None, ax=None, vis=True, save=False, save_path=None, debug=True):
+def visualize_bbox(bbox, fig=None, ax=None, vis=True, save=False, save_path=None, debug=True, closefig=True):
     if debug:    
         assert bboxcheck_TLBR(bbox), 'input bounding boxes are not correct'
 
@@ -655,7 +661,10 @@ def visualize_bbox(bbox, fig=None, ax=None, vis=True, save=False, save_path=None
     if vis:
         plt.show()
 
-    return fig, ax
+    if closefig:
+        plt.close(fig)
+    else:
+        return fig, ax
 
 
 def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, truncated_list=None, display2terminal=True, display_list=None, title=None, debug=True, vis=True, save=False, pck_savepath=None, table_savepath=None):
