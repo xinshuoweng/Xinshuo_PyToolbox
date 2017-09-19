@@ -15,6 +15,8 @@ function [full_image_list, num_image] = load_list_from_folder(folder_path, ext_f
 
     if ~exist('ext_filter', 'var')
         ext_filter = {'.jpg', '.png', '.bmp', '.jpeg'};
+    elseif ~iscell(ext_filter)
+        ext_filter = {ext_filter};
     end
 
 	subfolder_list = get_subfolder_list(folder_path, depth, debug_mode);
