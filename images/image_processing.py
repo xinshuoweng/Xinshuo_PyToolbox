@@ -123,3 +123,46 @@ def pil2cv_colorimage(pil_image, debug=True, vis=False):
 	cv_image = cv_image[:, :, ::-1].copy() 			# convert RGB to BGR
 
 	return cv_image
+
+def bgr2rgb_npimage(np_image, debug=True):
+	'''
+	this function transpose the channels of a numpy image from C x H x W to H x W x C
+	'''
+	if debug:
+		assert isnparray(np_image), 'the input is not a numpy'
+		assert np_image.ndim == 3 and np_image.shape[0] == 3, 'the input numpy image does not have a good dimension: {}'.format(np_image.shape)
+
+	return np.transpose(np_image, (1, 2, 0)) 
+
+def	unnormalize_npimage(np_image, debug=True):
+	'''
+	un-normalize a numpy image and scale it to [0, 255]
+	'''
+
+	if debug:
+		assert isnparray(np_image), 'the input is not a numpy'
+		assert np_image.ndim == 3 and np_image.shape[2] == 3, 'the input numpy image does not have a good dimension: {}'.format(np_image.shape)
+
+	min_val = np.min(np_image)
+	max_val = np.max(np_image)
+
+	# print np_image
+
+
+	np_image = np_image - min_val
+	np_image = np_image / (max_val - min_val)
+
+	np_image = np_image * 255.
+
+	# print np.min(np_image)
+	# print np.max(np_image)
+	# time.sleep(5)
+
+	np_image = np_image.astype('uint8')
+
+	# print np_image
+
+	if debug:
+		assert np.min(np_image) == 0 and np.max(np_image) == 255, 'the value range is not right [%d, %d]' % (np.min(np_image), np.max(np_image))
+
+	return np_image

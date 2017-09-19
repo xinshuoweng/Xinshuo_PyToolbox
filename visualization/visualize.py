@@ -1,9 +1,10 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
 import time
+import matplotlib as mpl
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.collections as plycollections
-import matplotlib as mpl
 from matplotlib.patches import Ellipse
 import numpy as np
 import shutil
