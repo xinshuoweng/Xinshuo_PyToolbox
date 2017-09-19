@@ -41,7 +41,7 @@ def format_time(seconds):
     assert isfloat(seconds) or isinteger(seconds), 'input should be an integer or floating number to represent number of seconds'
     m, s = divmod(int(seconds), 60)
     h, m = divmod(m, 60)
-    return '%d:%02d:%02d' % (h, m, s)
+    return '[%d:%02d:%02d]' % (h, m, s)
 
 
 def get_timestring():
