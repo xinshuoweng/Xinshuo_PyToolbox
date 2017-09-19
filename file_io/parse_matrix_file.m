@@ -4,8 +4,11 @@
 % this function parse all the stuff in the file as floating number
 % and save it to 2d matrix
 % nrows is the number of rows parse from the file
-function [data, nrows] = parse_text_file(file_path)
-	assert(ischar(file_path), 'The input path should be a string to a file.');
+function [data, nrows] = parse_matrix_file(file_path, debug_mode)
+    if debug_mode
+    	assert(ischar(file_path), 'The input path should be a string to a file.');
+    end
+    
 	fid = get_fileID_for_loading(file_path);
 
 	tline = fgetl(fid);
