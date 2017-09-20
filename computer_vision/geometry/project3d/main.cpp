@@ -26,11 +26,11 @@
 
 int main(int argc, char* argv[]){
     if( argc != 6 ){
-        fprintf(stderr, "calibration pose_3d_file num_pts frame pose2d_out_dir\n");
+        fprintf(stderr, "calibration pose_3d_file num_pts pose2d_filename pose2d_out_dir\n");
         return -1;
     }
-    int frame;
-    sscanf(argv[4], "%d", &frame);		// frame number
+//    int frame;
+//    sscanf(argv[4], "%d", &frame);		// frame number
     char cmd[1024];
     int num_pts;
     char str_tmp[1024];
@@ -70,7 +70,7 @@ int main(int argc, char* argv[]){
         ASSERT_WITH_MSG(ret == 0, "creating folder for back projecting 2d locations on camera failed!");
 
         // write output to file
-        sprintf(cmd, "%s/%s/%05d.pose", argv[5], camera_tmp.name.c_str(), frame);
+        sprintf(cmd, "%s/%s/%s.pose", argv[5], camera_tmp.name.c_str(), argv[4]);
         FILE *out = fopen(cmd, "w");
         ASSERT_WITH_MSG(ret == 0, "opening folder for back projecting 2d locations failed");
         for(int pts_index = 0; pts_index < num_pts; pts_index++){
