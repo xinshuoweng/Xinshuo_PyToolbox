@@ -15,6 +15,7 @@
 #include <miscellaneous/type_conversion.h>
 #include <math/math_functions.h>
 
+const double projection_err_threshold = 8;
 
 MyMesh::MyMesh(char* filename, int scale) {
 	pcl::PolygonMesh::Ptr poly_ptr_tmp(new pcl::PolygonMesh);
@@ -36,14 +37,19 @@ MyMesh::MyMesh(char* filename, int scale) {
 
 	int num_vertices = cloud->size();
 	int num_planes = poly_ptr_tmp->polygons.size();
+    std::cout << "number of planes in the loaded mesh is " << num_planes << std::endl;
+    std::cout << "number of vertices in the loaded mesh is " << num_vertices << std::endl;
 	planes_of_vertices.resize(num_vertices);
 	first_plane_of_vertices.resize(num_vertices);
 	planes.resize(num_planes);
 
 	for (int i = 0; i < num_planes; i++) {
 //		ASSERT_WITH_MSG(poly_ptr_tmp->polygons[i].vertices.size() == 3, "The vertices of mesh should have 3 coordinates");			// ensure mesh is in 3d
-		std::vector<int> idxs(3);
-		for (int j = 0; j < 3; j++) {
+
+        int size_polygon = poly_ptr_tmp->polygons[i].vertices.size();
+        std::vector<int> idxs(size_polygon);
+//        std::cout << "polygon size is " <<  << std::endl;
+		for (int j = 0; j < size_polygon; j++) {
 			idxs[j] = poly_ptr_tmp->polygons[i].vertices[j];			// find the id of vertices corresponding to all polygon (triangle)
 		}
 		//std::cout << "idxs is:" << std::endl;
@@ -106,7 +112,7 @@ pts_on_mesh* MyMesh::pts_back_projection_single_view(pts_2d_conf& pts_2d, pts_2d
     vec_pts_3d[0].print();
 
     get_3d_ray(pts_2d, camera_src, C, ray, consider_dist);
-    return this->get_pts_on_mesh(C, ray, pts_2d.conf, vec_pts_3d[0].convert_to_point3d());
+    return this->get_pts_on_mesh_heuristic(C, ray, pts_2d.conf, vec_pts_3d[0].convert_to_point3d());
 }
 
 // TODO: test for correctness
@@ -296,10 +302,11 @@ pts_on_mesh* MyMesh::get_pts_on_mesh(cv::Point3d C_src, std::vector<double>& ray
 }
 
 
+// note that we add heuristic to this function, the furtherest point (within the error range) should be the right choice
 pts_on_mesh* MyMesh::get_pts_on_mesh(cv::Point3d C_src, std::vector<double>& ray, double conf, cv::Point3d pts_3d_ref) {
     std::cout << "finding the closest point on the mesh given a 3d point." << std::endl;
     clock_t old_time = clock();
-    double closest = -1;
+    double closest = 100000;
     std::vector<double> pts_3d_ref_vec = cv2vec_pts3d(pts_3d_ref);
     std::vector<double> cpts;
     int tri_id = -1;
@@ -342,19 +349,20 @@ pts_on_mesh* MyMesh::get_pts_on_mesh(cv::Point3d C_src, std::vector<double>& ray
             continue;
         }
 
-        // even though t is larger than 0, is further than a 3d point found before
-        if (closest != -1 && t >= closest) {
-//			std::cout << "Skipped current plane because the it is further than the 3d point found before..." << std::endl;
-            continue;
-        }
-
         std::vector<double> pts_tmp;
         for (int i = 0; i < 3; i++) {
             pts_tmp.push_back(t * ray[i] + C[i]);	// the 3d point
         }
 
-        std::vector<double> pts_append = pts_tmp;
-        pts_append.push_back(1.0);
+        // even though t is larger than 0, is further than a 3d point found before
+        double dist = compute_distance(pts_tmp, pts_3d_ref_vec);                   // compute the distance between the found point and reference 3d point
+        if (dist >= closest || dist >= projection_err_threshold) {
+//			std::cout << "Skipped current plane because the it is further than the 3d point found before..." << std::endl;
+            continue;
+        }
+
+//        std::vector<double> pts_append = pts_tmp;
+//        pts_append.push_back(1.0);
 
 //		std::cout << "checking the point on triangle...\n" << std::endl;
 //		ASSERT_WITH_MSG(std::abs(inner(pts_append, plane)) < EPS_MYSELF, "Point found is not even on the extended triangle plane. The offset is " + std::to_string(std::abs(inner(pts_append, plane))));		// check the point with parameter t is inside the current plane
@@ -374,13 +382,12 @@ pts_on_mesh* MyMesh::get_pts_on_mesh(cv::Point3d C_src, std::vector<double>& ray
         // check if the point is inside the triangle
 //		std::cout << "checking the triangle...\n" << std::endl;
         if (point_triangle_test_3d(pts_tmp, tri_a, tri_b, tri_c)) {
-            double dist = compute_distance(pts_tmp, pts_3d_ref_vec);                   // compute the distance between the found point and reference 3d point
             std::cout << "t is " << t << ", current point found is " << pts_tmp[0] << ", " << pts_tmp[1] << ", " << pts_tmp[2] << ", distance is " << dist << ", previous closest distance is " << closest << std::endl;
-
             if (tri_id == -1 || dist < closest) {		// find the exact right plane which intersect with the ray and the intersection point is inside the plane.
 //                std::cout << "t is " << t << std::endl;
 //                closest = t;
                 closest = dist;
+                std::cout << "current closest distance is " << closest << std::endl;
                 tri_id = plane_index;
                 cpts = pts_tmp;
             }
@@ -428,9 +435,133 @@ pts_on_mesh* MyMesh::get_pts_on_mesh(cv::Point3d C_src, std::vector<double>& ray
     //std::cout << std::endl;
 
     pts_on_mesh* ptr_mesh;
-    if (tri_id == -1) {
+    if (tri_id == -1 || closest >= projection_err_threshold) {
         conf = 0;
-        fprintf(stderr, "no projected triangles!\n");
+
+        if (closest >= projection_err_threshold) {
+            fprintf(stderr, "no projected triangles because of big projection error: %.2f!\n", closest);
+        }
+        else
+            fprintf(stderr, "no projected triangles!\n");
+
+        ptr_mesh = new pts_on_mesh(-1, -1, 0.0, 0.0, 0.0, conf);
+        return ptr_mesh;
+    }
+
+    //ptr_mesh = new pts_on_mesh(this->plane_pts_idx[tri_id][0], cpts[0], cpts[1], cpts[2], conf);
+    pts_3d_conf pts_3d(cpts[0], cpts[1], cpts[2], conf);
+    //std::cout << "final 3d points is" << std::endl;
+    //pts_3d.print();
+    pts_on_mesh* pts_mesh = find_closest_pts_on_mesh(pts_3d, tri_id);
+    pts_mesh->print();
+
+    return pts_mesh;
+}
+
+// note that we add heuristic to this function, the furtherest point (within the error range) should be the right choice
+pts_on_mesh* MyMesh::get_pts_on_mesh_heuristic(cv::Point3d C_src, std::vector<double>& ray, double conf, cv::Point3d pts_3d_ref) {
+    std::cout << "finding the closest point on the mesh given a 3d point." << std::endl;
+    clock_t old_time = clock();
+    double final_dist = 1000000;
+    double max_t = -1;
+    std::vector<double> pts_3d_ref_vec = cv2vec_pts3d(pts_3d_ref);
+    std::vector<double> cpts;
+    int tri_id = -1;
+    int planes = this->planes.size();
+    std::vector<double> C = cv2vec_pts3d(C_src);
+
+    // go though all planes
+    float time_accu1 = 0;
+    float time_accu2 = 0;
+    for (int plane_index = 0; plane_index < planes; plane_index++) {
+        // plane is plane[0] * x + plane[1] * y + plane[2] * z + plane[3] = 0
+        // expected 3d point is [C[0] + t * ray[0], C[1] + t * ray[1], C[2] + t * ray[2]], t is the parameter we need to find
+        std::vector<double>& plane = this->planes[plane_index];
+        double n = 0, d = 0;
+        for (int l = 0; l < 3; l++) {
+            n += C[l] * plane[l];
+            d += ray[l] * plane[l];
+        }
+        n += plane[3];
+        double t = -n / d;
+
+
+        clock_t new_time = clock();
+        time_accu1 += float(new_time - old_time);
+        old_time = new_time;
+
+//        std::cout << "n is " << n << std::endl;
+//        std::cout << "d is " << d << std::endl;
+
+        if (std::abs(d) < EPS_SMALL) {
+//            std::cout << "Skipped current plane for unknown reason 1 ...\n" << std::endl;
+            continue;
+        }
+
+        // t should be larger than 0, otherwise the 3d point is in the wrong direction oppose to the ray
+        if (t < 0) {
+//			std::cout << "Skipped current plane because the direction is the opposite  ...\n" << std::endl;
+            continue;
+        }
+
+        std::vector<double> pts_tmp;
+        for (int i = 0; i < 3; i++) {
+            pts_tmp.push_back(t * ray[i] + C[i]);	// the 3d point
+        }
+
+        // even though t is larger than 0, is further than a 3d point found before
+        double dist = compute_distance(pts_tmp, pts_3d_ref_vec);                   // compute the distance between the found point and reference 3d point
+        if (dist >= projection_err_threshold) {
+//			std::cout << "Skipped current plane because the it is further than the 3d point found before..." << std::endl;
+            continue;
+        }
+
+//        std::vector<double> pts_append = pts_tmp;
+//        pts_append.push_back(1.0);
+
+//		std::cout << "checking the point on triangle...\n" << std::endl;
+//		ASSERT_WITH_MSG(std::abs(inner(pts_append, plane)) < EPS_MYSELF, "Point found is not even on the extended triangle plane. The offset is " + std::to_string(std::abs(inner(pts_append, plane))));		// check the point with parameter t is inside the current plane
+
+        std::vector<int> vec_id = this->plane_pts_idx[plane_index];
+        std::vector<double> tri_a, tri_b, tri_c;
+        tri_a.push_back(this->cloud->points[vec_id[0]].x);
+        tri_a.push_back(this->cloud->points[vec_id[0]].y);
+        tri_a.push_back(this->cloud->points[vec_id[0]].z);
+        tri_b.push_back(this->cloud->points[vec_id[1]].x);
+        tri_b.push_back(this->cloud->points[vec_id[1]].y);
+        tri_b.push_back(this->cloud->points[vec_id[1]].z);
+        tri_c.push_back(this->cloud->points[vec_id[2]].x);
+        tri_c.push_back(this->cloud->points[vec_id[2]].y);
+        tri_c.push_back(this->cloud->points[vec_id[2]].z);
+
+        // check if the point is inside the triangle
+//		std::cout << "checking the triangle...\n" << std::endl;
+        if (t > max_t) {		// find the exact right plane which intersect with the ray and the intersection point is inside the plane.
+            if (point_triangle_test_3d(pts_tmp, tri_a, tri_b, tri_c)) {
+                std::cout << "t is " << t <<  ", previous biggest t is " << max_t << ", current point found is " << pts_tmp[0] << ", " << pts_tmp[1] << ", " << pts_tmp[2] << ", distance is " << dist << std::endl;
+
+                max_t = t;
+                final_dist = dist;
+                std::cout << "current biggest t is " << max_t << std::endl;
+                tri_id = plane_index;
+                cpts = pts_tmp;
+            }
+        }
+
+        new_time = clock();
+        time_accu2 += float(new_time - old_time);
+        old_time = new_time;
+    }
+
+    pts_on_mesh* ptr_mesh;
+    if (tri_id == -1 || final_dist >= projection_err_threshold) {
+        conf = 0;
+
+        if (final_dist >= projection_err_threshold) {
+            fprintf(stderr, "no projected triangles because of big projection error: %.2f!\n", final_dist);
+        }
+        else
+            fprintf(stderr, "no projected triangles!\n");
 
         ptr_mesh = new pts_on_mesh(-1, -1, 0.0, 0.0, 0.0, conf);
         return ptr_mesh;

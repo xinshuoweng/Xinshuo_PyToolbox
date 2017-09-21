@@ -34,6 +34,7 @@ public:
 	// ray intersection to find points on mesh
 	pts_on_mesh* get_pts_on_mesh(cv::Point3d C, std::vector<double>& ray, double conf);
     pts_on_mesh* get_pts_on_mesh(cv::Point3d C, std::vector<double>& ray, double conf, cv::Point3d C_ref);
+	pts_on_mesh* get_pts_on_mesh_heuristic(cv::Point3d C, std::vector<double>& ray, double conf, cv::Point3d C_ref);
 
 	// given an arbitraty 3d point in 3d space, find the closest one on the mesh
 	// given a 3d point, find closest 3d point on mesh
