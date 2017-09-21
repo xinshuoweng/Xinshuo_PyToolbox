@@ -140,14 +140,14 @@ def	unnormalize_npimage(np_image, debug=True):
 	'''
 
 	if debug:
-		assert isnparray(np_image), 'the input is not a numpy'
-		assert np_image.ndim == 3 and np_image.shape[2] == 3, 'the input numpy image does not have a good dimension: {}'.format(np_image.shape)
+		assert isnpimage_dimension(np_image), 'the input numpy image is not correct: {}'.format(np_image.shape)
 
 	min_val = np.min(np_image)
 	max_val = np.max(np_image)
 
 	# print np_image
-
+	# print min_val
+	# print max_val
 
 	np_image = np_image - min_val
 	np_image = np_image / (max_val - min_val)

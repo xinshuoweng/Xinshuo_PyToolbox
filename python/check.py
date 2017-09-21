@@ -74,6 +74,9 @@ def istuple(tuple_test):
 def isext(ext_test):
     return isstring(ext_test) and ext_test[0] == '.'
 
+def isnpimage_dimension(image_test):
+    return isnparray(image_test) and ((image_test.ndim == 3 and (image_test.shape[2] == 3 or image_test.shape[2] == 1)) or image_test.ndim == 2)
+
 def ispilimage(image_test):
     return isinstance(image_test, Image.Image)
 
