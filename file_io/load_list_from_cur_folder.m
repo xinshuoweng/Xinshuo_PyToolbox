@@ -16,15 +16,17 @@ function full_image_list = load_list_from_cur_folder(folder_path, ext_filter, de
 	end
 	image_id_list = {image_list(:).name};
 
-	keep_logical = zeros(1, length(image_id_list));
+	keep_logical = ones(1, length(image_id_list));
 	for ext_index = 1:length(ext_filter)
 		ext_filter_tmp = ext_filter{ext_index};
 		ext_filter_tmp = check_extension(ext_filter_tmp, debug_mode);
 		% keep_logical_tmp = cellfun(@(x) ~isempty(x), strfind(image_id_list, ext_filter_tmp));
 		keep_logical_tmp = cellfun(@(x) strcmp(x(max(end-length(ext_filter_tmp)+1, 1):end), ext_filter_tmp), image_id_list);
-		keep_logical = keep_logical | keep_logical_tmp;
+		keep_logical = keep_logical & keep_logical_tmp;
 		% disp(keep_logical);
 	end
+	remove_logical_tmp = cellfun(@(x) strcmp(x, '.') || strcmp(x, '..'), image_id_list);
+	keep_logical = keep_logical & ~remove_logical_tmp;
 
 	keep = find(keep_logical);		% find the index of the cell which is image
 	image_list = {image_list(keep).name};

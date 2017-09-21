@@ -3,25 +3,41 @@
 
 % this script return a cell which contains a set of image path under folder recursively
 % note that the list returned in this function is ordered
-function [full_image_list, num_image] = load_list_from_folder(folder_path, ext_filter, debug_mode, save_fullpath)
+function [full_image_list, num_image] = load_list_from_folder(folder_path, ext_filter, depth, debug_mode, save_fullpath)
+    if nargin < 3
+        depth = 1;
+    end
+
     if nargin < 4
         debug_mode = true;
     end
 
-    depth = intmax;
     if debug_mode
     	assert(ischar(folder_path), 'Input path is not valid for obtaining list');
+        assert(depth >= 1, 'the depth is not correct');
     end
 
     if ~exist('ext_filter', 'var')
-        ext_filter = {'.jpg', '.png', '.bmp', '.jpeg'};
+        ext_filter = {};
     elseif ~iscell(ext_filter)
         ext_filter = {ext_filter};
     end
 
-	subfolder_list = get_subfolder_list(folder_path, depth, debug_mode);
-    imagelist_subfolder = remove_empty_cell(cellfun(@(x) load_list_from_cur_folder(x, ext_filter, debug_mode), subfolder_list, 'UniformOutput', false), debug_mode);
+    % get folder and file from current depth
+	% subfolder_list = get_subfolder_list(folder_path, depth, debug_mode);
     imagelist_curfolder = load_list_from_cur_folder(folder_path, ext_filter, debug_mode);
+
+    % subfolder_list
+    % pause;
+
+    % imagelist_curfolder
+    % pause
+
+    
+    % subfolder_list_recur
+    % pause
+    subfolder_list_recur = get_subfolder_list(folder_path, depth-1, debug_mode);
+    imagelist_subfolder = remove_empty_cell(cellfun(@(x) load_list_from_cur_folder(x, ext_filter, debug_mode), subfolder_list_recur, 'UniformOutput', false), debug_mode);
 
     % merge all sub-imagelist
     full_image_list = imagelist_curfolder;
