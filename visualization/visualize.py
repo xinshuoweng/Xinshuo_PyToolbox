@@ -23,6 +23,7 @@ from conversions import print_np_shape, list2tuple, list_reorder
 from math_functions import pts_euclidean, calculate_truncated_mse
 
 color_set = ['r', 'b', 'g', 'c', 'm', 'y', 'k', 'w', 'lime', 'cyan', 'aqua']
+color_set_big = ['aqua', 'azure', 'red', 'black', 'blue', 'brown', 'cyan', 'darkblue', 'fuchsia', 'gold', 'green', 'grey', 'indigo', 'magenta', 'lime', 'yellow', 'white', 'tomato', 'salmon']
 marker_set = ['o', 'v', '^', '<', '>', '1', '2', '3', '4', '8', 's', 'p', '*', 'h', 'H', '+', 'x', 'D', 'd']
 hatch_set = [None, 'o', '/', '\\', '|', '-', '+', '*', 'x', 'O', '.']
 linestyle_set = ['-', '--', '-.', ':', None, ' ', 'solid', 'dashed']
@@ -72,7 +73,7 @@ def visualize_lines(lines_array, color_index=0, line_width=3, fig=None, ax=None,
     else:
         return fig, ax
 
-def visualize_pts_line(pts_array, line_index_list, method=2, fig=None, ax=None, vis=False, save=False, save_path=None, debug=True):
+def visualize_pts_line(pts_array, line_index_list, method=2, threshold=None, fig=None, ax=None, vis=False, save=False, save_path=None, closefig=True, debug=True):
     '''
     given a list of index, and a point array, to plot a set of points with line on it
 
@@ -81,39 +82,48 @@ def visualize_pts_line(pts_array, line_index_list, method=2, fig=None, ax=None, 
         line_index_list:    a list of index
         method:             1: all points are connected, if some points are missing in the middle, just ignore that point and connect the two nearby points
                             2: if some points are missing, there might be two sub-lines
-    
+        threshold:          confidence to draw the points
+
     '''
 
     if debug:
-        assert assert is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array), 'input points are not correct'
+        assert is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array), 'input points are not correct'
+        assert islist(line_index_list), 'the list of index is not correct'
+        assert method == 2 or method == 1, 'the plot method is not correct'
 
+    if ax is None:
+        ax = plt.gca()
+    if fig is None:
+        fig = plt.gcf()
+
+    line_color = 'y'
     pts_line = pts_array[:, line_index_list]
     # print pts_line
     # time.sleep(100)
 
     if method == 1:    
-        valid_pts_list = np.where(pts_line[2, :] > cfg.test_threshold)[0].tolist()
+        valid_pts_list = np.where(pts_line[2, :] > threshold)[0].tolist()
         # print valid_pts_list
         pts_line_tmp = pts_line[:, valid_pts_list]
         
         # plot line
-        plt.plot(pts_line_tmp[0, :], pts_line_tmp[1, :], color=color)
+        ax.plot(pts_line_tmp[0, :], pts_line_tmp[1, :], color=line_color)
 
         # plot point
         for pts_index in valid_pts_list:
             pts_index_original = line_index_list[pts_index]
-            plt.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set[pts_index_original % len(color_set)])
+            ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set_big[pts_index_original % len(color_set_big)])
     else:
-        not_valid_pts_list = np.where(pts_line[2, :] < cfg.test_threshold)[0].tolist()
+        not_valid_pts_list = np.where(pts_line[2, :] < threshold)[0].tolist()
         
         if len(not_valid_pts_list) == 0:            # all valid
             
             # plot line
-            plt.plot(pts_line[0, :], pts_line[1, :], color=color)
+            ax.plot(pts_line[0, :], pts_line[1, :], color=line_color)
 
             # plot points
             for pts_index in line_index_list:
-                plt.plot(pts_array[0, pts_index], pts_array[1, pts_index], 'o', color=color_set[pts_index % len(color_set)])                        
+                ax.plot(pts_array[0, pts_index], pts_array[1, pts_index], 'o', color=color_set_big[pts_index % len(color_set_big)])                        
         else:
             prev_index = 0
             for not_valid_index in not_valid_pts_list:
@@ -121,24 +131,29 @@ def visualize_pts_line(pts_array, line_index_list, method=2, fig=None, ax=None, 
 
                 # plot line
                 pts_line_tmp = pts_line[:, plot_list]
-                plt.plot(pts_line_tmp[0, :], pts_line_tmp[1, :], color=color)
+                ax.plot(pts_line_tmp[0, :], pts_line_tmp[1, :], color=line_color)
                 
                 # plot points
                 for pts_index in plot_list:
                     pts_index_original = line_index_list[pts_index]
-                    plt.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set[pts_index_original % len(color_set)]) 
+                    ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set_big[pts_index_original % len(color_set_big)]) 
 
                 prev_index = not_valid_index + 1
 
             pts_line_tmp = pts_line[:, prev_index:]
 
             # plot last line
-            plt.plot(pts_line_tmp[0, :], pts_line_tmp[1, :], color=color)               
+            ax.plot(pts_line_tmp[0, :], pts_line_tmp[1, :], color=line_color)               
 
             # plot last points
             for pts_index in range(prev_index, pts_line.shape[1]):
                 pts_index_original = line_index_list[pts_index]
-                plt.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set[pts_index_original % len(color_set)]) 
+                ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set_big[pts_index_original % len(color_set_big)]) 
+
+    if closefig:
+        plt.close(fig)
+    else:
+        return fig, ax 
 
 
 def visualize_image(image, vis=True, save=False, save_path=None, debug=True, closefig=True):
