@@ -122,7 +122,7 @@ function concatenate_video_grid(image_folder_list, save_dir, im_size, grid_size,
 	% img_src = video_data_root_dir;
 	fprintf('generating video %d.\n', i);
 	num_images = generate_video_from_folder(save_dir, video_savepath, framerate, vis_resize_factor, {'.jpg'}, debug_mode);
-	fprintf('%d images loaded at %s...\n\n', num_images, tmp_dir);
+	fprintf('%d images loaded at %s...\n\n', num_images, save_dir);
 	fprintf('\ndone!!!!!!!!!!!\n\n');
 
 end
