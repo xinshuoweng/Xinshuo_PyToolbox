@@ -72,6 +72,75 @@ def visualize_lines(lines_array, color_index=0, line_width=3, fig=None, ax=None,
     else:
         return fig, ax
 
+def visualize_pts_line(pts_array, line_index_list, method=2, fig=None, ax=None, vis=False, save=False, save_path=None, debug=True):
+    '''
+    given a list of index, and a point array, to plot a set of points with line on it
+
+    inputs:
+        pts_array:          2(3) x num_pts
+        line_index_list:    a list of index
+        method:             1: all points are connected, if some points are missing in the middle, just ignore that point and connect the two nearby points
+                            2: if some points are missing, there might be two sub-lines
+    
+    '''
+
+    if debug:
+        assert assert is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array), 'input points are not correct'
+
+    pts_line = pts_array[:, line_index_list]
+    # print pts_line
+    # time.sleep(100)
+
+    if method == 1:    
+        valid_pts_list = np.where(pts_line[2, :] > cfg.test_threshold)[0].tolist()
+        # print valid_pts_list
+        pts_line_tmp = pts_line[:, valid_pts_list]
+        
+        # plot line
+        plt.plot(pts_line_tmp[0, :], pts_line_tmp[1, :], color=color)
+
+        # plot point
+        for pts_index in valid_pts_list:
+            pts_index_original = line_index_list[pts_index]
+            plt.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set[pts_index_original % len(color_set)])
+    else:
+        not_valid_pts_list = np.where(pts_line[2, :] < cfg.test_threshold)[0].tolist()
+        
+        if len(not_valid_pts_list) == 0:            # all valid
+            
+            # plot line
+            plt.plot(pts_line[0, :], pts_line[1, :], color=color)
+
+            # plot points
+            for pts_index in line_index_list:
+                plt.plot(pts_array[0, pts_index], pts_array[1, pts_index], 'o', color=color_set[pts_index % len(color_set)])                        
+        else:
+            prev_index = 0
+            for not_valid_index in not_valid_pts_list:
+                plot_list = range(prev_index, not_valid_index)
+
+                # plot line
+                pts_line_tmp = pts_line[:, plot_list]
+                plt.plot(pts_line_tmp[0, :], pts_line_tmp[1, :], color=color)
+                
+                # plot points
+                for pts_index in plot_list:
+                    pts_index_original = line_index_list[pts_index]
+                    plt.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set[pts_index_original % len(color_set)]) 
+
+                prev_index = not_valid_index + 1
+
+            pts_line_tmp = pts_line[:, prev_index:]
+
+            # plot last line
+            plt.plot(pts_line_tmp[0, :], pts_line_tmp[1, :], color=color)               
+
+            # plot last points
+            for pts_index in range(prev_index, pts_line.shape[1]):
+                pts_index_original = line_index_list[pts_index]
+                plt.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set[pts_index_original % len(color_set)]) 
+
+
 def visualize_image(image, vis=True, save=False, save_path=None, debug=True, closefig=True):
     '''
     input image is a numpy array matrix
