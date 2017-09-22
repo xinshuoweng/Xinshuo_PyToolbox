@@ -30,14 +30,22 @@ function [full_image_list, num_image] = load_list_from_folder(folder_path, ext_f
     % subfolder_list
     % pause;
 
+    % folder_path
+    % ext_filter
+
     % imagelist_curfolder
-    % pause
+    % % pause
 
     
-    % subfolder_list_recur
-    % pause
+
     subfolder_list_recur = get_subfolder_list(folder_path, depth-1, debug_mode);
     imagelist_subfolder = remove_empty_cell(cellfun(@(x) load_list_from_cur_folder(x, ext_filter, debug_mode), subfolder_list_recur, 'UniformOutput', false), debug_mode);
+
+    % subfolder_list_recur
+    % pause
+
+    % imagelist_subfolder
+    % pause
 
     % merge all sub-imagelist
     full_image_list = imagelist_curfolder;

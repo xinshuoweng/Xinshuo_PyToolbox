@@ -8,7 +8,7 @@
 %		im_size:				(height, width), final concatenated image size
 %		grid_size:				(number of rows, number of cols)
 %		save_dir:				output image folder
-function concatenate_video_grid(image_folder_list, save_dir, im_size, grid_size, ext_filter, framerate, vis_resize_factor, force, edge_factor, debug_mode)
+function concatenate_video_grid(image_folder_list, save_dir, im_size, grid_size, ext_filter, framerate, vis_resize_factor, force, edge_factor, start_frame, end_frame, debug_mode)
 	if nargin < 3
 		im_size = [1600, 2560];
 	end
@@ -43,6 +43,10 @@ function concatenate_video_grid(image_folder_list, save_dir, im_size, grid_size,
 	end
 
 	if nargin < 10
+		start_frame = 1;
+	end
+
+	if nargin < 12
 		debug_mode = true;
 	end
 
@@ -81,10 +85,13 @@ function concatenate_video_grid(image_folder_list, save_dir, im_size, grid_size,
 		end
 	end
 	fprintf('%d images loaded for %d folders\n', num_images, num_videos);
+	if nargin < 11
+		end_frame = num_images;
+	end
 
 	% concatenate
 	image_merged = zeros(window_height, window_width, im_channel);
-	for image_index = 1:num_images
+	for image_index = start_frame:end_frame
 		image_list_tmp = image_list_cell{1};
 		image_file = image_list_tmp{image_index};
 		[~, filename, ~] = fileparts(image_file);
