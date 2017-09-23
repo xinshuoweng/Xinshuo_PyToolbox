@@ -3,9 +3,9 @@
 
 
 % output is the one from softmax layer
-% as well as the hidden layer pre activations in 'act_a', and the hidden layer post
-% activations in 'act_h'.
-function [output, act_h, act_a] = forward_fc(fc_weight, train_sample, debug_mode)
+% as well as the hidden layer pre activations, and the hidden layer post
+% activations
+function [output, post_activation, pre_activation] = forward_fc(fc_weight, train_sample, debug_mode)
 	if nargin < 3
 		debug_mode = true;
 	end
@@ -31,26 +31,47 @@ function [output, act_h, act_a] = forward_fc(fc_weight, train_sample, debug_mode
 			assert(1 == size(b{layer_index}, 2), 'the second dimension of bias in neuron should be equal 1\n');
 		end
 	end
-	
-	act_a = cell(num_layer-1, 1);
-	act_h = cell(num_layer-1, 1);
+
+
+	pre_activation = cell(num_layer-1, 1);
+	post_activation = cell(num_layer-1, 1);
+
+	% pre_activation
+	% post_activation
+	% pause
 	for i = 1:num_layer
 		weight = W{i};
 		bias = b{i};
+		% size(bias)
 		output_pre = weight * train_sample + bias;
 
+		% output_pre
 		if i < num_layer
-			act_a{i} = output_pre;     % save the pre-activations
+			% 'h'
+			pre_activation{i} = output_pre;     % save the pre-activations
 		end
 
 		output_pos = mysigmoid(output_pre);
 		if i < num_layer
-			act_h{i} = output_pos;     % save the post-activations
+			post_activation{i} = output_pos;     % save the post-activations
 		elseif i == num_layer      % output the final softmax result
 			output = mysoftmax(output_pre);
 			break;
 		end
 		train_sample = output_pos;
+	end
+
+	% pre_activation
+	% post_activation
+	% pause
+
+	if debug_mode
+		assert(length(pre_activation) == length(W) - 1, 'the dimension of pre-activation is not correct');
+		assert(length(post_activation) == length(W) - 1, 'the dimension of post-activation is not correct');
+		for layer_index = 1:num_layer-1
+			assert(all(size(pre_activation{layer_index}) == size(fc_weight.b{layer_index})), 'the dimension of pre-activation is not correct');
+			assert(all(size(post_activation{layer_index}) == size(fc_weight.b{layer_index})), 'the dimension of post-activation is not correct');
+		end
 	end
 
 end

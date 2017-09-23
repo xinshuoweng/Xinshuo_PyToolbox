@@ -12,10 +12,16 @@ function weight = train(weight, train_data, train_label, config, debug_mode)
 	if debug_mode
 		assert(isfield(config, 'lr'), 'the configuration needs to have a field of learning rate\n');
 		assert(isfield(config, 'shuffle'), 'the configuration needs to have a field of shuffle\n');
+		% assert(isfield(config, 'check_grad'), 'the configuration needs to have a field of check gradient\n');
 	end
 
 	num_data = size(train_data, 1);
+	% check = false;
+	% num_data
 	% id = 1:number_data;
+
+	% size(train_data)
+	% pause
 
 	% shuffle the data
 	if config.shuffle
@@ -27,9 +33,24 @@ function weight = train(weight, train_data, train_label, config, debug_mode)
 	for i = 1:num_data
 		data_temp = train_data(i, :)';  		% N x 1
 		label_temp = train_label(i, :)';      	% C x 1 
-		[~, act_h_temp, act_a_temp] = forward_fc(weight, data_temp, debug_mode);
-		gradients = backward_fc(weight, data_temp, label_temp, act_h_temp, act_a_temp, debug_mode);
+
+
+		% size(label_temp)
+		% pause
+
+		[~, post_activation, pre_activation] = forward_fc(weight, data_temp, debug_mode);
+		gradients = backward_fc(weight, data_temp, label_temp, post_activation, debug_mode);
 		weight = update_parameters(weight, gradients, config, debug_mode);
+		
+		% act_a_temp
+		% if isnan(weight.W{2}(end))
+		% 	% data_temp
+		% 	label_temp
+		% 	pre_activation{1}
+		% 	post_activation{1}
+		% 	gradients.W{2}
+		% 	pause
+		% end
 
 		if mod(i, 100) == 0
 			fprintf('\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b');

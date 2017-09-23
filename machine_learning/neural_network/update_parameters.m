@@ -37,4 +37,5 @@ function weights_updated = update_parameters(weights, gradients, config, debug_m
 	weights_updated.b = b;
 	weights_updated.W = W;
 
+	% weights_updated.W{2}
 end
