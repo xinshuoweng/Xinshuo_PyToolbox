@@ -28,8 +28,8 @@ function weight = train(weight, train_data, train_label, config, debug_mode)
 		data_temp = train_data(i, :)';  		% N x 1
 		label_temp = train_label(i, :)';      	% C x 1 
 		[~, act_h_temp, act_a_temp] = forward_fc(weight, data_temp, debug_mode);
-		grad = Backward(weight, data_temp, label_temp, act_h_temp, act_a_temp, debug_mode);
-		weight = UpdateParameters(weight, grad, config, debug_mode);
+		gradients = backward_fc(weight, data_temp, label_temp, act_h_temp, act_a_temp, debug_mode);
+		weight = update_parameters(weight, gradients, config, debug_mode);
 
 		if mod(i, 100) == 0
 			fprintf('\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b');
