@@ -4,7 +4,7 @@
 % this function computes the gradient of fully connected layer with stored activation
 % inputs:
 %   		'X' and 'Y' the single input data sample and ground truth output vector of sizes N x 1 and C x 1 respectively
-function gradients = Backward(fc_weight, X, Y, post_activation, debug_mode)
+function gradients = backward_fc(fc_weight, X, Y, post_activation, debug_mode)
 	if nargin < 6
 		debug_mode = true;
 	end
@@ -44,10 +44,6 @@ function gradients = Backward(fc_weight, X, Y, post_activation, debug_mode)
 
 		grad_b{i} = delta_cur;
 		delta = delta_cur;
-
-		% grad_b{2}
-		% grad_W{2}
-		% pause
 	end
 
 	gradients = struct();

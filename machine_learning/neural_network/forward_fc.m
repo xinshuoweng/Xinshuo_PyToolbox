@@ -31,14 +31,9 @@ function [output, post_activation, pre_activation] = forward_fc(fc_weight, train
 			assert(1 == size(b{layer_index}, 2), 'the second dimension of bias in neuron should be equal 1\n');
 		end
 	end
-
-
 	pre_activation = cell(num_layer-1, 1);
 	post_activation = cell(num_layer-1, 1);
 
-	% pre_activation
-	% post_activation
-	% pause
 	for i = 1:num_layer
 		weight = W{i};
 		bias = b{i};
@@ -60,10 +55,6 @@ function [output, post_activation, pre_activation] = forward_fc(fc_weight, train
 		end
 		train_sample = output_pos;
 	end
-
-	% pre_activation
-	% post_activation
-	% pause
 
 	if debug_mode
 		assert(length(pre_activation) == length(W) - 1, 'the dimension of pre-activation is not correct');
