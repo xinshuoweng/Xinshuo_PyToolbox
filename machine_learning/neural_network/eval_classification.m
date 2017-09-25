@@ -1,14 +1,9 @@
 % Author: Xinshuo Weng
 % Email: xinshuow@andrew.cmu.edu
 
-% [accuracy, loss] = ComputeAccuracyAndLoss(W, b, X, Y) computes the networks
-% classification accuracy and cross entropy loss with respect to the data samples
-% and ground truth labels provided in 'data' and labels'. The function should return
-% the overall accuracy and the average cross-entropy loss.
-
 % this function computes the loss for multi-class classification problem
 % accuracy is the percentage of correct classification
-function [accuracy, loss_avg] = eval_classification(fc_weights, data, labels, num_class, debug_mode)
+function [accuracy, loss_avg] = eval_classification(fc_weights, data, labels, config, debug_mode)
 	if nargin < 5
 		debug_mode = true;
 	end
@@ -17,15 +12,15 @@ function [accuracy, loss_avg] = eval_classification(fc_weights, data, labels, nu
 		assert(isfield(fc_weights, 'W'), 'the weights in fully connected do not exist');
 		assert(isfield(fc_weights, 'b'), 'the bias in fully connected do not exist');
 		assert(size(data, 1) == size(labels, 1), 'the number of data samples should be equal to number of labels during evaluation');
-		assert(size(fc_weights.W{end}, 1) == num_class, 'the number of output in the last layer is not equal to number of classes');
+		assert(size(fc_weights.W{end}, 1) == config.num_class, 'the number of output in the last layer is not equal to number of classes');
 	end
 
 	% inference
 	num_data = size(data, 1);
-	predictions = zeros(num_data, num_class);			% num_data x num_class
+	predictions = zeros(num_data, config.num_class);			% num_data x num_class
 	for data_index = 1 : num_data
 	    data_tmp = data(data_index, :)';
-		predictions_tmp = forward_fc(fc_weights, data_tmp)';
+		predictions_tmp = forward_fc(fc_weights, data_tmp, config.train, debug_mode)';
 		predictions(data_index, :) = predictions_tmp;
 	end
 

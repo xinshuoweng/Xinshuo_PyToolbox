@@ -5,7 +5,7 @@
 % output is the one from softmax layer
 % as well as the hidden layer pre activations, and the hidden layer post
 % activations
-function [output, post_activation, pre_activation] = forward_fc(fc_weight, train_sample, debug_mode)
+function [output, post_activation, pre_activation] = forward_fc(fc_weight, train_sample, config, debug_mode)
 	if nargin < 3
 		debug_mode = true;
 	end
@@ -19,6 +19,19 @@ function [output, post_activation, pre_activation] = forward_fc(fc_weight, train
 	% W, b are cells of matrix to store the weight and bias
 	W = fc_weight.W;
 	b = fc_weight.b;
+
+	% define the activation function
+	if isfield(config, 'activation')
+		if strcmp(config.activation, 'sigmoid')
+			activation = @mysigmoid;
+		elseif strcmp(config.activation, 'relu')
+			activation = @myrelu;
+		else
+			assert(false, sprintf('the activation function is not correct in the configuration: %s', config.activation));
+		end	
+	else
+		activation = @mysigmoid;
+	end
 
 	if debug_mode
 		assert(length(W) == length(b), 'the number of layers in weight and bias is not equal\n');
@@ -35,18 +48,23 @@ function [output, post_activation, pre_activation] = forward_fc(fc_weight, train
 	post_activation = cell(num_layer-1, 1);
 
 	for i = 1:num_layer
-		weight = W{i};
-		bias = b{i};
-		% size(bias)
-		output_pre = weight * train_sample + bias;
+		weight = W{i};			% 100 x 784
+		bias = b{i};			% 100 x 1
+		% size(train_sample)	% 784 x 1
+
+		output_pre = weight * train_sample + bias;		% 100 x 1
 
 		% output_pre
 		if i < num_layer
-			% 'h'
+			
 			pre_activation{i} = output_pre;     % save the pre-activations
 		end
 
-		output_pos = mysigmoid(output_pre);
+		% output_pre(1:10)
+		output_pos = activation(output_pre);
+		% output_pos(1:10)
+		% pause
+
 		if i < num_layer
 			post_activation{i} = output_pos;     % save the post-activations
 		elseif i == num_layer      % output the final softmax result

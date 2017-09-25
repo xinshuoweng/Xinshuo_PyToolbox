@@ -32,12 +32,16 @@ function weight = train(weight, train_data, train_label, config, debug_mode)
 		train_label = train_label(shuffle_id, :);
 	end
 
+	if ~isfield(config, 'batch_size')
+		config.batch_size = 1;
+	end
+
 	for i = 1:num_data
 		data_temp = train_data(i, :)';  		% N x 1
 		label_temp = train_label(i, :)';      	% C x 1 
 
-		[~, post_activation, pre_activation] = forward_fc(weight, data_temp, debug_mode);
-		gradients = backward_fc(weight, data_temp, label_temp, post_activation, debug_mode);
+		[~, post_activation, pre_activation] = forward_fc(weight, data_temp, config, debug_mode);
+		gradients = backward_fc(weight, data_temp, label_temp, post_activation, config, debug_mode);
 		[weight, gradients_old] = update_parameters(weight, gradients, gradients_old, config, debug_mode);
 
 		if mod(i, 100) == 0

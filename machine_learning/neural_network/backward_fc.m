@@ -4,7 +4,7 @@
 % this function computes the gradient of fully connected layer with stored activation
 % inputs:
 %   		'X' and 'Y' the single input data sample and ground truth output vector of sizes N x 1 and C x 1 respectively
-function gradients = backward_fc(fc_weight, X, Y, post_activation, debug_mode)
+function gradients = backward_fc(fc_weight, X, Y, post_activation, config, debug_mode)
 	if nargin < 6
 		debug_mode = true;
 	end
@@ -23,6 +23,19 @@ function gradients = backward_fc(fc_weight, X, Y, post_activation, debug_mode)
 	grad_W = cell(size(W));
 	grad_b = cell(size(b));
 
+	% define the activation function
+	if isfield(config, 'activation')
+		if strcmp(config.activation, 'sigmoid')
+			activation = @mysigmoidprime;
+		elseif strcmp(config.activation, 'relu')
+			activation = @myreluprime;
+		else
+			assert(false, sprintf('the activation function is not correct in the configuration: %s', config.activation));
+		end	
+	else
+		activation = @mysigmoidprime;
+	end
+
 	% number_layer = number_hidden + 1;
 	output = mysoftmax(W{num_hidden + 1} * post_activation{num_hidden} + b{num_hidden + 1});
 
@@ -34,7 +47,13 @@ function gradients = backward_fc(fc_weight, X, Y, post_activation, debug_mode)
 	% iteratively compute the gradient for all hidden layers
 	for i = num_hidden : -1 : 1
 		weight_cur = W{i + 1}';					% 7x9
-		delta_cur = mysigmoidprime(post_activation{i}) .* (weight_cur * delta);    % 7x1
+
+		% post_activation{i}(1:10)
+		pre_activation = activation(post_activation{i});
+		% pre_activation(1:10)
+		% pause
+
+		delta_cur = pre_activation .* (weight_cur * delta);    % 7x1
 
 		if i == 1
 			grad_W{i} = delta_cur * X';                                                 
