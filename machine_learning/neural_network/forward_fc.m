@@ -26,10 +26,13 @@ function [output, post_activation, pre_activation] = forward_fc(fc_weight, train
 			activation = @mysigmoid;
 		elseif strcmp(config.activation, 'relu')
 			activation = @myrelu;
+		elseif strcmp(config.activation, 'tanh')
+			activation = @mytanh;
 		else
 			assert(false, sprintf('the activation function is not correct in the configuration: %s', config.activation));
 		end	
 	else
+		fprintf('No activation function is specified. Sigmoid is used here.');
 		activation = @mysigmoid;
 	end
 
@@ -52,12 +55,11 @@ function [output, post_activation, pre_activation] = forward_fc(fc_weight, train
 		bias = b{i};			% 100 x 1
 		% size(train_sample)	% 784 x 1
 
-		output_pre = weight * train_sample + bias;		% 100 x 1
+		output_pre = weight * train_sample + bias;				% 100 x 1			
 
 		% output_pre
 		if i < num_layer
-			
-			pre_activation{i} = output_pre;     % save the pre-activations
+			pre_activation{i} = output_pre;     				% 100 x 1
 		end
 
 		% output_pre(1:10)
@@ -66,9 +68,9 @@ function [output, post_activation, pre_activation] = forward_fc(fc_weight, train
 		% pause
 
 		if i < num_layer
-			post_activation{i} = output_pos;     % save the post-activations
+			post_activation{i} = output_pos;     				% 100 x 1
 		elseif i == num_layer      % output the final softmax result
-			output = mysoftmax(output_pre);
+			output = mysoftmax(output_pre);						% 10 x 1
 			break;
 		end
 		train_sample = output_pos;
