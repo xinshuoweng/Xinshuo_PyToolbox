@@ -330,8 +330,8 @@ def anno_parser(anno_path, num_pts=None, anno_version=None, debug=True):
     return pts
 
 
-######################################################### web related #########################################################
-def load_image(src_path, debug=True):
+######################################################### image related #########################################################
+def load_image(src_path, resize=1, debug=True):
     # open path as file to avoid ResourceWarning (https://github.com/python-pillow/Pillow/issues/835)
     src_path = safepath(src_path)
     if debug:
@@ -339,7 +339,10 @@ def load_image(src_path, debug=True):
 
     with open(src_path, 'rb') as f:
         with Image.open(f) as img:
-          return img.convert('RGB')
+            img = img.convert('RGB')
+            width, height = img.size
+            img = img.resize(size=(int(width*resize), int(height*resize)), resample=Image.BILINEAR)
+            return img
 
 ######################################################### web related #########################################################
 """

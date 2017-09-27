@@ -6,6 +6,11 @@ function [num_images] = generate_video_from_folder(img_src, save_path, framerate
 	if ~exist('debug_mode', 'var')
 		debug_mode = true;
 	end
+
+	if ~exist('downsample_factor', 'var')
+		downsample_factor = 1.0;
+	end
+
 	if ~exist('framerate', 'var')
 		framerate = 30;
 	elseif debug_mode
@@ -30,15 +35,15 @@ function [num_images] = generate_video_from_folder(img_src, save_path, framerate
 
 	open(video);
 	time = tic;
-	for i = 1:length(imagelist)
+	for i = 1:5:length(imagelist)
 		elapsed = toc(time);
 		remaining_str = string(py.timer.format_time(elapsed / i * (num_images - i)));
 		elapsed_str = string(py.timer.format_time(toc(time)));
 
 		fprintf('Loading images for videos: %d/%d, EP: %s, ETA: %s\n', i, num_images, elapsed_str, remaining_str);
-	    img = imread(imagelist{i});
-	    img = imresize(img, 1/downsample_factor);
-	    writeVideo(video, img);
+		img = imread(imagelist{i});
+		img = imresize(img, 1/downsample_factor);
+		writeVideo(video, img);
 	end
 
 	close(video);

@@ -124,7 +124,7 @@ def pil2cv_colorimage(pil_image, debug=True, vis=False):
 
 	return cv_image
 
-def bgr2rgb_npimage(np_image, debug=True):
+def chw2hwc_npimage(np_image, debug=True):
 	'''
 	this function transpose the channels of a numpy image from C x H x W to H x W x C
 	'''
@@ -138,31 +138,17 @@ def	unnormalize_npimage(np_image, debug=True):
 	'''
 	un-normalize a numpy image and scale it to [0, 255]
 	'''
-
 	if debug:
 		assert isnpimage_dimension(np_image), 'the input numpy image is not correct: {}'.format(np_image.shape)
 
 	min_val = np.min(np_image)
 	max_val = np.max(np_image)
 
-	# print np_image
-	# print min_val
-	# print max_val
-
 	np_image = np_image - min_val
 	np_image = np_image / (max_val - min_val)
-
 	np_image = np_image * 255.
-
-	# print np.min(np_image)
-	# print np.max(np_image)
-	# time.sleep(5)
-
 	np_image = np_image.astype('uint8')
 
-	# print np_image
-
 	if debug:
-		assert np.min(np_image) == 0 and np.max(np_image) == 255, 'the value range is not right [%d, %d]' % (np.min(np_image), np.max(np_image))
-
+		assert np.min(np_image) == 0 and np.max(np_image) == 255, 'the value range is not right [%f, %f]' % (min_val, max_val)
 	return np_image
