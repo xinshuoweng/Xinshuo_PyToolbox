@@ -13,10 +13,6 @@ function visualize_segment(pts_array, fig, color_index, debug_mode)
         assert(all(size(pts_array) == [2, 2]), 'the input point array is not correct');
     end
 
-    figure(fig);
+    % figure(fig);
     plot(pts_array(:, 1), pts_array(:, 2), 'Marker', 'x', 'Color', color_set(color_index));
-
-    % max_value = max(max(heatmap));
-    % im_to_disp = (img + mat2im(heatmap, jet(100), [0 max_value])) / 2;  % apply heatmap on the original image
-    % figure; imshow(im_to_disp);
 end

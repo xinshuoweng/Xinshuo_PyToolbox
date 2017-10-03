@@ -25,12 +25,15 @@ function [rectified_img, H] = metric_rectification(img, line_pairs, debug_mode)
 	params = zeros(5, 5);
 	right_side = zeros(5, 1);
 	for line_index = 1:5
-		params(line_index, 1) = line_pairs(line_index, 1) * line_pairs(line_index+1, 1);
-		params(line_index, 2) = (line_pairs(line_index, 1) * line_pairs(line_index+1, 2) + line_pairs(line_index, 2) * line_pairs(line_index+1, 1)) / 2;
-		params(line_index, 3) = line_pairs(line_index, 2) * line_pairs(line_index+1, 2);
-		params(line_index, 4) = (line_pairs(line_index, 1) * line_pairs(line_index+1, 3) + line_pairs(line_index, 3) * line_pairs(line_index+1, 1)) / 2;
-		params(line_index, 5) = (line_pairs(line_index, 2) * line_pairs(line_index+1, 3) + line_pairs(line_index, 3) * line_pairs(line_index+1, 2)) / 2;
-		right_side(line_index, 1) = -line_pairs(line_index, 3) * line_pairs(line_index+1, 3);
+		line1_index = 1 + (line_index - 1) * 2;
+		line2_index = line1_index + 1;
+
+		params(line_index, 1) = line_pairs(line1_index, 1) * line_pairs(line2_index, 1);
+		params(line_index, 2) = (line_pairs(line1_index, 1) * line_pairs(line2_index, 2) + line_pairs(line1_index, 2) * line_pairs(line2_index, 1)) / 2;
+		params(line_index, 3) = line_pairs(line1_index, 2) * line_pairs(line2_index, 2);
+		params(line_index, 4) = (line_pairs(line1_index, 1) * line_pairs(line2_index, 3) + line_pairs(line1_index, 3) * line_pairs(line2_index, 1)) / 2;
+		params(line_index, 5) = (line_pairs(line1_index, 2) * line_pairs(line2_index, 3) + line_pairs(line1_index, 3) * line_pairs(line2_index, 2)) / 2;
+		right_side(line_index, 1) = -line_pairs(line1_index, 3) * line_pairs(line2_index, 3);
 	end
 
 	s = (params' * params) \ (params' * right_side);

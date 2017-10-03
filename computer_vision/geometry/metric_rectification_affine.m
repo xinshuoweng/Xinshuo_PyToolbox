@@ -33,7 +33,6 @@ function [rectified_img, H] = metric_rectification_affine(img, line_pairs, debug
 	right_side = [m; n];
 	s = params \ right_side;
 	conic_dual = [s(1), s(2), 0; s(2), 1, 0; 0, 0, 0];
-	conic_dual
 
 	% check orthogonality in dual space with affine distortion
 	if debug_mode
@@ -42,22 +41,17 @@ function [rectified_img, H] = metric_rectification_affine(img, line_pairs, debug
 		assert(dot_product1 < 1e-4 && dot_product2 < 1e-4, 'the line in the plane with affine distortion is not orthogonal');
 	end
 
-	% check if the computed S is positive definite
+	% check if the computed conic dual is positive definite
 	% if debug_mode
 	% 	eigen = eig(conic_dual);
 	% 	assert(all(eigen >= 0), sprintf('the computed K * K'' is not positive definite, the eigen values are %.3f, %.3f\n', eigen(1), eigen(2)));
 	% end
 
-	[L, D] = ldl(conic_dual)
-	% D(1) = -D(1);
-	% L*D*L'
-	% conic_dual
+	[L, D] = ldl(conic_dual);
 	K = L * sqrt(sqrt(D^2));
-
-
 	% K = chol(conic_dual(1:2, 1:2), 'lower')														% 2 x 2
 
-	% check the decomposition such that K*K' = S
+	% check the decomposition such that K*K' = conic_dual
 	% if debug_mode
 	% 	residual = K * K' - conic_dual(1:2, 1:2);
 	% 	assert(norm(residual) < 1e-4, 'the Cholesky decomposition is not correct');
