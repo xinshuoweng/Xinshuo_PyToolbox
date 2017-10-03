@@ -44,7 +44,7 @@ function [rectified_img, H] = metric_rectification_affine(img, line_pairs, debug
 	% check if the computed S is positive definite
 	if debug_mode
 		eigen = eig(conic_dual);
-		assert(all(eigen >= 0), 'the computed K * K'' is not positive definite');
+		assert(all(eigen >= 0), sprintf('the computed K * K'' is not positive definite, the eigen values are %.3f, %.3f\n', eigen(1), eigen(2)));
 	end
 
 	K = chol(conic_dual(1:2, 1:2), 'lower');														% 2 x 2
