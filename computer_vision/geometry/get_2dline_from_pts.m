@@ -8,6 +8,7 @@
 %
 % output
 %	line:	1 x 3 vector [a, b, c] -> represent ax + by + c = 0
+
 function line_2d = get_2dline_from_pts(pts1, pts2, debug_mode)
 	if nargin < 3
 		debug_mode = true;
