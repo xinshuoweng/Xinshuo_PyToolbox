@@ -15,6 +15,12 @@ function cosine = angle_between_2dline(line1, line2, debug_mode)
 		assert(all(size(line2) == [1, 3]), 'the dimension of line is not correct');
 	end
 
+
+	% line1(1:3) = line1(1:3) / line1(3);
+	% line2(1:3) = line2(1:3) / line2(3);
+
+	% cosine = line1(1) * line2(1) + line1(2) * line2(2) + line1(3) * line2(3);
 	cosine = line1(1) * line2(1) + line1(2) * line2(2);
+	% cosine = cosine / (norm(line1) * norm(line2));
 	cosine = cosine / (norm(line1(1:2)) * norm(line2(1:2)));
 end
