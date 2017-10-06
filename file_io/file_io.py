@@ -22,7 +22,7 @@ from conversions import string2ext_filter, remove_empty_item_from_list
 from PIL import Image
 
 
-def fileparts(pathname, debug=True):
+def fileparts(pathname):
 	'''
 	this function return a tuple, which contains (directory, filename, extension)
 	if the file has multiple extension, only last one will be displayed
@@ -40,15 +40,47 @@ def fileparts(pathname, debug=True):
 	ext = os.path.splitext(pathname)[1]
 	return (directory, filename, ext)
 
-def load_list_from_file(file_path):
+def mkdir_if_missing(pathname, debug=True):
+    pathname = safepath(pathname)
+    if debug:
+        assert is_path_exists_or_creatable(pathname), 'input path is not valid or creatable: %s' % pathname
+    dirname, _, _ = fileparts(pathname)
+
+    if not is_path_exists(dirname):
+        mkdir_if_missing(dirname)
+
+    if isfolder(pathname) and not is_path_exists(pathname):
+        os.mkdir(pathname)
+
+def load_txt_file(file_path, debug=True):
+    '''
+    load data or string from text file
+    '''
+    file_path = safepath(file_path)
+    if debug:
+        assert is_path_exists(file_path), 'text file is not existing at path: %s!' % file_path
+
+    with open(file_path, 'r') as file:
+        data = file.read().splitlines()
+    num_lines = len(data)
+    file.close()
+
+    return data, num_lines
+
+######################################################### list related #########################################################
+
+def load_list_from_file(file_path, debug=True):
     '''
     this function reads list from a txt file
     '''
     file_path = safepath(file_path)
     _, _, extension = fileparts(file_path)
-    assert extension == '.txt', 'File doesn''t have valid extension.'
+
+    if debug:
+        assert extension == '.txt', 'File doesn''t have valid extension.'
     file = open(file_path, 'r')
-    assert file != -1, 'datalist not found'
+    if debug:
+        assert file != -1, 'datalist not found'
 
     fulllist = file.read().splitlines()
     fulllist = [os.path.normpath(path_tmp) for path_tmp in fulllist]
@@ -57,7 +89,7 @@ def load_list_from_file(file_path):
 
     return fulllist, num_elem
 
-def load_list_from_folder(folder_path, ext_filter=None, depth=1, recursive=False, sort=True, save_path=None):
+def load_list_from_folder(folder_path, ext_filter=None, depth=1, recursive=False, sort=True, save_path=None, debug=True):
     '''
     load a list of files or folders from a system path
 
@@ -70,12 +102,15 @@ def load_list_from_folder(folder_path, ext_filter=None, depth=1, recursive=False
             True: return all levels till to the depth
     '''
     folder_path = safepath(folder_path)
-    assert isfolder(folder_path), 'input folder path is not correct: %s' % folder_path
+    if debug:
+        assert isfolder(folder_path), 'input folder path is not correct: %s' % folder_path
     if not is_path_exists(folder_path):
         return [], 0
-    assert islogical(recursive), 'recursive should be a logical variable: {}'.format(recursive)
-    assert (isinteger(depth) and depth >= 1) or depth is None, 'input depth is not correct {}'.format(depth)
-    assert ext_filter is None or (islist(ext_filter) and all(isstring(ext_tmp) for ext_tmp in ext_filter)) or isstring(ext_filter), 'extension filter is not correct'
+
+    if debug:
+        assert islogical(recursive), 'recursive should be a logical variable: {}'.format(recursive)
+        assert (isinteger(depth) and depth >= 1) or depth is None, 'input depth is not correct {}'.format(depth)
+        assert ext_filter is None or (islist(ext_filter) and all(isstring(ext_tmp) for ext_tmp in ext_filter)) or isstring(ext_filter), 'extension filter is not correct'
     if isstring(ext_filter):    # convert to a list
         ext_filter = [ext_filter]
 
@@ -124,7 +159,8 @@ def load_list_from_folder(folder_path, ext_filter=None, depth=1, recursive=False
     # save list to a path
     if save_path is not None:
         save_path = safepath(save_path)
-        assert is_path_exists_or_creatable(save_path), 'the file cannot be created'
+        if debug:
+            assert is_path_exists_or_creatable(save_path), 'the file cannot be created'
         with open(save_path, 'w') as file:
             for item in fulllist:
                 file.write('%s\n' % item)
@@ -132,11 +168,12 @@ def load_list_from_folder(folder_path, ext_filter=None, depth=1, recursive=False
 
     return fulllist, num_elem
 
-def load_list_from_folders(folder_path_list, ext_filter=None, depth=1, recursive=False, save_path=None):
+def load_list_from_folders(folder_path_list, ext_filter=None, depth=1, recursive=False, save_path=None, debug=True):
     '''
     load a list of files or folders from a list of system path
     '''
-    assert islist(folder_path_list) or isstring(folder_path_list), 'input path list is not correct'
+    if debug:
+        assert islist(folder_path_list) or isstring(folder_path_list), 'input path list is not correct'
     if isstring(folder_path_list):
         folder_path_list = [folder_path_list]
 
@@ -150,7 +187,8 @@ def load_list_from_folders(folder_path_list, ext_filter=None, depth=1, recursive
     # save list to a path
     if save_path is not None:
         save_path = safepath(save_path)
-        assert is_path_exists_or_creatable(save_path), 'the file cannot be created'
+        if debug:
+            assert is_path_exists_or_creatable(save_path), 'the file cannot be created'
         with open(save_path, 'w') as file:
             for item in fulllist:
                 file.write('%s\n' % item)
@@ -158,32 +196,20 @@ def load_list_from_folders(folder_path_list, ext_filter=None, depth=1, recursive
 
     return fulllist, num_elem
 
-def mkdir_if_missing(pathname):
-	pathname = safepath(pathname)
-	assert is_path_exists_or_creatable(pathname), 'input path is not valid or creatable: %s' % pathname
-	dirname, _, _ = fileparts(pathname)
+# def generate_list_from_folder(save_path, src_path, ext_filter='jpg'):
+# 	save_path = safepath(save_path)
+# 	src_path = safepath(src_path)
+# 	assert isfolder(src_path) and is_path_exists(src_path), 'source folder not found or incorrect'
+# 	if not isfile(save_path):
+# 		assert isfolder(save_path), 'save path is not correct'
+# 		save_path = os.path.join(save_path, 'datalist.txt')
 
-	if not is_path_exists(dirname):
-		mkdir_if_missing(dirname)
+# 	if ext_filter is not None:
+# 		assert isstring(ext_filter), 'extension filter is not correct'
 
-	if isfolder(pathname) and not is_path_exists(pathname):
-		os.mkdir(pathname)
-
-
-def generate_list_from_folder(save_path, src_path, ext_filter='jpg'):
-	save_path = safepath(save_path)
-	src_path = safepath(src_path)
-	assert isfolder(src_path) and is_path_exists(src_path), 'source folder not found or incorrect'
-	if not isfile(save_path):
-		assert isfolder(save_path), 'save path is not correct'
-		save_path = os.path.join(save_path, 'datalist.txt')
-
-	if ext_filter is not None:
-		assert isstring(ext_filter), 'extension filter is not correct'
-
-	filepath = os.path.dirname(os.path.abspath(__file__))
-	cmd = 'th %s/generate_list.lua %s %s %s' % (filepath, src_path, save_path, ext_filter)
-	os.system(cmd)    # generate data list
+# 	filepath = os.path.dirname(os.path.abspath(__file__))
+# 	cmd = 'th %s/generate_list.lua %s %s %s' % (filepath, src_path, save_path, ext_filter)
+# 	os.system(cmd)    # generate data list
 
 
 def generate_list_from_data(save_path, src_data, debug=True):
@@ -213,29 +239,7 @@ def generate_list_from_data(save_path, src_data, debug=True):
             file.write('%f\n' % item)
     file.close()
 
-def save_image_from_data(save_path, data, debug=True, vis=False):
-    save_path = safepath(save_path)
-    if debug:
-        assert isimage(data), 'input data is not image format'
-        assert is_path_exists_or_creatable(save_path), 'save path is not correct'
-        mkdir_if_missing(save_path)
-
-    imsave(save_path, data)
-
-def load_txt_file(file_path, debug=True):
-    '''
-    load data or string from text file
-    '''
-    file_path = safepath(file_path)
-    if debug:
-        assert is_path_exists(file_path), 'text file is not existing at path: %s!' % file_path
-
-    with open(file_path, 'r') as file:
-        data = file.read().splitlines()
-    num_lines = len(data)
-    file.close()
-
-    return data, num_lines
+######################################################### matrix related #########################################################
 
 def save_2dmatrix_to_file(data, save_path, formatting='%.1f', debug=True):
     save_path = safepath(save_path)
@@ -258,6 +262,8 @@ def load_2dmatrix_from_file(src_path, delimiter=' ', dtype='float32', debug=True
 
     data = np.loadtxt(src_path, delimiter=delimiter, dtype=dtype)
     return data
+
+######################################################### pts related #########################################################
 
 # standard facial annotation format IO function
 # note that, the top left point is (1, 1) in 300-W instead of zero-indexed
@@ -286,7 +292,6 @@ def anno_writer(pts_array, pts_savepath, num_pts=68, anno_version=1, debug=True)
 
         file.write('}')
         file.close()
-
 
 def anno_parser(anno_path, num_pts=None, anno_version=None, debug=True):
     '''
@@ -329,20 +334,44 @@ def anno_parser(anno_path, num_pts=None, anno_version=None, debug=True):
             print('error in loading points in %s' % anno_path)
     return pts
 
-
 ######################################################### image related #########################################################
-def load_image(src_path, resize=1, debug=True):
+def load_image(src_path, resize_factor=1, mode='numpy', debug=True):
+    '''
+    load an image from given path
+
+    parameters:
+        resize_factor:      resize the image (>1 enlarge)
+        mode:               numpy or pil, specify the format of returned image
+    '''
+
     # open path as file to avoid ResourceWarning (https://github.com/python-pillow/Pillow/issues/835)
     src_path = safepath(src_path)
     if debug:
         assert is_path_exists(src_path), 'txt path is not correct at %s' % src_path
+        assert mode == 'numpy' or mode == 'pil', 'the input mode for returned image is not correct'
+        assert isfloat(resize_factor) and resize_factor > 0, 'the resize factor is not correct'
 
     with open(src_path, 'rb') as f:
         with Image.open(f) as img:
             img = img.convert('RGB')
             width, height = img.size
-            img = img.resize(size=(int(width*resize), int(height*resize)), resample=Image.BILINEAR)
-            return img
+            img = img.resize(size=(int(width*resize_factor), int(height*resize_factor)), resample=Image.BILINEAR)
+            
+            if mode == 'numpy':
+                tmp = np.array(img)
+                print(type(tmp))
+                return np.array(img)
+            else:
+                return img
+
+def save_image_from_data(save_path, data, debug=True, vis=False):
+    save_path = safepath(save_path)
+    if debug:
+        assert isimage(data), 'input data is not image format'
+        assert is_path_exists_or_creatable(save_path), 'save path is not correct'
+        mkdir_if_missing(save_path)
+
+    imsave(save_path, data)
 
 ######################################################### web related #########################################################
 """

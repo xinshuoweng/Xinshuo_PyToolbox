@@ -106,6 +106,16 @@ def string2ext_filter(string, debug=True):
 	else:
 		return '.' + string
 
+######################################################### time related #########################################################
+def convert_secs2time(seconds):
+    '''
+    format second to human readable way
+    '''
+    assert isfloat(seconds) or isinteger(seconds), 'input should be an integer or floating number to represent number of seconds'
+    m, s = divmod(int(seconds), 60)
+    h, m = divmod(m, 60)
+    return '[%d:%02d:%02d]' % (h, m, s)
+
 ######################################################### dict related #########################################################
 def get_subdict(dictionary, num, debug=True):	
 	if debug:
@@ -296,12 +306,3 @@ def float2percent(number, debug=True):
 	except ValueError:
 		print('could not convert to a floating number')
 	return '{:.1%}'.format(number)
-
-def print_np_shape(nparray, debug=True):
-	'''
-	print a string to represent the shape of a numpy array
-	'''
-	if debug:
-		assert isnparray(nparray), 'input is not a numpy array and does not have any shape'
-
-	return '(%s)' % (functools.reduce(lambda x, y: str(x) + ', ' + str(y), nparray.shape))

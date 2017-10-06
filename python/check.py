@@ -48,12 +48,21 @@ def istuple(tuple_test):
 	return isinstance(tuple_test, tuple)
 
 def is2dline(line_test):
-	return (isnparray(line_test) or islist(line_test) or istuple(line_test)) and np.array(line_test).size == 3
+    '''
+    numpy array or list or tuple with 3 elements
+    '''
+    return (isnparray(line_test) or islist(line_test) or istuple(line_test)) and np.array(line_test).size == 3
 
 def is2dpts(pts_test):
-	return (isnparray(pts_test) or islist(pts_test) or istuple(pts_test)) and np.array(pts_test).size == 2
+    '''
+    numpy array or list or tuple with 2 elements
+    '''
+    return (isnparray(pts_test) or islist(pts_test) or istuple(pts_test)) and np.array(pts_test).size == 2
 
 def is2dptsarray(pts_test):
+    '''
+    numpy array with [2, N]
+    '''
     return isnparray(pts_test) and pts_test.shape[0] == 2 and len(pts_test.shape) == 2 and pts_test.shape[1] >= 0
 
 def is2dptsarray_occlusion(pts_test):
