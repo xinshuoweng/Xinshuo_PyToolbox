@@ -10,9 +10,8 @@
 
 # this_dir = os.path.dirname(os.path.abspath(__file__))
 
-# file_path = os.path.join(this_dir, '../file_io')
+# file_path = os.path.join(this_dir, '../python')
 # add_path(file_path)
 
-from .check import *
-from .configuration import *
-from .conversions import *
+from .counter import *
+from .logger import *

@@ -15,11 +15,13 @@ from scipy.misc import imread
 from scipy.stats import norm, chi2
 from terminaltables import AsciiTable
 
-import __init__paths__
+# this file define a set of functions related to matplotlib
+from collections import Counter
 from check import *
 from file_io import mkdir_if_missing, fileparts
 from bbox_transform import bbox_TLBR2TLWH, bboxcheck_TLBR
-from conversions import print_np_shape, list2tuple, list_reorder
+from logger import print_np_shape
+from conversions import list2tuple, list_reorder
 from math_functions import pts_euclidean, calculate_truncated_mse
 
 color_set = ['r', 'b', 'g', 'c', 'm', 'y', 'k', 'w', 'lime', 'cyan', 'aqua']
@@ -156,7 +158,7 @@ def visualize_pts_line(pts_array, line_index_list, method=2, threshold=None, fig
         return fig, ax 
 
 
-def visualize_image(image, vis=True, save=False, save_path=None, debug=True, closefig=True):
+def visualize_image(image, vis=True, save_path=None, debug=True, closefig=True):
     '''
     input image is a numpy array matrix
     '''
@@ -169,6 +171,9 @@ def visualize_image(image, vis=True, save=False, save_path=None, debug=True, clo
         except IOError:
             print('path is not a valid image path. Please check: %s' % image)
             return
+
+    if save_path is not None:
+        save = True
 
     if islist(image):
         imagelist = image
@@ -1179,3 +1184,39 @@ def visualize_bar_graph(data=None, title=None, label=False, label_list=None, vis
     if vis:
         plt.show()
     plt.close()
+
+
+
+
+############################## for matplotlib
+
+def autopct_generator(upper_percentage_to_draw):
+    '''
+    this function generate a autopct when draw a pie chart
+    '''
+    def inner_autopct(pct):
+        return ('%.2f' % pct) if pct > upper_percentage_to_draw else ''
+    return inner_autopct
+
+
+def fixOverLappingText(text):
+
+    # if undetected overlaps reduce sigFigures to 1
+    sigFigures = 2
+    positions = [(round(item.get_position()[1],sigFigures), item) for item in text]
+
+    overLapping = Counter((item[0] for item in positions))
+    overLapping = [key for key, value in overLapping.items() if value >= 2]
+
+    for key in overLapping:
+        textObjects = [text for position, text in positions if position == key]
+
+        if textObjects:
+
+            # If bigger font size scale will need increasing
+            scale = 0.1
+
+            spacings = np.linspace(0,scale*len(textObjects),len(textObjects))
+
+            for shift, textObject in zip(spacings,textObjects):
+                textObject.set_y(key + shift)

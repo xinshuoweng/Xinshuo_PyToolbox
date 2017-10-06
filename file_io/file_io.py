@@ -335,7 +335,7 @@ def anno_parser(anno_path, num_pts=None, anno_version=None, debug=True):
     return pts
 
 ######################################################### image related #########################################################
-def load_image(src_path, resize_factor=1, mode='numpy', debug=True):
+def load_image(src_path, resize_factor=1.0, mode='numpy', debug=True):
     '''
     load an image from given path
 
@@ -346,6 +346,9 @@ def load_image(src_path, resize_factor=1, mode='numpy', debug=True):
 
     # open path as file to avoid ResourceWarning (https://github.com/python-pillow/Pillow/issues/835)
     src_path = safepath(src_path)
+    if isinteger(resize_factor):
+        resize_factor = float(resize_factor)
+
     if debug:
         assert is_path_exists(src_path), 'txt path is not correct at %s' % src_path
         assert mode == 'numpy' or mode == 'pil', 'the input mode for returned image is not correct'
@@ -358,8 +361,6 @@ def load_image(src_path, resize_factor=1, mode='numpy', debug=True):
             img = img.resize(size=(int(width*resize_factor), int(height*resize_factor)), resample=Image.BILINEAR)
             
             if mode == 'numpy':
-                tmp = np.array(img)
-                print(type(tmp))
                 return np.array(img)
             else:
                 return img

@@ -4,11 +4,12 @@
 # this file generate a synthetic image with various objects
 
 # from __future__ import print_function
-# from PIL import Image
 import numpy as np
+from scipy.misc import imresize
 
 from check import *
 from file_io import load_image
+# from visualize import visualize_image
 
 class synthetic_image_data(object):
 	def __init__(self, img, debug=True):
@@ -28,8 +29,11 @@ class synthetic_image_data(object):
 
 		self.__original = np.copy(img)
 
-	def clean():
-		self.img = self.__original
+	def get_image(self):
+		return self.img
+
+	def clean(self):
+		self.img = np.copy(self.__original)
 
 	def add_line(self, center_location, height=3, width=100, intensity=255):
 		'''
@@ -50,10 +54,7 @@ class synthetic_image_data(object):
 		x, y = center_location[0], center_location[1]
 		left_bound, right_bound = int(x - width/2), int(x + width/2)
 		lower_bound, upper_bound = int(y - height/2), int(y + height/2)
-		self.img[lower_bound:upper_bound+1, left_bound:right_bound+1] = intensity
-
-	def get_image(self):
-		return self.img
+		self.img[lower_bound:upper_bound+1, left_bound:right_bound+1, :] = intensity
 
 	def add_background(self, back_img, patch_location, mode='resize'):
 		'''
@@ -61,18 +62,19 @@ class synthetic_image_data(object):
 
 		parameters:
 			back_img:				integer image
-			patch_location:					[x_left, x_right, y_lower, y_upper], a location of the patch
+			patch_location:			[x_left, y_lower, x_right, y_upper], a location of the patch
 			mode:					trun, keep, resize
 		'''
 		if isstring(back_img):
-			back_img = load_image(back_img, mode='numpy', debug=debug)
-		
+			back_img = load_image(back_img, mode='numpy', debug=self.debug)
+
 		if self.debug:
 			assert isuintimage(back_img), 'the input background image is not correct'
-			assert patch_location[0] >= 0 and patch_location[2] >= 0, 'the input patch location is not correct'
-			assert patch_location[1] < self.width and patch_location[3] < self.height, 'the input patch location is not correct'
-			assert patch_location[1] >= patch_location[0] and patch_location[3] >= patch_location[2], 'the input patch location is not correct'
+			assert patch_location[0] >= 0 and patch_location[1] >= 0, 'the input patch location is not correct'
+			assert patch_location[2] <= self.width and patch_location[3] <= self.height, 'the input patch location is not correct'
+			assert patch_location[2] >= patch_location[0] and patch_location[3] >= patch_location[1], 'the input patch location is not correct'
 			assert mode == 'trim' or mode == 'resize', 'the input mode is not correct'
 
 		if mode == 'resize':
-			self.img[patch_location[2]:patch_location[3], patch_location[0]:patch_location[1]] = np.resize(back_img, (patch_location[3] - patch_location[2], patch_location[1] - patch_location[0]))
+			back_img = imresize(back_img, (patch_location[3] - patch_location[1], patch_location[2] - patch_location[0], 3))
+			self.img[patch_location[1]:patch_location[3], patch_location[0]:patch_location[2], :] = np.copy(back_img)
