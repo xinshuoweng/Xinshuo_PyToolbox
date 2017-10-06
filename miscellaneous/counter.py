@@ -3,7 +3,8 @@
 
 # visualize the blob of caffe net
 
-import time
+import time, sys
+import numpy as np
 
 # import __init__paths__
 # from check import isfloat, isinteger

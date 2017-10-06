@@ -21,6 +21,7 @@ def print_np_shape(nparray, debug=True):
 	return '(%s)' % (functools.reduce(lambda x, y: str(x) + ', ' + str(y), nparray.shape))
 
 def print_torch_size(torch_size):
+	print(torch_size)
 	dims = len(torch_size)
 	string = '['
 	for idim in range(dims):
