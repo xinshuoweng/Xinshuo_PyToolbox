@@ -2,7 +2,7 @@
 # email: xinshuo.weng@gmail.com
 
 # this file contains all functions related to operation of bounding box
-import __init__paths__
+# import __init__paths__
 import numpy as np
 import math
 import time

@@ -14,7 +14,7 @@ from check import *
 from math_functions import pts_euclidean
 from visualize import visualize_ced, visualize_pts
 from file_io import fileparts, mkdir_if_missing
-from conversions import print_np_shape, list_reorder
+from miscellaneous import print_np_shape, list_reorder
 
 # for better visualization in error distribution, we center the distribution map and set fixed visualization range for fair comparison
 display_range = True

@@ -15,3 +15,4 @@
 
 from .counter import *
 from .logger import *
+from .conversions import *

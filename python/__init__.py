@@ -14,5 +14,4 @@
 # add_path(file_path)
 
 from .check import *
-from .configuration import *
-from .conversions import *
+# from .configuration import *

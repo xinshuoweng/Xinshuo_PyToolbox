@@ -4,7 +4,7 @@ import math
 import numpy as np
 from numpy.testing import assert_almost_equal
 
-import __init__paths__
+# import __init__paths__
 from check import *
 
 ################################################################## 2d geometry ##################################################################
