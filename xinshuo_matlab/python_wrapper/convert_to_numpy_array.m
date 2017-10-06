@@ -13,6 +13,6 @@ function [np_array_obj, shape] = convert_to_numpy_array(matrix)
 	end
 
 	% cell array corresponds to tuple array in python
-	np_array_obj = py.wrapper_function.get_nparray_from_array(cell_matrix);
+	np_array_obj = py.xinshuo_matlab.get_nparray_from_array(cell_matrix);
 	shape = size(matrix);
 end

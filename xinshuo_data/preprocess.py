@@ -5,9 +5,8 @@
 import numpy as np
 from numpy.testing import assert_almost_equal
 
-import __init__paths__
-from xinshuo_python import isnparray, iscolorimage, istuple, islist, CHECK_EQ_LIST, isimage, isgrayimage, isuintimage, isfloatimage
-from xinshuo_visualization import visualize_save_image
+from xinshuo_python import isnparray, iscolorimage, istuple, islist, CHECK_EQ_LIST_SELF, isimage, isgrayimage, isuintimage, isfloatimage
+from xinshuo_visualization import visualize_image
 
 
 def identity(data, data_range=None, debug=True):
@@ -78,7 +77,7 @@ def preprocess_image_caffe(image_datalist, debug=True, vis=False):
 		assert islist(image_datalist), 'input is not a list of image'
 		assert all(isimage(image_data, debug=debug) for image_data in image_datalist), 'input is not a list of image'
 		shape_list = [image_data.shape for image_data in image_datalist]
-		assert CHECK_EQ_LIST(shape_list), 'image shape is not equal inside one batch'
+		assert CHECK_EQ_LIST_SELF(shape_list), 'image shape is not equal inside one batch'
 
 	data_warmup = image_datalist[0]
 	if iscolorimage(data_warmup, debug=debug):
@@ -125,7 +124,7 @@ def preprocess_image_caffe(image_datalist, debug=True, vis=False):
 			for index in xrange(caffe_input_data.shape[0]):
 				image_tmp_swapped = caffe_input_data[index]
 				print('\n\nPlease make sure the image is not RGB after swapping channel')
-				visualize_save_image(image_tmp_swapped, debug=debug)
+				visualize_image(image_tmp_swapped, debug=debug)
 		assert caffe_input_data.shape[-1] == 3 or caffe_input_data.shape[-1] == 1, 'channel is not correct'
 	caffe_input_data = np.transpose(caffe_input_data, (0, 3, 1, 2))         # permute to [batch, channel, height, weight]
 	
