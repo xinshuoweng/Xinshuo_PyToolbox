@@ -53,6 +53,9 @@ def is2dline(line_test):
     '''
     return (isnparray(line_test) or islist(line_test) or istuple(line_test)) and np.array(line_test).size == 3
 
+def issize(size_test):
+    return is2dpts(size_test)
+
 def is2dpts(pts_test):
     '''
     numpy array or list or tuple with 2 elements
@@ -203,8 +206,11 @@ def isfloatimage(image_test, debug=False):
             print 'No'
         return False
 
+def isnpimage(image_test, debug=False):
+    return isfloatimage(image_test, debug=debug) or isuintimage(image_test, debug=debug)
+
 def isimage(image_test, debug=False):
-    return isfloatimage(image_test, debug=debug) or isuintimage(image_test, debug=debug) or ispilimage(image_test)
+    return isnpimage(image_test, debug=debug) or ispilimage(image_test)
 
 def isscaledimage(image_test):
     if not isimage(image_test):

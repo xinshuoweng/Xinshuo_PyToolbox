@@ -2,7 +2,7 @@
 # email: xinshuo.weng@gmail.com
 import time
 import matplotlib as mpl
-mpl.use('Agg')
+# mpl.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.collections as plycollections
 from matplotlib.patches import Ellipse
@@ -172,6 +172,8 @@ def visualize_image(image, vis=True, save_path=None, debug=True, closefig=True):
 
     if save_path is not None:
         save = True
+    else:
+        save = False
 
     if islist(image):
         imagelist = image
@@ -246,7 +248,7 @@ def visualize_image(image, vis=True, save_path=None, debug=True, closefig=True):
     else:
         return fig, ax
 
-def visualize_image_with_pts(image_path, pts, covariance=False, pts_size=20, label=False, label_list=None, color_index=0, vis=True, vis_threshold=-10000, save=False, save_path=None, debug=True, closefig=True):
+def visualize_image_with_pts(image_path, pts, covariance=False, pts_size=20, label=False, label_list=None, color_index=0, vis=False, vis_threshold=-10000, save=False, save_path=None, debug=True, closefig=True):
     '''
     visualize image and plot keypoints on top of it
 

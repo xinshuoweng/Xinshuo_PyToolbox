@@ -1,6 +1,7 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
 import numpy as np
+from PIL import Image
 
 from xinshuo_python import *
 
@@ -15,7 +16,6 @@ def imagecoor2cartesian(pts, debug=True):
 		pts:	a tuple if only single point comes in or a 2 x N numpy array
 	'''
 	return cartesian2imagecoor(pts, debug=debug)
-
 
 def cartesian2imagecoor(pts, debug=True):
 	'''
@@ -37,7 +37,6 @@ def cartesian2imagecoor(pts, debug=True):
 	else:
 		pts[1, :] = -pts[1, :]
 		return pts
-
 
 def imagecoor2cartesian_center(image_shape, debug=True):
 	'''
@@ -111,7 +110,6 @@ def generate_mean_image(images_dir, save_path, debug=True, vis=False):
 	mean_im = np.mean(image_blob, axis=2)
 	visualize_image(mean_im, debug=debug, vis=vis, save=True, save_path=save_path)
 
-
 def pil2cv_colorimage(pil_image, debug=True, vis=False):
 	'''
 	this function converts a PIL image to a cv2 image, which has RGB and BGR format respectively
@@ -152,3 +150,65 @@ def	unnormalize_npimage(np_image, debug=True):
 	if debug:
 		assert np.min(np_image) == 0 and np.max(np_image) == 255, 'the value range is not right [%f, %f]' % (min_val, max_val)
 	return np_image
+
+def concatenate_grid(image_list, im_size=[1600, 2560], grid_size=None, edge_factor=0.99, debug=True):
+	'''
+	concatenate a list of images automatically
+
+	parameters:	
+		image_list: 		a list of numpy array
+		im_size:			a tuple or list of numpy array for [H, W]
+		edge_factor:		the margin between images after concatenation, bigger, the edge is smaller, [0, 1]
+	'''
+	if debug:
+		assert islist(image_list) and all(ispilimage(image_tmp) for image_tmp in image_list), 'the input is not a list of image'
+		assert issize(im_size), 'the input image size is not correct'
+		if grid_size is not None:
+			assert issize(grid_size), 'the input grid size is not correct'
+
+	num_images = len(image_list)
+
+	if grid_size is None:
+		num_rows = int(np.sqrt(num_images))
+		num_cols = int(np.ceil(num_images * 1.0 / num_rows))
+	else:
+		num_rows = grid_size[0]
+		num_cols = grid_size[1]
+
+	window_height = im_size[0]
+	window_width = im_size[1]
+	
+	grid_height = int(window_height / num_rows)
+	grid_width  = int(window_width  / num_cols)
+	im_height   = int(grid_height   * edge_factor)
+	im_width 	= int(grid_width 	 * edge_factor)
+	im_channel 	= 3
+
+	# print(window_height)
+	# print(window_width)
+	# print(grid_height)
+	# print(grid_width)
+	# print(im_width)
+	# print(im_height)
+
+	# concatenate
+	image_merged = np.zeros((window_height, window_width, im_channel), dtype='uint8')
+	for image_index in range(num_images):
+		image_tmp = image_list[image_index]
+		image_tmp = image_tmp.resize((im_width, im_height), Image.ANTIALIAS)
+		image_tmp = image_tmp.convert('RGB')
+
+		rows_index = int(np.ceil((image_index+1.0) / num_cols))			# 1-indexed
+		cols_index = image_index+1 - (rows_index - 1) * num_cols	# 1-indexed
+		rows_start = 1 + (rows_index - 1) * grid_height				# 1-indexed
+		rows_end   = rows_start + im_height							# 1-indexed
+		cols_start = 1 + (cols_index - 1) * grid_width				# 1-indexed
+		cols_end   = cols_start + im_width							# 1-indexed
+
+		# print(rows_index)
+		# print(cols_index)
+		# print(rows_start)
+		# print(rows_end)
+		image_merged[rows_start:rows_end, cols_start : cols_end, :] = np.array(image_tmp)
+
+	return image_merged
