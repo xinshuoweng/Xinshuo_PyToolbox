@@ -1,5 +1,6 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
+import math
 import numpy as np
 from PIL import Image
 
@@ -134,21 +135,26 @@ def chw2hwc_npimage(np_image, debug=True):
 
 def	unnormalize_npimage(np_image, debug=True):
 	'''
-	un-normalize a numpy image and scale it to [0, 255]
+	un-normalize a numpy image and scale it to [0, 255], uint8
 	'''
 	if debug:
 		assert isnpimage_dimension(np_image), 'the input numpy image is not correct: {}'.format(np_image.shape)
 
 	min_val = np.min(np_image)
 	max_val = np.max(np_image)
+	if math.isnan(min_val) or math.isnan(max_val):			# with nan
+		assert False, 'the input image has nan'
+	elif min_val == max_val:								# all same
+		np_image.fill(0)
+	else:													# normal case
+		np_image = np_image - min_val
+		np_image = np_image / (max_val - min_val)
+		np_image = np_image * 255.
+		if debug:
+			assert np.min(np_image) == 0 and np.max(np_image) == 255, 'the value range is not right [%f, %f]' % (min_val, max_val)
 
-	np_image = np_image - min_val
-	np_image = np_image / (max_val - min_val)
-	np_image = np_image * 255.
 	np_image = np_image.astype('uint8')
 
-	if debug:
-		assert np.min(np_image) == 0 and np.max(np_image) == 255, 'the value range is not right [%f, %f]' % (min_val, max_val)
 	return np_image
 
 def concatenate_grid(image_list, im_size=[1600, 2560], grid_size=None, edge_factor=0.99, debug=True):
@@ -184,13 +190,6 @@ def concatenate_grid(image_list, im_size=[1600, 2560], grid_size=None, edge_fact
 	im_width 	= int(grid_width 	 * edge_factor)
 	im_channel 	= 3
 
-	# print(window_height)
-	# print(window_width)
-	# print(grid_height)
-	# print(grid_width)
-	# print(im_width)
-	# print(im_height)
-
 	# concatenate
 	image_merged = np.zeros((window_height, window_width, im_channel), dtype='uint8')
 	for image_index in range(num_images):
@@ -205,10 +204,6 @@ def concatenate_grid(image_list, im_size=[1600, 2560], grid_size=None, edge_fact
 		cols_start = 1 + (cols_index - 1) * grid_width				# 1-indexed
 		cols_end   = cols_start + im_width							# 1-indexed
 
-		# print(rows_index)
-		# print(cols_index)
-		# print(rows_start)
-		# print(rows_end)
 		image_merged[rows_start:rows_end, cols_start : cols_end, :] = np.array(image_tmp)
 
 	return image_merged

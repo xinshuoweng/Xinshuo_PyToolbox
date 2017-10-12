@@ -723,8 +723,7 @@ def visualize_image_with_bbox(image_path, bbox, ax=None, vis=True, save=False, s
 
     return visualize_bbox(bbox, fig=fig, ax=ax, vis=vis, save=save, save_path=save_path, debug=debug, closefig=closefig)
 
-
-def visualize_bbox(bbox, fig=None, ax=None, vis=True, save=False, save_path=None, debug=True, closefig=True):
+def visualize_bbox(bbox, fig=None, ax=None, linewidth=1.5, vis=True, save=False, save_path=None, debug=True, closefig=True):
     if debug:    
         assert bboxcheck_TLBR(bbox), 'input bounding boxes are not correct'
 
@@ -739,7 +738,7 @@ def visualize_bbox(bbox, fig=None, ax=None, vis=True, save=False, save_path=None
     bbox = bbox_TLBR2TLWH(bbox)              # convert TLBR format to TLWH format
     for bbox_index in range(bbox.shape[0]):
         bbox_tmp = bbox[bbox_index, :]     
-        ax.add_patch(plt.Rectangle((bbox_tmp[0], bbox_tmp[1]), bbox_tmp[2], bbox_tmp[3], fill=False, edgecolor='yellow', linewidth=3.5))
+        ax.add_patch(plt.Rectangle((bbox_tmp[0], bbox_tmp[1]), bbox_tmp[2], bbox_tmp[3], fill=False, edgecolor='yellow', linewidth=linewidth))
 
     # save and visualization
     if save:
@@ -754,7 +753,6 @@ def visualize_bbox(bbox, fig=None, ax=None, vis=True, save=False, save_path=None
         plt.close(fig)
     else:
         return fig, ax
-
 
 def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, truncated_list=None, display2terminal=True, display_list=None, title=None, debug=True, vis=True, save=False, pck_savepath=None, table_savepath=None):
     '''
