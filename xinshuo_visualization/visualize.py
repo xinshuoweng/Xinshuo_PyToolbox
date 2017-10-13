@@ -723,7 +723,7 @@ def visualize_image_with_bbox(image_path, bbox, ax=None, vis=True, save=False, s
 
     return visualize_bbox(bbox, fig=fig, ax=ax, vis=vis, save=save, save_path=save_path, debug=debug, closefig=closefig)
 
-def visualize_bbox(bbox, fig=None, ax=None, linewidth=1.5, vis=True, save=False, save_path=None, debug=True, closefig=True):
+def visualize_bbox(bbox, fig=None, ax=None, linewidth=0.5, vis=True, save=False, save_path=None, debug=True, closefig=True):
     if debug:    
         assert bboxcheck_TLBR(bbox), 'input bounding boxes are not correct'
 

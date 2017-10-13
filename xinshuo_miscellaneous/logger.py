@@ -1,12 +1,15 @@
 # Author: Xinshuo Weng
 # Email: xinshuo.weng@gmail.com
 
+from __future__ import print_function
+
 # logging
 
-
-
-def print_log(print_string, log):
-	print("{}".format(print_string))
+def print_log(print_string, log, same_line=False):
+	if same_line:
+		print('{}'.format(print_string), end='')
+	else:
+		print('{}'.format(print_string))
 	if log is not None:
 		log.write('{}\n'.format(print_string))
 		log.flush()
