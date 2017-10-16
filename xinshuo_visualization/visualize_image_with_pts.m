@@ -8,7 +8,11 @@
 %	pts_array:	2 x num_pts matrix to represent (x, y) locations
 %	label:		a logical value to judge if display a text for every points
 %	label_str:	a cell array where every cell has a string inside
-function img_with_pts = visualize_image_with_pts(img, pts_array, vis, debug_mode, save_path, label, label_str, vis_radius, vis_resize_factor)
+function img_with_pts = visualize_image_with_pts(img, pts_array, vis, debug_mode, save_path, label, label_str, vis_radius, vis_resize_factor, closefig)
+	if ~exist('closefig', 'var')
+		closefig = true;
+	end
+
 	if ~exist('debug_mode', 'var')
 		debug_mode = true;
 	end
@@ -74,7 +78,10 @@ function img_with_pts = visualize_image_with_pts(img, pts_array, vis, debug_mode
 	% get the current frame to return
 	img_with_pts = getframe;
 	img_with_pts = img_with_pts.cdata;
-	close(fig);
+
+	if closefig
+		close(fig);
+	end
 
 	% resize the image obtained from the handle
 	im_size = check_imageSize(size(img), debug_mode);
@@ -85,7 +92,7 @@ function img_with_pts = visualize_image_with_pts(img, pts_array, vis, debug_mode
 	end
 
 	% save
-	if exist('save_path', 'var')
+	if ~isempty(save_path)
 		assert(ischar(save_path), 'save path is not correct.');
 		mkdir_if_missing(fileparts(save_path));
 		imwrite(imresize(img_with_pts, vis_resize_factor), save_path);

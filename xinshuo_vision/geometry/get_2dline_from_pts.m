@@ -23,4 +23,9 @@ function line_2d = get_2dline_from_pts(pts1, pts2, debug_mode)
 	pts2_homo = [pts2, 1];
 
 	line_2d = cross(pts1_homo, pts2_homo);
+
+	if debug_mode
+		assert(pts1_homo * line_2d' < 1e-5, 'the point is not on the line');
+		assert(pts2_homo * line_2d' < 1e-5, 'the point is not on the line');
+	end
 end
