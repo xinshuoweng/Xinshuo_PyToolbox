@@ -2,7 +2,7 @@
 % Email: xinshuow@andrew.cmu.edu
 
 % this function updates the parameters from previous stored weights and the gradients computed in the current iteration
-function [weights_updated, gradients_old] = update_parameters(weight, gradients, gradients_old, config, debug_mode)
+function [weights_updated, gradients_old] = update_parameters_fc(weight, gradients, gradients_old, config, debug_mode)
 	if nargin < 5
 		debug_mode = true;
 	end

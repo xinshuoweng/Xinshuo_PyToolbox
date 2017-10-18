@@ -1,10 +1,10 @@
 % Author: Xinshuo Weng
 % Email: xinshuow@andrew.cmu.edu
 
-% trains the network for one epoch
-% This % function should return the updated network parameters 'W' and 'b' after
+% trains the restricted Boltzmann machine for one epoch
+% This function should return the updated network parameters after
 % performing back-propagation on every data sample.
-function weight = train(weight, train_data, train_label, config, debug_mode)
+function weight = train_rbm(weight, train_data, train_label, config, debug_mode)
 	if nargin < 5
 		debug_mode = true;
 	end
@@ -16,16 +16,12 @@ function weight = train(weight, train_data, train_label, config, debug_mode)
 
 	% set previous gradients as zero before optimization
 	gradients_old = weight;
-	num_layer = length(gradients_old.W);
-	for layer_index = 1:num_layer
-		gradients_old.W{layer_index}(:) = 0;
-	end
-	for layer_index = 1:num_layer
-		gradients_old.b{layer_index}(:) = 0;
-	end
+	gradients_old.W(:) = 0;
+	gradients_old.bias_hidden(:) = 0;
+	gradients_old.bias_visible(:) = 0;
 
-	num_data = size(train_data, 1);
 	% shuffle the data
+	num_data = size(train_data, 1);
 	if config.shuffle
 		shuffle_id = randperm(num_data);
 		train_data = train_data(shuffle_id, :);
@@ -40,8 +36,9 @@ function weight = train(weight, train_data, train_label, config, debug_mode)
 		data_temp = train_data(i, :)';  		% N x 1
 		label_temp = train_label(i, :)';      	% C x 1 
 
-		[~, post_activation, pre_activation] = forward_fc(weight, data_temp, config, debug_mode);
-		gradients = backward_fc(weight, data_temp, label_temp, post_activation, config, debug_mode);
+		[~, post_activation, pre_activation] = forward_(weight, data_temp, config, debug_mode);
+		
+		gradients = compute_gradient_rbm(weight, data_temp, label_temp, post_activation, config, debug_mode);
 		[weight, gradients_old] = update_parameters(weight, gradients, gradients_old, config, debug_mode);
 
 		if mod(i, 100) == 0

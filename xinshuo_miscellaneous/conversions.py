@@ -305,3 +305,21 @@ def float2percent(number, debug=True):
 	except ValueError:
 		print('could not convert to a floating number')
 	return '{:.1%}'.format(number)
+
+def number2onehot(number, ranges, debug=True):
+	'''
+	this function convert an integer number to a one hot vector
+	inputs:
+			number:			an integer
+			ranges:			[min, max], inclusive, both are integers
+	'''
+	if debug:
+		assert isinteger(number), 'input number is not an integer'
+		assert len(ranges) == 2, 'input range is not correct'
+		assert isinteger(ranges[0]) and isinteger(ranges[1]), 'the input range should be integer'
+		assert ranges[0] <= ranges[1], 'the input range is not correct'
+
+	num_integers = ranges[1] - ranges[0] + 1
+	index = number - ranges[0]
+	onehot = np.zeros([num_integers, ], dtype='float32')
+	onehot[index] = 1

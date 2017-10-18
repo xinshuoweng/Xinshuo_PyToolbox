@@ -3,7 +3,7 @@
 
 
 % given a list of numbers for fully connected layers, initialize the weight with Xavier initialization
-function fc_weight = weights_initialization(net, method, debug_mode)
+function fc_weight = weights_initialization_fc(net, method, debug_mode)
 	if nargin < 3
 		debug_mode = true;
 	end

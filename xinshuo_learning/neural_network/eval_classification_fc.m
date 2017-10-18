@@ -3,7 +3,7 @@
 
 % this function computes the loss for multi-class classification problem
 % accuracy is the percentage of correct classification
-function [accuracy, loss_avg] = eval_classification(fc_weights, data, labels, config, debug_mode)
+function [accuracy, loss_avg] = eval_classification_fc(fc_weights, data, labels, config, debug_mode)
 	if nargin < 5
 		debug_mode = true;
 	end
