@@ -14,47 +14,59 @@ function [weights_updated, gradients_old] = update_parameters_rbm(weight, gradie
 		assert(isfield(config, 'optim'), 'the configuration does not have a selected optimization method');
 		assert(isfield(config, 'weight_decay'), 'the configuration does not have a weight decay parameter');
 		assert(isfield(weight, 'W'), 'the weights in fully connected do not exist');
-		assert(isfield(weight, 'b'), 'the bias in fully connected do not exist');
+		assert(isfield(weight, 'bias_visible'), 'the bias in fully connected do not exist');
+		assert(isfield(weight, 'bias_hidden'), 'the bias in fully connected do not exist');
 		assert(isfield(gradients, 'W'), 'the weights in gradients do not exist');
-		assert(isfield(gradients, 'b'), 'the bias in gradients do not exist');
+		assert(isfield(gradients, 'bias_visible'), 'the bias in gradients do not exist');
+		assert(isfield(gradients, 'bias_hidden'), 'the bias in gradients do not exist');
 	end
 
 	W = weight.W;
-	b = weight.b;
+	bias_hidden = weight.bias_hidden;
+	bias_visible = weight.bias_visible;
 	grad_W = gradients.W;
-	grad_b = gradients.b;
+	grad_bias_visible = gradients.bias_visible;
+	grad_bias_hidden = gradients.bias_hidden;
 
 	gradients_cur = struct();
 	gradients_cur.W = grad_W;			% this need to be updated if there is weight decay
-	gradients_cur.b = grad_b;
+	gradients_cur.bias_hidden = grad_bias_hidden;
+	gradients_cur.bias_visible = grad_bias_visible;
+	
 	% update the parameters in all layers by using a pre-defined optimization method
-	for i = 1 : length(W)
-		grad_w_tmp = - grad_W{i} - config.weight_decay .* W{i};
-		grad_b_tmp = - grad_b{i};
+	grad_w_tmp = - grad_W - config.weight_decay .* W;
+	grad_bias_hidden_tmp = - grad_bias_hidden;
+	grad_bias_visible_tmp = - grad_bias_visible;
 
-		% gradients_cur.W{i} = grad_w_tmp;		% update with weight decay
-		if strcmp(config.optim, 'sgd')
-			W{i} = W{i} + config.lr .* grad_w_tmp;
-			b{i} = b{i} + config.lr .* grad_b_tmp;
-		elseif strcmp(config.optim, 'momentum')
-			if debug_mode
-				assert(isfield(config, 'momentum'), 'the configuration does not have a momentum parameter');
-			end
+	% gradients_cur.W{i} = grad_w_tmp;		% update with weight decay
+	if strcmp(config.optim, 'sgd')
+		W = W + config.lr .* grad_w_tmp;
+		bias_hidden = bias_hidden + config.lr .* grad_bias_hidden_tmp;
+		bias_visible = bias_visible + config.lr .* grad_bias_visible_tmp;
 
-			velocity_W = config.lr .* grad_w_tmp + config.momentum .* gradients_old.W{i};
-			velocity_b = config.lr .* grad_b_tmp + config.momentum .* gradients_old.b{i};
-			W{i} = W{i} + velocity_W;
-			b{i} = b{i} + velocity_b;
-
-			gradients_cur.W{i} = velocity_W;
-			gradients_cur.b{i} = velocity_b;
-		else
-			assert(false, sprintf('%s is not supported in xinshuo''s library', config.optim));
+	elseif strcmp(config.optim, 'momentum')
+		if debug_mode
+			assert(isfield(config, 'momentum'), 'the configuration does not have a momentum parameter');
 		end
+
+		velocity_W = config.lr .* grad_w_tmp + config.momentum .* gradients_old.W;
+		velocity_bias_hidden = config.lr .* grad_bias_hidden_tmp + config.momentum .* gradients_old.bias_hidden;
+		velocity_bias_visible = config.lr .* grad_bias_visible_tmp + config.momentum .* gradients_old.bias_visible;
+
+		W = W + velocity_W;
+		bias_hidden = bias_hidden + velocity_bias_hidden;
+		bias_visible = bias_visible + velocity_bias_visible;
+
+		gradients_cur.W = velocity_W;
+		gradients_cur.bias_hidden = velocity_bias_hidden;
+		gradients_cur.bias_visible = velocity_bias_visible;
+	else
+		assert(false, sprintf('%s is not supported in xinshuo''s library', config.optim));
 	end
 
 	weights_updated = struct();
-	weights_updated.b = b;
+	weights_updated.bias_hidden = bias_hidden;
+	weights_updated.bias_visible = bias_visible;
 	weights_updated.W = W;
 
 	gradients_old = gradients_cur;

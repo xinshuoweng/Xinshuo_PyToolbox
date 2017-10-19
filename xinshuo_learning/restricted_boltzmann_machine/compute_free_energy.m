@@ -2,11 +2,8 @@
 % Email: xinshuow@andrew.cmu.edu
 
 
-% compute the gradient of RBM
-% inputs
-%		positive_visible_sample:		sample of a input data
-%		negative_visible_sample:		sample from gibbs sampling
-function gradients = compute_gradient_rbm(rbm_weight, positive_visible_sample, negative_visible_sample, debug_mode)
+% compute the free energy
+function gradients = compute_free_energy(rbm_weight, positive_visible_sample, negative_visible_sample, debug_mode)
 	if nargin < 4
 		debug_mode = true;
 	end
@@ -25,16 +22,8 @@ function gradients = compute_gradient_rbm(rbm_weight, positive_visible_sample, n
 	grad_bias_hidden = hidden_prab_positive - hidden_prab_negative;
 	grad_bias_visible = positive_visible_sample - negative_visible_sample;
 
-	% hidden_prab_positive(1:10)
-	% positive_visible_sample(1:10)
-	% pause
-
 	gradients = struct();
-	gradients.W = -grad_W;
-	gradients.bias_visible = -grad_bias_visible;
-	gradients.bias_hidden = -grad_bias_hidden;
-
-	% grad_W(1:10, 1:10)
-	% grad_bias_visible(1:10)
-	% pause;
+	gradients.W = grad_W;
+	gradients.bias_visible = grad_bias_visible;
+	gradients.bias_hidden = grad_bias_hidden;
 end

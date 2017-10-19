@@ -11,7 +11,7 @@ function rbm_weight = weights_initialization_rbm(rbm, method, debug_mode)
 	if debug_mode
 		assert(isfield(rbm, 'num_hidden'),  'the input restricted Boltzmann machine should have a number of hidden variables');
 		assert(isfield(rbm, 'num_visible'), 'the input restricted Boltzmann machine should have a number of visible variables');
-		assert(isstring(method) && strcmp(method, 'gaussian'), sprintf('the initialization method %s is not available', method));
+		assert(ischar(method) && strcmp(method, 'gaussian'), sprintf('the initialization method %s is not available', method));
 	end
 
 	% compute bias and weight for RBM
@@ -23,8 +23,8 @@ function rbm_weight = weights_initialization_rbm(rbm, method, debug_mode)
 		assert(false, sprintf('%s initialization method is not supported in xinshuo''s library', method));
 	end
 
-	fc_weight = struct();
-	fc_weight.W = W;
-	fc_weight.bias_hidden = bias_hidden;
-	fc_weight.bias_visible = bias_visible;
+	rbm_weight = struct();
+	rbm_weight.W = W;
+	rbm_weight.bias_hidden = bias_hidden;
+	rbm_weight.bias_visible = bias_visible;
 end

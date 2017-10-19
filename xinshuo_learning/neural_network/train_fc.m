@@ -15,7 +15,7 @@ function weight = train_fc(weight, train_data, train_label, config, debug_mode)
 	end
 
 	% set previous gradients as zero before optimization
-	gradients_old = weight;
+	gradients_old = weight;						% num_hidden x num_visible
 	num_layer = length(gradients_old.W);
 	for layer_index = 1:num_layer
 		gradients_old.W{layer_index}(:) = 0;
