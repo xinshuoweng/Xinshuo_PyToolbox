@@ -2,10 +2,14 @@
 % Email: xinshuow@andrew.cmu.edu
 
 % this function computes the average reconstructed error
-function [reconstructed_error_avg] = eval_reconstruction_error(rbm_weights, data, config, debug_mode)
-	if nargin < 5
+function [reconstructed_error_avg, reconstructed_data] = eval_reconstruction_error_rbm(rbm_weights, data, sampling_step, debug_mode)
+	if nargin < 4
 		debug_mode = true;
 	end
+
+	if nargin < 3
+		sampling_step = 1;
+	end	
 
 	if debug_mode
 		assert(isfield(rbm_weights, 'W'), 'the weights in fully connected do not exist');
@@ -21,13 +25,15 @@ function [reconstructed_error_avg] = eval_reconstruction_error(rbm_weights, data
 
 		% get negative visible sample
 		var_visible = data_tmp;
-		for iter_index = 1:config.sampling_step
-			hidden_sample = gibbs_sampling_hidden_from_visible(rbm_weights, var_visible, debug_mode);
-			var_visible = gibbs_sampling_visible_from_hidden(rbm_weights, hidden_sample, debug_mode);
+		for iter_index = 1:sampling_step
+			% hidden_sample = gibbs_sampling_hidden_from_visible(rbm_weights, var_visible, debug_mode);
+			% var_visible = gibbs_sampling_visible_from_hidden(rbm_weights, hidden_sample, debug_mode);
+			hidden_sample = forward_visible_rbm(rbm_weights, var_visible, debug_mode);
+			var_visible = forward_hidden_rbm(rbm_weights, hidden_sample, debug_mode);
 		end
 
-		reconstructed_data_prab_tmp = forward_hidden_rbm(rbm_weights, hidden_sample, debug_mode);			% num_visible x 1
-		reconstructed_data(data_index, :) = reconstructed_data_prab_tmp';
+		% reconstructed_data_prab_tmp = var_visible;			% num_visible x 1
+		reconstructed_data(data_index, :) = var_visible';
 	end
 
 	% compute reconstructed root of square error
