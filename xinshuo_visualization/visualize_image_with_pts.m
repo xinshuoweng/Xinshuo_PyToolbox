@@ -92,7 +92,7 @@ function img_with_pts = visualize_image_with_pts(img, pts_array, vis, debug_mode
 	end
 
 	% save
-	if ~isempty(save_path)
+	if exist('save_path', 'var')
 		assert(ischar(save_path), 'save path is not correct.');
 		mkdir_if_missing(fileparts(save_path));
 		imwrite(imresize(img_with_pts, vis_resize_factor), save_path);

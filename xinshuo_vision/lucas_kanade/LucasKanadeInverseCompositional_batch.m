@@ -3,7 +3,7 @@
 
 % input - image at time t, image at t+1, rectangle (top left, bot right coordinates)
 % output - movement vector, [u,v] in the x- and y-directions.
-function [u, v, num_iter] = LucasKanadeInverseCompositional(It, It1, rect, input_format, max_iter, weight, epsilon, debug_mode)
+function [u, v, num_iter] = LucasKanadeInverseCompositional_batch(It, It1, rect, input_format, max_iter, weight, epsilon, debug_mode)
     if nargin < 8
         debug_mode = true;
     end
@@ -36,7 +36,7 @@ function [u, v, num_iter] = LucasKanadeInverseCompositional(It, It1, rect, input
 
     % compute the warped image
     % cropped_template = crop_interp(It, input_format, rect);                    % C x height_kernel x width_kernel
-    cropped_template = crop_interp(It, input_format, rect);                % num_pts x C x height_kernel x width_kernel
+    cropped_template = crop_interp_batch(It, input_format, rect);                % num_pts x C x height_kernel x width_kernel
     
     % rect
     % rect(1, :)
@@ -49,9 +49,9 @@ function [u, v, num_iter] = LucasKanadeInverseCompositional(It, It1, rect, input
 
     % cropped_template = permute(cropped_template, [3, 4, 1, 2]);
     % cropped_template = squeeze(cropped_template);
-    [Iy, ~, Ix] = gradient(cropped_template);                                   % C x height_kernel x width_kernel
+    % [Iy, ~, Ix] = gradient(cropped_template);                                   % C x height_kernel x width_kernel
 
-    % [~, ~, Iy, Ix] = gradient(cropped_template);                                % num_pts x C x height_kernel x width_kernel,       note that the gradient along the edge is different in MATLAB and python, but same after adding weight
+    [~, ~, Iy, Ix] = gradient(cropped_template);                                % num_pts x C x height_kernel x width_kernel,       note that the gradient along the edge is different in MATLAB and python, but same after adding weight
 
     % squeeze(Ix(1, :, :))
     % squeeze(Iy(1, :, :))
@@ -72,31 +72,33 @@ function [u, v, num_iter] = LucasKanadeInverseCompositional(It, It1, rect, input
     width_kernel = size(Ix, 4);
     height_kernel = size(Ix, 3);
     im_channel = size(Ix, 2);
-    % num_pts = size(Ix, 1)
+    num_pts = size(Ix, 1)
     weight_map = generate_weight([height_kernel, width_kernel]);                % height_kernel x width_kernel
     % weight_map
     % pause;
 
-    J = zeros(2, im_channel, height_kernel, width_kernel);                                                    % num_pts x 2 x C x height_kernel x width_kernel
+    J = zeros(num_pts, 2, im_channel, height_kernel, width_kernel);                                                    % num_pts x 2 x C x height_kernel x width_kernel
     % size(J(:, 1, :, :, :))
     % size(reshape(Ix, [num_pts, 1, im_channel, height_kernel, width_kernel]))
     % J(:, 1, :, :, :) = reshape(Ix, [num_pts, 1, im_channel, height_kernel, width_kernel]);            
-    J(1, :, :, :) = Ix;
-    J(2, :, :, :) = Iy;
+    J(:, 1, :, :, :) = Ix;
+    J(:, 2, :, :, :) = Iy;
 
 
     % squeeze(J(1, 1, :, :))
     if weight
         % reshape_tmp_J = reshape(J, 2, im_channel, height_kernel * width_kernel);
-        weightedJ = zeros(2, im_channel, height_kernel, width_kernel);
-        for channel_index = 1:im_channel
-            weightedJ(1, channel_index, :, :) = squeeze(J(1, channel_index, :, :)) .* weight_map;
-            weightedJ(2, channel_index, :, :) = squeeze(J(2, channel_index, :, :)) .* weight_map;
+        weightedJ = zeros(num_pts, 2, im_channel, height_kernel, width_kernel);
+        for pts_index = 1:num_pts
+            for channel_index = 1:im_channel
+                weightedJ(pts_index, 1, channel_index, :, :) = squeeze(J(pts_index, 1, channel_index, :, :)) .* weight_map;
+                weightedJ(pts_index, 2, channel_index, :, :) = squeeze(J(pts_index, 2, channel_index, :, :)) .* weight_map;
+            end
         end
-        weightedJ = reshape(weightedJ, 2, []);                                      % 2 x (C x height_kernel x width_kernel), note the the reshape is different in MATLAB and python
-        J = reshape(J, 2, []);                                                      % 2 x (C x height_kernel x width_kernel)
+        weightedJ = reshape(weightedJ, num_pts, 2, []);                                      % num_pts x 2 x (C x height_kernel x width_kernel), note the the reshape is different in MATLAB and python
+        J = reshape(J, num_pts, 2, []);                                                      % num_pts x 2 x (C x height_kernel x width_kernel)
     else
-        weightedJ = reshape(J, 2, []);
+        weightedJ = reshape(J, num_pts, 2, []);
         J = weightedJ;
     end
 
@@ -104,10 +106,10 @@ function [u, v, num_iter] = LucasKanadeInverseCompositional(It, It1, rect, input
     % size(weightedJ)
     % size(J)
 
-    % permuted_J = permute(J, [1, 3, 2]);             % num_pts x (C x height_kernel x width_kernel) x 2
-    H = weightedJ * J';                 % num_pts x 2 x 2
+    permuted_J = permute(J, [1, 3, 2]);             % num_pts x (C x height_kernel x width_kernel) x 2
+    H = matrix_bmm(weightedJ, permuted_J);                 % num_pts x 2 x 2
 
-    prefix_operator = H \ weightedJ;            % num_pts x 2 x (C x height_kernel x width_kernel)
+    prefix_operator = matrix_bmm(H, weightedJ);            % num_pts x 2 x (C x height_kernel x width_kernel)
 
     % H = zeros(num_pts, 2, 2);
     % prefix_operator = zeros(num_pts, 2, im_channel*height_kernel*width_kernel);
@@ -157,7 +159,7 @@ function [u, v, num_iter] = LucasKanadeInverseCompositional(It, It1, rect, input
         % size(batch_gradient_time)
         %     'ssssss'
 
-        V = bmm(prefix_operator, batch_gradient_time);                         % num_pts x 2 x 1
+        V = matrix_bmm(prefix_operator, batch_gradient_time);                         % num_pts x 2 x 1
         size(V)
         V
 
@@ -176,7 +178,3 @@ function [u, v, num_iter] = LucasKanadeInverseCompositional(It, It1, rect, input
         old_v = v;
     end
 end
-
-
-
-

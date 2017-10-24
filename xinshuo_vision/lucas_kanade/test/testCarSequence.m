@@ -2,7 +2,11 @@ close all;
 clc;
 clear;
 
-load('../data/carseq.mat');
+load('carseq.mat');
+addpath('../../../xinshuo_io');
+addpath('../');
+mkdir_if_missing('results');
+
 frames = im2double(frames);
 
 number_frame = size(frames, 3);
@@ -31,16 +35,16 @@ for i = 1:number_frame-1
     pause(0.001);
     res = getframe;
     if i == 2 - 1
-        imwrite(res.cdata, '../results/carOriginalFrame2.jpg');
+        imwrite(res.cdata, 'results/carOriginalFrame2.jpg');
     elseif i == 100 - 1
-        imwrite(res.cdata, '../results/carOriginalFrame100.jpg');
+        imwrite(res.cdata, 'results/carOriginalFrame100.jpg');
     elseif i == 200 - 1
-        imwrite(res.cdata, '../results/carOriginalFrame200.jpg');
+        imwrite(res.cdata, 'results/carOriginalFrame200.jpg');
     elseif i == 300 - 1
-        imwrite(res.cdata, '../results/carOriginalFrame300.jpg');
+        imwrite(res.cdata, 'results/carOriginalFrame300.jpg');
     elseif i == 400 - 1
-        imwrite(res.cdata, '../results/carOriginalFrame400.jpg');
+        imwrite(res.cdata, 'results/carOriginalFrame400.jpg');
     end
 end
 
-save('../results/carseqrects.mat', 'rects');
+save('results/carseqrects.mat', 'rects');
