@@ -129,9 +129,14 @@ function [velocity, num_iter_vec] = LucasKanadeInverseCompositional(It, It1, rec
         end
 
         if warning_mode
-            fprintf('iter: %d, %.2f%% points have converged\n', iter_index, length(converged_index)*100.0/num_pts);
+            fprintf('iter: %d, %.2f%% points have converged.\n', iter_index, length(converged_index)*100.0/num_pts);
         end
         
         velocity_old = velocity;
+
+
+        converged_index
+        velocity_update_all
+        % pause;
     end
 end
