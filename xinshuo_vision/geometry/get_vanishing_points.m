@@ -30,64 +30,65 @@ function VPs = get_vanishing_points(img, num_vp, num_iter, debug_mode, vis_mode,
 	im_width = size(im_gray, 2);
 	length_diagonal = sqrt(im_height ^ 2 + im_width ^ 2);
 	lines = APPgetLargeConnectedEdges(im_gray, 0.025 * length_diagonal);
+	% lines
 
-	[index_line, centroid] = kmeans(lines(:, 5), num_vp);
+	% [index_line, centroid] = kmeans(lines(:, 5), num_vp);
 
 	% compute the vanishing point inside each cluster
-	VPs = zeros(num_vp, 2);
-	corresponding_lines = cell(num_vp, 1);
-	for cluster_index = 1:num_vp
-		lines_tmp = lines(index_line == cluster_index, :);			% num_lines x 6
+	% VPs = zeros(num_vp, 2);
+	% corresponding_lines = cell(num_vp, 1);
+	% for cluster_index = 1:num_vp
+	% 	lines_tmp = lines(index_line == cluster_index, :);			% num_lines x 6
 
-		% RANSAC to compute the vanishing point
-		num_lines = size(lines_tmp, 1);
-		biggest_num_valid = 0;
-		for iter_index = 1:num_iter
-			line1_index = randi(num_lines);
-			line2_index = randi(num_lines-1);
-			if line2_index >= line1_index
-				line2_index = line2_index + 1;
-			end
+	% 	% RANSAC to compute the vanishing point
+	% 	num_lines = size(lines_tmp, 1);
+	% 	biggest_num_valid = 0;
+	% 	for iter_index = 1:num_iter
+	% 		line1_index = randi(num_lines);
+	% 		line2_index = randi(num_lines-1);
+	% 		if line2_index >= line1_index
+	% 			line2_index = line2_index + 1;
+	% 		end
 
-			pts1 = lines_tmp(line1_index, 1:2);
-			pts2 = lines_tmp(line1_index, 3:4);
-			pts3 = lines_tmp(line2_index, 1:2);
-			pts4 = lines_tmp(line2_index, 3:4);
+	% 		pts1 = lines_tmp(line1_index, 1:2);
+	% 		pts2 = lines_tmp(line1_index, 3:4);
+	% 		pts3 = lines_tmp(line2_index, 1:2);
+	% 		pts4 = lines_tmp(line2_index, 3:4);
 
-			line1_2d = get_2dline_from_pts(pts1, pts2, debug_mode);
-			line2_2d = get_2dline_from_pts(pts3, pts4, debug_mode);
+	% 		line1_2d = get_2dline_from_pts(pts1, pts2, debug_mode);
+	% 		line2_2d = get_2dline_from_pts(pts3, pts4, debug_mode);
 
-			pts_infinity = get_pts_from_2dlines(line1_2d, line2_2d, debug_mode);
+	% 		pts_infinity = get_pts_from_2dlines(line1_2d, line2_2d, debug_mode);
 
-			% compute the distance for all line within the cluster
-			num_valid = 0;
-			lines_valid = zeros(num_lines, 6);
-			for line_index = 1:num_lines
-				pts_test1 = lines_tmp(line_index, 1:2);
-				pts_test2 = lines_tmp(line_index, 3:4);
-				line_test = get_2dline_from_pts(pts_test1, pts_test2, debug_mode);
+	% 		% compute the distance for all line within the cluster
+	% 		num_valid = 0;
+	% 		lines_valid = zeros(num_lines, 6);
+	% 		for line_index = 1:num_lines
+	% 			pts_test1 = lines_tmp(line_index, 1:2);
+	% 			pts_test2 = lines_tmp(line_index, 3:4);
+	% 			line_test = get_2dline_from_pts(pts_test1, pts_test2, debug_mode);
 
-				distance = get_distance_from_pts_2dline(pts_infinity, line_test, debug_mode);
-				if distance < error_threshold
-					num_valid = num_valid + 1;
-					lines_valid(num_valid, :) = lines_tmp(line_index, :);
-				end
-			end
+	% 			distance = get_distance_from_pts_2dline(pts_infinity, line_test, debug_mode);
+	% 			if distance < error_threshold
+	% 				num_valid = num_valid + 1;
+	% 				lines_valid(num_valid, :) = lines_tmp(line_index, :);
+	% 			end
+	% 		end
 
-			if num_valid > biggest_num_valid
-				biggest_num_valid = num_valid;
-				best_vp = pts_infinity;
-				best_lines = lines_valid(1:num_valid, :);
-			end
-		end
+	% 		if num_valid > biggest_num_valid
+	% 			biggest_num_valid = num_valid;
+	% 			best_vp = pts_infinity;
+	% 			best_lines = lines_valid(1:num_valid, :);
+	% 		end
+	% 	end
 
-		best_vp = best_vp / best_vp(3);
-		VPs(cluster_index, :) = best_vp(1:2);
-		size(best_lines)
-		corresponding_lines{cluster_index} = best_lines;
-	end
+	% 	best_vp = best_vp / best_vp(3);
+	% 	VPs(cluster_index, :) = best_vp(1:2);
+	% 	size(best_lines)
+	% 	corresponding_lines{cluster_index} = best_lines;
+	% end
 
-	VPs
+	% VPs
 
 	if vis_mode
 		% save_path = '';
@@ -104,7 +105,7 @@ function VPs = get_vanishing_points(img, num_vp, num_iter, debug_mode, vis_mode,
 		% 	hold on; plot(corresponding_lines{cluster_index}(:, [1 2])', corresponding_lines{cluster_index}(:, [3 4])', 'r');
 		% end
 		lines
-		index = lines(:, 5) > 0.2
+		index = lines(:, 7) > 50000
 
 		figure(1); hold off; imshow(im_gray);
 		figure(1); hold on; plot(lines(index, [1 2])', lines(index, [3 4])');
