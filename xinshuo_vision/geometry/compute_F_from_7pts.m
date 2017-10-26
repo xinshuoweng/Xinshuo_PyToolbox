@@ -5,10 +5,10 @@
 % eightpoint:
 %   pts1 - Nx2 matrix of (x,y) coordinates
 %   pts2 - Nx2 matrix of (x,y) coordinates
-%   M    - max (imwidth, imheight)
+%   normlize_factor    - max (imwidth, imheight)
 %	
 %	det(F) = 0
-function F = compute_F_from_7pts(pts1, pts2, M, debug_mode)
+function F = compute_F_from_7pts(pts1, pts2, normlize_factor, debug_mode)
 	if nargin < 4
 		debug_mode = true;
 	end
@@ -21,8 +21,8 @@ function F = compute_F_from_7pts(pts1, pts2, M, debug_mode)
 	num_pts = size(pts1, 1);
 
 	% normlize the coordinate
-	pts1_norm = pts1 / M;
-	pts2_norm = pts2 / M;
+	pts1_norm = pts1 / normlize_factor;
+	pts2_norm = pts2 / normlize_factor;
 
 	% construct the U matrix
 	U(:, [1, 5]) = pts1_norm .* pts2_norm;
@@ -64,7 +64,6 @@ function F = compute_F_from_7pts(pts1, pts2, M, debug_mode)
 	F_refine = refineF(F, pts1_norm, pts2_norm);
 
 	% unscaling the F
-	T = [1/M, 0, 0; 0, 1/M, 0; 0, 0, 1];
+	T = [1/normlize_factor, 0, 0; 0, 1/normlize_factor, 0; 0, 0, 1];
 	F = T'*F_refine*T;
 end
-

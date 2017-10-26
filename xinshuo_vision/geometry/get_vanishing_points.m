@@ -26,15 +26,16 @@ function VPs = get_vanishing_points(img, num_vp, max_iter, debug_mode, vis_mode,
 		num_vp = 3;
 	end
 
+	epsilon = 1e-5;
+
 	% extract the line segments from the image
 	im_gray = rgb2gray(img);
 	im_height = size(im_gray, 1);
 	im_width = size(im_gray, 2);
 	length_diagonal = sqrt(im_height ^ 2 + im_width ^ 2);
-	% lines = APPgetLargeConnectedEdges(im_gray, 0.025 * length_diagonal);			% num_lines x 7
-	lines = APPgetLargeConnectedEdges(im_gray, 30);			% num_lines x 7
+	lines = APPgetLargeConnectedEdges(im_gray, 0.025 * length_diagonal);			% num_lines x 7
+	% lines = APPgetLargeConnectedEdges(im_gray, 30);			% num_lines x 7
 
-	max_iter = 1000;
 	num_lines = size(lines, 1);
 	sorted_lines = sortrows(lines, 7);
 	
@@ -83,7 +84,7 @@ function VPs = get_vanishing_points(img, num_vp, max_iter, debug_mode, vis_mode,
 			lines_cluster = corresponding_lines{cluster_index};
 			num_lines_tmp = size(lines_cluster, 1);
 
-			angular_value = lines_cluster(:, 5);
+			angular_value = tan(lines_cluster(:, 5));
 			[closest_mean, line_seed1_index, mean_value] = find_closest_mean_from_array(angular_value, debug_mode);
 
 			line_seed1 = lines_cluster(line_seed1_index, :);
@@ -106,7 +107,7 @@ function VPs = get_vanishing_points(img, num_vp, max_iter, debug_mode, vis_mode,
 				pts_intersection = get_pts_from_2dlines(line1_2d, line2_2d, debug_mode);
 				intersection_points(line_index, :) = pts_intersection;
 
-				if line_seed1_proj(2) > 1e-5
+				if line_seed1_proj(2) > epsilon
 					intersection_points_proj(line_index, 1) = pts_intersection(1);			% project to x axis
 				else
 					intersection_points_proj(line_index, 1) = pts_intersection(2);			% project to y axis
@@ -136,7 +137,7 @@ function VPs = get_vanishing_points(img, num_vp, max_iter, debug_mode, vis_mode,
 		end
 
 		VPs_diff = VPs - VPs_old;
-		if norm(VPs_diff) < 1e-5
+		if norm(VPs_diff) < epsilon
 			break;
 		end
 

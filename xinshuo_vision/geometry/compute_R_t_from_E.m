@@ -20,5 +20,11 @@ function [R, t] = compute_R_t_from_E(E, debug_mode);
 	t_skew = U * W * S * U';
 	R = U * W' * V'; 
 
-	t_skew
+	% check the rotation matrix
+	if debug_mode
+		resdual = R * R' - eye(3);
+		assert(norm(resdual) < epsilon, 'the rotation matrix is not good');
+	end
+
+	t_skew * R - E
 end

@@ -109,8 +109,8 @@ function K = autocalibrate(image_cell, debug_mode, save_path, skew, square_pixel
 	K = inv(ktinv)';
 	K = K ./ K(3, 3);
 
-	kkt = inv(conic);
-	K = chol(kkt, 'upper');
+	% kkt = inv(conic);
+	% K = chol(kkt, 'upper');
 	
 	% [L, D] = ldl(kkt);
 	% K = L * sqrt(sqrt(D^2));

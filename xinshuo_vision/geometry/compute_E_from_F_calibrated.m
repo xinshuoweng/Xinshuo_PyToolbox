@@ -20,8 +20,19 @@ function E = compute_E_from_F_calibrated(F, K1, K2, debug_mode);
 
 	E = K2' * F * K1;
 
-	det(E)
-	2 * E * E' * E - trace(E * E') * E
-	svd(E)
-	pause;
+	% enforce the essential matrix to have two identical eigenvalue of 1
+	[U, S, V] = svd(E);
+	diag_value = (S(1, 1) + S(2, 2)) / 2.0;
+	E = U * [diag_value, 0, 0; 0, diag_value, 0; 0, 0, 0] * V';		
+
+	% ensure singularity
+	if debug_mode
+		assert(det(E) < epsilon, 'the determinant of essential matrix is not close to 0');
+	end
+
+	% ensure the property of essential matrix
+	if debug_mode
+		resdual = 2 * E * E' * E - trace(E * E') * E;
+		assert(norm(resdual) < epsilon, 'the essential matrix is not good');
+	end
 end

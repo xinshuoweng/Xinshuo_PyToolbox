@@ -8,14 +8,22 @@
 %	pts_array:	2 x num_pts matrix to represent (x, y) locations
 %	label:		a logical value to judge if display a text for every points
 %	label_str:	a cell array where every cell has a string inside
-function img_with_pts = visualize_image_with_pts(img, pts_array, vis, debug_mode, save_path, label, label_str, vis_radius, vis_resize_factor, closefig, color_index)
+function img_with_pts = visualize_image_with_pts(img, pts_array, vis, debug_mode, save_path, label, label_str, vis_radius, vis_resize_factor, closefig, color_index, marker_index)
 	color_set = ['r', 'g', 'b', 'k', 'y', 'm', 'c', 'w'];
+	marker_set = ['o', '+', '*', '.', 'x', 's', 'd', '<', '>', 'p', 'h'];
 	if ~exist('color_index', 'var')
 		color_index = 1;
 	else
-		color_index = mod(color_index, length(color_set)) + 1;
+		color_index = mod(color_index-1, length(color_set)) + 1;
 	end	
 	color_tmp = color_set(color_index);
+
+	if ~exist('marker_index', 'var')
+		marker_index = 1;
+	else
+		marker_index = mod(marker_index-1, length(marker_set)) + 1;
+	end	
+	marker_tmp = marker_set(marker_index);
 
 	if ~exist('closefig', 'var')
 		closefig = false;
@@ -64,7 +72,7 @@ function img_with_pts = visualize_image_with_pts(img, pts_array, vis, debug_mode
 	imshow(img); hold on;
 	x = pts_array(1, :);
 	y = pts_array(2, :);
-	plot(x, y, 'o', 'Color', color_tmp, 'MarkerSize', vis_radius, 'MarkerFaceColor', color_tmp);
+	plot(x, y, 'o', 'Color', color_tmp, 'MarkerSize', vis_radius, 'MarkerFaceColor', color_tmp, 'Marker', marker_tmp);
 	axis auto;
 
 	% add labels

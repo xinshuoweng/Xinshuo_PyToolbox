@@ -2,7 +2,7 @@
 % email: xinshuo.weng@gmail.com
 
 % compose the projection matrix
-function M = compose_projection(K, R, t, debug_mode);
+function M = compute_M(K, R, t, debug_mode);
 	if nargin < 4
 		debug_mode = true;
 	end

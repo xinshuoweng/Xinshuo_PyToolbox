@@ -14,24 +14,26 @@ function pts = get_pts_from_2dlines(line1, line2, debug_mode)
 		debug_mode = true;
 	end
 
+	epsilon = 1e-10;
 	if debug_mode
 		assert(all(size(line1) == [1, 3]), 'the size of input points is not correct');
 		assert(all(size(line2) == [1, 3]), 'the size of input points is not correct');
 	end
 
-	% line1
-	% line2
-	
+	% normalization
+	line1 = line1 ./ line1(1, 3);
+	line2 = line2 ./ line2(1, 3);
+
+	if debug_mode
+		residual = line1 - line2;
+		assert(norm(residual) > epsilon, 'the input two lines are too similar');
+	end
 
 	pts = cross(line1, line2);
 	pts = pts / pts(3);
 
-	% pts
-	% pts * line1'
-	% pts * line2'
-
 	if debug_mode
-		assert(pts * line1' < 1e-5, 'the point is not on the line');
-		assert(pts * line2' < 1e-5, 'the point is not on the line');
+		assert(pts * line1' < epsilon, 'the point is not on the line');
+		assert(pts * line2' < epsilon, 'the point is not on the line');
 	end
 end
