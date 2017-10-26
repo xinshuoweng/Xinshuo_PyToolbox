@@ -4,7 +4,7 @@
 % trains the network for one epoch
 % This % function should return the updated network parameters 'W' and 'b' after
 % performing back-propagation on every data sample.
-function weight = train(weight, train_data, train_label, config, debug_mode)
+function weight = train_fc(weight, train_data, train_label, config, debug_mode)
 	if nargin < 5
 		debug_mode = true;
 	end
@@ -15,7 +15,7 @@ function weight = train(weight, train_data, train_label, config, debug_mode)
 	end
 
 	% set previous gradients as zero before optimization
-	gradients_old = weight;
+	gradients_old = weight;						% num_hidden x num_visible
 	num_layer = length(gradients_old.W);
 	for layer_index = 1:num_layer
 		gradients_old.W{layer_index}(:) = 0;
@@ -42,7 +42,7 @@ function weight = train(weight, train_data, train_label, config, debug_mode)
 
 		[~, post_activation, pre_activation] = forward_fc(weight, data_temp, config, debug_mode);
 		gradients = backward_fc(weight, data_temp, label_temp, post_activation, config, debug_mode);
-		[weight, gradients_old] = update_parameters(weight, gradients, gradients_old, config, debug_mode);
+		[weight, gradients_old] = update_parameters_fc(weight, gradients, gradients_old, config, debug_mode);
 
 		if mod(i, 100) == 0
 			fprintf('\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b');

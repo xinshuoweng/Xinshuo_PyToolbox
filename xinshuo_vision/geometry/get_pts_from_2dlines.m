@@ -19,8 +19,16 @@ function pts = get_pts_from_2dlines(line1, line2, debug_mode)
 		assert(all(size(line2) == [1, 3]), 'the size of input points is not correct');
 	end
 
+	% line1
+	% line2
+	
+
 	pts = cross(line1, line2);
 	pts = pts / pts(3);
+
+	% pts
+	% pts * line1'
+	% pts * line2'
 
 	if debug_mode
 		assert(pts * line1' < 1e-5, 'the point is not on the line');

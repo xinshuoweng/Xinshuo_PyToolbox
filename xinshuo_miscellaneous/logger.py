@@ -2,7 +2,9 @@
 # Email: xinshuo.weng@gmail.com
 
 from __future__ import print_function
+import functools
 
+from xinshuo_python import isnparray
 # logging
 
 def print_log(print_string, log, same_line=False):
