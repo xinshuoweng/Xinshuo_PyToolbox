@@ -19,13 +19,10 @@ function img_with_pts = visualize_image_with_pts(img, pts_array, vis, debug_mode
 
 	if ~exist('closefig', 'var')
 		closefig = false;
-<<<<<<< HEAD
-=======
 	end
 
 	if ~exist('save_path', 'var')
 		save_path = '';
->>>>>>> 4ae903eec3bec55dc48915cc61cc47602218f971
 	end
 
 	if ~exist('debug_mode', 'var')
@@ -48,13 +45,6 @@ function img_with_pts = visualize_image_with_pts(img, pts_array, vis, debug_mode
 		vis_radius = 1;
 	end
 
-<<<<<<< HEAD
-	if ~exist('save_path', 'var')
-		save_path = '';
-	end
-
-=======
->>>>>>> 4ae903eec3bec55dc48915cc61cc47602218f971
 	if debug_mode
 		assert(isImage(img), 'the input is not an image format.');
 		assert(size(pts_array, 1) == 2 && size(pts_array, 2) >= 0, 'shape of points to draw is not correct.');
