@@ -2,7 +2,7 @@
 % email: xinshuo.weng@gmail.com
 
 % TODO: CHECK
-function [ F ] = eightpoint( pts1, pts2, M )
+function F = eightpoint(pts1, pts2, M)
 % eightpoint:
 %   pts1 - Nx2 matrix of (x,y) coordinates
 %   pts2 - Nx2 matrix of (x,y) coordinates
