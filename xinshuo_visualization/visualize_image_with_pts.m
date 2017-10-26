@@ -8,9 +8,24 @@
 %	pts_array:	2 x num_pts matrix to represent (x, y) locations
 %	label:		a logical value to judge if display a text for every points
 %	label_str:	a cell array where every cell has a string inside
-function img_with_pts = visualize_image_with_pts(img, pts_array, vis, debug_mode, save_path, label, label_str, vis_radius, vis_resize_factor, closefig)
+function img_with_pts = visualize_image_with_pts(img, pts_array, vis, debug_mode, save_path, label, label_str, vis_radius, vis_resize_factor, closefig, color_index)
+	color_set = ['r', 'g', 'b', 'k', 'y', 'm', 'c', 'w'];
+	if ~exist('color_index', 'var')
+		color_index = 1;
+	else
+		color_index = mod(color_index, length(color_set)) + 1;
+	end	
+	color_tmp = color_set(color_index);
+
 	if ~exist('closefig', 'var')
 		closefig = false;
+<<<<<<< HEAD
+=======
+	end
+
+	if ~exist('save_path', 'var')
+		save_path = '';
+>>>>>>> 4ae903eec3bec55dc48915cc61cc47602218f971
 	end
 
 	if ~exist('debug_mode', 'var')
@@ -33,10 +48,13 @@ function img_with_pts = visualize_image_with_pts(img, pts_array, vis, debug_mode
 		vis_radius = 1;
 	end
 
+<<<<<<< HEAD
 	if ~exist('save_path', 'var')
 		save_path = '';
 	end
 
+=======
+>>>>>>> 4ae903eec3bec55dc48915cc61cc47602218f971
 	if debug_mode
 		assert(isImage(img), 'the input is not an image format.');
 		assert(size(pts_array, 1) == 2 && size(pts_array, 2) >= 0, 'shape of points to draw is not correct.');
@@ -50,13 +68,14 @@ function img_with_pts = visualize_image_with_pts(img, pts_array, vis, debug_mode
 		fig = figure('Visible', 'off');
 	end
 
+	
 	% pts_size = 5;
 	font_size = 6;
 	imshow(img); hold on;
-	% end
 	x = pts_array(1, :);
 	y = pts_array(2, :);
-	plot(x, y, 'ro', 'MarkerSize', vis_radius, 'MarkerFaceColor', 'r');
+	plot(x, y, 'o', 'Color', color_tmp, 'MarkerSize', vis_radius, 'MarkerFaceColor', color_tmp);
+	axis auto;
 
 	% add labels
 	if label

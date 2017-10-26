@@ -8,7 +8,7 @@ def isstring(string_test):
 	return isinstance(string_test, basestring)
 
 def isinteger(integer_test):
-	return isinstance(integer_test, int)
+	return isinstance(integer_test, int) or int(integer_test) == integer_test
 
 def ispositiveinteger(integer_test):
     return isinteger(integer_test) and integer_test > 0

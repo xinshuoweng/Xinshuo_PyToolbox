@@ -102,6 +102,7 @@ function K = autocalibrate(image_cell, debug_mode, save_path, skew, square_pixel
 			skew_value,  null_space(1), null_space(3);
 			null_space(2), null_space(3), null_space(4)];
 
+<<<<<<< HEAD
 	% kkt1 = inv(conic);
 	% K1 = chol(kkt1, 'upper')
 	
@@ -109,6 +110,11 @@ function K = autocalibrate(image_cell, debug_mode, save_path, skew, square_pixel
 	K = inv(ktinv)';
 	K = K ./ K(3, 3);
 
+=======
+	kkt = inv(conic);
+	K = chol(kkt, 'upper');
+	
+>>>>>>> 4ae903eec3bec55dc48915cc61cc47602218f971
 	% [L, D] = ldl(kkt);
 	% K = L * sqrt(sqrt(D^2));
 
