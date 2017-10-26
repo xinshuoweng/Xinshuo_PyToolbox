@@ -18,7 +18,11 @@ function img_with_pts = visualize_image_with_pts(img, pts_array, vis, debug_mode
 	color_tmp = color_set(color_index);
 
 	if ~exist('closefig', 'var')
-		closefig = true;
+		closefig = false;
+	end
+
+	if ~exist('save_path', 'var')
+		save_path = '';
 	end
 
 	if ~exist('debug_mode', 'var')
@@ -26,7 +30,7 @@ function img_with_pts = visualize_image_with_pts(img, pts_array, vis, debug_mode
 	end
 
 	if ~exist('vis', 'var')
-		vis = false;
+		vis = true;
 	end
 
 	if ~exist('label', 'var')
@@ -40,7 +44,6 @@ function img_with_pts = visualize_image_with_pts(img, pts_array, vis, debug_mode
 	if ~exist('vis_radius', 'var')
 		vis_radius = 1;
 	end
-
 
 	if debug_mode
 		assert(isImage(img), 'the input is not an image format.');
