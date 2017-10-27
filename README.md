@@ -13,26 +13,3 @@ git clone --recursive https://github.com/xinshuoweng/xinshuo_toolbox
 cd xinshuo_toolbox
 pip install -r requirements.txt
 ~~~
-
-#### TODO:
-
-*coding*
-1. cv/geometry for python (2d manipulation)<br>
-2. cv/geometry for matlab (project 3d line)<br>
-3. machine_learning/deep_learing layer.py: more layers<br>
-
-*debug*
-1. test TODO in the code<br>
-
-*add more functions from old projects*
-
-3. integrate hw<br>
-4. integrate previous project before CMU<br>
-5. integrate projct on my github<br>
-6. integrate stuff on my laptop<br>
-
-*fix toolbox structure*
-1. ml/neural network<br>
-2. cv/kmeans_meanshift_normalizedcut<br>
-3. videos
-4. images
