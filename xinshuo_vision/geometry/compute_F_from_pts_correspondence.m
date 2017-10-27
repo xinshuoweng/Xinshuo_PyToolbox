@@ -23,7 +23,7 @@ function [F, inlier_index] = compute_F_from_pts_correspondence(pts1, pts2, norma
     end
 
     if nargin < 7
-        err_threshold = 0.0002;
+        err_threshold = 0.0005;
     end
 
     if debug_mode

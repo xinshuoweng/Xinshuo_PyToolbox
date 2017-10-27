@@ -13,14 +13,18 @@
 %			plane_3d 				num_plane x 4
 %			pts_index_plane 		num_pts x 1, 			the index of plane belonging to for every pts, 0 indicate bad pts
 %			corresponding_pts 		num_plane x 1 cell, 	save the ptss for every VP
-function [plane_3d, pts_index_plane, corresponding_pts] = get_dominant_3dplane_RANSAC(pts_3d, num_plane, debug_mode, vis_mode, max_iter, err_threshold)
+function [plane_3d, pts_index_plane, corresponding_pts] = get_dominant_3dplane_RANSAC(pts_3d, num_plane, debug_mode, vis_mode, save_path, max_iter, err_threshold)
 	color_set = ['r', 'g', 'b', 'k', 'y', 'm', 'c', 'w'];
+	if nargin < 7
+		err_threshold = 0.1;
+	end
+
 	if nargin < 6
-		err_threshold = 50;
+		max_iter = 50000;
 	end
 
 	if nargin < 5
-		max_iter = 50000;
+		save_path = '';
 	end
 
 	if nargin < 4
@@ -107,22 +111,18 @@ function [plane_3d, pts_index_plane, corresponding_pts] = get_dominant_3dplane_R
 
 	% visualization
 	if vis_mode
-		save_path = '';
-		label = false;
-		label_str = '';
-		vis_radius = 3;
-		vis_resize_factor = 1;
-		closefig = false;
-		figure; 
+		fig = figure; 
 		for plane_index = 1:num_plane
 			color_index = plane_index;
 			color_tmp = color_set(color_index);
-			% img_with_pts = visualize_image_with_pts(img, plane_3d(plane_index, :)', vis_mode, debug_mode, save_path, label, label_str, vis_radius, vis_resize_factor, closefig, color_index);
-			% plot(corresponding_pts{plane_index}(:, [1 2])', corresponding_pts{plane_index}(:, [3 4])', color_set(color_index));
 			pts_tmp = corresponding_pts{plane_index};
 			scatter3(pts_tmp(:, 1), pts_tmp(:, 2), pts_tmp(:, 3), 'MarkerEdgeColor', color_tmp, 'MarkerFaceColor', color_tmp);
 			hold on; 
 		end
 		hold off;
+		pause;
+		if ~isempty(save_path)
+			print(save_path, '-depsc');
+		end
 	end
 end

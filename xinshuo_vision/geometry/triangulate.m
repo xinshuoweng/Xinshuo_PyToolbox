@@ -2,10 +2,10 @@
 % email: xinshuo.weng@gmail.com
 
 % triangulation given two projection matrix and point correspondence
-%       M1 - 3x4 Camera Matrix 1
-%       p1 - Nx2 set of points
-%       M2 - 3x4 Camera Matrix 2
-%       p2 - Nx2 set of points
+%       pts1        - 2 x num_pts 
+%       pts2        - 2 x num_pts
+%       M1          - 3x4 Camera Matrix 1
+%       M2          - 3x4 Camera Matrix 2
 function [P, err] = triangulate(pts1, pts2, M1, M2, debug_mode)
     if nargin < 5
         debug_mode = true;
@@ -13,13 +13,14 @@ function [P, err] = triangulate(pts1, pts2, M1, M2, debug_mode)
 
     if debug_mode
         assert(all(size(pts1) == size(pts2)), 'the size of input point correspondence is not equal');
-        assert(size(pts1, 2) == 2 && size(pts1, 1) > 0 && length(size(pts1)) == 2, 'the input point does not have a good shape');
-
+        assert(is2dPtsArray(pts1), 'the input point does not have a good shape');
         assert(all(size(M1) == [3, 4]), 'the input projection matrix 1 does not have a good shape');
         assert(all(size(M2) == [3, 4]), 'the input projection matrix 2 does not have a good shape');
     end
 
     % initialization
+    pts1 = pts1';
+    pts2 = pts2';
     num_pts = size(pts1, 1);
 
     % least square
@@ -55,4 +56,3 @@ function [P, err] = triangulate(pts1, pts2, M1, M2, debug_mode)
 
     P = P(:, 1:3);
 end
-
