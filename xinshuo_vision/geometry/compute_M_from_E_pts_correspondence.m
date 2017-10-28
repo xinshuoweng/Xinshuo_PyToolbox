@@ -9,7 +9,7 @@ function M = compute_M_from_E_pts_correspondence(E, pts1, pts2, K1, K2, debug_mo
 		debug_mode = true;
 	end
 
-	noise_tolerance = 0.1;
+	noise_tolerance = 0.05;
 	epsilon = 1e-5;
 	if debug_mode
 		assert(all(size(pts1) == size(pts2)), 'the input point correspondence is not good');
@@ -49,7 +49,9 @@ function M = compute_M_from_E_pts_correspondence(E, pts1, pts2, K1, K2, debug_mo
 		% triangulate to get 3D points cloud
  		[P{i}, err(i)] = triangulate(pts1, pts2, K1 * M1, K2 * M2, debug_mode);
  		num_valid_pts_tmp = length(find(P{i}(:, 3) > 0));
-		if num_valid_pts_tmp > num_valid_pts && (num_valid_pts_tmp / num_pts < noise_tolerance)
+ 		noise_level = 1 - num_valid_pts_tmp / num_pts;
+ 		fprintf('noise level in %d solution is %f\n', i, noise_level);
+		if num_valid_pts_tmp > num_valid_pts && (noise_level < noise_tolerance)
 			num_valid_pts = num_valid_pts_tmp;
 			index = i;
 		end
@@ -63,7 +65,7 @@ function M = compute_M_from_E_pts_correspondence(E, pts1, pts2, K1, K2, debug_mo
 		% end
 	end
 	
-	assert(index > 0 && index <= 4, 'no good extrinsic matrix found from possible set');
+	assert(index > 0 && index <= 4, 'no good extrinsic matrix found from possible set. Please change the seed and re-run the code');
 	extrinsic = squeeze(M2_set(:, :, index));
 	M = K2 * extrinsic;
 end

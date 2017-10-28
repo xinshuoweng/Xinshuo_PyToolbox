@@ -13,7 +13,7 @@ function [F, inlier_index] = compute_F_from_pts_correspondence(pts1, pts2, norma
     end
 
     if nargin < 5
-        method = '8pts';
+        method = '7pts';
     else
         assert(strcmp(method, '8pts') || strcmp(method, '7pts'), 'the method is 8pts or 7pts');
     end
@@ -23,7 +23,7 @@ function [F, inlier_index] = compute_F_from_pts_correspondence(pts1, pts2, norma
     end
 
     if nargin < 7
-        err_threshold = 0.0005;
+        err_threshold = 0.005;
     end
 
     if debug_mode
@@ -46,7 +46,7 @@ function [F, inlier_index] = compute_F_from_pts_correspondence(pts1, pts2, norma
         pts1_temp = pts1(index, :);
         pts2_temp = pts2(index, :);
         
-        fprintf('iteration %d\n', iter_index); 
+        % fprintf('iteration %d\n', iter_index); 
         if strcmp(method, '8pts')
             F = compute_F_from_8pts(pts1_temp, pts2_temp, normalize_factor, debug_mode);
         elseif strcmp(method, '7pts')

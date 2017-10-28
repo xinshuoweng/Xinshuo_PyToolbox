@@ -96,10 +96,12 @@ function [plane_3d, pts_index_plane, corresponding_pts] = get_dominant_3dplane_R
 			best_pts_index_plane = pts_index_plane;
 			best_corresponding_pts = corresponding_pts;
 			valid = true;
+			% fprintf('best number of inlier')
+			fprintf('iter: %d, best number of inliers is %d\n', iter_index, best_num_inlier);
 		end
 
-		fprintf('iter: %d, best number of inliers is %d\n', iter_index, best_num_inlier);
-		if num_inliers > 0.7 * num_pts
+		
+		if num_inliers > 0.95 * num_pts
 			break;
 		end
 	end

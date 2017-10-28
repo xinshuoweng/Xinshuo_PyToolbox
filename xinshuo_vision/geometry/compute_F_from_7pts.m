@@ -19,6 +19,7 @@ function F = compute_F_from_7pts(pts1, pts2, normlize_factor, debug_mode)
 	end
 
 	num_pts = size(pts1, 1);
+	epsilon = 1e-5;
 
 	% normlize the coordinate
 	pts1_norm = pts1 / normlize_factor;
@@ -46,7 +47,7 @@ function F = compute_F_from_7pts(pts1, pts2, normlize_factor, debug_mode)
 	func = symfun(det((1-lambda)*F1 + lambda*F2), lambda);
 	res = double(root(func, lambda));
 	F_check = (1-res(1))*F1 + res(1)*F2;
-	fprintf('check the determinant of (1 - lambda)*F1 + lambda*F2 = %f\n', abs(det(F_check)));
+	assert(abs(det(F_check)) < epsilon, 'the F is not good');
 	% for i = 1:length(res)
 	%     if isreal(res(i))
 	%         continue;
