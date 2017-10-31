@@ -6,6 +6,9 @@
 %       pts2        - 2 x num_pts
 %       M1          - 3x4 Camera Matrix 1
 %       M2          - 3x4 Camera Matrix 2
+%
+% output
+%       P           num_pts x 3
 function [P, err] = triangulate(pts1, pts2, M1, M2, debug_mode)
     if nargin < 5
         debug_mode = true;
@@ -54,5 +57,5 @@ function [P, err] = triangulate(pts1, pts2, M1, M2, debug_mode)
         err = err + norm(p1_proj(i, 1:2) - pts1(i, :)) + norm(p2_proj(i, 1:2) - pts2(i, :));
     end
 
-    P = P(:, 1:3);
+    P = P(:, 1:3);      
 end
