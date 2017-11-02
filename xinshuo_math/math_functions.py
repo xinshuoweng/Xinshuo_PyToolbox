@@ -6,7 +6,7 @@ from numpy.testing import assert_almost_equal
 
 from xinshuo_python import *
 
-################################################################## 2d geometry ##################################################################
+################################################################## 2d math ##################################################################
 # TODO: check
 def get_line(pts, slope, debug=True):
     '''
@@ -65,6 +65,36 @@ def get_intersection(line1, line2, debug=True):
         assert_almost_equal(x*line1[0] + y*line1[1] + 1, 0, err_msg='Intersection point is not on the line')
         assert_almost_equal(x*line2[0] + y*line2[1] + 1, 0, err_msg='Intersection point is not on the line')
     return np.array([x, y], dtype=float)
+
+def pts_rotate2D(pts_array, rotation_angle, im_height, im_width, debug=True):
+    '''
+    rotate the point array in 2D plane counter-clockwise
+
+    parameters:
+        pts_array:          2 x num_pts
+        rotation_angle:     e.g. 90
+
+    return
+        pts_array:          2 x num_pts
+    '''
+    if debug:
+        assert is2dptsarray(pts_array), 'the input point array does not have a good shape'
+
+    rotation_angle = saferotation_angle(rotation_angle)             # ensure to be in [-180, 180]
+
+    if rotation_degree > 0:
+        cols2rotated = im_width
+        rows2rotated = im_width
+    else:
+        cols2rotated = im_height
+        rows2rotated = im_height
+    rotation_matrix = cv2.getRotationMatrix2D((cols2rotated/2, rows2rotated/2), rotation_degree, 1)         # 2 x 3
+    
+    num_pts = pts_array.shape[1]
+    pts_rotate = np.ones((3, num_pts), dtype='float32')             # 3 x num_pts
+    pts_rotate[0:2, :] = pts_array         
+
+    return np.dot(rotation_matrix, pts_rotate)         # 2 x num_pts
 
 def pts_euclidean(pts1, pts2, debug=True):
     '''

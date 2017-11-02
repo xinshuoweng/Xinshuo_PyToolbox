@@ -207,3 +207,7 @@ def concatenate_grid(image_list, im_size=[1600, 2560], grid_size=None, edge_fact
 		image_merged[rows_start:rows_end, cols_start : cols_end, :] = np.array(image_tmp)
 
 	return image_merged
+
+
+
+# def crop_pts()

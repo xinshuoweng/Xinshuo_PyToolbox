@@ -56,6 +56,7 @@ function concatenate_video_grid(image_folder_list, save_dir, im_size, grid_size,
 		assert(length(image_folder_list) > 0, 'the image folder list should not be empty');
 	end
 
+	depth = 1;
 	mkdir_if_missing(save_dir);
 	window_height = im_size(1);
 	window_width = im_size(2);
@@ -73,7 +74,7 @@ function concatenate_video_grid(image_folder_list, save_dir, im_size, grid_size,
 	image_list_cell = {};
 	for video_index = 1:num_videos
 		fprintf('loading image list for all folders %d/%d\n', video_index, num_videos);
-		[imagelist, num_images] = load_list_from_folder(image_folder_list{video_index}, ext_filter, debug_mode);
+		[imagelist, num_images] = load_list_from_folder(image_folder_list{video_index}, ext_filter, depth, debug_mode);
 		num_image_cell{video_index} = num_images;
 		image_list_cell{video_index} = imagelist;
 	end

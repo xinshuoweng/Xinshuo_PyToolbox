@@ -736,7 +736,7 @@ def visualize_bbox(bbox, fig=None, ax=None, linewidth=0.5, vis=True, save=False,
         ax = plt.gca()   
 
     # plot bounding box
-    bbox = bbox_TLBR2TLWH(bbox)              # convert TLBR format to TLWH format
+    bbox = bbox_TLBR2TLWH(bbox, debug=debug)              # convert TLBR format to TLWH format
     for bbox_index in range(bbox.shape[0]):
         bbox_tmp = bbox[bbox_index, :]     
         ax.add_patch(plt.Rectangle((bbox_tmp[0], bbox_tmp[1]), bbox_tmp[2], bbox_tmp[3], fill=False, edgecolor='yellow', linewidth=linewidth))
@@ -1039,7 +1039,7 @@ def visualize_nearest_neighbor(featuremap_dict, num_neighbor=5, top_number=5, vi
     return all_sorted_nearest_id, selected_nearest_id
 
 
-def visualize_distribution(data, bin_size=None, vis=True, save=False, save_path=None, debug=True):
+def visualize_distribution(data, bin_size=None, vis=True, save=False, save_path=None, debug=True, closefig=True):
     '''
     visualize the histogram of a data, which can be a dictionary or list or numpy array or tuple or a list of list
     '''
@@ -1054,6 +1054,8 @@ def visualize_distribution(data, bin_size=None, vis=True, save=False, save_path=
     elif isnparray(data):
         data = data.tolist()
 
+    num_bins = 1000.0
+
     # calculate bin size
     if bin_size is None:
         if islistoflist(data):
@@ -1062,8 +1064,7 @@ def visualize_distribution(data, bin_size=None, vis=True, save=False, save_path=
         else:
             max_value = np.max(data)
             min_value = np.min(data)
-        bin_size = (max_value - min_value) / 10.0
-        print bin_size
+        bin_size = (max_value - min_value) / num_bins
     else:
         try:
             bin_size = int(bin_size)
@@ -1086,6 +1087,7 @@ def visualize_distribution(data, bin_size=None, vis=True, save=False, save_path=
         bins = np.arange(min(data) - bin_size, max(data) + bin_size, bin_size)      # fixed bin size
         plt.xlim([min(data) - bin_size, max(data) + bin_size])
         plt.hist(data, bins=bins, alpha=0.5)
+    
     plt.title('distribution of data')
     plt.xlabel('data (bin size = %f)' % bin_size)
     plt.ylabel('count')
@@ -1098,9 +1100,10 @@ def visualize_distribution(data, bin_size=None, vis=True, save=False, save_path=
             assert is_path_exists_or_creatable(save_path) and isfile(save_path), 'save path is not correct' 
         plt.savefig(save_path)
 
-    plt.close()
+    if closefig:
+        plt.close()
 
-def visualize_bar_graph(data=None, title=None, label=False, label_list=None, vis=True, save=False, save_path=None, debug=True):
+def visualize_bar_graph(data=None, title=None, label=False, label_list=None, vis=True, save=False, save_path=None, debug=True, closefig=True):
     '''
     visualize the bar graph of a data, which can be a dictionary or list of dictionary
     inside each dictionary, the keys (string) should be the same which is the y label, the values should be scalar
@@ -1180,9 +1183,12 @@ def visualize_bar_graph(data=None, title=None, label=False, label_list=None, vis
         if debug:
             assert is_path_exists_or_creatable(save_path) and isfile(save_path), 'save path is not correct' 
         fig.savefig(save_path, dpi=dpi, transparent=True)
+    
     if vis:
         plt.show()
-    plt.close()
+
+    if closefig:
+        plt.close()
 
 
 

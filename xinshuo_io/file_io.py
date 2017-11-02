@@ -510,7 +510,13 @@ def get_data_from_sheet(service, sheet_id, search_range, debug=True):
 
     # value_range_body = {'values': [data]}
     request = service.spreadsheets().values().batchGet(spreadsheetId=sheet_id, ranges=search_range)
-    response = request.execute()
+
+    while True:
+        try:
+            response = request.execute()
+            break
+        except:
+            continue
 
     data = list()
     # print(response['valueRanges'])
