@@ -74,7 +74,7 @@ def visualize_lines(lines_array, color_index=0, line_width=3, fig=None, ax=None,
     else:
         return fig, ax
 
-def visualize_pts_line(pts_array, line_index_list, method=2, threshold=None, fig=None, ax=None, vis=False, save=False, save_path=None, closefig=True, debug=True):
+def visualize_pts_line(pts_array, line_index_list, method=2, threshold=None, fig=None, ax=None, vis=False, save=False, save_path=None, closefig=True, debug=True, seed=0, alpha=0.5):
     '''
     given a list of index, and a point array, to plot a set of points with line on it
 
@@ -97,10 +97,11 @@ def visualize_pts_line(pts_array, line_index_list, method=2, threshold=None, fig
     if fig is None:
         fig = plt.gcf()
 
+    num_pts = pts_array.shape[1]
     line_color = 'y'
     pts_line = pts_array[:, line_index_list]
-    # print pts_line
-    # time.sleep(100)
+    np.random.seed(seed)
+    color_set_random = np.random.rand(3, num_pts)
 
     if method == 1:    
         valid_pts_list = np.where(pts_line[2, :] > threshold)[0].tolist()
@@ -108,23 +109,25 @@ def visualize_pts_line(pts_array, line_index_list, method=2, threshold=None, fig
         pts_line_tmp = pts_line[:, valid_pts_list]
         
         # plot line
-        ax.plot(pts_line_tmp[0, :], pts_line_tmp[1, :], color=line_color)
+        ax.plot(pts_line_tmp[0, :], pts_line_tmp[1, :], color=line_color, alpha=alpha)
 
         # plot point
         for pts_index in valid_pts_list:
             pts_index_original = line_index_list[pts_index]
-            ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set_big[pts_index_original % len(color_set_big)])
+            # ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set_big[pts_index_original % len(color_set_big)], alpha=alpha)
+            ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set_random[:, pts_index], alpha=alpha)
     else:
         not_valid_pts_list = np.where(pts_line[2, :] < threshold)[0].tolist()
         
         if len(not_valid_pts_list) == 0:            # all valid
             
             # plot line
-            ax.plot(pts_line[0, :], pts_line[1, :], color=line_color)
+            ax.plot(pts_line[0, :], pts_line[1, :], color=line_color, alpha=alpha)
 
             # plot points
             for pts_index in line_index_list:
-                ax.plot(pts_array[0, pts_index], pts_array[1, pts_index], 'o', color=color_set_big[pts_index % len(color_set_big)])                        
+                # ax.plot(pts_array[0, pts_index], pts_array[1, pts_index], 'o', color=color_set_big[pts_index % len(color_set_big)], alpha=alpha)
+                ax.plot(pts_array[0, pts_index], pts_array[1, pts_index], 'o', color=color_set_random[:, pts_index], alpha=alpha)
         else:
             prev_index = 0
             for not_valid_index in not_valid_pts_list:
@@ -132,24 +135,26 @@ def visualize_pts_line(pts_array, line_index_list, method=2, threshold=None, fig
 
                 # plot line
                 pts_line_tmp = pts_line[:, plot_list]
-                ax.plot(pts_line_tmp[0, :], pts_line_tmp[1, :], color=line_color)
+                ax.plot(pts_line_tmp[0, :], pts_line_tmp[1, :], color=line_color, alpha=alpha)
                 
                 # plot points
                 for pts_index in plot_list:
                     pts_index_original = line_index_list[pts_index]
-                    ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set_big[pts_index_original % len(color_set_big)]) 
+                    ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set_random[:, pts_index_original], alpha=alpha) 
+                    # ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set_big[pts_index_original % len(color_set_big)], alpha=alpha) 
 
                 prev_index = not_valid_index + 1
 
             pts_line_tmp = pts_line[:, prev_index:]
 
             # plot last line
-            ax.plot(pts_line_tmp[0, :], pts_line_tmp[1, :], color=line_color)               
+            ax.plot(pts_line_tmp[0, :], pts_line_tmp[1, :], color=line_color, alpha=alpha)
 
             # plot last points
             for pts_index in range(prev_index, pts_line.shape[1]):
                 pts_index_original = line_index_list[pts_index]
-                ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set_big[pts_index_original % len(color_set_big)]) 
+                # ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set_big[pts_index_original % len(color_set_big)], alpha=alpha) 
+                ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set_random[:, pts_index_original], alpha=alpha) 
 
     if closefig:
         plt.close(fig)
