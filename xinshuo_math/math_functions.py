@@ -5,6 +5,7 @@ import numpy as np
 from numpy.testing import assert_almost_equal
 
 from xinshuo_python import *
+from xinshuo_miscellaneous import print_np_shape
 
 ################################################################## 2d math ##################################################################
 # TODO: check
@@ -109,8 +110,6 @@ def pts_euclidean(pts1, pts2, debug=True):
     if debug:
         assert is2dptsarray(pts1) and is2dptsarray(pts2), 'the input points are not correct'
         assert pts1.shape == pts2.shape, 'shape of two points is not equal'
-        if len(pts1.shape) > 1:
-            assert len(pts1.shape) == 2 and pts1.shape[1] > 0, 'shape of input points is not correct'
     
     # if the shape of input points is (2, ), reshape them to (2, 1)
     if len(pts1.shape) == 1:

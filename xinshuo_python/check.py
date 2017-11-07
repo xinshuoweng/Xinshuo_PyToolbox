@@ -13,6 +13,9 @@ def isinteger(integer_test):
 def ispositiveinteger(integer_test):
     return isinteger(integer_test) and integer_test > 0
 
+def isnonnegativeinteger(integer_test):
+    return isinteger(integer_test) and integer_test >= 0
+
 def isfloat(float_test):
     return isinstance(float_test, float)
 

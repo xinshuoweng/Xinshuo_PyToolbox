@@ -20,7 +20,7 @@ from collections import Counter
 # this file define a set of functions related to matplotlib
 from xinshuo_python import *
 from xinshuo_io import mkdir_if_missing, fileparts
-from xinshuo_vision.bbox_transform import bbox_TLBR2TLWH, bboxcheck_TLBR
+from xinshuo_vision.bbox_transform import bbox_TLBR2TLWH, bboxcheck_TLBR, get_centered_bbox
 from xinshuo_miscellaneous import print_np_shape, list2tuple, list_reorder
 from xinshuo_math import pts_euclidean, calculate_truncated_mse
 
@@ -30,6 +30,11 @@ marker_set = ['o', 'v', '^', '<', '>', '1', '2', '3', '4', '8', 's', 'p', '*', '
 hatch_set = [None, 'o', '/', '\\', '|', '-', '+', '*', 'x', 'O', '.']
 linestyle_set = ['-', '--', '-.', ':', None, ' ', 'solid', 'dashed']
 
+
+def visualize_image_with_pts_bbox(image, pts_array, window_size, pts_size=20, label=False, label_list=None, color_index=0, vis=False, vis_threshold=-10000, save=False, save_path=None, debug=True, closefig=True):
+    fig, ax = visualize_image_with_pts(image, pts_array, pts_size=pts_size, color_index=color_index, debug=False, save=False, closefig=False)
+    bbox = get_centered_bbox(pts_array, window_size, window_size, debug=debug)
+    visualize_bbox(bbox, fig=fig, ax=ax, vis=vis, save=save, save_path=save_path, debug=debug, closefig=closefig)
 
 def visualize_lines(lines_array, color_index=0, line_width=3, fig=None, ax=None, vis=True, save=False, save_path=None, debug=True, closefig=True):
     '''
