@@ -168,21 +168,21 @@ def remove_item_from_list(list_to_remove, item, debug=True):
 
 	return list_to_remove
 
-def remove_list_from_list(list_to_remove, list_items, debug=True):
+def remove_list_from_list(list_all, list_to_remove, debug=True):
 	'''
-	remove a list of items from a list
+	remove a list "list_to_remove" from a list "list_all"
 	'''
 	if debug:
-		assert islist(list_to_remove), 'input list is not a list'
-		assert islist(list_items), 'remove list is not a list'
+		assert islist(list_all), 'input list is not a list'
+		assert islist(list_to_remove), 'remove list is not a list'
 		
-	for item in list_items:
+	for item in list_to_remove:
 		try:
-			list_to_remove.remove(item)
+			list_all.remove(item)
 		except ValueError:
 			print('Warning!!!!!! Item to remove is not in the list. Remove operation is not done.')
 
-	return list_to_remove
+	return list_all
 
 
 def remove_empty_item_from_list(list_to_remove, debug=True):

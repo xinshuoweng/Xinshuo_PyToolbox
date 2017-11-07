@@ -253,12 +253,12 @@ def bboxcheck(bbox, debug=True):
     check the input to be a bounding box 
 
     parameter:
-        bbox:   N x 4 numpy array, TLBR format
+        bbox:   N x 4 numpy array, N >= 0
     
     return:
         True or False
     '''    
-    return isnparray(bbox) and bbox.shape[1] == 4 and bbox.shape[0] > 0
+    return isnparray(bbox) and bbox.shape[1] == 4 and bbox.shape[0] >= 0
 
 def bboxcheck_TLBR(bbox, debug=True):
     '''
@@ -270,8 +270,6 @@ def bboxcheck_TLBR(bbox, debug=True):
     return:
         True or False
     '''
-    
-    
     if not bboxcheck(bbox):
         return False
 

@@ -1,14 +1,13 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
 
-import time
+import time, shutil
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.collections as plycollections
 from matplotlib.patches import Ellipse
 import numpy as np
-import shutil
 import seaborn as sns
 from pandas import DataFrame
 from sklearn.neighbors import NearestNeighbors
@@ -21,173 +20,37 @@ from collections import Counter
 from xinshuo_python import *
 from xinshuo_io import mkdir_if_missing, fileparts
 from xinshuo_vision.bbox_transform import bbox_TLBR2TLWH, bboxcheck_TLBR, get_centered_bbox
-from xinshuo_miscellaneous import print_np_shape, list2tuple, list_reorder
+from xinshuo_miscellaneous import print_np_shape, list2tuple, list_reorder, remove_list_from_list
 from xinshuo_math import pts_euclidean, calculate_truncated_mse
 
+dpi = 80
 color_set = ['r', 'b', 'g', 'c', 'm', 'y', 'k', 'w', 'lime', 'cyan', 'aqua']
 color_set_big = ['aqua', 'azure', 'red', 'black', 'blue', 'brown', 'cyan', 'darkblue', 'fuchsia', 'gold', 'green', 'grey', 'indigo', 'magenta', 'lime', 'yellow', 'white', 'tomato', 'salmon']
 marker_set = ['o', 'v', '^', '<', '>', '1', '2', '3', '4', '8', 's', 'p', '*', 'h', 'H', '+', 'x', 'D', 'd']
 hatch_set = [None, 'o', '/', '\\', '|', '-', '+', '*', 'x', 'O', '.']
 linestyle_set = ['-', '--', '-.', ':', None, ' ', 'solid', 'dashed']
 
-
-def visualize_image_with_pts_bbox(image, pts_array, window_size, pts_size=20, label=False, label_list=None, color_index=0, vis=False, vis_threshold=-10000, save=False, save_path=None, debug=True, closefig=True):
-    fig, ax = visualize_image_with_pts(image, pts_array, pts_size=pts_size, color_index=color_index, debug=False, save=False, closefig=False)
-    bbox = get_centered_bbox(pts_array, window_size, window_size, debug=debug)
-    visualize_bbox(bbox, fig=fig, ax=ax, vis=vis, save=save, save_path=save_path, debug=debug, closefig=closefig)
-
-def visualize_lines(lines_array, color_index=0, line_width=3, fig=None, ax=None, vis=True, save=False, save_path=None, debug=True, closefig=True):
+def visualize_image(image_path, vis=True, save_path=None, debug=True, closefig=True):
     '''
-    plot lines 
+    visualize various images
 
     parameters:
-        lines_array:            4 x num_lines, each column denotes (x1, y1, x2, y2)
+        image_path:         a path to an image / an image / a list of images / a list of image paths
     '''
-
-    if debug:    
-        assert islinesarray(lines_array), 'input array of lines are not correct'
-
-    dpi = 80  
-    if fig is None:
-        fig = plt.gcf()
-
-    if ax is None:
-        ax = plt.gca()   
-
-    # plot lines
-    num_lines = lines_array.shape[1]
-    lines_all = []
-    for line_index in range(num_lines):
-        line_tmp = lines_array[:, line_index]
-        lines_all.append([tuple([line_tmp[0], line_tmp[1]]), tuple([line_tmp[2], line_tmp[3]])])
-
-    line_col = plycollections.LineCollection(lines_all, linewidths=line_width, colors=color_set[color_index])
-    ax.add_collection(line_col)
-        # ax.plot([line_tmp[0], line_tmp[2]], [line_tmp[1], line_tmp[3]], color=color_set[color_index], linewidth=line_width)
-
-    # save and visualization
-    if save:
-        if debug:
-            assert is_path_exists_or_creatable(save_path) and isfile(save_path), 'save path is not valid: %s' % save_path
-            mkdir_if_missing(save_path)
-        fig.savefig(save_path, dpi=dpi, transparent=True)
-    if vis:
-        plt.show()
-
-    if closefig:
-        plt.close(fig)
-    else:
-        return fig, ax
-
-def visualize_pts_line(pts_array, line_index_list, method=2, threshold=None, fig=None, ax=None, vis=False, save=False, save_path=None, closefig=True, debug=True, seed=0, alpha=0.5):
-    '''
-    given a list of index, and a point array, to plot a set of points with line on it
-
-    inputs:
-        pts_array:          2(3) x num_pts
-        line_index_list:    a list of index
-        method:             1: all points are connected, if some points are missing in the middle, just ignore that point and connect the two nearby points
-                            2: if some points are missing, there might be two sub-lines
-        threshold:          confidence to draw the points
-
-    '''
-
     if debug:
-        assert is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array), 'input points are not correct'
-        assert islist(line_index_list), 'the list of index is not correct'
-        assert method == 2 or method == 1, 'the plot method is not correct'
-
-    if ax is None:
-        ax = plt.gca()
-    if fig is None:
-        fig = plt.gcf()
-
-    num_pts = pts_array.shape[1]
-    line_color = 'y'
-    pts_line = pts_array[:, line_index_list]
-    np.random.seed(seed)
-    color_set_random = np.random.rand(3, num_pts)
-
-    if method == 1:    
-        valid_pts_list = np.where(pts_line[2, :] > threshold)[0].tolist()
-        # print valid_pts_list
-        pts_line_tmp = pts_line[:, valid_pts_list]
-        
-        # plot line
-        ax.plot(pts_line_tmp[0, :], pts_line_tmp[1, :], color=line_color, alpha=alpha)
-
-        # plot point
-        for pts_index in valid_pts_list:
-            pts_index_original = line_index_list[pts_index]
-            # ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set_big[pts_index_original % len(color_set_big)], alpha=alpha)
-            ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set_random[:, pts_index], alpha=alpha)
-    else:
-        not_valid_pts_list = np.where(pts_line[2, :] < threshold)[0].tolist()
-        
-        if len(not_valid_pts_list) == 0:            # all valid
-            
-            # plot line
-            ax.plot(pts_line[0, :], pts_line[1, :], color=line_color, alpha=alpha)
-
-            # plot points
-            for pts_index in line_index_list:
-                # ax.plot(pts_array[0, pts_index], pts_array[1, pts_index], 'o', color=color_set_big[pts_index % len(color_set_big)], alpha=alpha)
-                ax.plot(pts_array[0, pts_index], pts_array[1, pts_index], 'o', color=color_set_random[:, pts_index], alpha=alpha)
+        if isstring(image_path):
+            assert is_path_exists(image_path), 'image is not existing at %s' % image_path
         else:
-            prev_index = 0
-            for not_valid_index in not_valid_pts_list:
-                plot_list = range(prev_index, not_valid_index)
+            assert islist(image_path) or isimage(image_path, debug=debug), 'the input is not a list or an good image'
 
-                # plot line
-                pts_line_tmp = pts_line[:, plot_list]
-                ax.plot(pts_line_tmp[0, :], pts_line_tmp[1, :], color=line_color, alpha=alpha)
-                
-                # plot points
-                for pts_index in plot_list:
-                    pts_index_original = line_index_list[pts_index]
-                    ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set_random[:, pts_index_original], alpha=alpha) 
-                    # ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set_big[pts_index_original % len(color_set_big)], alpha=alpha) 
-
-                prev_index = not_valid_index + 1
-
-            pts_line_tmp = pts_line[:, prev_index:]
-
-            # plot last line
-            ax.plot(pts_line_tmp[0, :], pts_line_tmp[1, :], color=line_color, alpha=alpha)
-
-            # plot last points
-            for pts_index in range(prev_index, pts_line.shape[1]):
-                pts_index_original = line_index_list[pts_index]
-                # ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set_big[pts_index_original % len(color_set_big)], alpha=alpha) 
-                ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set_random[:, pts_index_original], alpha=alpha) 
-
-    if closefig:
-        plt.close(fig)
-    else:
-        return fig, ax 
-
-
-def visualize_image(image, vis=True, save_path=None, debug=True, closefig=True):
-    '''
-    input image is a numpy array matrix
-    '''
-    if debug and isstring(image):
-        assert is_path_exists(image), 'image is not existing at %s' % image
-
-    if isstring(image):
+    if isstring(image_path):            # a path to an image
         try:
-            image = imread(image)
+            image = imread(image_path)
         except IOError:
-            print('path is not a valid image path. Please check: %s' % image)
+            print('path is not a valid image path. Please check: %s' % image_path)
             return
-
-    if save_path is not None:
-        save = True
-    else:
-        save = False
-
-    if islist(image):
-        imagelist = image
+    elif islist(image_path):            # a list of images / a list of image paths
+        imagelist = image_path
         save_path_list = save_path
         if vis:
             print('visualizing a list of images:')
@@ -206,23 +69,20 @@ def visualize_image(image, vis=True, save_path=None, debug=True, closefig=True):
                 visualize_image(image_tmp, vis=vis, debug=debug)
             index += 1
         return
+    else:                               # an image
+        if ispilimage(image_path):
+            image = np.array(image_path)
+        else:
+            image = image_path
 
-    if debug:
-        # assert isnparray(image), 'input image is not a numpy array {}'.format(type(image))
-        assert isimage(image, debug=debug), 'input is not a good image, shape is {}'.format(image.shape)
-
-    if ispilimage(image):
-    	image = np.array(image)
-
-
-    dpi = 80  
     width = image.shape[1]
     height = image.shape[0]
     figsize = width / float(dpi), height / float(dpi)
     fig = plt.figure(figsize=figsize)
     ax = fig.add_axes([0, 0, 1, 1])
     ax.axis('off')
-
+    
+    # display image
     if iscolorimage(image, debug=debug):
         if debug:
             print 'visualizing color image'
@@ -246,201 +106,9 @@ def visualize_image(image, vis=True, save_path=None, debug=True, closefig=True):
         assert False, 'image is not correct'
     ax.set(xlim=[0, width], ylim=[height, 0], aspect=1)
 
-    if save:
-        if debug:
-            assert is_path_exists_or_creatable(save_path) and isfile(save_path), 'save path is not valid: %s' % save_path
-            mkdir_if_missing(save_path)
-        fig.savefig(save_path, dpi=dpi, transparent=True)
-    if vis:
-        plt.show()
+    return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
 
-    if closefig:
-        plt.close(fig)
-    else:
-        return fig, ax
-
-def visualize_image_with_pts(image_path, pts, covariance=False, pts_size=20, label=False, label_list=None, color_index=0, vis=False, vis_threshold=-10000, save=False, save_path=None, debug=True, closefig=True):
-    '''
-    visualize image and plot keypoints on top of it
-
-    parameter:
-        image_path:     a path to an image
-        pts:            a dictionary or 2 or 3 x num_pts numpy array
-                        when there are 3 channels in pts, the third one denotes the occlusion flag
-                        occlusion: 0 -> invisible, 1 -> visible, -1 -> not existing
-        label:          determine to add text label for each point
-        label_list:     label string for all points
-        color_index:    a scalar or a list of color indexes
-    '''
-
-    # plot keypoints
-    def visualize_pts_array(pts_array, covariance=False, color_index=0, ax=None, pts_size=20, label=False, label_list=None, occlusion=True, vis_threshold=-10000, debug=True):
-        # pts_size = 20
-        fontsize = 20
-        std = None
-        conf = 0.95
-        if islist(color_index):
-            if debug:
-                assert not occlusion, 'the occlusion is not compatible with plotting different colors during scattering'
-                assert not covariance, 'the covariance is not compatible with plotting different colors during scattering'
-            color_tmp = [color_set[index_tmp] for index_tmp in color_index]
-        else:
-            color_tmp = color_set[color_index]
-        num_pts = pts_array.shape[1]
-
-        if is2dptsarray(pts_array):    
-            ax.scatter(pts_array[0, :], pts_array[1, :], color=color_tmp, s=pts_size)
-
-            if debug and islist(color_tmp):
-                assert len(color_tmp) == pts_array.shape[1], 'number of points to plot is not equal to number of colors provided'
-            pts_visible_index = range(pts_array.shape[1])
-            pts_ignore_index = []
-            pts_invisible_index = []
-        else:
-            num_float_elements = np.where(np.logical_and(pts_array[2, :] > 0, pts_array[2, :] < 1))[0].tolist()
-            if len(num_float_elements) > 0:
-                type_3row = 'conf'
-                if debug:
-                    print('third row is confidence')
-            else:
-                type_3row = 'occu'
-                if debug:
-                    print('third row is occlusion')
-
-            if type_3row == 'occu':
-                pts_visible_index   = np.where(pts_array[2, :] == 1)[0].tolist()              # plot visible points in red color
-                pts_invisible_index = np.where(pts_array[2, :] == 0)[0].tolist()              # plot invisible points in blue color
-                pts_ignore_index    = np.where(pts_array[2, :] == -1)[0].tolist()             # do not plot points with annotation
-            else:
-                pts_visible_index   = np.where(pts_array[2, :] > vis_threshold)[0].tolist()
-                pts_ignore_index    = np.where(pts_array[2, :] <= vis_threshold)[0].tolist()
-                pts_invisible_index = []
-
-            if debug and islist(color_tmp):
-                assert len(color_tmp) == len(pts_visible_index), 'number of points to plot is not equal to number of colors provided'
-
-            ax.scatter(pts_array[0, pts_visible_index], pts_array[1, pts_visible_index], color=color_tmp, s=pts_size)
-            if occlusion:
-                ax.scatter(pts_array[0, pts_invisible_index], pts_array[1, pts_invisible_index], color=color_set[(color_index+1) % len(color_set)], s=pts_size)
-            # else:
-                # ax.scatter(pts_array[0, pts_invisible_index], pts_array[1, pts_invisible_index], color=color_tmp, s=pts_size)
-            if covariance:
-                visualize_pts_covariance(pts_array[0:2, :], std=std, conf=conf, ax=ax, debug=False, color=color_tmp)
-
-        if debug:
-            print 'visible index list', 
-            print(pts_visible_index)
-            print 'invisible index list', 
-            print(pts_invisible_index)
-            print 'ignored index list', 
-            print(pts_ignore_index)
-        if label:
-            for pts_index in xrange(num_pts):
-                label_tmp = label_list[pts_index]
-                if pts_index in pts_ignore_index:
-                    continue
-                else:
-                    # note that the annotation is based on the coordinate instead of the order of plotting the points, so the orider in pts_index does not matter
-                    if islist(color_index):
-                        plt.annotate(label_tmp, xy=(pts_array[0, pts_index], pts_array[1, pts_index]), xytext=(-1, 1), color=color_set[(color_index[pts_index]+5) % len(color_set)], textcoords='offset points', ha='right', va='bottom', fontsize=fontsize)
-                    else:
-                        plt.annotate(label_tmp, xy=(pts_array[0, pts_index], pts_array[1, pts_index]), xytext=(-1, 1), color=color_set[(color_index+5) % len(color_set)], textcoords='offset points', ha='right', va='bottom', fontsize=fontsize)
-                    # bbox=dict(boxstyle='round,pad=0.5', fc='yellow', alpha=0.5),
-                    # arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
-
-    if label and (label_list is None):
-        if not isdict(pts):
-            num_pts = pts.shape[1]
-        else:
-            pts_tmp = pts.values()[0]
-            num_pts = np.asarray(pts_tmp).shape[1] if islist(pts_tmp) else pts_tmp.shape[1]
-        label_list = [str(i+1) for i in xrange(num_pts)];
-
-    if debug:
-        if isstring(image_path):
-            assert is_path_exists(image_path), 'image is not existing at %s' % image_path
-        else:
-            assert isimage(image_path, debug=debug), 'the input is not a good image'
-        if isdict(pts):
-            for pts_tmp in pts.values():
-                if islist(pts_tmp):
-                    pts_tmp = np.asarray(pts_tmp)
-                assert is2dptsarray(pts_tmp) or is2dptsarray_occlusion(pts_tmp), 'input points within dictionary are not correct: (2 (3), num_pts) vs %s' % print_np_shape(pts_tmp)
-        else:
-            assert is2dptsarray(pts) or is2dptsarray_occlusion(pts), 'input points are not correct'
-        assert islogical(label), 'label flag is not correct'
-        if label:
-            assert islist(label_list) and all(isstring(label_tmp) for label_tmp in label_list), 'labels are not correct'
-
-    if isstring(image_path):
-        try:
-            image = imread(image_path)
-        except IOError:
-            print('path is not a valid image path. Please check: %s' % image_path)
-            return
-    else:
-        image = image_path
-        if ispilimage(image):
-        	image = np.array(image)
-    
-
-    dpi = 80  
-    width = image.shape[1]
-    height = image.shape[0]
-    figsize = width / float(dpi), height / float(dpi)
-    fig = plt.figure(figsize=figsize)
-    ax = fig.add_axes([0, 0, 1, 1])
-    ax.axis('off')
-    
-    # display image
-    if iscolorimage(image, debug=debug):
-        if debug:
-            print 'visualizing color image'
-        ax.imshow(image, interpolation='nearest')
-    elif isgrayimage(image, debug=debug):
-        if debug:
-            print 'visualizing gray scale image'
-        if image.ndim == 3 and image.shape[-1] == 1:
-            image = np.reshape(image, image.shape[:-1])
-
-        if isfloatimage(image, debug=debug) and all(item == 1.0 for item in image.flatten().tolist()):
-            if debug:
-                print('all elements in image are 1. For visualizing, we subtract the top left with an epsilon value')
-            image[0, 0] -= 0.00001
-        elif isuintimage(image, debug=debug) and all(item == 255 for item in image.flatten().tolist()):
-            if debug:
-                print('all elements in image are 255. For visualizing, we subtract the top left with an epsilon value')
-            image[0, 0] -= 1
-        ax.imshow(image, interpolation='nearest', cmap='gray')
-    else:
-        assert False, 'image is not correct'
-    ax.set(xlim=[0, width], ylim=[height, 0], aspect=1)
-
-    if isdict(pts):
-        color_index = color_index
-        for pts_id, pts_array in pts.items():
-            if islist(pts_array):
-                pts_array = np.asarray(pts_array)
-            visualize_pts_array(pts_array, ax=ax, covariance=covariance, color_index=color_index, pts_size=pts_size, label=label, label_list=label_list, occlusion=False, debug=debug, vis_threshold=vis_threshold)
-            color_index += 1
-    else:   
-        visualize_pts_array(pts, ax=ax, covariance=covariance, pts_size=pts_size, label=label, label_list=label_list, color_index=color_index, occlusion=False, debug=debug, vis_threshold=vis_threshold)
-
-    # save and visualization
-    if save:
-        if debug:
-            assert is_path_exists_or_creatable(save_path) and isfile(save_path), 'save path is not valid: %s' % save_path
-            mkdir_if_missing(save_path)
-        fig.savefig(save_path, dpi=dpi, transparent=True)
-    if vis:
-        plt.show()
-    
-    if closefig:
-        plt.close(fig)
-    else:
-        return fig, ax
-
-def visualize_pts_covariance(pts_array, conf=None, std=None, ax=None, debug=True, **kwargs):
+def visualize_pts_covariance(pts_array, conf=None, std=None, fig=None, ax=None, debug=True, **kwargs):
     """
     Plots an `nstd` sigma ellipse based on the mean and covariance of a point
     "cloud" (points, an Nx2 array).
@@ -468,9 +136,9 @@ def visualize_pts_covariance(pts_array, conf=None, std=None, ax=None, debug=True
     pts_array = np.transpose(pts_array)
     center = pts_array.mean(axis=0)
     covariance = np.cov(pts_array, rowvar=False)
-    return visualize_covariance_ellipse(covariance=covariance, center=center, conf=conf, std=std, ax=ax, debug=debug, **kwargs), np.sqrt(covariance[0, 0]**2 + covariance[1, 1]**2)
+    return visualize_covariance_ellipse(covariance=covariance, center=center, conf=conf, std=std, fig=fig, ax=ax, debug=debug, **kwargs), np.sqrt(covariance[0, 0]**2 + covariance[1, 1]**2)
 
-def visualize_covariance_ellipse(covariance, center, conf=None, std=None, ax=None, debug=True, **kwargs):
+def visualize_covariance_ellipse(covariance, center, conf=None, std=None, fig=None, ax=None, debug=True, **kwargs):
     """
     Plots an `nstd` sigma error ellipse based on the specified covariance
     matrix (`cov`). Additional keyword arguments are passed on to the 
@@ -507,8 +175,7 @@ def visualize_covariance_ellipse(covariance, center, conf=None, std=None, ax=Non
         raise ValueError('One of `conf` and `std` should be specified.')
     r2 = chi2.ppf(conf, 2)
 
-    if ax is None:
-        ax = plt.gca()
+    fig, ax = get_fig_ax_helper(fig=fig, ax=ax)
 
     vals, vecs = eigsorted(covariance)
     theta = np.degrees(np.arctan2(*vecs[:,0][::-1]))
@@ -525,7 +192,322 @@ def visualize_covariance_ellipse(covariance, center, conf=None, std=None, ax=Non
     ax.add_artist(ellipse)
     return ellipse
 
-def visualize_pts(pts, title=None, fig=None, ax=None, display_range=False, xlim=[-100, 100], ylim=[-100, 100], display_list=None, covariance=False, mse=False, mse_value=None, vis=True, save=False, save_path=None, debug=True):
+def visualize_pts_array(pts_array, covariance=False, color_index=0, fig=None, ax=None, pts_size=20, label=False, label_list=None, occlusion=True, vis_threshold=-10000, save_path=None, vis=False, debug=True, closefig=True):
+    '''
+    plot keypoints
+
+    parameters:
+        pts_array:      2 or 3 x num_pts, the third channel could be confidence or occlusion
+    '''
+
+    fontsize = 20
+    std = None
+    conf = 0.95
+    if islist(color_index):
+        if debug:
+            assert not occlusion, 'the occlusion is not compatible with plotting different colors during scattering'
+            assert not covariance, 'the covariance is not compatible with plotting different colors during scattering'
+        color_tmp = [color_set_big[index_tmp] for index_tmp in color_index]
+    else:
+        color_tmp = color_set_big[color_index]
+    num_pts = pts_array.shape[1]
+
+    if is2dptsarray(pts_array):    
+        ax.scatter(pts_array[0, :], pts_array[1, :], color=color_tmp, s=pts_size)
+
+        if debug and islist(color_tmp):
+            assert len(color_tmp) == pts_array.shape[1], 'number of points to plot is not equal to number of colors provided'
+        pts_visible_index = range(pts_array.shape[1])
+        pts_ignore_index = []
+        pts_invisible_index = []
+    else:
+        num_float_elements = np.where(np.logical_and(pts_array[2, :] > 0, pts_array[2, :] < 1))[0].tolist()
+        if len(num_float_elements) > 0:
+            type_3row = 'conf'
+            if debug:
+                print('third row is confidence')
+        else:
+            type_3row = 'occu'
+            if debug:
+                print('third row is occlusion')
+
+        if type_3row == 'occu':
+            pts_visible_index   = np.where(pts_array[2, :] == 1)[0].tolist()              # plot visible points in red color
+            pts_invisible_index = np.where(pts_array[2, :] == 0)[0].tolist()              # plot invisible points in blue color
+            pts_ignore_index    = np.where(pts_array[2, :] == -1)[0].tolist()             # do not plot points with annotation
+        else:
+            pts_visible_index   = np.where(pts_array[2, :] > vis_threshold)[0].tolist()
+            pts_ignore_index    = np.where(pts_array[2, :] <= vis_threshold)[0].tolist()
+            pts_invisible_index = []
+
+        if debug and islist(color_tmp):
+            assert len(color_tmp) == len(pts_visible_index), 'number of points to plot is not equal to number of colors provided'
+
+        ax.scatter(pts_array[0, pts_visible_index], pts_array[1, pts_visible_index], color=color_tmp, s=pts_size)
+        if occlusion:
+            ax.scatter(pts_array[0, pts_invisible_index], pts_array[1, pts_invisible_index], color=color_set_big[(color_index+1) % len(color_set_big)], s=pts_size)
+        # else:
+            # ax.scatter(pts_array[0, pts_invisible_index], pts_array[1, pts_invisible_index], color=color_tmp, s=pts_size)
+        if covariance:
+            visualize_pts_covariance(pts_array[0:2, :], std=std, conf=conf, fig=fig, ax=ax, debug=False, color=color_tmp)
+
+    if label:
+        for pts_index in xrange(num_pts):
+            label_tmp = label_list[pts_index]
+            if pts_index in pts_ignore_index:
+                continue
+            else:
+                # note that the annotation is based on the coordinate instead of the order of plotting the points, so the orider in pts_index does not matter
+                if islist(color_index):
+                    plt.annotate(label_tmp, xy=(pts_array[0, pts_index], pts_array[1, pts_index]), xytext=(-1, 1), color=color_set_big[(color_index[pts_index]+5) % len(color_set_big)], textcoords='offset points', ha='right', va='bottom', fontsize=fontsize)
+                else:
+                    plt.annotate(label_tmp, xy=(pts_array[0, pts_index], pts_array[1, pts_index]), xytext=(-1, 1), color=color_set_big[(color_index+5) % len(color_set_big)], textcoords='offset points', ha='right', va='bottom', fontsize=fontsize)
+                # bbox=dict(boxstyle='round,pad=0.5', fc='yellow', alpha=0.5),
+                # arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
+    
+    return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
+
+def visualize_image_with_pts(image_path, pts, pts_size=20, label=False, label_list=None, color_index=0, vis=False, save_path=None, debug=True, closefig=True):
+    '''
+    visualize image and plot keypoints on top of it
+
+    parameter:
+        image_path:     a path to an image / an image
+        pts:            a dictionary or 2 or 3 x num_pts numpy array
+                        when there are 3 channels in pts, the third one denotes the occlusion flag
+                        occlusion: 0 -> invisible, 1 -> visible, -1 -> not existing
+        label:          determine to add text label for each point
+        label_list:     label string for all points
+        color_index:    a scalar or a list of color indexes
+    '''
+    fig, ax = visualize_image(image_path, vis=False, debug=debug, closefig=False)
+
+    if label and (label_list is None):
+        if not isdict(pts):
+            num_pts = pts.shape[1]
+        else:
+            pts_tmp = pts.values()[0]
+            num_pts = np.asarray(pts_tmp).shape[1] if islist(pts_tmp) else pts_tmp.shape[1]
+        label_list = [str(i+1) for i in xrange(num_pts)];
+
+    if debug:
+        assert not islist(image_path), 'this function only support to plot points on one image'
+        if isdict(pts):
+            for pts_tmp in pts.values():
+                if islist(pts_tmp):
+                    pts_tmp = np.asarray(pts_tmp)
+                assert is2dptsarray(pts_tmp) or is2dptsarray_occlusion(pts_tmp), 'input points within dictionary are not correct: (2 (3), num_pts) vs %s' % print_np_shape(pts_tmp)
+        else:
+            assert is2dptsarray(pts) or is2dptsarray_occlusion(pts), 'input points are not correct'
+        assert islogical(label), 'label flag is not correct'
+        if label:
+            assert islist(label_list) and all(isstring(label_tmp) for label_tmp in label_list), 'labels are not correct'
+
+    if isdict(pts):
+        color_index = color_index
+        for pts_id, pts_array in pts.items():
+            if islist(pts_array):
+                pts_array = np.asarray(pts_array)
+            visualize_pts_array(pts_array, fig=fig, ax=ax, color_index=color_index, pts_size=pts_size, label=label, label_list=label_list, occlusion=False, debug=debug, closefig=False)
+            color_index += 1
+    else:   
+        visualize_pts_array(pts, fig=fig, ax=ax, color_index=color_index, pts_size=pts_size, label=label, label_list=label_list, occlusion=False, debug=debug, closefig=False)
+
+    return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
+
+def visualize_bbox(bbox, fig=None, ax=None, linewidth=0.5, color_index=20, vis=True, save_path=None, debug=True, closefig=True):
+    '''
+    visualize a set of bounding box
+
+    parameters:
+        bbox:       N x 4
+    '''
+    if debug:    
+        assert bboxcheck_TLBR(bbox), 'input bounding boxes are not correct'
+
+    edge_color = color_set_big[color_index % len(color_set_big)]
+
+    # plot bounding box
+    bbox = bbox_TLBR2TLWH(bbox, debug=debug)              # convert TLBR format to TLWH format
+    for bbox_index in range(bbox.shape[0]):
+        bbox_tmp = bbox[bbox_index, :]     
+        ax.add_patch(plt.Rectangle((bbox_tmp[0], bbox_tmp[1]), bbox_tmp[2], bbox_tmp[3], fill=False, edgecolor=edge_color, linewidth=linewidth))
+
+    return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
+
+def visualize_image_with_bbox(image, bbox, ax=None, vis=True, save_path=None, debug=True, closefig=True):
+    '''
+    visualize image and plot keypoints on top of it
+
+    parameter:
+        image:          a path to an image / an image
+        bbox:           N X 4 numpy array, with TLBR format
+    '''
+    if debug:
+        assert not islist(image), 'this function only support to plot points on one image'
+
+    fig, ax = visualize_image(image, vis=False, debug=debug, closefig=False)
+    return visualize_bbox(bbox, fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
+
+def visualize_image_with_pts_bbox(image, pts_array, window_size, pts_size=20, label=False, label_list=None, color_index=0, vis=False, save_path=None, debug=True, closefig=True):
+    '''
+    plot a set of points on top of an image with bbox around all points
+
+    parameters
+        pts_array:              2 x N
+    '''
+    if debug:
+        assert is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array), 'input points are not correct'
+
+    fig, ax = visualize_image_with_pts(image, pts_array, pts_size=pts_size, label=label, label_list=label_list, color_index=color_index, debug=False, save_path=None, closefig=False)
+    bbox = get_centered_bbox(pts_array, window_size, window_size, debug=debug)
+    return visualize_bbox(bbox, fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
+
+def visualize_image_with_pts_bbox_tracking(image, pts_array, valid_index, window_size, pts_anno=None, pts_size=20, vis=False, save_path=None, debug=True, closefig=True):
+    '''
+    plot a set of points from tracking results on top of an image with bbox, and plot the annotation meanwhile with another color
+    the tracking results also include the successful or failed tracking, we differentiate them in different color
+
+    parameters:
+        pts_array:              2 x N
+        pts_anno:               2 x N
+        valid_index:            a list of m elements who succeeds, m >= 0 && m <= N
+    '''
+    if debug:
+        assert is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array), 'input points are not correct'
+        assert pts_array.shape == pts_anno.shape, 'the input points from prediction and annotation have to have the same shape'
+        assert islist(valid_index), 'the valid index is not a list'
+
+    num_pts_all = pts_array.shape[1]
+    num_pts_succeed = len(valid_index)
+    if debug:
+        assert num_pts_succeed <= num_pts_all, 'the number of points should be less than number of points in total'
+
+    color_anno_index = 16                         # cyan
+    color_succeed_index = 15                       # yellow
+    color_failed_index = 0                        # aqua
+    failed_index = remove_list_from_list(range(num_pts_all), valid_index, debug=debug)
+    pts_succeed = pts_array[:, valid_index]
+    pts_failed = pts_array[:, failed_index]
+
+    # plot successful predictions
+    fig, ax = visualize_image_with_pts(image, pts_succeed, pts_size=pts_size, color_index=color_succeed_index, debug=False, closefig=False)
+    bbox = get_centered_bbox(pts_succeed, window_size, window_size, debug=debug)
+    fig, ax = visualize_bbox(bbox, fig=fig, ax=ax, color_index=color_succeed_index, vis=vis, debug=debug, closefig=False)
+
+    # plot failed predictions
+    fig, ax = visualize_pts_array(pts_failed, fig=fig, ax=ax, color_index=color_failed_index, pts_size=pts_size, debug=debug, closefig=False)
+    bbox = get_centered_bbox(pts_failed, window_size, window_size, debug=debug)
+    
+    if pts_anno is None:
+        return visualize_bbox(bbox, fig=fig, ax=ax, color_index=color_failed_index, vis=vis, save_path=save_path, debug=debug, closefig=closefig)    
+    else:
+        fig, ax = visualize_bbox(bbox, fig=fig, ax=ax, color_index=color_failed_index, vis=vis, debug=debug, closefig=False)    
+
+        # plot annotations
+        fig, ax = visualize_pts_array(pts_anno, fig=fig, ax=ax, color_index=color_anno_index, pts_size=pts_size, debug=debug, closefig=False)
+        bbox = get_centered_bbox(pts_anno, window_size, window_size, debug=debug)
+        return visualize_bbox(bbox, fig=fig, ax=ax, color_index=color_anno_index, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
+
+def visualize_lines(lines_array, color_index=0, line_width=3, fig=None, ax=None, vis=True, save_path=None, debug=True, closefig=True):
+    '''
+    plot lines 
+
+    parameters:
+        lines_array:            4 x num_lines, each column denotes (x1, y1, x2, y2)
+    '''
+
+    if debug:    
+        assert islinesarray(lines_array), 'input array of lines are not correct'
+
+    fig, ax = get_fig_ax_helper(fig=fig, ax=ax)
+
+    # plot lines
+    num_lines = lines_array.shape[1]
+    lines_all = []
+    for line_index in range(num_lines):
+        line_tmp = lines_array[:, line_index]
+        lines_all.append([tuple([line_tmp[0], line_tmp[1]]), tuple([line_tmp[2], line_tmp[3]])])
+
+    line_col = plycollections.LineCollection(lines_all, linewidths=line_width, colors=color_set[color_index])
+    ax.add_collection(line_col)
+        # ax.plot([line_tmp[0], line_tmp[2]], [line_tmp[1], line_tmp[3]], color=color_set[color_index], linewidth=line_width)
+
+    return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
+
+def visualize_pts_line(pts_array, line_index_list, method=2, threshold=None, fig=None, ax=None, vis=False, save=False, save_path=None, closefig=True, debug=True, seed=0, alpha=0.5):
+    '''
+    given a list of index, and a point array, to plot a set of points with line on it
+
+    inputs:
+        pts_array:          2(3) x num_pts
+        line_index_list:    a list of index
+        method:             1: all points are connected, if some points are missing in the middle, just ignore that point and connect the two nearby points
+                            2: if some points are missing, there might be two sub-lines
+        threshold:          confidence to draw the points
+
+    '''
+
+    if debug:
+        assert is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array), 'input points are not correct'
+        assert islist(line_index_list), 'the list of index is not correct'
+        assert method == 2 or method == 1, 'the plot method is not correct'
+
+    fig, ax = get_fig_ax_helper(fig=fig, ax=ax)
+    np.random.seed(seed)
+    color_set_random = np.random.rand(3, num_pts)
+
+    num_pts = pts_array.shape[1]
+    line_color = 'y'
+    pts_line = pts_array[:, line_index_list]
+    
+
+    if method == 1:    
+        valid_pts_list = np.where(pts_line[2, :] > threshold)[0].tolist()
+        pts_line_tmp = pts_line[:, valid_pts_list]
+        ax.plot(pts_line_tmp[0, :], pts_line_tmp[1, :], color=line_color, alpha=alpha)      # plot all lines
+
+        # plot all points
+        for pts_index in valid_pts_list:
+            pts_index_original = line_index_list[pts_index]
+            # ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set_big[pts_index_original % len(color_set_big)], alpha=alpha)
+            ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set_random[:, pts_index], alpha=alpha)
+    else:
+        not_valid_pts_list = np.where(pts_line[2, :] < threshold)[0].tolist()
+        if len(not_valid_pts_list) == 0:            # all valid
+            ax.plot(pts_line[0, :], pts_line[1, :], color=line_color, alpha=alpha)
+
+            # plot points
+            for pts_index in line_index_list:
+                # ax.plot(pts_array[0, pts_index], pts_array[1, pts_index], 'o', color=color_set_big[pts_index % len(color_set_big)], alpha=alpha)
+                ax.plot(pts_array[0, pts_index], pts_array[1, pts_index], 'o', color=color_set_random[:, pts_index], alpha=alpha)
+        else:
+            prev_index = 0
+            for not_valid_index in not_valid_pts_list:
+                plot_list = range(prev_index, not_valid_index)
+                pts_line_tmp = pts_line[:, plot_list]
+                ax.plot(pts_line_tmp[0, :], pts_line_tmp[1, :], color=line_color, alpha=alpha)
+                
+                # plot points
+                for pts_index in plot_list:
+                    pts_index_original = line_index_list[pts_index]
+                    ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set_random[:, pts_index_original], alpha=alpha) 
+                    # ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set_big[pts_index_original % len(color_set_big)], alpha=alpha) 
+
+                prev_index = not_valid_index + 1
+
+            pts_line_tmp = pts_line[:, prev_index:]
+            ax.plot(pts_line_tmp[0, :], pts_line_tmp[1, :], color=line_color, alpha=alpha)      # plot last line
+
+            # plot last points
+            for pts_index in range(prev_index, pts_line.shape[1]):
+                pts_index_original = line_index_list[pts_index]
+                # ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set_big[pts_index_original % len(color_set_big)], alpha=alpha) 
+                ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set_random[:, pts_index_original], alpha=alpha) 
+
+    return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
+
+def visualize_pts(pts, title=None, fig=None, ax=None, display_range=False, xlim=[-100, 100], ylim=[-100, 100], display_list=None, covariance=False, mse=False, mse_value=None, vis=True, save_path=None, debug=True, closefig=True):
     '''
     visualize point scatter plot
 
@@ -553,9 +535,7 @@ def visualize_pts(pts, title=None, fig=None, ax=None, display_range=False, xlim=
             assert islist(xlim) and islist(ylim) and len(xlim) == 2 and len(ylim) == 2, 'the input range for x and y is not correct'
             assert xlim[1] > xlim[0] and ylim[1] > ylim[0], 'the input range for x and y is not correct'
 
-
     # figure setting
-    dpi = 80  
     width = 1024
     height = 1024
     figsize = width / float(dpi), height / float(dpi)
@@ -668,102 +648,7 @@ def visualize_pts(pts, title=None, fig=None, ax=None, display_range=False, xlim=
         plt.yticks(np.arange(ylim[0], ylim[1] + interval_y, interval_y))
     plt.grid()
 
-    # save and visualization
-    if save:
-        if debug:
-            assert is_path_exists_or_creatable(save_path) and isfile(save_path), 'save path is not valid: %s' % save_path
-            mkdir_if_missing(save_path)
-        fig.savefig(save_path, dpi=dpi)
-    if vis:
-        plt.show()
-    plt.close(fig)
-    
-    if mse:
-        return mse_return
-    else:
-        return
-
-def visualize_image_with_bbox(image_path, bbox, ax=None, vis=True, save=False, save_path=None, debug=True, closefig=True):
-    '''
-    visualize image and plot keypoints on top of it
-
-    parameter:
-        image_path:     a path to an image
-        bbox:           N X 4 numpy array, with TLBR format
-    '''
-
-    if debug:
-        assert is_path_exists(image_path), 'image is not existing'
-
-    try:
-        image = imread(image_path)
-    except IOError:
-        print('path is not a valid image path. Please check: %s' % image_path)
-        return
-
-    dpi = 80  
-    width = image.shape[1]
-    height = image.shape[0]
-    figsize = width / float(dpi), height / float(dpi)
-    fig = plt.figure(figsize=figsize)
-    ax = fig.add_axes([0, 0, 1, 1])
-    ax.axis('off')
-    
-    # display image
-    if iscolorimage(image, debug=debug):
-        if debug:
-            print 'visualizing color image'
-        ax.imshow(image, interpolation='nearest')
-    elif isgrayimage(image, debug=debug):
-        if debug:
-            print 'visualizing grayscale image'
-        if image.ndim == 3 and image.shape[-1] == 1:
-            image = np.reshape(image, image.shape[:-1])
-        if isfloatimage(image, debug=debug) and all(item == 1.0 for item in image.flatten().tolist()):
-            if debug:
-                print('all elements in image are 1. For visualizing, we subtract the top left with an epsilon value')
-            image[0, 0] -= 0.00001
-        elif isuintimage(image, debug=debug) and all(item == 255 for item in image.flatten().tolist()):
-            if debug:
-                print('all elements in image are 255. For visualizing, we subtract the top left with an epsilon value')
-            image[0, 0] -= 1
-        ax.imshow(image, interpolation='nearest', cmap='gray')
-    else:
-        assert False, 'image is not correct'
-    ax.set(xlim=[0, width], ylim=[height, 0], aspect=1)
-
-    return visualize_bbox(bbox, fig=fig, ax=ax, vis=vis, save=save, save_path=save_path, debug=debug, closefig=closefig)
-
-def visualize_bbox(bbox, fig=None, ax=None, linewidth=0.5, vis=True, save=False, save_path=None, debug=True, closefig=True):
-    if debug:    
-        assert bboxcheck_TLBR(bbox), 'input bounding boxes are not correct'
-
-    dpi = 80  
-    if fig is None:
-        fig = plt.gcf()
-
-    if ax is None:
-        ax = plt.gca()   
-
-    # plot bounding box
-    bbox = bbox_TLBR2TLWH(bbox, debug=debug)              # convert TLBR format to TLWH format
-    for bbox_index in range(bbox.shape[0]):
-        bbox_tmp = bbox[bbox_index, :]     
-        ax.add_patch(plt.Rectangle((bbox_tmp[0], bbox_tmp[1]), bbox_tmp[2], bbox_tmp[3], fill=False, edgecolor='yellow', linewidth=linewidth))
-
-    # save and visualization
-    if save:
-        if debug:
-            assert is_path_exists_or_creatable(save_path) and isfile(save_path), 'save path is not valid: %s' % save_path
-            mkdir_if_missing(save_path)
-        fig.savefig(save_path, dpi=dpi, transparent=True)
-    if vis:
-        plt.show()
-
-    if closefig:
-        plt.close(fig)
-    else:
-        return fig, ax
+    return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
 
 def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, truncated_list=None, display2terminal=True, display_list=None, title=None, debug=True, vis=True, save=False, pck_savepath=None, table_savepath=None):
     '''
@@ -799,7 +684,6 @@ def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, trun
             display_list = normed_mean_error_dict.keys()
 
     # set display parameters
-    dpi = 80  
     width = 1000
     height = 800
     legend_fontsize = 10
@@ -1049,7 +933,7 @@ def visualize_nearest_neighbor(featuremap_dict, num_neighbor=5, top_number=5, vi
     return all_sorted_nearest_id, selected_nearest_id
 
 
-def visualize_distribution(data, bin_size=None, vis=True, save=False, save_path=None, debug=True, closefig=True):
+def visualize_distribution(data, bin_size=None, vis=True, save_path=None, debug=True, closefig=True):
     '''
     visualize the histogram of a data, which can be a dictionary or list or numpy array or tuple or a list of list
     '''
@@ -1102,18 +986,9 @@ def visualize_distribution(data, bin_size=None, vis=True, save=False, save_path=
     plt.xlabel('data (bin size = %f)' % bin_size)
     plt.ylabel('count')
 
-    if vis:
-        plt.show()
+    return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
 
-    if save:
-        if debug:
-            assert is_path_exists_or_creatable(save_path) and isfile(save_path), 'save path is not correct' 
-        plt.savefig(save_path)
-
-    if closefig:
-        plt.close()
-
-def visualize_bar_graph(data=None, title=None, label=False, label_list=None, vis=True, save=False, save_path=None, debug=True, closefig=True):
+def visualize_bar_graph(data=None, title=None, label=False, label_list=None, vis=True, save_path=None, debug=True, closefig=True):
     '''
     visualize the bar graph of a data, which can be a dictionary or list of dictionary
     inside each dictionary, the keys (string) should be the same which is the y label, the values should be scalar
@@ -1155,7 +1030,6 @@ def visualize_bar_graph(data=None, title=None, label=False, label_list=None, vis
     dataframe = DataFrame(data_new)
 
     # plot
-    dpi = 200  
     width = 2000
     height = 2000
     alpha = 0.5
@@ -1189,21 +1063,33 @@ def visualize_bar_graph(data=None, title=None, label=False, label_list=None, vis
     adaptive_fontsize = -0.0555556 * num_yticks + 15.111
     plt.yticks(fontsize=adaptive_fontsize)
 
-    if save:
+    return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
+
+###################################################################################################################################################### helper
+def get_fig_ax_helper(fig=None, ax=None):
+    if fig is None:
+        fig = plt.gcf()
+
+    if ax is None:
+        ax = plt.gca()   
+
+    return fig, ax
+
+def save_vis_close_helper(fig=None, ax=None, vis=False, save_path=None, debug=True, closefig=True):
+    # save and visualization
+    if save_path is not None:
         if debug:
-            assert is_path_exists_or_creatable(save_path) and isfile(save_path), 'save path is not correct' 
+            assert is_path_exists_or_creatable(save_path) and isfile(save_path), 'save path is not valid: %s' % save_path
+            mkdir_if_missing(save_path)
         fig.savefig(save_path, dpi=dpi, transparent=True)
-    
     if vis:
         plt.show()
 
     if closefig:
-        plt.close()
-
-
-
-
-############################## for matplotlib
+        plt.close(fig)
+        return None, None
+    else:
+        return fig, ax
 
 def autopct_generator(upper_percentage_to_draw):
     '''
@@ -1213,9 +1099,7 @@ def autopct_generator(upper_percentage_to_draw):
         return ('%.2f' % pct) if pct > upper_percentage_to_draw else ''
     return inner_autopct
 
-
 def fixOverLappingText(text):
-
     # if undetected overlaps reduce sigFigures to 1
     sigFigures = 2
     positions = [(round(item.get_position()[1],sigFigures), item) for item in text]
