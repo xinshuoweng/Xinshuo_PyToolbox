@@ -7,7 +7,7 @@
 
 
 #include <myheader.h>
-#include <computer_vision/geometry/pts_3d_conf.h>
+#include <xinshuo_vision/geometry/pts_3d_conf.h>
 
 class pts_3d_conf;
 

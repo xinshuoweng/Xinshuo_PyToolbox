@@ -1,7 +1,7 @@
 // Author: Xinshuo
 // Email: xinshuow@andrew.cmu.edu
 
-#include <computer_vision/geometry/pts_2d_conf.h>
+#include <xinshuo_vision/geometry/pts_2d_conf.h>
 
 cv::Point2d pts_2d_conf::convert_to_point2d() {
 	return cv::Point2d(this->x, this->y);

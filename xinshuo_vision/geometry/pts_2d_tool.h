@@ -8,7 +8,7 @@
 
 
 #include <myheader.h>
-#include <computer_vision/geometry/pts_2d_conf.h>
+#include <xinshuo_vision/geometry/pts_2d_conf.h>
 
 
 

@@ -1,7 +1,7 @@
 // Author: Xinshuo
 // Email: xinshuow@andrew.cmu.edu
 
-#include <computer_vision/geometry/pts_on_mesh.h>
+#include <xinshuo_vision/geometry/pts_on_mesh.h>
 
 // TODO: test for correctness
 cv::Point3d pts_on_mesh::convert_to_point3d() {

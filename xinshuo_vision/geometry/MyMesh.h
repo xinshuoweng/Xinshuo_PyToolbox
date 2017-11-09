@@ -18,6 +18,7 @@ class pts_3d_conf;
 
 class MyMesh{
 public:
+	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_original;			// 3D coordinate indexed by point id
 	pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;			// 3D coordinate indexed by point id
 	std::vector<std::vector<int>> planes_of_vertices;	// planes_of_vertices[x] represent which plane xth vertices belongs to
 	std::vector<int> first_plane_of_vertices;

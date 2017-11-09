@@ -6,7 +6,7 @@
 #define __PTS_3D_CONF_H_INCLUDED__
 
 #include <myheader.h>
-#include <computer_vision/geometry/pts_2d_conf.h>
+#include <xinshuo_vision/geometry/pts_2d_conf.h>
 
 #define	default_z	0.0
 

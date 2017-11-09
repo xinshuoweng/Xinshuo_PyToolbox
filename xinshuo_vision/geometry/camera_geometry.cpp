@@ -2,13 +2,13 @@
 // Email: xinshuow@andrew.cmu.edu
 
 // self-contained library
-#include <computer_vision/geometry/camera_geometry.h>
-#include <computer_vision/geometry/mycamera.h>
-#include <computer_vision/geometry/pts_2d_conf.h>
-#include <computer_vision/geometry/pts_3d_conf.h>
-#include <math/math_functions.h>
-#include <miscellaneous/debug_tool.h>
-#include <miscellaneous/type_conversion.h>
+#include <xinshuo_vision/geometry/camera_geometry.h>
+#include <xinshuo_vision/geometry/mycamera.h>
+#include <xinshuo_vision/geometry/pts_2d_conf.h>
+#include <xinshuo_vision/geometry/pts_3d_conf.h>
+#include <xinshuo_math/math_functions.h>
+#include <xinshuo_miscellaneous/debug_tool.h>
+#include <xinshuo_miscellaneous/type_conversion.h>
 
 // opencv library
 #include <opencv2/calib3d/calib3d.hpp>

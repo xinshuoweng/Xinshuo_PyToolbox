@@ -5,8 +5,8 @@
 
 #include <opencv2/calib3d/calib3d.hpp>
 
-#include <computer_vision/geometry/mycamera.h>
-#include <miscellaneous/debug_tool.h>
+#include <xinshuo_vision/geometry/mycamera.h>
+#include <xinshuo_miscellaneous/debug_tool.h>
 
 mycamera::mycamera() {
 	//this->intrinsic = cv::Mat(3, 3, CV_64FC1);
