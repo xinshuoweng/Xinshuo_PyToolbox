@@ -1,7 +1,7 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
 
-import time, shutil
+import time, shutil, colorsys
 import matplotlib as mpl
 mpl.use('Agg')
 import matplotlib.pyplot as plt
@@ -453,11 +453,21 @@ def visualize_pts_line(pts_array, line_index_list, method=2, threshold=None, fig
         assert islist(line_index_list), 'the list of index is not correct'
         assert method == 2 or method == 1, 'the plot method is not correct'
 
+    num_pts = pts_array.shape[1]
     fig, ax = get_fig_ax_helper(fig=fig, ax=ax)
     np.random.seed(seed)
-    color_set_random = np.random.rand(3, num_pts)
+    color_option = 'hsv'
 
-    num_pts = pts_array.shape[1]
+    if color_option == 'rgb':
+        color_set_random = np.random.rand(3, num_pts)
+    elif color_option == 'hsv':
+        h_random = np.random.rand(num_pts, )
+        color_set_random = np.zeros((3, num_pts), dtype='float32')
+        for pts_index in range(num_pts):
+            # print(h_random[pts_index])
+            # print(colorsys.hsv_to_rgb(h_random[pts_index], 1, 1))
+            color_set_random[:, pts_index] = colorsys.hsv_to_rgb(h_random[pts_index], 1, 1) 
+
     line_color = 'y'
     pts_line = pts_array[:, line_index_list]
     

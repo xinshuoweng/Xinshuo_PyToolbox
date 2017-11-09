@@ -1,6 +1,6 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
-import math
+import math, cv2
 import numpy as np
 from numpy.testing import assert_almost_equal
 
@@ -67,6 +67,18 @@ def get_intersection(line1, line2, debug=True):
         assert_almost_equal(x*line2[0] + y*line2[1] + 1, 0, err_msg='Intersection point is not on the line')
     return np.array([x, y], dtype=float)
 
+def saferotation_angle(rotation_angle):
+    '''
+    ensure the rotation is in [-180, 180] in degree
+    '''
+    while rotation_angle > 180:
+        rotation_angle -= 360
+
+    while rotation_angle < -180:
+        rotation_angle += 360
+
+    return rotation_angle
+
 def pts_rotate2D(pts_array, rotation_angle, im_height, im_width, debug=True):
     '''
     rotate the point array in 2D plane counter-clockwise
@@ -83,13 +95,13 @@ def pts_rotate2D(pts_array, rotation_angle, im_height, im_width, debug=True):
 
     rotation_angle = saferotation_angle(rotation_angle)             # ensure to be in [-180, 180]
 
-    if rotation_degree > 0:
+    if rotation_angle > 0:
         cols2rotated = im_width
         rows2rotated = im_width
     else:
         cols2rotated = im_height
         rows2rotated = im_height
-    rotation_matrix = cv2.getRotationMatrix2D((cols2rotated/2, rows2rotated/2), rotation_degree, 1)         # 2 x 3
+    rotation_matrix = cv2.getRotationMatrix2D((cols2rotated/2, rows2rotated/2), rotation_angle, 1)         # 2 x 3
     
     num_pts = pts_array.shape[1]
     pts_rotate = np.ones((3, num_pts), dtype='float32')             # 3 x num_pts
