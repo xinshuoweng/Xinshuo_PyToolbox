@@ -6,6 +6,8 @@ import os, sys, subprocess
 
 ################################################################################ mesh related
 
+# this mesh downsample method is based on meshlab, please install meshlab first in order to use this
+
 # Script taken from doing the needed operation
 # (Filters > Remeshing, Simplification and Reconstruction >
 # Quadric Edge Collapse Decimation, with parameters:
