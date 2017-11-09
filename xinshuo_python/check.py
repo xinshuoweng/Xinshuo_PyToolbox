@@ -74,6 +74,13 @@ def is2dptsarray(pts_test):
 def is2dptsarray_occlusion(pts_test):
     return isnparray(pts_test) and pts_test.shape[0] == 3 and len(pts_test.shape) == 2 and pts_test.shape[1] >= 0                   # 3 x N
 
+def is3dpts(pts_test):
+    '''
+    numpy array or list or tuple with 2 elements
+    '''
+    return (isnparray(pts_test) or islist(pts_test) or istuple(pts_test)) and np.array(pts_test).size == 3
+
+
 def islinesarray(line_test):
     return isnparray(line_test) and line_test.shape[0] == 4 and len(line_test.shape) == 2 and line_test.shape[1] >= 0               # 4 x N
 

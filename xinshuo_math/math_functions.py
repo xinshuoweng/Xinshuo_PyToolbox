@@ -143,6 +143,29 @@ def pts_euclidean(pts1, pts2, debug=True):
     # ave_euclidean = ave_euclidean / float(num_pts)
     return ave_euclidean, eculidean_list.tolist()
 
+################################################################## 3d math ##################################################################
+def generate_sphere(pts_3d, radius, debug=True):
+    '''
+    generate a boundary of a 3D shpere point cloud
+    '''
+    if debug:
+        assert is3dpts(pts_3d), 'the input point is not a 3D point'
+
+    num_pts = 100
+    u = np.random.rand(num_pts, )
+    v = np.random.rand(num_pts, )
+
+    print(u.shape)
+    theta = 2 * math.pi * u
+    phi = math.acos(2 * v - 1)
+    
+    pts_shpere = np.zeros((3, num_pts), dtype='float32')
+    pts_shpere[0, :] = pts_3d[0] + radius * math.sin(phi) * math.cos(theta)
+    pts_sphere[1, :] = pts_3d[1] + radius * math.sin(phi) * math.sin(theta)
+    pts_sphere[2, :] = pts_3d[2] + radius * math.cos(phi)
+
+    return pts_sphere
+
 def calculate_truncated_mse(error_list, truncated_list, debug=True):
     '''
     calculate the mse truncated by a set of thresholds, and return the truncated MSE and the percentage of how many points' error is lower than the threshold

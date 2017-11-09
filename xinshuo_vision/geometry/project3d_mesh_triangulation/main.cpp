@@ -17,7 +17,7 @@
 #include <computer_vision/geometry/pts_on_mesh.h>
 #include <computer_vision/geometry/mycamera.h>
 #include <computer_vision/geometry/camera_geometry.h>
-#include <file_io/camera_io.h>
+#include <xinshuo_io/camera_io.h>
 #include <visualization/mesh_visualization.h>
 #include <miscellaneous/type_conversion.h>
 
