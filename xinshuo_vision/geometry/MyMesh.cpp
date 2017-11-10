@@ -456,12 +456,13 @@ int MyMesh::get_pts_with_mesh_heuristic(cv::Point3d C_src, std::vector<double>& 
 //        return ptr_mesh;
         tri_id = -1;
     }
-
-    pts_3d_out.x = cpts[0];
-    pts_3d_out.y = cpts[1];
-    pts_3d_out.z = cpts[2];
-    pts_3d_out.conf = conf;
-
+    else {
+        pts_3d_out.x = cpts[0];
+        pts_3d_out.y = cpts[1];
+        pts_3d_out.z = cpts[2];
+        pts_3d_out.conf = conf;
+    }
+    
     return tri_id;
 }
 
