@@ -88,12 +88,12 @@ int main(int argc, char* argv[]){
     std::map<std::string, std::vector<pcl::PointXY>> pts_2d_allviews;
     std::vector<pts_3d_conf> pts_3d_allviews(num_pts, pts_3d_conf());    // view, num_pts, pts_3d_conf
 
-
-//     for visualization
-    std::vector<std::vector<double>> pts_visualization;
-    std::vector<std::vector<double>> rays;
-    std::vector<double> ray_tmp;
-    cv::Point3d camera_center;
+//
+////     for visualization
+//    std::vector<std::vector<double>> pts_visualization;
+//    std::vector<std::vector<double>> rays;
+//    std::vector<double> ray_tmp;
+//    cv::Point3d camera_center;
 
     // create 3d point folder and open the file to write
     sprintf(cmd, "mkdir -p %s/pose3d/cam%s", argv[7], argv[5]);
@@ -161,20 +161,20 @@ int main(int argc, char* argv[]){
         pts_3d_allviews[pts_index] = pts_3d_tmp;
         fprintf(out, "%g %g %g %g %d %d %g %g %g\n", pts_3d_tmp.x, pts_3d_tmp.y, pts_3d_tmp.z, pts_3d_tmp.conf, pom->vertice_id, pom->triangle_id, pts_3d_out.x, pts_3d_out.y, pts_3d_out.z);
         pts_index++;
-
-//         for visualization
-        get_3d_ray(pts_2d_tmp, camera_src, camera_center, ray_tmp, consider_dist_test);
-//        ASSERT_WITH_MSG(ray_tmp.size() == 4, "The size of the output ray is not correct. Please check!");
-        std::cout << "start point is " << std::endl;
-        print_pts3d(camera_center);
-        std::cout << "ray is " << std::endl;
-        print_vec(ray_tmp);
-        std::cout << "3d point is " << std::endl;
-        pts_3d_tmp.print();
-
-        pts_visualization.push_back(pts_3d_tmp.convert_to_pts_vec());
-        ray_tmp.push_back(-1);
-        rays.push_back(ray_tmp);
+//
+////         for visualization
+//        get_3d_ray(pts_2d_tmp, camera_src, camera_center, ray_tmp, consider_dist_test);
+////        ASSERT_WITH_MSG(ray_tmp.size() == 4, "The size of the output ray is not correct. Please check!");
+//        std::cout << "start point is " << std::endl;
+//        print_pts3d(camera_center);
+//        std::cout << "ray is " << std::endl;
+//        print_vec(ray_tmp);
+//        std::cout << "3d point is " << std::endl;
+//        pts_3d_tmp.print();
+//
+//        pts_visualization.push_back(pts_3d_tmp.convert_to_pts_vec());
+//        ray_tmp.push_back(-1);
+//        rays.push_back(ray_tmp);
 
     }
 
@@ -183,27 +183,27 @@ int main(int argc, char* argv[]){
     fclose(out);
 
 
-//     for visualization in 3d
-    pts_visualization.push_back(cv2vec_pts3d(camera_center));
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr keypoints_cloud_ptr(new pcl::PointCloud<pcl::PointXYZRGB>);
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr line_cloud_ptr(new pcl::PointCloud<pcl::PointXYZRGB>);
-    boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
-    get_cloud_from_points(pts_visualization, keypoints_cloud_ptr);
-    pcl::PointXYZ pts_start_tmp(camera_center.x, camera_center.y, camera_center.z);
-    std::vector<pcl::PointXYZ> pts_start;
-    std::vector<uint32_t> range;
-    for (int i = 0; i < num_pts; i++) {
-        pts_start.push_back(pts_start_tmp);
-        range.push_back(100000);
-    }
-    get_cloud_from_lines(rays, line_cloud_ptr, pts_start, range);
-    viewer = keypoint_line_mesh_visualization(keypoints_cloud_ptr, line_cloud_ptr, mesh.cloud);
-    while (!viewer->wasStopped())
-    {
-        viewer->spinOnce(10000);
-        boost::this_thread::sleep(boost::posix_time::microseconds(100000));
-    }
-
+////     for visualization in 3d
+//    pts_visualization.push_back(cv2vec_pts3d(camera_center));
+//    pcl::PointCloud<pcl::PointXYZRGB>::Ptr keypoints_cloud_ptr(new pcl::PointCloud<pcl::PointXYZRGB>);
+//    pcl::PointCloud<pcl::PointXYZRGB>::Ptr line_cloud_ptr(new pcl::PointCloud<pcl::PointXYZRGB>);
+//    boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
+//    get_cloud_from_points(pts_visualization, keypoints_cloud_ptr);
+//    pcl::PointXYZ pts_start_tmp(camera_center.x, camera_center.y, camera_center.z);
+//    std::vector<pcl::PointXYZ> pts_start;
+//    std::vector<uint32_t> range;
+//    for (int i = 0; i < num_pts; i++) {
+//        pts_start.push_back(pts_start_tmp);
+//        range.push_back(100000);
+//    }
+//    get_cloud_from_lines(rays, line_cloud_ptr, pts_start, range);
+//    viewer = keypoint_line_mesh_visualization(keypoints_cloud_ptr, line_cloud_ptr, mesh.cloud);
+//    while (!viewer->wasStopped())
+//    {
+//        viewer->spinOnce(10000);
+//        boost::this_thread::sleep(boost::posix_time::microseconds(100000));
+//    }
+//
 
 //
 

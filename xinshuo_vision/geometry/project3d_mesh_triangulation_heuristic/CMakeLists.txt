@@ -16,10 +16,10 @@ link_directories(/opt/VTK-7.0.0/lib)
 link_directories(/home/xinshuo/Qt5.7.0/5.7/gcc_64/lib)
 
 # with visualization
-file(GLOB LIBS "/home/xinshuo/lib/xinshuo_toolbox/xinshuo_visualization/mesh*.cpp" "/home/xinshuo/lib/xinshuo_toolbox/xinshuo_vision/geometry/*.cpp" "/home/xinshuo/lib/xinshuo_toolbox/xinshuo_io/*.cpp" "/home/xinshuo/lib/xinshuo_toolbox/xinshuo_miscellaneous/type_conversion.cpp" "/home/xinshuo/lib/xinshuo_toolbox/xinshuo_miscellaneous/debug_tool.cpp" "/home/xinshuo/lib/xinshuo_toolbox/xinshuo_math/*.cpp")
+#file(GLOB LIBS "/home/xinshuo/lib/xinshuo_toolbox/xinshuo_visualization/mesh*.cpp" "/home/xinshuo/lib/xinshuo_toolbox/xinshuo_vision/geometry/*.cpp" "/home/xinshuo/lib/xinshuo_toolbox/xinshuo_io/*.cpp" "/home/xinshuo/lib/xinshuo_toolbox/xinshuo_miscellaneous/type_conversion.cpp" "/home/xinshuo/lib/xinshuo_toolbox/xinshuo_miscellaneous/debug_tool.cpp" "/home/xinshuo/lib/xinshuo_toolbox/xinshuo_math/*.cpp")
 
 # without visualization
-#file(GLOB LIBS "/home/xinshuo/lib/xinshuo_toolbox/computer_vision/geometry/*.cpp" "/home/xinshuo/lib/xinshuo_toolbox/file_io/*.cpp" "/home/xinshuo/lib/xinshuo_toolbox/miscellaneous/type_conversion.cpp" "/home/xinshuo/lib/xinshuo_toolbox/miscellaneous/debug_tool.cpp" "/home/xinshuo/lib/xinshuo_toolbox/math/*.cpp")
+file(GLOB LIBS "/home/xinshuo/lib/xinshuo_toolbox/xinshuo_vision/geometry/*.cpp" "/home/xinshuo/lib/xinshuo_toolbox/xinshuo_io/*.cpp" "/home/xinshuo/lib/xinshuo_toolbox/xinshuo_miscellaneous/type_conversion.cpp" "/home/xinshuo/lib/xinshuo_toolbox/xinshuo_miscellaneous/debug_tool.cpp" "/home/xinshuo/lib/xinshuo_toolbox/xinshuo_math/*.cpp")
 
 set(CMAKE_CXX_STANDARD 11)
 #set(LIBSs computer_vision/geometry/camera_geometry.cpp)
@@ -29,7 +29,7 @@ set(SOURCE_FILES main.cpp)
 add_executable(project3d_mesh_triangulation_heuristic ${SOURCE_FILES} ${LIBS})
 
 # with visualization
-target_link_libraries(project3d_mesh_triangulation_heuristic libvtkCommonCore-7.0.so libQt5Gui.so.5 libvtkCommonMath-7.0.so libvtkRenderingCore-7.0.so libvtkCommonDataModel-7.0.so libpcl_visualization.so libboost_system.so libboost_thread.so libopencv_core.so libopencv_calib3d.so libopencv_imgproc.so libpcl_kdtree.so libpcl_common.so libpcl_io.so)
+#target_link_libraries(project3d_mesh_triangulation_heuristic libvtkCommonCore-7.0.so libQt5Gui.so.5 libvtkCommonMath-7.0.so libvtkRenderingCore-7.0.so libvtkCommonDataModel-7.0.so libpcl_visualization.so libboost_system.so libboost_thread.so libopencv_core.so libopencv_calib3d.so libopencv_imgproc.so libpcl_kdtree.so libpcl_common.so libpcl_io.so)
 
 # without visualization
-#target_link_libraries(project3d_mesh_triangulation_heuristic libboost_system.so libboost_thread.so libopencv_core.so libopencv_calib3d.so libopencv_imgproc.so libpcl_kdtree.so libpcl_common.so libpcl_io.so)
+target_link_libraries(project3d_mesh_triangulation_heuristic libboost_system.so libboost_thread.so libopencv_core.so libopencv_calib3d.so libopencv_imgproc.so libpcl_kdtree.so libpcl_common.so libpcl_io.so)
