@@ -440,7 +440,7 @@ int MyMesh::get_pts_with_mesh_heuristic(cv::Point3d C_src, std::vector<double>& 
 
 //    pts_on_mesh* ptr_mesh;
     if (tri_id == -1 || final_dist >= projection_err_threshold) {
-        conf = 0;
+        conf = 0.0;
 
         if (final_dist >= projection_err_threshold) {
             fprintf(stderr, "no projected triangles because of big projection error: %.2f!\n", final_dist);
@@ -448,9 +448,9 @@ int MyMesh::get_pts_with_mesh_heuristic(cv::Point3d C_src, std::vector<double>& 
         else
             fprintf(stderr, "no projected triangles!\n");
 
-        pts_3d_out.x = 0;
-        pts_3d_out.y = 0;
-        pts_3d_out.z = 0;
+        pts_3d_out.x = 0.0;
+        pts_3d_out.y = 0.0;
+        pts_3d_out.z = 0.0;
         pts_3d_out.conf = conf;
 //        ptr_mesh = new pts_on_mesh(-1, -1, 0.0, 0.0, 0.0, conf);
 //        return ptr_mesh;
