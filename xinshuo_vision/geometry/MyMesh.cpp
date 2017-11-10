@@ -455,6 +455,7 @@ int MyMesh::get_pts_with_mesh_heuristic(cv::Point3d C_src, std::vector<double>& 
 //        ptr_mesh = new pts_on_mesh(-1, -1, 0.0, 0.0, 0.0, conf);
 //        return ptr_mesh;
         tri_id = -1;
+
     }
     else {
         pts_3d_out.x = cpts[0];
@@ -462,7 +463,7 @@ int MyMesh::get_pts_with_mesh_heuristic(cv::Point3d C_src, std::vector<double>& 
         pts_3d_out.z = cpts[2];
         pts_3d_out.conf = conf;
     }
-    
+
     return tri_id;
 }
 
@@ -471,7 +472,11 @@ pts_on_mesh* MyMesh::get_pts_on_mesh_heuristic(cv::Point3d C_src, std::vector<do
 	int tri_id = get_pts_with_mesh_heuristic(C_src, ray, conf, pts_3d_ref, pts_3d_out);
     //std::cout << "final 3d points is" << std::endl;
     //pts_3d.print();
-    pts_on_mesh* pts_mesh = find_closest_pts_on_mesh(pts_3d_out, tri_id);
+    pts_on_mesh* pts_mesh;
+    if (tri_id == -1)
+        pts_mesh = new pts_on_mesh(-1, -1, 0.0, 0.0, 0.0, 0.0);
+    else
+        pts_mesh = find_closest_pts_on_mesh(pts_3d_out, tri_id);
     pts_mesh->print();
     pts_3d_out.print();
 
