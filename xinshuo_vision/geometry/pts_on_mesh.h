@@ -30,5 +30,4 @@ public:
 	void print(int prec = default_precision);
 };
 
-
 #endif

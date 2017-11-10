@@ -163,7 +163,6 @@ int main(int argc, char* argv[]){
         fprintf(out, "%g %g %g %g %d %d\n", pts_3d_tmp.x, pts_3d_tmp.y, pts_3d_tmp.z, pts_3d_tmp.conf, pom->vertice_id, pom->triangle_id);
         pts_index++;
 
-
         // for visualization
 //            get_3d_ray(pts_2d_tmp, camera_src, camera_center, ray_tmp, consider_dist_test);
 //            ASSERT_WITH_MSG(ray_tmp.size() == 4, "The size of the output ray is not correct. Please check!");
@@ -206,71 +205,6 @@ int main(int argc, char* argv[]){
 //        boost::this_thread::sleep(boost::posix_time::microseconds(100000));
 //    }
 //
-
-//
-//    Eigen::MatrixXf mymatrix(svd_m.size(), 4);
-//    for(int i = 0; i < svd_m.size(); i++){
-//        mymatrix(i, 0) = svd_m[i].x;
-//        mymatrix(i, 1) = svd_m[i].y;
-//        mymatrix(i, 2) = svd_m[i].z;
-//        mymatrix(i, 3) = 1;
-//    }
-//    Eigen::JacobiSVD<Eigen::MatrixXf> svd(mymatrix, Eigen::ComputeThinU | Eigen::ComputeThinV);
-//    vector<float> cutting_plane;
-//    auto matV = svd.matrixV();
-//    for(int i = 0; i < 4; i++){
-//        cutting_plane.push_back(matV(i, 3)); //last column
-//    }
-//
-//    float acc = 0;
-//    acc += svd_m[0].x * cutting_plane[0]; //svd_m[0] is left eyebrow
-//    acc += svd_m[0].y * cutting_plane[1]; //svd_m[0] is left eyebrow
-//    acc += svd_m[0].z * cutting_plane[2]; //svd_m[0] is left eyebrow
-//    acc += cutting_plane[3];
-//    cutting_plane[3] -= acc; //if the plane was distance d away, now make it 0 away
-//    acc = 0;
-//    acc += svd_m[13].x * cutting_plane[0]; //svd_m[13] is tip of nose
-//    acc += svd_m[13].y * cutting_plane[1];
-//    acc += svd_m[13].z * cutting_plane[2];
-//    acc += cutting_plane[3];
-//
-//    sprintf(cmd, "%s/del/%05d.obj", argv[6], frame);
-//    out = fopen(cmd, "w");
-//    assert(out != NULL);
-//    unordered_set<int> faces_to_delete;
-//    int pts = mesh.cloud->size();
-//    map<int, int> remap_vertices;
-//    for(int i = 0; i < pts; i++){
-//        float acc2 = 0;
-//        acc2 += cutting_plane[0] * mesh.cloud->points[i].x;
-//        acc2 += cutting_plane[1] * mesh.cloud->points[i].y;
-//        acc2 += cutting_plane[2] * mesh.cloud->points[i].z;
-//        acc2 += cutting_plane[3];
-//        if( acc * acc2 < 0 || inside_mouth_eye(Ms[330030] ,mesh.cloud->points[i], parts2d_all_cams[330030]) ){ // not on same side as the detected points, throw away
-//            for(int j = 0; j < mesh.planes_of_vertices[i].size(); j++){
-//                faces_to_delete.insert(mesh.planes_of_vertices[i][j]);
-//            }
-//        }else{
-//            remap_vertices[ i ] = remap_vertices.size();
-//            fprintf(out, "v %g %g %g\n", mesh.cloud->points[i].x, mesh.cloud->points[i].y, mesh.cloud->points[i].z);
-//        }
-//    }
-//
-//    for(int i = 0; i < mesh.plane_pts_idx.size(); i++){
-//        if( faces_to_delete.find(i) == faces_to_delete.end() ){
-//            int ok = 1;
-//            for(int j = 0; j < 3; j++){
-//                if( remap_vertices.find( mesh.plane_pts_idx[i][j] ) == remap_vertices.end() ){
-//                    ok = 0;
-//                    break;
-//                }
-//            }
-//            if( ok == 1 )
-//                fprintf(out, "f %d %d %d\n", remap_vertices[ mesh.plane_pts_idx[i][0] ], remap_vertices[ mesh.plane_pts_idx[i][1] ], remap_vertices[ mesh.plane_pts_idx[i][2] ]);
-//        }
-//    }
-//    fclose(out);
-
     std::cout << "back projecting 3d point to 2d." << std::endl;
     for (int camera_index = 0; camera_index < camera_cluster.size(); camera_index++) {
         mycamera camera_tmp = camera_cluster[camera_index];
@@ -285,10 +219,6 @@ int main(int argc, char* argv[]){
         FILE *out = fopen(cmd, "w");
         ASSERT_WITH_MSG(ret == 0, "opening folder for back projecting 2d locations failed");
         for(int pts_index = 0; pts_index < num_pts; pts_index++){
-//            if( closest[i] == -1 ){
-//                fprintf(out, "-1 -1 -1\n");
-//                continue;
-//            }
             cv::Mat P(4, 1, CV_64FC1);
             P.at<double>(0, 0) = pts_3d_allviews[pts_index].x;
             P.at<double>(1, 0) = pts_3d_allviews[pts_index].y;

@@ -66,6 +66,23 @@ def load_txt_file(file_path, debug=True):
 
     return data, num_lines
 
+def save_txt_file(data_list, save_path, debug=True):
+    '''
+    save a list of string to a file
+    '''
+    save_path = safepath(save_path)
+    if debug:
+        assert is_path_exists_or_creatable(save_path), 'text file is not able to be created at path: %s!' % save_path
+
+    with open(save_path, 'w') as file:
+        for item in data_list:
+            # print(item)
+            # time.sleep(0.1)
+            file.write('%s\n' % item)
+    file.close()
+
+    return    
+
 ######################################################### list related #########################################################
 
 def load_list_from_file(file_path, debug=True):

@@ -236,7 +236,6 @@ pts_on_mesh* MyMesh::get_pts_on_mesh(cv::Point3d C_src, std::vector<double>& ray
 	return pts_mesh;
 }
 
-
 // note that we add heuristic to this function, the furtherest point (within the error range) should be the right choice
 pts_on_mesh* MyMesh::get_pts_on_mesh(cv::Point3d C_src, std::vector<double>& ray, double conf, cv::Point3d pts_3d_ref) {
     std::cout << "finding the closest point on the mesh given a 3d point." << std::endl;
@@ -346,7 +345,6 @@ pts_on_mesh* MyMesh::get_pts_on_mesh(cv::Point3d C_src, std::vector<double>& ray
 
     return pts_mesh;
 }
-
 
 // note that we add heuristic to this function, the furtherest point (within the error range) should be the right choice
 pts_on_mesh* MyMesh::get_pts_with_mesh_heuristic(cv::Point3d C_src, std::vector<double>& ray, double conf, cv::Point3d pts_3d_ref) {
