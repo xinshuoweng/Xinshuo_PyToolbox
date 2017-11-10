@@ -7,6 +7,7 @@ import numpy as np
 from xinshuo_io import load_txt_file, save_txt_file
 
 ################################################################################ mesh related
+FNULL = open(os.devnull, 'w')
 
 # this mesh downsample method is based on meshlab, please install meshlab first in order to use this
 
@@ -27,7 +28,7 @@ def get_downsample_script(num_faces):
   <Param type="RichFloat" value="0" name="TargetPerc"/>
   <Param type="RichFloat" value="0.3" name="QualityThr"/>
   <Param type="RichBool" value="false" name="PreserveBoundary"/>
-  <Param type="RichFloat" value="0" name="BoundaryWeight"/>
+  <Param type="RichFloat" value="1" name="BoundaryWeight"/>
   <Param type="RichBool" value="false" name="PreserveNormal"/>
   <Param type="RichBool" value="false" name="PreserveTopology"/>
   <Param type="RichBool" value="true" name="OptimalPlacement"/>
@@ -94,16 +95,16 @@ def reduce_faces(in_file, out_file, num_faces):
 	# Add the output filename and output flags
 	command += " -o " + out_file + " -om vn fn"
 	# Execute command
-	print "Going to execute: " + command
-	output = subprocess.check_output(command, shell=True)
-	last_line = output.splitlines()[-1]
-	print
-	print "Done:"
-	print in_file + " > " + out_file + ": " + last_line
+	# print "Going to execute: " + command
+	subprocess.call(command, shell=True, stdout=FNULL, stderr=subprocess.STDOUT)
+	# last_line = output.splitlines()[-1]
+	# print
+	# print "Done:"
+	# print in_file + " > " + out_file + ": " + last_line
 
 def merge_mesh(in_file1, in_file2, out_file):
 	filter_script_path = create_merge_filter_file()  
-	FNULL = open(os.devnull, 'w')
+
 
 	# Add input mesh
 	command = "meshlabserver -i %s %s" % (in_file1, in_file2)
