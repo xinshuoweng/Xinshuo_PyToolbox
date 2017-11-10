@@ -86,7 +86,7 @@ def create_downsample_filter_file(num_faces, filename='filter_file_tmp.mlx'):
 	return '/tmp/' + filename
 
 def reduce_faces(in_file, out_file, num_faces):
-	filter_script_path = create_downsample_filter_file(num_faces)  
+	filter_script_path = create_downsample_filter_file(num_faces, filename='reduce_tmp_%d.mlx' % num_faces)  
 
 	# Add input mesh
 	command = "meshlabserver -i " + in_file
