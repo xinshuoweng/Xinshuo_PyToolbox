@@ -7,9 +7,9 @@
 #include <stdarg.h>
 
 // in-project library
-#include <math/math_functions.h>
-#include <miscellaneous/type_conversion.h>
-#include <miscellaneous/debug_tool.h>
+#include <xinshuo_math/math_functions.h>
+#include <xinshuo_miscellaneous/type_conversion.h>
+#include <xinshuo_miscellaneous/debug_tool.h>
 
 /*********************************************** I/O ******************************************************/
 void read_matrix(FILE *califp, cv::Mat& m) {

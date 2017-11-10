@@ -1,9 +1,9 @@
 // Author: Xinshuo Weng
 // Email: xinshuow@andrew.cmu.edu
 
-#include <file_io/io_point.h>
-#include <computer_vision/geometry/pts_2d_conf.h>
-#include <computer_vision/geometry/mycamera.h>
+#include <xinshuo_io/io_point.h>
+#include <xinshuo_vision/geometry/pts_2d_conf.h>
+#include <xinshuo_vision/geometry/mycamera.h>
 
 void fileparts(std::string str, std::string separator, std::string *path, std::string *filename, std::string *extension)
 {

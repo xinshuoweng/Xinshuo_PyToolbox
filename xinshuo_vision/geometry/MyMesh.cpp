@@ -7,13 +7,13 @@
 
 
 // self_contained library
-#include <computer_vision/geometry/mycamera.h>
-#include <computer_vision/geometry/MyMesh.h>
-#include <computer_vision/geometry/pts_on_mesh.h>
-#include <computer_vision/geometry/camera_geometry.h>
-#include <miscellaneous/debug_tool.h>
-#include <miscellaneous/type_conversion.h>
-#include <math/math_functions.h>
+#include <xinshuo_vision/geometry/mycamera.h>
+#include <xinshuo_vision/geometry/MyMesh.h>
+#include <xinshuo_vision/geometry/pts_on_mesh.h>
+#include <xinshuo_vision/geometry/camera_geometry.h>
+#include <xinshuo_miscellaneous/debug_tool.h>
+#include <xinshuo_miscellaneous/type_conversion.h>
+#include <xinshuo_math/math_functions.h>
 
 const double projection_err_threshold = 8;
 
@@ -77,7 +77,7 @@ pts_on_mesh* MyMesh::pts_back_projection_single_view(pts_2d_conf& pts_2d, mycame
 
 }
 
-pts_on_mesh* MyMesh::pts_back_projection_single_view(pts_2d_conf& pts_2d, pts_2d_conf& pts_2d_ref, mycamera& camera_src, mycamera& camera_ref, const bool consider_dist) {
+pts_on_mesh* MyMesh::pts_back_projection_single_view(pts_2d_conf& pts_2d, pts_2d_conf& pts_2d_ref, mycamera& camera_src, mycamera& camera_ref, pts_3d_conf& pts_3d, const bool consider_dist) {
     std::vector<double> ray;
     cv::Point3d C, pts_3d_ref;
 
@@ -91,7 +91,7 @@ pts_on_mesh* MyMesh::pts_back_projection_single_view(pts_2d_conf& pts_2d, pts_2d
     vec_pts_3d[0].print();
 
     get_3d_ray(pts_2d, camera_src, C, ray, consider_dist);
-    return this->get_pts_on_mesh_heuristic(C, ray, pts_2d.conf, vec_pts_3d[0].convert_to_point3d());
+    return this->get_pts_on_mesh_heuristic(C, ray, pts_2d.conf, vec_pts_3d[0].convert_to_point3d(), pts_3d);
 }
 
 // TODO: test for correctness
@@ -347,7 +347,7 @@ pts_on_mesh* MyMesh::get_pts_on_mesh(cv::Point3d C_src, std::vector<double>& ray
 }
 
 // note that we add heuristic to this function, the furtherest point (within the error range) should be the right choice
-pts_on_mesh* MyMesh::get_pts_with_mesh_heuristic(cv::Point3d C_src, std::vector<double>& ray, double conf, cv::Point3d pts_3d_ref) {
+int MyMesh::get_pts_with_mesh_heuristic(cv::Point3d C_src, std::vector<double>& ray, double conf, cv::Point3d pts_3d_ref, pts_3d_conf& pts_3d_out) {
     std::cout << "finding the closest point on the mesh given a 3d point." << std::endl;
     clock_t old_time = clock();
     double final_dist = 1000000;
@@ -438,7 +438,7 @@ pts_on_mesh* MyMesh::get_pts_with_mesh_heuristic(cv::Point3d C_src, std::vector<
         old_time = new_time;
     }
 
-    pts_on_mesh* ptr_mesh;
+//    pts_on_mesh* ptr_mesh;
     if (tri_id == -1 || final_dist >= projection_err_threshold) {
         conf = 0;
 
@@ -448,26 +448,29 @@ pts_on_mesh* MyMesh::get_pts_with_mesh_heuristic(cv::Point3d C_src, std::vector<
         else
             fprintf(stderr, "no projected triangles!\n");
 
-        ptr_mesh = new pts_on_mesh(-1, -1, 0.0, 0.0, 0.0, conf);
-        return ptr_mesh;
+        pts_3d_out.x = 0;
+        pts_3d_out.y = 0;
+        pts_3d_out.z = 0;
+        pts_3d_out.conf = 0.0;
+//        ptr_mesh = new pts_on_mesh(-1, -1, 0.0, 0.0, 0.0, conf);
+//        return ptr_mesh;
+        return -1;
     }
 
-    //ptr_mesh = new pts_on_mesh(this->plane_pts_idx[tri_id][0], cpts[0], cpts[1], cpts[2], conf);
-    pts_3d_conf pts_3d(cpts[0], cpts[1], cpts[2], conf);
-    //std::cout << "final 3d points is" << std::endl;
-    //pts_3d.print();
-    // pts_on_mesh* pts_mesh = find_closest_pts_on_mesh(pts_3d, tri_id);
-    // pts_mesh->print();
+    pts_3d_out.x = cpts[0];
+    pts_3d_out.y = cpts[1];
+    pts_3d_out.z = cpts[2];
+    pts_3d_out.conf = conf;
 
-    return pts_3d;
+    return tri_id;
 }
 
 // note that we add heuristic to this function, the furtherest point (within the error range) should be the right choice
-pts_on_mesh* MyMesh::get_pts_on_mesh_heuristic(cv::Point3d C_src, std::vector<double>& ray, double conf, cv::Point3d pts_3d_ref) {
-	get_pts_with_mesh_heuristic(C_src, ray, conf, pts_3d_ref);
+pts_on_mesh* MyMesh::get_pts_on_mesh_heuristic(cv::Point3d C_src, std::vector<double>& ray, double conf, cv::Point3d pts_3d_ref, pts_3d_conf& pts_3d_out) {
+	int tri_id = get_pts_with_mesh_heuristic(C_src, ray, conf, pts_3d_ref, pts_3d_out);
     //std::cout << "final 3d points is" << std::endl;
     //pts_3d.print();
-    pts_on_mesh* pts_mesh = find_closest_pts_on_mesh(pts_3d, tri_id);
+    pts_on_mesh* pts_mesh = find_closest_pts_on_mesh(pts_3d_out, tri_id);
     pts_mesh->print();
 
     return pts_mesh;

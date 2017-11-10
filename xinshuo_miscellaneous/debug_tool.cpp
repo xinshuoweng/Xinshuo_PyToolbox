@@ -2,10 +2,10 @@
 // Email: xinshuow@andrew.cmu.edu
 
 
-#include <miscellaneous/debug_tool.h>
-#include <miscellaneous/type_conversion.h>
-#include <computer_vision/geometry/pts_2d_conf.h>
-#include <computer_vision/geometry/pts_3d_conf.h>
+#include <xinshuo_miscellaneous/debug_tool.h>
+#include <xinshuo_miscellaneous/type_conversion.h>
+#include <xinshuo_vision/geometry/pts_2d_conf.h>
+#include <xinshuo_vision/geometry/pts_3d_conf.h>
 
 
 /************************************** print function ********************************************/
