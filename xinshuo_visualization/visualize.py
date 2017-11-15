@@ -19,8 +19,8 @@ from collections import Counter
 # this file define a set of functions related to matplotlib
 from xinshuo_python import *
 from xinshuo_io import mkdir_if_missing, fileparts
-from xinshuo_vision.bbox_transform import bbox_TLBR2TLWH, bboxcheck_TLBR, get_centered_bbox
-from xinshuo_miscellaneous import print_np_shape, list2tuple, list_reorder, remove_list_from_list
+from xinshuo_vision import bbox_TLBR2TLWH, bboxcheck_TLBR, get_centered_bbox
+from xinshuo_miscellaneous import print_np_shape, list2tuple, list_reorder, remove_list_from_list, scalar_list2str_list
 from xinshuo_math import pts_euclidean, calculate_truncated_mse
 
 dpi = 80
@@ -943,7 +943,7 @@ def visualize_nearest_neighbor(featuremap_dict, num_neighbor=5, top_number=5, vi
     return all_sorted_nearest_id, selected_nearest_id
 
 
-def visualize_distribution(data, bin_size=None, vis=True, save_path=None, debug=True, closefig=True):
+def visualize_distribution(data, bin_size=None, vis=False, save_path=None, debug=True, closefig=True):
     '''
     visualize the histogram of a data, which can be a dictionary or list or numpy array or tuple or a list of list
     '''
@@ -959,6 +959,7 @@ def visualize_distribution(data, bin_size=None, vis=True, save_path=None, debug=
         data = data.tolist()
 
     num_bins = 1000.0
+    fig, ax = get_fig_ax_helper(fig=None, ax=None)
 
     # calculate bin size
     if bin_size is None:
@@ -971,9 +972,9 @@ def visualize_distribution(data, bin_size=None, vis=True, save_path=None, debug=
         bin_size = (max_value - min_value) / num_bins
     else:
         try:
-            bin_size = int(bin_size)
+            bin_size = float(bin_size)
         except TypeError:
-            print('size of bin should be integer')
+            print('size of bin should be an float value')
 
     # plot
     if islistoflist(data):
@@ -988,7 +989,7 @@ def visualize_distribution(data, bin_size=None, vis=True, save_path=None, debug=
             sns.distplot(data_list_tmp, bins=bins, kde=False)
             # sns.distplot(data_list_tmp, bins=bins, kde=False)
     else:
-        bins = np.arange(min(data) - bin_size, max(data) + bin_size, bin_size)      # fixed bin size
+        bins = np.arange(min(data) - 10 * bin_size, max(data) + 10 * bin_size, bin_size)      # fixed bin size
         plt.xlim([min(data) - bin_size, max(data) + bin_size])
         plt.hist(data, bins=bins, alpha=0.5)
     
@@ -998,16 +999,45 @@ def visualize_distribution(data, bin_size=None, vis=True, save_path=None, debug=
 
     return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
 
-def visualize_bar_graph(data=None, title=None, label=False, label_list=None, vis=True, save_path=None, debug=True, closefig=True):
+def visualize_bar(data, bin_size=2.0, title='Bar Graph of Key-Value Pair', xlabel='index', ylabel='count', vis=True, save_path=None, debug=True, closefig=True):
+    '''
+    visualize the bar graph of a data, which can be a dictionary or list of dictionary
+
+    different from function of visualize_bar_graph, this function does not depend on panda and dataframe, it's simpler but with less functionality
+    also the key of this function takes continuous scalar variable
+    '''
+    if debug:
+        assert isstring(title) and isstring(xlabel) and isstring(ylabel), 'title/xlabel/ylabel is not correct'
+        assert isdict(data) or islist(data), 'input data is not correct'
+        assert isscalar(bin_size), 'the bin size is not a floating number'
+
+    if isdict(data):
+        index_list = data.keys()
+        if debug:
+            assert islistofscalar(index_list), 'the input dictionary does not contain a scalar key'
+        frequencies = data.values()
+    else:
+        index_list = range(len(data))
+        frequencies = data
+
+    index_str_list = scalar_list2str_list(index_list, debug=debug)
+    index_list = np.array(index_list)
+    fig, ax = get_fig_ax_helper(fig=None, ax=None)
+    # ax.set_xticks(index_list)
+    # ax.set_xticklabels(index_str_list)
+    plt.bar(index_list, frequencies, bin_size, color='r', alpha=0.5)
+    plt.title(title, fontsize=20)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, transparent=False, closefig=closefig)
+
+def visualize_bar_graph(data, title='Bar Graph of Key-Value Pair', xlabel='pixel error', ylabel='keypoint index', label=False, label_list=None, vis=True, save_path=None, debug=True, closefig=True):
     '''
     visualize the bar graph of a data, which can be a dictionary or list of dictionary
     inside each dictionary, the keys (string) should be the same which is the y label, the values should be scalar
     '''
     if debug:
-        if title is not None:
-            assert isstring(title), 'title is not correct'
-        else:
-            title = 'Bar Graph of Key-Value Pair'
+        assert isstring(title) and isstring(xlabel) and isstring(ylabel), 'title/xlabel/ylabel is not correct'
         assert isdict(data) or islistofdict(data), 'input data is not correct'
         if isdict(data):
             assert all(isstring(key_tmp) for key_tmp in data.keys()), 'the keys are not all strings'
@@ -1046,6 +1076,7 @@ def visualize_bar_graph(data=None, title=None, label=False, label_list=None, vis
     figsize = width / float(dpi), height / float(dpi)
     fig = plt.figure(figsize=figsize)
     sns.set(style='whitegrid')
+    # fig, ax = get_fig_ax_helper(fig=None, ax=None)
     if isdict(data):
         g = sns.barplot(x='values', y='names', data=dataframe, label='data', color='b')
         plt.legend(ncol=1, loc='lower right', frameon=True, fontsize=5)
@@ -1066,14 +1097,14 @@ def visualize_bar_graph(data=None, title=None, label=False, label_list=None, vis
     sns.despine(left=True, bottom=True)
     plt.title(title, fontsize=20)
     plt.xlim([0, 50])
-    plt.xlabel('pixel error')
-    plt.ylabel('keypoint index')
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
 
     num_yticks = len(data_new['names'])
     adaptive_fontsize = -0.0555556 * num_yticks + 15.111
     plt.yticks(fontsize=adaptive_fontsize)
 
-    return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
+    return save_vis_close_helper(fig=fig, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
 
 ###################################################################################################################################################### helper
 def get_fig_ax_helper(fig=None, ax=None):
@@ -1085,13 +1116,13 @@ def get_fig_ax_helper(fig=None, ax=None):
 
     return fig, ax
 
-def save_vis_close_helper(fig=None, ax=None, vis=False, save_path=None, debug=True, closefig=True):
+def save_vis_close_helper(fig=None, ax=None, vis=False, save_path=None, debug=True, transparent=True, closefig=True):
     # save and visualization
     if save_path is not None:
         if debug:
             assert is_path_exists_or_creatable(save_path) and isfile(save_path), 'save path is not valid: %s' % save_path
             mkdir_if_missing(save_path)
-        fig.savefig(save_path, dpi=dpi, transparent=True)
+        fig.savefig(save_path, dpi=dpi, transparent=transparent)
     if vis:
         plt.show()
 

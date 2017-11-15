@@ -19,7 +19,7 @@ function [accuracy, loss_avg] = eval_classification_fc(fc_weights, data, labels,
 	num_data = size(data, 1);
 	predictions = zeros(num_data, config.num_class);			% num_data x num_class
 	for data_index = 1 : num_data
-	    data_tmp = data(data_index, :)';
+		data_tmp = data(data_index, :)';
 		predictions_tmp = forward_fc(fc_weights, data_tmp, config.train, debug_mode)';
 		predictions(data_index, :) = predictions_tmp;
 	end

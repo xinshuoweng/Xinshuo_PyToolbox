@@ -4,6 +4,8 @@ import os, sys
 import numpy as np
 from PIL import Image
 
+############################################################# basic
+
 def isstring(string_test):
 	return isinstance(string_test, basestring)
 
@@ -25,6 +27,27 @@ def islist(list_test):
 def islogical(logical_test):
     return isinstance(logical_test, bool)
 
+def isscalar(scalar_test):
+    return isinteger(scalar_test) or isfloat(scalar_test)
+
+def isnparray(nparray_test):
+    return isinstance(nparray_test, np.ndarray)
+
+def istuple(tuple_test):
+    return isinstance(tuple_test, tuple)
+
+def isfunction(func_test):
+    return callable(func_test)
+
+def isdict(dict_test):
+    return isinstance(dict_test, dict)
+
+def isext(ext_test):
+    return isstring(ext_test) and ext_test[0] == '.'
+
+
+############################################################# list-related
+
 def islistoflist(list_test):
     if not islist(list_test):
         return False
@@ -41,23 +64,21 @@ def islistofdict(list_test):
     else:
         return False  
 
-def isscalar(scalar_test):
-    return isinteger(scalar_test) or isfloat(scalar_test)
-
-def isnparray(nparray_test):
-	return isinstance(nparray_test, np.ndarray)
-
-def istuple(tuple_test):
-	return isinstance(tuple_test, tuple)
+def islistofscalar(list_test):
+    if not islist(list_test):
+        return False
+    if all(isscalar(tmp) for tmp in list_test):
+        return True
+    else:
+        return False  
+        
+############################################################# geometry-related
 
 def is2dline(line_test):
     '''
     numpy array or list or tuple with 3 elements
     '''
     return (isnparray(line_test) or islist(line_test) or istuple(line_test)) and np.array(line_test).size == 3
-
-def issize(size_test):
-    return is2dpts(size_test)
 
 def is2dpts(pts_test):
     '''
@@ -80,21 +101,13 @@ def is3dpts(pts_test):
     '''
     return (isnparray(pts_test) or islist(pts_test) or istuple(pts_test)) and np.array(pts_test).size == 3
 
-
 def islinesarray(line_test):
     return isnparray(line_test) and line_test.shape[0] == 4 and len(line_test.shape) == 2 and line_test.shape[1] >= 0               # 4 x N
 
-def isfunction(func_test):
-	return callable(func_test)
+############################################################# image_related
 
-def isdict(dict_test):
-    return isinstance(dict_test, dict)
-
-def istuple(tuple_test):
-    return isinstance(tuple_test, tuple)
-
-def isext(ext_test):
-    return isstring(ext_test) and ext_test[0] == '.'
+def issize(size_test):
+    return is2dpts(size_test)
 
 def isnpimage_dimension(image_test):
     return isnparray(image_test) and ((image_test.ndim == 3 and (image_test.shape[2] == 3 or image_test.shape[2] == 1)) or image_test.ndim == 2)
@@ -237,6 +250,9 @@ def isscaledimage(image_test):
     else:
         assert False, 'Unknown error'
 
+
+
+############################################################# io_related
 def is_path_valid(pathname):
     '''
     `True` if the passed pathname is a valid pathname for the current OS;
@@ -261,7 +277,7 @@ def is_path_creatable(pathname):
     for file, it needs the folder existing
     '''
     if is_path_valid(pathname) is False:
-    	return False
+        return False
     
     pathname = safepath(pathname)
     pathname = os.path.dirname(os.path.abspath(pathname))
@@ -276,7 +292,7 @@ def is_path_creatable(pathname):
 
 def is_path_exists_or_creatable(pathname):
     '''
-	this function is to justify is given path existing or creatable
+    this function is to justify is given path existing or creatable
     '''
     try:
         return is_path_valid(pathname) and (os.path.exists(pathname) or is_path_creatable(pathname))
@@ -285,7 +301,7 @@ def is_path_exists_or_creatable(pathname):
 
 def is_path_exists(pathname):
     '''
-	this function is to justify is given path existing or not
+    this function is to justify is given path existing or not
     '''
     try:
         return is_path_valid(pathname) and os.path.exists(pathname)
@@ -318,6 +334,9 @@ def safepath(pathname):
     '''
     assert is_path_valid(pathname), 'path is not valid: %s' % pathname
     return os.path.normpath(pathname)
+
+
+############################################################# equality check
 
 def CHECK_EQ_LIST_SELF(input_list, debug=True):
 	'''

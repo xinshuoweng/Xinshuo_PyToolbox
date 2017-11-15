@@ -126,6 +126,30 @@ def get_subdict(dictionary, num, debug=True):
 
 	return take(num, dictionary.iteritems())
 
+def sort_dict(dictionary, sort_base='value', order='descending', debug=True):
+	'''
+	sort a dictionary to a list
+	'''
+	if debug:
+		assert isdict(dictionary), 'the input is not a dictionary'
+		assert sort_base == 'value' or sort_base == 'key', 'the sorting is based on key or value'
+		assert order == 'descending' or order == 'ascending', 'the sorting order is not descending or ascending'
+
+	reverse = True if order == 'descending' else False
+	if sort_base == 'value':
+		return sorted(dictionary.iteritems(), key= lambda (k,v): (v,k), reverse=reverse)
+	else:
+		return sorted(dictionary.iteritems(), reverse=reverse)
+
+def construct_dict_from_lists(list_key, list_value, debug=True):
+	'''
+	construct a distionary from two lists
+	'''
+	if debug:
+		assert islist(list_key) and islist(list_value), 'the input key list and value list are not correct'
+		assert len(list_key) == len(list_value), 'the length of two input lists are not equal'
+
+	return dict(zip(list_key, list_value))
 
 ######################################################### list related #########################################################
 def str2float_from_list(str_list, debug=True):
@@ -184,7 +208,6 @@ def remove_list_from_list(list_all, list_to_remove, debug=True):
 
 	return list_all
 
-
 def remove_empty_item_from_list(list_to_remove, debug=True):
 	'''
 	remove an empty string from a list
@@ -194,9 +217,22 @@ def remove_empty_item_from_list(list_to_remove, debug=True):
 	
 	return remove_item_from_list(list_to_remove, '', debug=debug)
 
+def scalar_list2str_list(scalar_list, debug=True):
+	'''
+	convert a list of scalar to a list of string
+	'''	
+	if debug:
+		assert islist(scalar_list) and all(isscalar(scalar_tmp) for scalar_tmp in scalar_list), 'input list is not a scalar list'
+	
+	str_list = list()
+	for item in scalar_list:
+		str_list.append(str(item))
+
+	return str_list
+
 def scalar_list2float_list(scalar_list, debug=True):
 	'''
-	remove an empty string from a list
+	convert a list of scalar to a list of floating number
 	'''
 	if debug:
 		assert islist(scalar_list) and all(isscalar(scalar_tmp) for scalar_tmp in scalar_list), 'input list is not a scalar list'
@@ -207,10 +243,9 @@ def scalar_list2float_list(scalar_list, debug=True):
 
 	return float_list
 
-
 def float_list2bytes(float_list, debug=True):
 	'''
-	convert a float number to a set of bytes
+	convert a list of floating number to bytes
 	'''
 	if debug:
 		assert isfloat(float_list) or (islist(float_list) and all(isfloat(float_tmp) for float_tmp in float_list)), 'input is not a floating number or a list of floating number'

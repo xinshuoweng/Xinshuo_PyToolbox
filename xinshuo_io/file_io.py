@@ -74,11 +74,14 @@ def save_txt_file(data_list, save_path, debug=True):
     if debug:
         assert is_path_exists_or_creatable(save_path), 'text file is not able to be created at path: %s!' % save_path
 
+    first_line = True
     with open(save_path, 'w') as file:
         for item in data_list:
-            # print(item)
-            # time.sleep(0.1)
-            file.write('%s\n' % item)
+            if first_line:
+                file.write('%s' % item)
+                first_line = False
+            else:
+                file.write('\n%s' % item)
     file.close()
 
     return    
