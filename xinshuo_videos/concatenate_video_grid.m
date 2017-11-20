@@ -73,7 +73,7 @@ function concatenate_video_grid(image_folder_list, save_dir, im_size, grid_size,
 	num_image_cell = {};
 	image_list_cell = {};
 	for video_index = 1:num_videos
-		fprintf('loading image list for all folders %d/%d\n', video_index, num_videos);
+		fprintf('loading image list for all folders %d/%d %s\n', video_index, num_videos, image_folder_list{video_index});
 		[imagelist, num_images] = load_list_from_folder(image_folder_list{video_index}, ext_filter, depth, debug_mode);
 		num_image_cell{video_index} = num_images;
 		image_list_cell{video_index} = imagelist;
@@ -124,13 +124,13 @@ function concatenate_video_grid(image_folder_list, save_dir, im_size, grid_size,
 		imwrite(image_merged, save_path_tmp);
 	end
 
-	video_savepath = fullfile(save_dir, 'concatenated.avi');
+	% video_savepath = fullfile(save_dir, 'concatenated.avi');
 	% img_src = fullfile(video_data_root_dir, 'images/cam330030');
 	% img_src = video_data_root_dir;
 	% img_src = video_data_root_dir;
-	fprintf('generating video %d.\n', i);
-	num_images = generate_video_from_folder(save_dir, video_savepath, framerate, vis_resize_factor, {'.jpg'}, debug_mode);
-	fprintf('%d images loaded at %s...\n\n', num_images, save_dir);
+	% fprintf('generating video %d.\n', i);
+	% num_images = generate_video_from_folder(save_dir, video_savepath, framerate, vis_resize_factor, {'.jpg'}, debug_mode);
+	% fprintf('%d images loaded at %s...\n\n', num_images, save_dir);
 	fprintf('\ndone!!!!!!!!!!!\n\n');
 
 end
