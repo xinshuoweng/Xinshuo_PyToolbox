@@ -375,7 +375,8 @@ def visualize_image_with_pts_bbox_tracking(image, pts_array, valid_index, window
     '''
     if debug:
         assert is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array), 'input points are not correct'
-        assert pts_array.shape == pts_anno.shape, 'the input points from prediction and annotation have to have the same shape'
+        if pts_anno is not None:
+            assert pts_array.shape == pts_anno.shape, 'the input points from prediction and annotation have to have the same shape'
         assert islist(valid_index), 'the valid index is not a list'
 
     num_pts_all = pts_array.shape[1]
