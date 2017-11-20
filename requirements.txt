@@ -8,3 +8,4 @@ seaborn
 terminaltables
 tabulate
 google-api-python-client
+opencv-python
