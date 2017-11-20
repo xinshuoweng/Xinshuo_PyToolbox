@@ -28,15 +28,15 @@ function weight = train_fc(weight, train_data, train_label, config, debug_mode)
 	% shuffle the data
 	if config.shuffle
 		shuffle_id = randperm(num_data);
-		train_data = train_data(shuffle_id, :);
-		train_label = train_label(shuffle_id, :);
-	end
+		train_data = train_data(shuffle_id, :);					% N x 48
+		train_label = train_label(shuffle_id, :);				% N x num_class		(one-hot vector)
+	end	
 
 	if ~isfield(config, 'batch_size')
 		config.batch_size = 1;
 	end
 
-	for i = 1:num_data
+	for i = 1:config.batch_size:num_data
 		data_temp = train_data(i, :)';  		% N x 1
 		label_temp = train_label(i, :)';      	% C x 1 
 
@@ -49,6 +49,19 @@ function weight = train_fc(weight, train_data, train_label, config, debug_mode)
 			fprintf('Done %.2f %%', i/size(train_data, 1) * 100);
 		end
 	end
+	% for i = 1:num_data
+	% 	data_temp = train_data(i, :)';  		% N x 1
+	% 	label_temp = train_label(i, :)';      	% C x 1 
+
+	% 	[~, post_activation, pre_activation] = forward_fc(weight, data_temp, config, debug_mode);
+	% 	gradients = backward_fc(weight, data_temp, label_temp, post_activation, config, debug_mode);
+	% 	[weight, gradients_old] = update_parameters_fc(weight, gradients, gradients_old, config, debug_mode);
+
+	% 	if mod(i, 100) == 0
+	% 		fprintf('\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b');
+	% 		fprintf('Done %.2f %%', i/size(train_data, 1) * 100);
+	% 	end
+	% end
 	fprintf('\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b');
 
 end
