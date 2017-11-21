@@ -16,10 +16,13 @@ function output = mysoftmax(in, debug_mode)
 	end
 
 	total = sum(exp(in));
+	total = repmat(total, size(in, 1), 1);
 
 	if debug_mode
-		assert(isvector(total), 'the summation of softmax function is not right\n');
+		assert(ismatrix(total), 'the summation of softmax function is not right\n');
 	end
 
+	% size(exp(in))
+	% size(total)
 	output = exp(in)./total;
 end
