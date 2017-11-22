@@ -25,6 +25,8 @@ function gradients = backward_fc(fc_weight, X, Y, post_activation, config, debug
 	grad_W = cell(size(W));
 	grad_b = cell(size(b));
 
+	% num_hidden
+
 	% define the activation function
 	if isfield(config, 'activation')
 		activation_flag = true;
@@ -65,7 +67,7 @@ function gradients = backward_fc(fc_weight, X, Y, post_activation, config, debug
 		if activation_flag
 			pre_activation = activation(post_activation{i});								% num_hidden x batch_size
 		else
-			pre_activation = post_activation{i};											
+			pre_activation = ones(size(post_activation{i}));											
 		end
 		delta_cur = pre_activation .* (weight_cur * delta);    								% num_hidden x batch_size
 
@@ -94,11 +96,11 @@ function gradients = backward_fc(fc_weight, X, Y, post_activation, config, debug
 	gradients.input = grad_input;
 
 	% mean(mean(grad_input))
-	max(grad_W{1}(:))
-	max(grad_W{2}(:))
-	max(grad_b{2}(:))
-	max(grad_b{1}(:))
-	max(grad_input(:))
+	% max(grad_W{1}(:))
+	% max(grad_W{2}(:))
+	% max(grad_b{2}(:))
+	% max(grad_b{1}(:))
+	% max(grad_input(:))
 	% mean(mean(grad_b{1}))
 	% pause;
 end

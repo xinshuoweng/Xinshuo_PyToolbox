@@ -59,6 +59,9 @@ function [output, post_activation, pre_activation] = forward_fc(fc_weight, train
 		weight = W{i};										% 100 x 784
 
 		bias = repmat(b{i}, 1, config.batch_size);			% 100 x batch_size
+
+		% size(weight)
+		% size(train_sample)
 		output_pre = weight * train_sample + bias;				% 100 x batch_size
 
 

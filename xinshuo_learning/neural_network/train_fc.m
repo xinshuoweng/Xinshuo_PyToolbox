@@ -30,6 +30,8 @@ function weight = train_fc(weight, train_data, train_label, config, debug_mode)
 	if isfield(weight, 'input')
 		back_input = true;
 		gradients_old = rmfield(gradients_old, 'input');
+	else
+		back_input = false;
 	end
 	% weight.input
 
@@ -57,19 +59,23 @@ function weight = train_fc(weight, train_data, train_label, config, debug_mode)
 			end
 			weight = rmfield(weight, 'input');
 		else
-			train_sample_parsed = data_temp;
+			train_sample_parsed = data_temp';				% batch_size x input_size
 		end
 
-		[~, post_activation, pre_activation] = forward_fc(weight, train_sample_parsed', config, debug_mode);
-		gradients = backward_fc(weight, train_sample_parsed', label_temp, post_activation, config, debug_mode);
+		% size(train_sample_parsed)
 
-		if back_input
+		[~, post_activation, ~] = forward_fc(weight, train_sample_parsed', config, debug_mode);
+		gradients = backward_fc(weight, train_sample_parsed', label_temp, post_activation, config, debug_mode);
+		% fieldnames(gradients)
+
+		% if back_input
 			% assert(isfield(gradients_old, 'input'), 'the gradients of inputs does not exist');
-			assert(isfield(gradients, 'input'), 'the gradients of inputs does not exist');
-			grad_input = gradients.input;				% batch_size x 48
-			grad_input_tmp = - grad_input;				% batch_size x 48		
-			gradients = rmfield(gradients, 'input');	
-		end	
+		assert(isfield(gradients, 'input'), 'the gradients of inputs does not exist');
+		grad_input = gradients.input;				% batch_size x 48
+		grad_input_tmp = - grad_input;				% batch_size x 48		
+		gradients = rmfield(gradients, 'input');	
+		% else
+		% end	
 
 		[weight, gradients_old] = update_parameters_fc(weight, gradients, gradients_old, config, debug_mode);
 
