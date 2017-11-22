@@ -9,7 +9,7 @@
 % output
 %	distance:	scalar
 
-function distance = get_pts_distance(pts1, pts2, debug_mode)
+function distance = distance_pts(pts1, pts2, debug_mode)
 	if nargin < 3
 		debug_mode = true;
 	end

@@ -192,7 +192,7 @@ def visualize_covariance_ellipse(covariance, center, conf=None, std=None, fig=No
     ax.add_artist(ellipse)
     return ellipse
 
-def visualize_pts_array(pts_array, covariance=False, color_index=0, fig=None, ax=None, pts_size=20, label=False, label_list=None, occlusion=True, vis_threshold=-10000, save_path=None, vis=False, debug=True, closefig=True):
+def visualize_pts_array(pts_array, covariance=False, color_index=0, fig=None, ax=None, pts_size=20, label=False, label_list=None, label_size=2, xlim=None, ylim=None, occlusion=True, vis_threshold=-10000, save_path=None, vis=False, debug=True, closefig=True):
     '''
     plot keypoints
 
@@ -200,7 +200,7 @@ def visualize_pts_array(pts_array, covariance=False, color_index=0, fig=None, ax
         pts_array:      2 or 3 x num_pts, the third channel could be confidence or occlusion
     '''
 
-    fontsize = 20
+    fig, ax = get_fig_ax_helper(fig=fig, ax=ax)
     std = None
     conf = 0.95
     if islist(color_index):
@@ -259,13 +259,23 @@ def visualize_pts_array(pts_array, covariance=False, color_index=0, fig=None, ax
             else:
                 # note that the annotation is based on the coordinate instead of the order of plotting the points, so the orider in pts_index does not matter
                 if islist(color_index):
-                    plt.annotate(label_tmp, xy=(pts_array[0, pts_index], pts_array[1, pts_index]), xytext=(-1, 1), color=color_set_big[(color_index[pts_index]+5) % len(color_set_big)], textcoords='offset points', ha='right', va='bottom', fontsize=fontsize)
+                    plt.annotate(label_tmp, xy=(pts_array[0, pts_index], pts_array[1, pts_index]), xytext=(-1, 1), color=color_set_big[(color_index[pts_index]+5) % len(color_set_big)], textcoords='offset points', ha='right', va='bottom', fontsize=label_size)
                 else:
-                    plt.annotate(label_tmp, xy=(pts_array[0, pts_index], pts_array[1, pts_index]), xytext=(-1, 1), color=color_set_big[(color_index+5) % len(color_set_big)], textcoords='offset points', ha='right', va='bottom', fontsize=fontsize)
+                    plt.annotate(label_tmp, xy=(pts_array[0, pts_index], pts_array[1, pts_index]), xytext=(-1, 1), color=color_set_big[(color_index+5) % len(color_set_big)], textcoords='offset points', ha='right', va='bottom', fontsize=label_size)
                 # bbox=dict(boxstyle='round,pad=0.5', fc='yellow', alpha=0.5),
                 # arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
     
-    return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
+    if xlim is not None:
+        if debug:
+            assert islist(xlim) and len(xlim) == 2, 'the x lim is not correct'
+        plt.xlim(xlim[0], xlim[1])
+
+    if ylim is not None:    
+        if debug:
+            assert islist(ylim) and len(ylim) == 2, 'the y lim is not correct'
+        plt.ylim(ylim[0], ylim[1])
+
+    return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig, transparent=False)
 
 def visualize_image_with_pts(image_path, pts, pts_size=20, label=False, label_list=None, color_index=0, vis=False, save_path=None, debug=True, closefig=True):
     '''

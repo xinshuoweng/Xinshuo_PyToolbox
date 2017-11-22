@@ -51,11 +51,11 @@ function weight = train_fc(weight, train_data, train_label, config, debug_mode)
 		%% preprocessing the input data sample
 		if back_input
 			volcabulary = weight.input;
-			train_sample_parsed = zeros(config.batch_size, 16 * (4 - 1));		% 8000 x 48
+			train_sample_parsed = zeros(config.batch_size, config.length_embedding * (4 - 1));		% 8000 x 48
 			for data_index = 1:config.batch_size
-				train_sample_parsed(data_index, 1:16) = volcabulary(data_temp(1, data_index), :);
-				train_sample_parsed(data_index, 17:32) = volcabulary(data_temp(2, data_index), :);
-				train_sample_parsed(data_index, 33:48) = volcabulary(data_temp(3, data_index), :);
+				train_sample_parsed(data_index, 1:config.length_embedding) = volcabulary(data_temp(1, data_index), :);
+				train_sample_parsed(data_index, config.length_embedding+1:config.length_embedding*2) = volcabulary(data_temp(2, data_index), :);
+				train_sample_parsed(data_index, config.length_embedding*2+1:config.length_embedding*3) = volcabulary(data_temp(3, data_index), :);
 			end
 			weight = rmfield(weight, 'input');
 		else
@@ -83,9 +83,9 @@ function weight = train_fc(weight, train_data, train_label, config, debug_mode)
 		if back_input
 			% value_input = weight.input;				% num_class x 16
 			for batch_size_index = 1:config.batch_size
-				grad_vol_tmp1 = grad_input_tmp(batch_size_index, 1:16);
-				grad_vol_tmp2 = grad_input_tmp(batch_size_index, 17:32);
-				grad_vol_tmp3 = grad_input_tmp(batch_size_index, 33:48);
+				grad_vol_tmp1 = grad_input_tmp(batch_size_index, 1:config.length_embedding);
+				grad_vol_tmp2 = grad_input_tmp(batch_size_index, config.length_embedding+1:config.length_embedding*2);
+				grad_vol_tmp3 = grad_input_tmp(batch_size_index, config.length_embedding*2+1:config.length_embedding*3);
 
 				velocity1 = config.lr .* grad_vol_tmp1;
 				velocity2 = config.lr .* grad_vol_tmp2;
