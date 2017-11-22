@@ -49,6 +49,13 @@ function [weights_updated, gradients_old] = update_parameters_fc(weight, gradien
 	for i = 1 : length(W)
 		grad_w_tmp = - grad_W{i} - config.weight_decay .* W{i};
 		grad_b_tmp = - grad_b{i};
+
+		% assert(~any(isnan(grad_w_tmp(:))), 'gradients of weight is nan');
+		% assert(~any(isnan(grad_b_tmp(:))), 'gradients of bias is nan');
+		% assert(~any(isinf(grad_w_tmp(:))), 'gradients of weight is nan');
+		% assert(~any(isinf(grad_b_tmp(:))), 'gradients of bias is nan');
+
+
 		% if back_input
 		% 	grad_input_tmp = - grad_input;
 		% end

@@ -15,6 +15,7 @@ function [output, post_activation, pre_activation] = forward_fc(fc_weight, train
 		assert(isstruct(fc_weight), 'the weight should be a struct\n');
 		assert(isfield(fc_weight, 'W'), 'the weights in fully connected do not exist');
 		assert(isfield(fc_weight, 'b'), 'the bias in fully connected do not exist');
+		assert(isfield(config, 'batch_size'), 'the bias in fully connected do not exist');
 	end
 
 	% W, b are cells of matrix to store the weight and bias
@@ -23,6 +24,7 @@ function [output, post_activation, pre_activation] = forward_fc(fc_weight, train
 
 	% define the activation function
 	if isfield(config, 'activation')
+		activation_flag = true;
 		if strcmp(config.activation, 'sigmoid')
 			activation = @mysigmoid;
 		elseif strcmp(config.activation, 'relu')
@@ -30,7 +32,7 @@ function [output, post_activation, pre_activation] = forward_fc(fc_weight, train
 		elseif strcmp(config.activation, 'tanh')
 			activation = @mytanh;
 		elseif strcmp(config.activation, 'none');
-			activation = false;
+			activation_flag = false;
 		else
 			assert(false, sprintf('the activation function is not correct in the configuration: %s', config.activation));
 		end	
@@ -55,8 +57,17 @@ function [output, post_activation, pre_activation] = forward_fc(fc_weight, train
 
 	for i = 1:num_layer
 		weight = W{i};										% 100 x 784
+
 		bias = repmat(b{i}, 1, config.batch_size);			% 100 x batch_size
 		output_pre = weight * train_sample + bias;				% 100 x batch_size
+
+
+		% assert(~any(isnan(weight(:))), 'weight is nan');
+		% assert(~any(isnan(bias(:))), 'bias is nan');
+		% assert(~any(isnan(output_pre(:))), 'pre output is nan');
+		% assert(~any(isinf(weight(:))), 'weight is nan');
+		% assert(~any(isinf(bias(:))), 'bias is nan');
+		% assert(~any(isinf(output_pre(:))), 'pre output is nan');
 
 		% output_pre
 		if i < num_layer
@@ -64,7 +75,7 @@ function [output, post_activation, pre_activation] = forward_fc(fc_weight, train
 		end
 
 		% output_pre(1:10)
-		if activation
+		if activation_flag
 			output_pos = activation(output_pre);
 		else
 			output_pos = output_pre;

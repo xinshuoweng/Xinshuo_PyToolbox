@@ -2,7 +2,7 @@
 % Email: xinshuow@andrew.cmu.edu
 
 % this function evaluate the perplexity of a language model
-function [perplexity, loss_avg] = eval_perplexity(fc_weights, data, labels, config, debug_mode)
+function [perplexity, loss_avg] = eval_perplexity(fc_weights, data, labels, length_lines, config, debug_mode)
 	if nargin < 5
 		debug_mode = true;
 	end
@@ -22,30 +22,80 @@ function [perplexity, loss_avg] = eval_perplexity(fc_weights, data, labels, conf
 
 	% compute loss and classification rate
 	prob_matrix = predictions .* labels;						% num_data x num_class
+	% prob_matrix(1:2, :)
+	% pause
+
 	prob_vector = sum(prob_matrix, 2);							% num_data x 1
 	loss_vector = -log(prob_vector);
 	loss_avg = sum(loss_vector) / num_data;
 
-	[~, ex_id] = max(predictions, [], 2);
-	[~, gt_id] = max(labels, [], 2);
-	accuracy = (sum(ex_id - gt_id == 0)) / num_data;
+	% perplexity = 0;
+	perplexity = compute_perplexity(prob_vector, length_lines, debug_mode);
 end
 
 
-function perplexity = calculatePerplexity(p_s, line_count)
-	% for validation set
-	M = size(p_s, 1);
-	sum_ = 0;
-    base = 0;
-	for i = 1:size(line_count, 1)
-        this_sentence_len = line_count(i);
-        p = 1;
-        for j = 1:this_sentence_len
-            p = p * p_s(j+base);
-        end
-        sum_ = sum_ + log2(p);
-        base = base + this_sentence_len;
-    end
-	l = (sum_)/M;
-	perplexity = 2^(-l);
+function perplexity = compute_perplexity(prob_vector, length_lines, debug_mode)
+	if nargin < 3
+		debug_mode = true;
+	end
+
+	if debug_mode
+		assert(isvector(prob_vector), 'the input probability is not a vector');
+		assert(isvector(length_lines), 'the length of lines is not a vector');
+	end
+
+	num_gram = length(prob_vector);	
+	num_lines = length(length_lines);
+	accu_num_gram_check = 0;
+
+	% sum_perplexity = 0;
+	ave_perplexity = 0;
+	gram_index_offset = 0;
+	for line_index = 1:num_lines
+		length_line_tmp = length_lines(line_index);
+		num_gram_line_tmp = length_line_tmp - 3;			% number of 4-gram in the current line
+		accu_num_gram_check = accu_num_gram_check + num_gram_line_tmp;
+
+		prob_line = double(1);
+		for gram_index = 1:num_gram_line_tmp
+			prob_line = prob_line * double(prob_vector(gram_index + gram_index_offset));
+		end
+		% prob_line
+		perplexity_tmp = -log2(prob_line);
+		% sum_perplexity = sum_perplexity + perplexity_tmp;
+		% sum_perplexity
+		% pause
+		% n = line_index;
+		
+
+		gram_index_offset = gram_index_offset + num_gram_line_tmp;
+
+		past_part = (gram_index_offset - num_gram_line_tmp) / gram_index_offset * ave_perplexity;
+		current_part = perplexity_tmp / gram_index_offset;
+
+		if isinf(current_part)
+			ave_perplexity = past_part;
+		else
+			ave_perplexity = past_part + current_part;
+		end
+
+		% line_index
+		% past_part
+		% current_part
+		% ave_perplexity
+		% pause
+		% sum_perplexity / gram_index_offset
+		% pause
+	end
+
+	assert(gram_index_offset == num_gram, 'the length of gram is not correct');
+	assert(accu_num_gram_check == num_gram, 'the length of lines is not correct');
+
+	% ave_perplexity_accu = sum_perplexity / num_gram;
+
+	% ave_perplexity_accu
+	% ave_perplexity
+	% pause
+	% perplexity = 2 ^ ave_perplexity_accu;
+	perplexity = 2 ^ ave_perplexity;
 end

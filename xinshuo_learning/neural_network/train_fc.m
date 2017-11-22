@@ -12,6 +12,7 @@ function weight = train_fc(weight, train_data, train_label, config, debug_mode)
 	if debug_mode
 		assert(isfield(config, 'lr'), 'the configuration needs to have a field of learning rate\n');
 		assert(isfield(config, 'shuffle'), 'the configuration needs to have a field of shuffle\n');
+		assert(isfield(config, 'batch_size'), 'the configuration needs to have a field of batch size\n');
 	end
 
 	% set previous gradients as zero before optimization
@@ -36,13 +37,10 @@ function weight = train_fc(weight, train_data, train_label, config, debug_mode)
 	% shuffle the data
 	if config.shuffle
 		shuffle_id = randperm(num_data);
+		% shuffle_id(1:10)
 		train_data = train_data(shuffle_id, :);					% N x 48
 		train_label = train_label(shuffle_id, :);				% N x num_class		(one-hot vector)
 	end	
-
-	if ~isfield(config, 'batch_size')
-		config.batch_size = 1;
-	end
 
 	for i = 1:config.batch_size:num_data - config.batch_size
 		data_temp = train_data(i:i+config.batch_size-1, :)';  			% N x batch_size
@@ -75,7 +73,6 @@ function weight = train_fc(weight, train_data, train_label, config, debug_mode)
 
 		[weight, gradients_old] = update_parameters_fc(weight, gradients, gradients_old, config, debug_mode);
 
-
 		%% hard code for updating the inputs
 		if back_input
 			% value_input = weight.input;				% num_class x 16
@@ -83,10 +80,19 @@ function weight = train_fc(weight, train_data, train_label, config, debug_mode)
 				grad_vol_tmp1 = grad_input_tmp(batch_size_index, 1:16);
 				grad_vol_tmp2 = grad_input_tmp(batch_size_index, 17:32);
 				grad_vol_tmp3 = grad_input_tmp(batch_size_index, 33:48);
-				volcabulary(data_temp(1, batch_size_index), :) = volcabulary(data_temp(1, batch_size_index), :) + config.lr .* grad_vol_tmp1;
-				volcabulary(data_temp(2, batch_size_index), :) = volcabulary(data_temp(2, batch_size_index), :) + config.lr .* grad_vol_tmp2;
-				volcabulary(data_temp(3, batch_size_index), :) = volcabulary(data_temp(3, batch_size_index), :) + config.lr .* grad_vol_tmp3;
+
+				velocity1 = config.lr .* grad_vol_tmp1;
+				velocity2 = config.lr .* grad_vol_tmp2;
+				velocity3 = config.lr .* grad_vol_tmp3;
+
+				volcabulary(data_temp(1, batch_size_index), :) = volcabulary(data_temp(1, batch_size_index), :) + velocity1;
+				volcabulary(data_temp(2, batch_size_index), :) = volcabulary(data_temp(2, batch_size_index), :) + velocity2;
+				volcabulary(data_temp(3, batch_size_index), :) = volcabulary(data_temp(3, batch_size_index), :) + velocity3;
 				% value_input = value_input + config.lr .* grad_input_tmp;
+
+				% gradients_old1 = velocity1;
+				% gradients_old2 = velocity2;
+				% gradients_old3 = velocity3;
 			end
 			weight.input = volcabulary;
 		end

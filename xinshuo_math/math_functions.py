@@ -136,7 +136,7 @@ def pts_euclidean(pts1, pts2, debug=True):
         pts1_tmp = pts1[:, pts_index]
         pts2_tmp = pts2[:, pts_index]
         n = float(pts_index + 1)
-        distance_tmp = math.sqrt((pts1_tmp[0] - pts2_tmp[0])**2 + (pts1_tmp[1] - pts2_tmp[1])**2)
+        distance_tmp = math.sqrt((pts1_tmp[0] - pts2_tmp[0])**2 + (pts1_tmp[1] - pts2_tmp[1])**2)               # TODO check the start
         ave_euclidean = (n-1) / n * ave_euclidean + distance_tmp / n
         eculidean_list[pts_index] = distance_tmp
 
