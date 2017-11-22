@@ -8,8 +8,8 @@ function time_str = convert_secs2time(seconds)
 	s = mod(int32(seconds), 60);
 	m = floor(seconds/60);
 
-	m = mod(m, 60);
 	h = floor(m/60);
+	m = mod(m, 60);
     % m, s = divmod(int(seconds), 60)
     % h, m = divmod(m, 60)
     time_str = sprintf('%d:%02d:%02d', h, m, s);
