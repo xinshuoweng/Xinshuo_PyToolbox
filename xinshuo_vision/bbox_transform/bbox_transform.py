@@ -13,7 +13,7 @@ from math import radians as rad
 
 from xinshuo_math import get_line, get_intersection
 from xinshuo_images import imagecoor2cartesian, cartesian2imagecoor
-from xinshuo_python import isnparray, is2dptsarray, is2dptsarray_occlusion
+from xinshuo_python import isnparray, is2dptsarray, is2dptsarray_occlusion, is2dpts
 
 
 def bbox_transform(ex_rois, gt_rois):
@@ -380,10 +380,15 @@ def get_centered_bbox(pts_array, width, height, debug=True):
     '''
     
     if debug:
-        assert is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array), 'the input points should have shape: 2 or 3 x num_pts vs %d x %s' % (pts_array.shape[0], pts_array.shape[1])
+        assert is2dpts(pts_array) or is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array), 'the input points should have shape: 2 or 3 x num_pts vs %d x %s' % (pts_array.shape[0], pts_array.shape[1])
 
-    xmin = pts_array[0, :] - np.ceil(width/2.0) + 1    
-    ymin = pts_array[1, :] - np.ceil(height/2.0) + 1
+    if is2dpts(pts_array):
+        xmin = pts_array[0] - np.ceil(width/2.0) + 1    
+        ymin = pts_array[1] - np.ceil(height/2.0) + 1
+    else: 
+        xmin = pts_array[0, :] - np.ceil(width/2.0) + 1    
+        ymin = pts_array[1, :] - np.ceil(height/2.0) + 1
+
     xmax = xmin + width - 1;
     ymax = ymin + height - 1;
     
