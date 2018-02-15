@@ -3,7 +3,7 @@
 
 % visualize a heatmap on top of an image
 function visualize_segment(pts_array, fig, color_index, debug_mode)
-    if nargin < 3
+    if nargin < 4
         debug_mode = true;
     end
 

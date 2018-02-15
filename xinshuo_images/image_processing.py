@@ -210,4 +210,90 @@ def concatenate_grid(image_list, im_size=[1600, 2560], grid_size=None, edge_fact
 
 
 
-# def crop_pts()
+
+# this function is to pad given value to an image in provided region, all images in this function are floating images
+# parameters:
+#   img:        a floating image
+#   pad_rect:   4 element array, which describes where to pad the value. The order is [left, top, right, bottom]
+#   pad_value:  a scalar defines what value we should pad
+def pad_around(img, pad_rect, pad_value):
+
+    [im_height, im_width, channel] = img.shape
+    
+    # calculate the new size of image
+    pad_left    = pad_rect[0];
+    pad_top     = pad_rect[1];
+    pad_right   = pad_rect[2];
+    pad_bottom  = pad_rect[3];
+    new_height  = im_height + pad_top + pad_bottom;
+    new_width   = im_width + pad_left + pad_right;
+    
+    # pad
+    padded = np.zeros([new_height, new_width, channel]);
+    padded[:] = pad_value;
+    padded[pad_top: new_height-pad_bottom, pad_left: new_width-pad_right, :] = img;
+    return padded
+
+def crop_center(img1, rect, pad_value):
+# rect is XYWH
+
+    if not pad_value:
+        pad_value = 128
+
+    # calculate crop rectangles
+    [im_height, im_width, im_channel] = img1.shape
+    im_size = [im_height, im_width]
+
+    rect = [int(x) for x in rect]
+    if len(rect) == 4:            # crop around the given center and width and height
+        center_x = rect[0]
+        center_y = rect[1]
+        crop_width = rect[2]
+        crop_height = rect[3]
+    else:                            # crop around the center of the image
+        center_x = math.ceil(im_width/2)
+        center_y = math.ceil(im_height/2)   
+        crop_width = rect[0]
+        crop_height = rect[1]
+    
+    # calculate cropped region
+    xmin = int(center_x - math.ceil(crop_width/2) + 1) -1
+    ymin = int(center_y - math.ceil(crop_height/2) + 1) -1
+    xmax = int(xmin + crop_width - 1)
+    ymax = int(ymin + crop_height - 1)
+    
+    crop_rect = [xmin, ymin, crop_width - 1, crop_height - 1]
+    tmp_min_x = xmin if xmin>=0 else 0
+    tmp_max_x = xmax if xmax<img1.shape[1] else (img1.shape[1]-1)
+    tmp_min_y = ymin if ymin>=0 else 0
+    tmp_max_y = ymax if ymax<img1.shape[0] else (img1.shape[0]-1)
+    cropped = img1[tmp_min_y:tmp_max_y+1, tmp_min_x:tmp_max_x+1, :]
+
+    # if original image is not enough to cover the crop area, we pad value around outside after cropping
+    if (xmin < 0 or ymin < 0 or xmax > im_width-1 or ymax > im_height-1):
+        pad_left    = max(0 - xmin, 0)
+        pad_top     = max(0 - ymin, 0)
+        pad_right   = max(xmax - (im_width-1), 0)
+        pad_bottom  = max(ymax - (im_height-1), 0)
+        if pad_left > 0:
+            tmp = np.ones((cropped.shape[0], pad_left + cropped.shape[1], img1.shape[2]))*pad_value
+            tmp[: , pad_left:, :] = cropped
+            cropped = tmp
+        if pad_right > 0:
+            tmp = np.ones((cropped.shape[0], pad_right + cropped.shape[1], img1.shape[2]))*pad_value
+            tmp[:, :cropped.shape[1], :] = cropped
+            cropped = tmp
+        if pad_top > 0:
+            tmp = np.ones((pad_top + cropped.shape[0], cropped.shape[1], img1.shape[2])) * pad_value
+            tmp[pad_top:, :, :] = cropped
+            cropped = tmp
+        if pad_bottom > 0:
+            tmp = np.ones((pad_bottom + cropped.shape[0], cropped.shape[1], img1.shape[2])) * pad_value
+            tmp[:cropped.shape[0] , :, :] = cropped
+            cropped = tmp
+
+    # TODO: with padding
+    [im_height, im_width, im_channel] = img1.shape
+    
+    crop_rect_ori = toolbox.bbox.clip_bboxes_TLWH(crop_rect, im_width, im_height)
+    return cropped, crop_rect, crop_rect_ori

@@ -354,13 +354,14 @@ def anno_parser(anno_path, num_pts=None, anno_version=None, debug=True):
     return pts
 
 ######################################################### image related #########################################################
-def load_image(src_path, resize_factor=1.0, mode='numpy', debug=True):
+def load_image(src_path, resize_factor=1.0, rotate=0, mode='numpy', debug=True):
     '''
     load an image from given path
 
     parameters:
         resize_factor:      resize the image (>1 enlarge)
         mode:               numpy or pil, specify the format of returned image
+        rotate:             counterclockwise rotation in degree
     '''
 
     # open path as file to avoid ResourceWarning (https://github.com/python-pillow/Pillow/issues/835)
@@ -376,6 +377,8 @@ def load_image(src_path, resize_factor=1.0, mode='numpy', debug=True):
     with open(src_path, 'rb') as f:
         with Image.open(f) as img:
             img = img.convert('RGB')
+            if rotate != 0:
+                img = img.rotate(rotate, expand=True)
             width, height = img.size
             img = img.resize(size=(int(width*resize_factor), int(height*resize_factor)), resample=Image.BILINEAR)
             

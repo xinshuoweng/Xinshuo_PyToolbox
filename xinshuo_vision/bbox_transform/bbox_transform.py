@@ -81,6 +81,28 @@ def clip_boxes(boxes, im_shape):
     boxes[:, 3::4] = np.maximum(np.minimum(boxes[:, 3::4], im_shape[0] - 1), 0)     # y2 < im_shape[0]
     return boxes
 
+
+# this function takes boxes in and process it to make them inside the image
+# input format could be a 1x1 cell, which contains Nx4 
+# or input boxes could be a Nx4 matrix or Nx5 matrix
+# input format: TLWH (x, y)
+# output format: TLWH (x, y)
+def clip_bboxes_TLWH(boxes, im_width, im_height, debug_mode=True):
+
+    # x1 >= 1 & <= im_width
+    boxes_new = []
+    boxes_new.append(max(min(boxes[0], im_width), 1))
+    # y1 >= 1 & <= im_height
+    boxes_new.append(max(min(boxes[1], im_height), 1))
+    
+    # width
+    boxes_new.append(max(min(boxes[2], im_width - boxes[0] + 1), 1))
+    # height
+    boxes_new.append(max(min(boxes[3], im_height - boxes[1] + 1), 1))
+
+    return boxes_new
+
+
 def bbox_rotation_inv(bbox_in, angle_in_degree, image_shape, debug=True):
     '''
     bbox_in is two coordinate

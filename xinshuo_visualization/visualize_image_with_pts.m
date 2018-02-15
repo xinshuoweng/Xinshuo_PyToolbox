@@ -54,7 +54,7 @@ function img_with_pts = visualize_image_with_pts(img, pts_array, vis, debug_mode
 	end
 
 	if debug_mode
-		assert(isImage(img), 'the input is not an image format.');
+		% assert(isImage(img), 'the input is not an image format.');
         assert(is2dPtsArray(pts_array), 'the input point does not have a good shape');
 		% assert(size(pts_array, 1) == 2 && size(pts_array, 2) >= 0, 'shape of points to draw is not correct.');
 	end
