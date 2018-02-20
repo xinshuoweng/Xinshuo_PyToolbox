@@ -11,15 +11,15 @@
 
 // self-contained library
 #include <myheader.h>
-#include <computer_vision/geometry/MyMesh.h>
-#include <computer_vision/geometry/pts_2d_conf.h>
-#include <computer_vision/geometry/pts_3d_conf.h>
-#include <computer_vision/geometry/pts_on_mesh.h>
-#include <computer_vision/geometry/mycamera.h>
-#include <computer_vision/geometry/camera_geometry.h>
-#include <file_io/camera_io.h>
-#include <visualization/mesh_visualization.h>
-#include <miscellaneous/type_conversion.h>
+#include <xinshuo_vision/geometry/MyMesh.h>
+#include <xinshuo_vision/geometry/pts_2d_conf.h>
+#include <xinshuo_vision/geometry/pts_3d_conf.h>
+#include <xinshuo_vision/geometry/pts_on_mesh.h>
+#include <xinshuo_vision/geometry/mycamera.h>
+#include <xinshuo_vision/geometry/camera_geometry.h>
+#include <xinshuo_io/camera_io.h>
+#include <xinshuo_visualization/mesh_visualization.h>
+#include <xinshuo_miscellaneous/type_conversion.h>
 
 #define consider_dist_test		false
 #define consider_skew_test		false
@@ -30,7 +30,7 @@ int main(int argc, char* argv[]){
         return -1;
     }
 
-    // char cmd[1024];
+    char str_tmp[1024];
  
     // read ply mesh file
     std::cout << "reading mesh file" << std::endl;
