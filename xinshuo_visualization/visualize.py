@@ -254,6 +254,7 @@ def visualize_pts_array(pts_array, covariance=False, color_index=0, fig=None, ax
     if label:
         for pts_index in xrange(num_pts):
             label_tmp = label_list[pts_index]
+            # print label_tmp
             if pts_index in pts_ignore_index:
                 continue
             else:
@@ -277,7 +278,7 @@ def visualize_pts_array(pts_array, covariance=False, color_index=0, fig=None, ax
 
     return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig, transparent=False)
 
-def visualize_image_with_pts(image_path, pts, pts_size=20, label=False, label_list=None, color_index=0, vis=False, save_path=None, debug=True, closefig=True):
+def visualize_image_with_pts(image_path, pts, pts_size=20, label=False, label_list=None, label_size=2, color_index=0, vis=False, save_path=None, debug=True, closefig=True):
     '''
     visualize image and plot keypoints on top of it
 
@@ -298,7 +299,8 @@ def visualize_image_with_pts(image_path, pts, pts_size=20, label=False, label_li
         else:
             pts_tmp = pts.values()[0]
             num_pts = np.asarray(pts_tmp).shape[1] if islist(pts_tmp) else pts_tmp.shape[1]
-        label_list = [str(i+1) for i in xrange(num_pts)];
+        label_list = [str(i+1) for i in xrange(num_pts)]
+    # print label_list
 
     if debug:
         assert not islist(image_path), 'this function only support to plot points on one image'
@@ -318,10 +320,10 @@ def visualize_image_with_pts(image_path, pts, pts_size=20, label=False, label_li
         for pts_id, pts_array in pts.items():
             if islist(pts_array):
                 pts_array = np.asarray(pts_array)
-            visualize_pts_array(pts_array, fig=fig, ax=ax, color_index=color_index, pts_size=pts_size, label=label, label_list=label_list, occlusion=False, debug=debug, closefig=False)
+            visualize_pts_array(pts_array, fig=fig, ax=ax, color_index=color_index, pts_size=pts_size, label=label, label_list=label_list, label_size=label_size, occlusion=False, debug=debug, closefig=False)
             color_index += 1
     else:   
-        visualize_pts_array(pts, fig=fig, ax=ax, color_index=color_index, pts_size=pts_size, label=label, label_list=label_list, occlusion=False, debug=debug, closefig=False)
+        visualize_pts_array(pts, fig=fig, ax=ax, color_index=color_index, pts_size=pts_size, label=label, label_list=label_list, label_size=label_size, occlusion=False, debug=debug, closefig=False)
 
     return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
 
@@ -446,7 +448,7 @@ def visualize_lines(lines_array, color_index=0, line_width=3, fig=None, ax=None,
 
     return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
 
-def visualize_pts_line(pts_array, line_index_list, method=2, threshold=None, fig=None, ax=None, vis=False, save=False, save_path=None, closefig=True, debug=True, seed=0, alpha=0.5):
+def visualize_pts_line(pts_array, line_index_list, method=2, threshold=None, fig=None, ax=None, vis=False, save_path=None, closefig=True, debug=True, seed=0, alpha=0.5):
     '''
     given a list of index, and a point array, to plot a set of points with line on it
 
@@ -465,6 +467,10 @@ def visualize_pts_line(pts_array, line_index_list, method=2, threshold=None, fig
         assert method == 2 or method == 1, 'the plot method is not correct'
 
     num_pts = pts_array.shape[1]
+    # expand the pts_array to 3 rows if the confidence row is not provided
+    if pts_array.shape[0] == 2:
+        pts_array = np.vstack((pts_array, np.ones((1, num_pts))))
+
     fig, ax = get_fig_ax_helper(fig=fig, ax=ax)
     np.random.seed(seed)
     color_option = 'hsv'
@@ -481,7 +487,6 @@ def visualize_pts_line(pts_array, line_index_list, method=2, threshold=None, fig
 
     line_color = 'y'
     pts_line = pts_array[:, line_index_list]
-    
 
     if method == 1:    
         valid_pts_list = np.where(pts_line[2, :] > threshold)[0].tolist()

@@ -8,9 +8,11 @@ function [nrows, ncols] = save_matrix2d_to_file(matrix, save_path)
     [nrows, ncols] = size(matrix);
 
     for i = 1:nrows
-        for j = 1:ncols
-        	fprintf(fileID, '%05.5f ', matrix(i, j));     
+        for j = 1:ncols-1
+        	fprintf(fileID, '%05.5f ', matrix(i, j));
         end
+        fprintf(fileID, '%05.5f', matrix(i, ncols));        % avoid the additional whitespace in the end
+        
         fprintf(fileID, '\n');
     end
     
