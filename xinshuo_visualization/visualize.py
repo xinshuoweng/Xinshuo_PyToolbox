@@ -103,7 +103,9 @@ def visualize_image(image_path, vis=True, save_path=None, debug=True, closefig=T
             image[0, 0] -= 1
         ax.imshow(image, interpolation='nearest', cmap='gray')
     else:
-        assert False, 'image is not correct'
+        print 'unknown image type'
+        ax.imshow(image, interpolation='nearest')
+        # assert False, 'image is not correct'
     ax.set(xlim=[0, width], ylim=[height, 0], aspect=1)
 
     return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
@@ -485,7 +487,7 @@ def visualize_pts_line(pts_array, line_index_list, method=2, threshold=None, fig
             # print(colorsys.hsv_to_rgb(h_random[pts_index], 1, 1))
             color_set_random[:, pts_index] = colorsys.hsv_to_rgb(h_random[pts_index], 1, 1) 
 
-    line_color = 'y'
+    line_color = 'k'
     pts_line = pts_array[:, line_index_list]
 
     if method == 1:    
