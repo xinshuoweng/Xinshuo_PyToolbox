@@ -3,7 +3,7 @@
 
 import time, shutil, colorsys
 import matplotlib as mpl
-mpl.use('Agg')
+# mpl.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.collections as plycollections
 from matplotlib.patches import Ellipse

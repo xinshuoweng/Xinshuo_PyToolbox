@@ -22,7 +22,7 @@ def normalize_data(data, data_range=None, debug=True):
 	'''
 	if debug:
 		assert isnparray(data), 'only numpy array is supported'
-		print('debug mode is on during data normalizing. Please turn off after debuging')
+		# print('debug mode is on during data normalizing. Please turn off after debuging')
 
 	if data_range is None:
 		max_value = np.max(data)
@@ -50,7 +50,7 @@ def unnormalize_data(data, data_range, debug=True):
 	this function unnormalizes 1-d label to normal scale based on range of data
 	'''
 	if debug:
-		print('debug mode is on during data unnormalizing. Please turn off after debuging')
+		# print('debug mode is on during data unnormalizing. Please turn off after debuging')
 		assert isnparray(data), 'only numpy array is supported'
 		if istuple(data_range) or islist(data_range):
 			assert len(data_range) == 2, 'data range is not correct'
@@ -64,6 +64,30 @@ def unnormalize_data(data, data_range, debug=True):
 		normalized = normalize_data(data=unnormalized, data_range=data_range, debug=False)
 		assert_almost_equal(data, normalized, decimal=6, err_msg='data is not correct: %f vs %f' % (data, normalized))
 	return unnormalized
+
+
+def preprocess_cv_image_caffe(img, mean_value, debug_mode=True):
+    # input is h w c
+    # output is c h w
+    if debug_mode:
+        img = check_imageorPath(img);
+        assert isIntegerImage(img), 'image should be in integer format.'
+        assert length(mean_value) == 1 or length(mean_value) or 3, 'mean value should be length 1 or 3!'
+        assert all(mean_value <= 1.0 and mean_value >= 0.0), 'mean value should be in range [0, 1].'
+
+
+    img_out = img/255.0
+    img_out = img_out - mean_value
+    #img_out = np.transpose(img_out, [1,0,2])    # permute to width x height x channel
+    img_out = np.transpose(img_out, [2,0,1])    # permute to channel x height x width
+    
+    if img_out.shape[0] == 1:
+        img_out[1, :, :] = img_out[0, :, :]    # broadcast to color image
+        img_out[2, :, :] = img_out[0, :, :]   
+    
+    # python + opencv is BGR itself
+    #img_out = img_out[[2,1,0], :, :]       # swap channel to bgr
+    return img_out
 
 
 def preprocess_image_caffe(image_datalist, debug=True, vis=False):

@@ -1,7 +1,7 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
 import os
-import tensorflow as tf
+# import tensorflow as tf
 
 def suppress_caffe_terminal_log():
 	'''
@@ -12,20 +12,20 @@ def suppress_caffe_terminal_log():
 	3 - errors
 	'''
 
-	os.environ['GLOG_minloglevel'] = '2' 
+	os.environ["GLOG_minloglevel"] = "2"
 
 
-def get_tf_good_gpu_session():
-	'''
-	return a tf session which takes proper GPU usage instead of all memory
-	'''
-	num_threads = os.environ.get('OMP_NUM_THREADS')
+# def get_tf_good_gpu_session():
+# 	'''
+# 	return a tf session which takes proper GPU usage instead of all memory
+# 	'''
+# 	num_threads = os.environ.get('OMP_NUM_THREADS')
 
-	if num_threads:
-		config = tf.ConfigProto(intra_op_parallelism_threads=num_threads)
-		config.gpu_options.allow_growth=True
-	else:
-		config = tf.ConfigProto()
-		config.gpu_options.allow_growth=True
+# 	if num_threads:
+# 		config = tf.ConfigProto(intra_op_parallelism_threads=num_threads)
+# 		config.gpu_options.allow_growth=True
+# 	else:
+# 		config = tf.ConfigProto()
+# 		config.gpu_options.allow_growth=True
 	    
-	return tf.Session(config=config)  
+# 	return tf.Session(config=config)  

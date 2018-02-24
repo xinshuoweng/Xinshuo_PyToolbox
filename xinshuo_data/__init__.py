@@ -3,3 +3,4 @@
 
 from .preprocess import *
 from .synthetic_data import *
+from .generate_data import *

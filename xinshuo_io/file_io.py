@@ -51,6 +51,20 @@ def mkdir_if_missing(pathname, debug=True):
     if isfolder(pathname) and not is_path_exists(pathname):
         os.mkdir(pathname)
 
+
+######################################################### dict related #########################################################
+
+def save_struct(struct_save, save_path, debug_mode):
+    with open(save_path, 'w') as f:
+        
+        for k, v in struct_save.__dict__.items():
+            # print(k: v)
+            # print(v)
+            f.write('%s    %s\n' % (k, v))
+    return
+
+######################################################### txt related #########################################################
+
 def load_txt_file(file_path, debug=True):
     '''
     load data or string from text file
@@ -280,7 +294,8 @@ def load_2dmatrix_from_file(src_path, delimiter=' ', dtype='float32', debug=True
         assert is_path_exists(src_path), 'txt path is not correct at %s' % src_path
 
     data = np.loadtxt(src_path, delimiter=delimiter, dtype=dtype)
-    return data
+    nrows = data.shape[0]
+    return data, nrows
 
 ######################################################### pts related #########################################################
 
@@ -392,8 +407,8 @@ def save_image_from_data(save_path, data, debug=True, vis=False):
     if debug:
         assert isimage(data), 'input data is not image format'
         assert is_path_exists_or_creatable(save_path), 'save path is not correct'
-        mkdir_if_missing(save_path)
-
+    
+    mkdir_if_missing(save_path)
     imsave(save_path, data)
 
 ######################################################### web related #########################################################

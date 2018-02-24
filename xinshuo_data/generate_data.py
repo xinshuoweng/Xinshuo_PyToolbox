@@ -5,17 +5,14 @@
 
 from scipy.misc import imread
 import numpy as np
-import os, time
-import h5py
-import random
+import os, time, h5py, random
 
-import __init__paths__
-from check import is_path_exists, isnparray, is_path_exists_or_creatable, isfile, isfolder, isfunction, isdict, isstring, islist, isimage
-from file_io import load_list_from_file, mkdir_if_missing, fileparts, load_list_from_folder
+from xinshuo_python import is_path_exists, isnparray, is_path_exists_or_creatable, isfile, isfolder, isfunction, isdict, isstring, islist, isimage
+from xinshuo_io import load_list_from_file, mkdir_if_missing, fileparts, load_list_from_folder
 from preprocess import preprocess_image_caffe, identity
-from timer import Timer, format_time
+from xinshuo_miscellaneous import Timer, convert_secs2time
 
-def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter='png', label_src1=None, label_name1='label', label_preprocess_function1=identity, label_range1=None, label_src2=None, label_name2='label2', label_preprocess_function2=identity, label_range2=None, debug=True, vis=False):
+def generate_hdf5(data_src, save_dir, data_name='data', batch_size=1, ext_filter='png', label_src1=None, label_name1='label', label_preprocess_function1=identity, label_range1=None, label_src2=None, label_name2='label2', label_preprocess_function2=identity, label_range2=None, debug=True, vis=False):
     '''
     # this function creates data in hdf5 format from a image path 
 
@@ -213,7 +210,7 @@ def generate_hdf5(save_dir, data_src, data_name='data', batch_size=1, ext_filter
             if debug:
                 assert len(datalist_batch) == 0, 'list has not been cleared'
         average_time = clock.toc()
-        print('saving to %s: %d/%d, average time:%.3f, elapsed time:%s, estimated time remaining:%s' % (save_path, i+1, num_data, average_time, format_time(average_time*i), format_time(average_time*(num_data-i))))
+        print('saving to %s: %d/%d, average time:%.3f, elapsed time:%s, estimated time remaining:%s' % (save_path, i+1, num_data, average_time, convert_secs2time(average_time*i), convert_secs2time(average_time*(num_data-i))))
 
     return count_hdf-1, num_data
 

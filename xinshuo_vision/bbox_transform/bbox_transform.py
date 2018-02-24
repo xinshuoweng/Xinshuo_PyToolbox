@@ -12,7 +12,7 @@ from math import radians as rad
 
 
 from xinshuo_math import get_line, get_intersection
-from xinshuo_images import imagecoor2cartesian, cartesian2imagecoor
+from xinshuo_miscellaneous import imagecoor2cartesian, cartesian2imagecoor
 from xinshuo_python import isnparray, is2dptsarray, is2dptsarray_occlusion, is2dpts
 
 
