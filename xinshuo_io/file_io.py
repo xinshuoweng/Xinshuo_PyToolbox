@@ -142,7 +142,7 @@ def load_list_from_folder(folder_path, ext_filter=None, depth=1, recursive=False
 
     if debug:
         assert islogical(recursive), 'recursive should be a logical variable: {}'.format(recursive)
-        assert (isinteger(depth) and depth >= 1) or depth is None, 'input depth is not correct {}'.format(depth)
+        assert depth is None or (isinteger(depth) and depth >= 1), 'input depth is not correct {}'.format(depth)
         assert ext_filter is None or (islist(ext_filter) and all(isstring(ext_tmp) for ext_tmp in ext_filter)) or isstring(ext_filter), 'extension filter is not correct'
     if isstring(ext_filter):    # convert to a list
         ext_filter = [ext_filter]

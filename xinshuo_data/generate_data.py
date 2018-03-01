@@ -195,7 +195,9 @@ def generate_hdf5(data_src, save_dir, data_name='data', batch_size=1, ext_filter
             h5f = h5py.File(save_path, 'w')
             h5f.create_dataset(data_name, data=data, dtype='float32')
             if (labeldict1 is not None) or (labellist1 is not None):
+                # print(labels1)
                 labels1 = label_preprocess_function1(data=labels1, data_range=label_range1, debug=debug)
+                # print(labels1)
                 h5f.create_dataset(label_name1, data=labels1, dtype='float32')
                 labels1 = np.zeros((batch_size, 1), dtype='float32')
 
