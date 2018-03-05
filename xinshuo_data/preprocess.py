@@ -68,7 +68,7 @@ def unnormalize_data(data, data_range, debug=True):
 	return unnormalized
 
 
-def preprocess_cv_image_caffe(img, mean_value, debug_mode=True):
+def preprocess_image_caffe(img, mean_value, debug_mode=True):
     # input is h w c
     # output is c h w
     if debug_mode:
@@ -88,75 +88,76 @@ def preprocess_cv_image_caffe(img, mean_value, debug_mode=True):
         img_out[2, :, :] = img_out[0, :, :]   
     
     # python + opencv is BGR itself
-    #img_out = img_out[[2,1,0], :, :]       # swap channel to bgr
+    img_out = img_out[[2,1,0], :, :]       # swap channel to bgr
     return img_out
 
 
-def preprocess_image_caffe(image_datalist, debug=True, vis=False):
-	'''
-	this function preprocesses image for caffe only,
-	including transfer from rgb to bgr
-	from HxWxC to NxCxHxW
-	'''
-	if debug:
-		print('debug mode is on during preprocessing. Please turn off after debuging')
-		assert islist(image_datalist), 'input is not a list of image'
-		assert all(isimage(image_data, debug=debug) for image_data in image_datalist), 'input is not a list of image'
-		shape_list = [image_data.shape for image_data in image_datalist]
-		assert CHECK_EQ_LIST_SELF(shape_list), 'image shape is not equal inside one batch'
+# # todo mean value
+# def preprocess_image_caffe(image_datalist, is_cvimage=False, debug=True, vis=False):
+# 	'''
+# 	this function preprocesses image for caffe only,
+# 	including transfer from rgb to bgr
+# 	from HxWxC to NxCxHxW
+# 	'''
+# 	if debug:
+# 		print('debug mode is on during preprocessing. Please turn off after debuging')
+# 		assert islist(image_datalist), 'input is not a list of image'
+# 		assert all(isimage(image_data, debug=debug) for image_data in image_datalist), 'input is not a list of image'
+# 		shape_list = [image_data.shape for image_data in image_datalist]
+# 		assert CHECK_EQ_LIST_SELF(shape_list), 'image shape is not equal inside one batch'
 
-	data_warmup = image_datalist[0]
-	if iscolorimage(data_warmup, debug=debug):
-		color = True
-	elif isgrayimage(data_warmup, debug=debug):
-		color = False
-		if data_warmup.ndim == 2:
-			image_datalist = [np.reshape(image_data, image_data.shape + (1, )) for image_data in image_datalist]
-	else:
-		assert False, 'only color or gray image is supported'
+# 	data_warmup = image_datalist[0]
+# 	if iscolorimage(data_warmup, debug=debug):
+# 		color = True
+# 	elif isgrayimage(data_warmup, debug=debug):
+# 		color = False
+# 		if data_warmup.ndim == 2:
+# 			image_datalist = [np.reshape(image_data, image_data.shape + (1, )) for image_data in image_datalist]
+# 	else:
+# 		assert False, 'only color or gray image is supported'
 
-	if isuintimage(data_warmup, debug=debug):
-		uint = True
-	elif isfloatimage(data_warmup, debug=debug):
-		uint = False
-	else:
-		assert False, 'only uint8 or float image is supported'		
+# 	if isuintimage(data_warmup, debug=debug):
+# 		uint = True
+# 	elif isfloatimage(data_warmup, debug=debug):
+# 		uint = False
+# 	else:
+# 		assert False, 'only uint8 or float image is supported'		
 
-	if debug:
-		if color:
-			assert all(iscolorimage(image_data, debug=debug) for image_data in image_datalist), 'input should be all color image format'	
-		else:
-			assert all(isgrayimage(image_data, debug=debug) and image_data.ndim == 3 and image_data.shape[-1] == 1 for image_data in image_datalist), 'input should be all grayscale image format'	
-		if uint:
-			assert all(isuintimage(image_data, debug=debug) for image_data in image_datalist), 'input should be all color image format'	
-		else:
-			assert all(isfloatimage(image_data, debug=debug) for image_data in image_datalist), 'input should be all grayscale image format'	
+# 	if debug:
+# 		if color:
+# 			assert all(iscolorimage(image_data, debug=debug) for image_data in image_datalist), 'input should be all color image format'	
+# 		else:
+# 			assert all(isgrayimage(image_data, debug=debug) and image_data.ndim == 3 and image_data.shape[-1] == 1 for image_data in image_datalist), 'input should be all grayscale image format'	
+# 		if uint:
+# 			assert all(isuintimage(image_data, debug=debug) for image_data in image_datalist), 'input should be all color image format'	
+# 		else:
+# 			assert all(isfloatimage(image_data, debug=debug) for image_data in image_datalist), 'input should be all grayscale image format'	
 
-	batch_size = len(image_datalist)
-	caffe_input_data = np.zeros((batch_size, ) + image_datalist[0].shape, dtype=data_warmup.dtype)
+# 	batch_size = len(image_datalist)
+# 	caffe_input_data = np.zeros((batch_size, ) + image_datalist[0].shape, dtype=data_warmup.dtype)
 
-	# fill one minibatch data
-	index = 0
-	for image_data in image_datalist:
-		caffe_input_data[index, :, :, :] = image_data
-		index += 1
+# 	# fill one minibatch data
+# 	index = 0
+# 	for image_data in image_datalist:
+# 		caffe_input_data[index, :, :, :] = image_data
+# 		index += 1
 		
-	if color:
-		caffe_input_data = caffe_input_data[:, :, :, [2, 1, 0]]                 # from rgb to bgr, currently [batch, height, weight, channels]
+# 	if color and is_cvimage:
+# 		caffe_input_data = caffe_input_data[:, :, :, [2, 1, 0]]                 # from rgb to bgr, currently [batch, height, weight, channels]
 	
-	if debug:
-		if vis:																# visualize swapped channel
-			print('visualization in debug mode is on during preprocessing. Please turn off after confirmation')
-			for index in xrange(caffe_input_data.shape[0]):
-				image_tmp_swapped = caffe_input_data[index]
-				print('\n\nPlease make sure the image is not RGB after swapping channel')
-				visualize_image(image_tmp_swapped, debug=debug)
-		assert caffe_input_data.shape[-1] == 3 or caffe_input_data.shape[-1] == 1, 'channel is not correct'
-	caffe_input_data = np.transpose(caffe_input_data, (0, 3, 1, 2))         # permute to [batch, channel, height, weight]
+# 	if debug:
+# 		if vis:																# visualize swapped channel
+# 			print('visualization in debug mode is on during preprocessing. Please turn off after confirmation')
+# 			for index in xrange(caffe_input_data.shape[0]):
+# 				image_tmp_swapped = caffe_input_data[index]
+# 				print('\n\nPlease make sure the image is not RGB after swapping channel')
+# 				visualize_image(image_tmp_swapped, debug=debug)
+# 		assert caffe_input_data.shape[-1] == 3 or caffe_input_data.shape[-1] == 1, 'channel is not correct'
+# 	caffe_input_data = np.transpose(caffe_input_data, (0, 3, 1, 2))         # permute to [batch, channel, height, weight]
 	
-	if debug:
-		assert caffe_input_data.shape[1] == 3 or caffe_input_data.shape[1] == 1, 'channel is not correct'
-	return caffe_input_data
+# 	if debug:
+# 		assert caffe_input_data.shape[1] == 3 or caffe_input_data.shape[1] == 1, 'channel is not correct'
+# 	return caffe_input_data
 
 def unpreprocess_image_caffe(image_datablob, pixel_mean=None, swap_channel=True, debug=True):
 	'''

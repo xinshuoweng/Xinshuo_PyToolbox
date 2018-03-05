@@ -353,6 +353,7 @@ def bbox_enlarge(bbox, ratio=0.2, width_ratio=None, height_ratio=None, min_lengt
 
     return bbox
 
+# done
 def pts_conversion_bbox(pts_array, bbox, debug=True):
     '''
     convert pts in the original image to pts in the cropped image
@@ -366,11 +367,13 @@ def pts_conversion_bbox(pts_array, bbox, debug=True):
         assert is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array), 'the input points should have shape: 2 or 3 x num_pts vs %d x %s' % (pts_array.shape[0], pts_array.shape[1])
         assert bboxcheck(bbox), 'the input bounding box is not correct'
 
-    pts_array[0, :] = pts_array[0, :] - bbox[0, 0]
-    pts_array[1, :] = pts_array[1, :] - bbox[0, 1]
+    pts_out = pts_array.copy()
+    pts_out[0, :] = pts_array[0, :] - bbox[0, 0]
+    pts_out[1, :] = pts_array[1, :] - bbox[0, 1]
 
-    return pts_array
+    return pts_out
 
+# done
 def pts_conversion_back_bbox(pts_array, bbox, debug=True):
     '''
     convert pts in the cropped image to the pts in the original image 
@@ -383,12 +386,14 @@ def pts_conversion_back_bbox(pts_array, bbox, debug=True):
     if debug:
         assert is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array), 'the input points should have shape: 2 or 3 x num_pts vs %d x %s' % (pts_array.shape[0], pts_array.shape[1])
         assert bboxcheck(bbox), 'the input bounding box is not correct'
+    
+    pts_out = pts_array.copy()
+    pts_out[0, :] = pts_array[0, :] + bbox[0, 0]
+    pts_out[1, :] = pts_array[1, :] + bbox[0, 1]
 
-    pts_array[0, :] = pts_array[0, :] + bbox[0, 0]
-    pts_array[1, :] = pts_array[1, :] + bbox[0, 1]
+    return pts_out
 
-    return pts_array
-
+# done
 def get_centered_bbox(pts_array, width, height, debug=True):
     '''
     given a set of points, return a set of bbox which are centered at the points

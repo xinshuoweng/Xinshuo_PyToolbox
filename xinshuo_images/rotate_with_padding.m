@@ -10,7 +10,7 @@
 % the bigger the scale is, more content will be removed. Generally scale
 % range is [0, 10]
 function im = rotate_with_padding(im, angle_degree, padding, background, edge_eliminate, edge_scale, debug_mode)
-    im = isImageorPath(im);
+    im = check_imageorPath(im);
     if ~exist('debug_mode', 'var')
     	debug_mode = true;
     end
@@ -46,7 +46,7 @@ function im = rotate_with_padding(im, angle_degree, padding, background, edge_el
 			assert(exist('background', 'var') == 1, 'The background must be provided if one want to add background as padding.');
 		end
 		
-        template_padding = im2double(isImageorPath(background));
+        template_padding = im2double(check_imageorPath(background));
         shape = size(im);
         shape = shape(1:2);
         template_padding = imresize(template_padding, shape);	% resize the background to the same scale
@@ -62,4 +62,3 @@ function im = rotate_with_padding(im, angle_degree, padding, background, edge_el
 	% resize the image as output
     im = imresize(im, original_size(1:2));	
 end
-

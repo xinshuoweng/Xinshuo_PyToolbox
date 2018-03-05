@@ -37,6 +37,8 @@ def generate_mean_image(images_dir, save_path, debug=True, vis=False):
 	mean_im = np.mean(image_blob, axis=2)
 	visualize_image(mean_im, debug=debug, vis=vis, save=True, save_path=save_path)
 
+############################################# image conversion #################################
+
 def pil2cv_colorimage(pil_image, debug=True, vis=False):
 	'''
 	this function converts a PIL image to a cv2 image, which has RGB and BGR format respectively
@@ -59,29 +61,53 @@ def chw2hwc_npimage(np_image, debug=True):
 
 	return np.transpose(np_image, (1, 2, 0)) 
 
-def	unnormalize_npimage(np_image, debug=True):
+# done
+def	unnormalize_npimage(np_image, img_type='uint8', debug=True):
 	'''
-	un-normalize a numpy image and scale it to [0, 255], uint8
+	un-normalize a numpy image and scale it
+		for uint8, scaled to [0, 255]
 	'''
 	if debug:
 		assert isnpimage_dimension(np_image), 'the input numpy image is not correct: {}'.format(np_image.shape)
+		assert img_type in {'uint8'}, 'the image does not contain a good type'
 
-	min_val = np.min(np_image)
-	max_val = np.max(np_image)
+	unnormalized_img = np_image.copy()
+	min_val = np.min(unnormalized_img)
+	max_val = np.max(unnormalized_img)
 	if math.isnan(min_val) or math.isnan(max_val):			# with nan
 		assert False, 'the input image has nan'
 	elif min_val == max_val:								# all same
-		np_image.fill(0)
+		unnormalized_img.fill(0)
 	else:													# normal case
-		np_image = np_image - min_val
-		np_image = np_image / (max_val - min_val)
-		np_image = np_image * 255.
+		unnormalized_img = unnormalized_img - min_val
+		unnormalized_img = unnormalized_img / (max_val - min_val)
+		unnormalized_img = unnormalized_img * 255.
 		if debug:
-			assert np.min(np_image) == 0 and np.max(np_image) == 255, 'the value range is not right [%f, %f]' % (min_val, max_val)
+			assert np.min(unnormalized_img) == 0 and np.max(unnormalized_img) == 255, 'the value range is not right [%f, %f]' % (min_val, max_val)
 
-	np_image = np_image.astype('uint8')
+	unnormalized_img = unnormalized_img.astype(img_type)
+	return unnormalized_img
 
-	return np_image
+# done
+def gray2rgb(np_image, with_color=True, cmap='jet', debug=True):
+	'''
+	convert a grayscale image (1-channel) to a rgb image
+		with_color:	add colormap
+	'''
+	if debug:
+		assert isgrayimage(np_image), 'the input numpy image is not correct: {}'.format(np_image.shape)
+
+	if with_color:
+		if cmap == 'jet':
+			rgb_image = cv2.applyColorMap(np_image, cv2.COLORMAP_JET)
+		else:
+			assert False, 'cmap %s is not supported' % cmap
+	else:
+		rgb_image = cv2.cvtColor(np_image, cv2.COLOR_GRAY2RGB)
+
+	return rgb_image
+
+############################################## miscellaneous
 
 def concatenate_grid(image_list, im_size=[1600, 2560], grid_size=None, edge_factor=0.99, debug=True):
 	'''
@@ -160,8 +186,10 @@ def pad_around(img, pad_rect, pad_value):
     padded[pad_top: new_height-pad_bottom, pad_left: new_width-pad_right, :] = img;
     return padded
 
+
+# TODO
 def crop_center(img1, rect, pad_value):
-# rect is XYWH
+	# rect is XYWH, only uint8 is supported
 
     if not pad_value:
         pad_value = 128
@@ -217,6 +245,7 @@ def crop_center(img1, rect, pad_value):
             tmp = np.ones((pad_bottom + cropped.shape[0], cropped.shape[1], img1.shape[2])) * pad_value
             tmp[:cropped.shape[0] , :, :] = cropped
             cropped = tmp
+    cropped = cropped.astype('uint8')
 
     # TODO: with padding
     [im_height, im_width, im_channel] = img1.shape
@@ -243,7 +272,7 @@ def imresize(img, portion, interp='bicubic', debug=True):
 	return img_
 
 
-
+# TODO
 def find_peaks(heatmap, thre):
     #filter = fspecial('gaussian', [3 3], 2)
     #map_smooth = conv2(map, filter, 'same')
@@ -289,3 +318,19 @@ def rotate_bound(image, angle):
     else:
         return np.rot90(image)
         # rotate counter-clockwise
+
+
+# done
+def draw_mask(np_image, np_image_mask, alpha=0.3, debug=True):
+	'''
+	draw a mask on top of an image with certain transparency
+	'''
+	if debug:
+		assert isnpimage_dimension(np_image), 'the input image is not correct: {}'.format(np_image.shape)
+		assert isnpimage_dimension(np_image_mask), 'the input mask image is not correct: {}'.format(np_image_mask.shape)
+
+	pil_image = Image.fromarray(np_image)
+	pil_image_mask = Image.fromarray(np_image_mask)
+	pil_image_out = Image.blend(pil_image, pil_image_mask, alpha=alpha)
+
+	return pil_image_out

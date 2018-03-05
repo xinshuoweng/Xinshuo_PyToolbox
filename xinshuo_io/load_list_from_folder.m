@@ -3,7 +3,7 @@
 
 % this script return a cell which contains a set of image path under folder recursively
 % note that the list returned in this function is ordered
-function [full_image_list, num_image] = load_list_from_folder(folder_path, ext_filter, depth, debug_mode, save_fullpath)
+function [full_image_list, num_image] = load_list_from_folder(folder_path, save_path, ext_filter, depth, debug_mode)
     if nargin < 3
         depth = 1;
     end
@@ -37,9 +37,9 @@ function [full_image_list, num_image] = load_list_from_folder(folder_path, ext_f
     num_image = length(full_image_list);
     
     % optional for saving
-    if exist('save_fullpath', 'var')
-    	mkdir_if_missing(fileparts(save_fullpath));
-    	file = fopen(save_fullpath, 'w');
+    if exist('save_path', 'var') && ~isempty(save_path)
+    	mkdir_if_missing(fileparts(save_path));
+    	file = fopen(save_path, 'w');
     	assert(file ~= -1, 'file is saved unsuccessfully while obtaining image list');
     	for i = 1:num_image
         	fprintf(file, [full_image_list{i}, '\n']);

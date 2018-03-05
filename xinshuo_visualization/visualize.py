@@ -1,7 +1,7 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
 
-import time, shutil, colorsys
+import time, shutil, colorsys, cv2
 import matplotlib as mpl
 # mpl.use('Agg')
 import matplotlib.pyplot as plt
@@ -30,7 +30,7 @@ marker_set = ['o', 'v', '^', '<', '>', '1', '2', '3', '4', '8', 's', 'p', '*', '
 hatch_set = [None, 'o', '/', '\\', '|', '-', '+', '*', 'x', 'O', '.']
 linestyle_set = ['-', '--', '-.', ':', None, ' ', 'solid', 'dashed']
 
-def visualize_image(image_path, vis=True, save_path=None, debug=True, closefig=True):
+def visualize_image(image_path, is_cvimage=False, vis=False, save_path=None, debug=False, closefig=True):
     '''
     visualize various images
 
@@ -84,6 +84,10 @@ def visualize_image(image_path, vis=True, save_path=None, debug=True, closefig=T
     
     # display image
     if iscolorimage(image, debug=debug):
+        if is_cvimage:
+            b,g,r = cv2.split(image)       # get b,g,r
+            image = cv2.merge([r,g,b])     # switch it to rgb
+
         if debug:
             print 'visualizing color image'
         ax.imshow(image, interpolation='nearest')
@@ -280,7 +284,7 @@ def visualize_pts_array(pts_array, covariance=False, color_index=0, fig=None, ax
 
     return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig, transparent=False)
 
-def visualize_image_with_pts(image_path, pts, pts_size=20, label=False, label_list=None, label_size=2, color_index=0, vis=False, save_path=None, debug=True, closefig=True):
+def visualize_image_with_pts(image_path, pts, pts_size=20, label=False, label_list=None, label_size=2, color_index=0, is_cvimage=False, vis=False, save_path=None, debug=True, closefig=True):
     '''
     visualize image and plot keypoints on top of it
 
@@ -293,7 +297,7 @@ def visualize_image_with_pts(image_path, pts, pts_size=20, label=False, label_li
         label_list:     label string for all points
         color_index:    a scalar or a list of color indexes
     '''
-    fig, ax = visualize_image(image_path, vis=False, debug=debug, closefig=False)
+    fig, ax = visualize_image(image_path, is_cvimage=is_cvimage, vis=False, debug=False, closefig=False)
 
     if label and (label_list is None):
         if not isdict(pts):
@@ -450,7 +454,7 @@ def visualize_lines(lines_array, color_index=0, line_width=3, fig=None, ax=None,
 
     return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
 
-def visualize_pts_line(pts_array, line_index_list, method=2, threshold=None, fig=None, ax=None, vis=False, save_path=None, closefig=True, debug=True, seed=0, alpha=0.5):
+def visualize_pts_line(pts_array, line_index_list, method=2, threshold=None, pts_size=20, line_size=10, line_color_index=5, fig=None, ax=None, vis=False, save_path=None, closefig=True, debug=True, seed=0, alpha=0.5):
     '''
     given a list of index, and a point array, to plot a set of points with line on it
 
@@ -487,51 +491,51 @@ def visualize_pts_line(pts_array, line_index_list, method=2, threshold=None, fig
             # print(colorsys.hsv_to_rgb(h_random[pts_index], 1, 1))
             color_set_random[:, pts_index] = colorsys.hsv_to_rgb(h_random[pts_index], 1, 1) 
 
-    line_color = 'k'
+    line_color = color_set[line_color_index]
     pts_line = pts_array[:, line_index_list]
 
     if method == 1:    
         valid_pts_list = np.where(pts_line[2, :] > threshold)[0].tolist()
         pts_line_tmp = pts_line[:, valid_pts_list]
-        ax.plot(pts_line_tmp[0, :], pts_line_tmp[1, :], color=line_color, alpha=alpha)      # plot all lines
+        ax.plot(pts_line_tmp[0, :], pts_line_tmp[1, :], lw=line_size, color=line_color, alpha=alpha)      # plot all lines
 
         # plot all points
         for pts_index in valid_pts_list:
             pts_index_original = line_index_list[pts_index]
             # ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set_big[pts_index_original % len(color_set_big)], alpha=alpha)
-            ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set_random[:, pts_index], alpha=alpha)
+            ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], marker='o', ms=pts_size, lw=line_size, color=color_set_random[:, pts_index], alpha=alpha)
     else:
         not_valid_pts_list = np.where(pts_line[2, :] < threshold)[0].tolist()
         if len(not_valid_pts_list) == 0:            # all valid
-            ax.plot(pts_line[0, :], pts_line[1, :], color=line_color, alpha=alpha)
+            ax.plot(pts_line[0, :], pts_line[1, :], lw=line_size, color=line_color, alpha=alpha)
 
             # plot points
             for pts_index in line_index_list:
                 # ax.plot(pts_array[0, pts_index], pts_array[1, pts_index], 'o', color=color_set_big[pts_index % len(color_set_big)], alpha=alpha)
-                ax.plot(pts_array[0, pts_index], pts_array[1, pts_index], 'o', color=color_set_random[:, pts_index], alpha=alpha)
+                ax.plot(pts_array[0, pts_index], pts_array[1, pts_index], marker='o', ms=pts_size, lw=line_size, color=color_set_random[:, pts_index], alpha=alpha)
         else:
             prev_index = 0
             for not_valid_index in not_valid_pts_list:
                 plot_list = range(prev_index, not_valid_index)
                 pts_line_tmp = pts_line[:, plot_list]
-                ax.plot(pts_line_tmp[0, :], pts_line_tmp[1, :], color=line_color, alpha=alpha)
+                ax.plot(pts_line_tmp[0, :], pts_line_tmp[1, :], lw=line_size, color=line_color, alpha=alpha)
                 
                 # plot points
                 for pts_index in plot_list:
                     pts_index_original = line_index_list[pts_index]
-                    ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set_random[:, pts_index_original], alpha=alpha) 
+                    ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], marker='o', ms=pts_size, lw=line_size, color=color_set_random[:, pts_index_original], alpha=alpha) 
                     # ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set_big[pts_index_original % len(color_set_big)], alpha=alpha) 
 
                 prev_index = not_valid_index + 1
 
             pts_line_tmp = pts_line[:, prev_index:]
-            ax.plot(pts_line_tmp[0, :], pts_line_tmp[1, :], color=line_color, alpha=alpha)      # plot last line
+            ax.plot(pts_line_tmp[0, :], pts_line_tmp[1, :], lw=line_size, color=line_color, alpha=alpha)      # plot last line
 
             # plot last points
             for pts_index in range(prev_index, pts_line.shape[1]):
                 pts_index_original = line_index_list[pts_index]
                 # ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set_big[pts_index_original % len(color_set_big)], alpha=alpha) 
-                ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set_random[:, pts_index_original], alpha=alpha) 
+                ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], marker='o', ms=pts_size, lw=line_size, color=color_set_random[:, pts_index_original], alpha=alpha) 
 
     return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
 

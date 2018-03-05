@@ -91,4 +91,3 @@ mat=round(mat);
 
 %Vectorised way of making the image matrix 
 im=reshape(cmap(mat(:),:),[size(mat),3]);
-
