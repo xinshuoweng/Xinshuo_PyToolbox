@@ -327,6 +327,7 @@ def anno_writer(pts_array, pts_savepath, num_pts=68, anno_version=1, debug=True)
         file.write('}')
         file.close()
 
+# done
 def anno_parser(anno_path, num_pts=None, anno_version=None, debug=True):
     '''
     parse the annotation for LS3D-W dataset, which has a fixed format for .pts file
