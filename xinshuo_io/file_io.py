@@ -393,11 +393,12 @@ def load_image(src_path, resize_factor=1.0, rotate=0, mode='numpy', debug=True):
     with open(src_path, 'rb') as f:
         with Image.open(f) as img:
             img = img.convert('RGB')
+
             if rotate != 0:
                 img = img.rotate(rotate, expand=True)
             width, height = img.size
             img = img.resize(size=(int(width*resize_factor), int(height*resize_factor)), resample=Image.BILINEAR)
-            
+
             if mode == 'numpy':
                 return np.array(img)
             else:

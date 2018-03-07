@@ -128,7 +128,7 @@ def iscolorimage(image_test, debug=False):
 
     if debug:
         print 'is dimension correct when testing color image? ', 
-    shape_check = (image_test.ndim == 3 and image_test.shape[2] == 3)
+    shape_check = (image_test.ndim == 3 and (image_test.shape[2] == 3 or image_test.shape[2] == 4))     # rgb or rgba
     if shape_check:
         if debug:
             print 'Yes'

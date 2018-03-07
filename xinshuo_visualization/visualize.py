@@ -30,7 +30,7 @@ marker_set = ['o', 'v', '^', '<', '>', '1', '2', '3', '4', '8', 's', 'p', '*', '
 hatch_set = [None, 'o', '/', '\\', '|', '-', '+', '*', 'x', 'O', '.']
 linestyle_set = ['-', '--', '-.', ':', None, ' ', 'solid', 'dashed']
 
-def visualize_image(image_path, is_cvimage=False, vis=False, save_path=None, debug=False, closefig=True):
+def visualize_image(image_path, is_cvimage=False, vis=False, save_path=None, debug=False, warning=False, closefig=True):
     '''
     visualize various images
 
@@ -82,36 +82,37 @@ def visualize_image(image_path, is_cvimage=False, vis=False, save_path=None, deb
     ax = fig.add_axes([0, 0, 1, 1])
     ax.axis('off')
     
+    # debug=True
     # display image
     if iscolorimage(image, debug=debug):
         if is_cvimage:
             b,g,r = cv2.split(image)       # get b,g,r
             image = cv2.merge([r,g,b])     # switch it to rgb
 
-        if debug:
+        if warning:
             print 'visualizing color image'
         ax.imshow(image, interpolation='nearest')
     elif isgrayimage(image, debug=debug):
-        if debug:
+        if warning:
             print 'visualizing grayscale image'
         if image.ndim == 3 and image.shape[-1] == 1:
             image = np.reshape(image, image.shape[:-1])
 
         if isfloatimage(image, debug=debug) and all(item == 1.0 for item in image.flatten().tolist()):
-            if debug:
+            if warning:
                 print('all elements in image are 1. For visualizing, we subtract the top left with an epsilon value')
             image[0, 0] -= 0.00001
         elif isuintimage(image, debug=debug) and all(item == 255 for item in image.flatten().tolist()):
-            if debug:
+            if warning:
                 print('all elements in image are 255. For visualizing, we subtract the top left with an epsilon value')
             image[0, 0] -= 1
         ax.imshow(image, interpolation='nearest', cmap='gray')
     else:
         print 'unknown image type'
-        ax.imshow(image, interpolation='nearest')
-        # assert False, 'image is not correct'
-    ax.set(xlim=[0, width], ylim=[height, 0], aspect=1)
+        # ax.imshow(image, interpolation='nearest')
+        assert False, 'image is not correct'
 
+    ax.set(xlim=[0, width], ylim=[height, 0], aspect=1)
     return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
 
 def visualize_pts_covariance(pts_array, conf=None, std=None, fig=None, ax=None, debug=True, **kwargs):
@@ -198,7 +199,7 @@ def visualize_covariance_ellipse(covariance, center, conf=None, std=None, fig=No
     ax.add_artist(ellipse)
     return ellipse
 
-def visualize_pts_array(pts_array, covariance=False, color_index=0, fig=None, ax=None, pts_size=20, label=False, label_list=None, label_size=2, xlim=None, ylim=None, occlusion=True, vis_threshold=-10000, save_path=None, vis=False, debug=True, closefig=True):
+def visualize_pts_array(pts_array, covariance=False, color_index=0, fig=None, ax=None, pts_size=20, label=False, label_list=None, label_size=2, xlim=None, ylim=None, occlusion=True, vis_threshold=-10000, save_path=None, vis=False, debug=True, warning=False, closefig=True):
     '''
     plot keypoints
 
@@ -230,11 +231,11 @@ def visualize_pts_array(pts_array, covariance=False, color_index=0, fig=None, ax
         num_float_elements = np.where(np.logical_and(pts_array[2, :] > 0, pts_array[2, :] < 1))[0].tolist()
         if len(num_float_elements) > 0:
             type_3row = 'conf'
-            if debug:
+            if warning:
                 print('third row is confidence')
         else:
             type_3row = 'occu'
-            if debug:
+            if warning:
                 print('third row is occlusion')
 
         if type_3row == 'occu':
