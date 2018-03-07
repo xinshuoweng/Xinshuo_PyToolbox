@@ -121,6 +121,18 @@ def remove_str_from_str(src_str, substr, debug=True):
 
 	return removed, valid, pre_part, pos_part
 
+def str2num(string, debug=True):
+	'''
+	convert a string to float or int if possible
+	'''
+	if debug:
+		assert isstring(string), 'the source string is not a string'
+
+	try:
+		return int(string)
+	except ValueError:
+		return float(string)
+
 ######################################################### time related #########################################################
 def convert_secs2time(seconds):
     '''

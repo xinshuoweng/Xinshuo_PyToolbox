@@ -12,7 +12,7 @@ from scipy.misc import imsave
 from PIL import Image
 
 from xinshuo_python import *
-from xinshuo_miscellaneous import string2ext_filter, remove_empty_item_from_list
+from xinshuo_miscellaneous import string2ext_filter, remove_empty_item_from_list, str2num
 
 import httplib2
 # from apiclient import discovery
@@ -339,7 +339,7 @@ def anno_parser(anno_path, num_pts=None, anno_version=None, debug=True):
         assert data[0].find('version: ') == 0, 'version is not correct'
         assert data[1].find('n_points: ') == 0, 'number of points in second line is not correct'
         assert data[2] == '{' and data[-1] == '}', 'starting and end symbol is not correct'
-    version = int(data[0][len('version: '):])
+    version = str2num(data[0][len('version: '):])
     n_points = int(data[1][len('n_points: '):])
 
     if debug:

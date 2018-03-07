@@ -30,6 +30,7 @@ marker_set = ['o', 'v', '^', '<', '>', '1', '2', '3', '4', '8', 's', 'p', '*', '
 hatch_set = [None, 'o', '/', '\\', '|', '-', '+', '*', 'x', 'O', '.']
 linestyle_set = ['-', '--', '-.', ':', None, ' ', 'solid', 'dashed']
 
+# done
 def visualize_image(image_path, is_cvimage=False, vis=False, save_path=None, debug=False, warning=False, closefig=True):
     '''
     visualize various images
