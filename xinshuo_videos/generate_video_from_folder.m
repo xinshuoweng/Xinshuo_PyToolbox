@@ -49,6 +49,5 @@ function [num_images] = generate_video_from_folder(img_src, save_path, framerate
 	close(video);
 end
 
-
 % ffmpeg -framerate 30 -start_number 0 -i image%04d.jpg -c:v libx264 -profile:V high -crf 18 -pix_fmt yuv420p concatenated.mp4
 % ffmpeg -i concatenated.mp4 folder/frame%06d.png

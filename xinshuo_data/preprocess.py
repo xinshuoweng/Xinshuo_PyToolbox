@@ -3,6 +3,7 @@
 
 # this file contains function to preprocess data
 import numpy as np
+from PIL import Image
 from numpy.testing import assert_almost_equal
 
 from xinshuo_python import isnparray, iscolorimage, istuple, islist, CHECK_EQ_LIST_SELF, isimage, isgrayimage, isuintimage, isfloatimage
@@ -159,27 +160,49 @@ def preprocess_image_caffe(img, mean_value, debug_mode=True):
 # 		assert caffe_input_data.shape[1] == 3 or caffe_input_data.shape[1] == 1, 'channel is not correct'
 # 	return caffe_input_data
 
-def unpreprocess_image_caffe(image_datablob, pixel_mean=None, swap_channel=True, debug=True):
+def unpreprocess_image_caffe(image_datablob, pixel_mean=None, pixel_std=None, bgr2rgb=True, chw2hwc=True, mode='np', debug=True):
 	'''
-	this function unpreprocesses image for caffe only,
-	including transfer from bgr to rgb
-	from NxCxHxW to a list of HxWxC 
+	this function unpreprocesses image,
+	including transfer from bgr to rgb, chw to hwc, times std across channels and adds mean across channels
+
+		inputs: NxCxHxW numpy array
+		outputs: a list of HxWxC 
 	'''
 	if debug:
-		print('debug mode is on during unpreprocessing. Please turn off after debuging')
-		assert isnparray(image_datablob) and image_datablob.ndim == 4, 'input is not correct'	
-		assert image_datablob.shape[1] == 1 or image_datablob.shape[1] == 3, 'this is not an blob of image, channel is not 1 or 3'
+		# print('debug mode is on during unpreprocessing. Please turn off after debuging')
+		assert isnparray(image_datablob), 'the input image blob is not a numpy'
+		assert mode in ['pil', 'np'], 'the mode is not correct'
+	image_data = image_datablob.copy()
+
+	if image_data.ndim == 3:
+		image_data = np.expand_dims(image_data, axis=0)
+
+	if debug:
+		assert image_data.ndim == 4, 'input is not correct'	
+		assert image_data.shape[1] == 1 or image_data.shape[1] == 3, 'this is not an blob of image, channel is not 1 or 3'
+	
+	if pixel_std is not None:
+		assert pixel_std.shape == (1, 1, 3) or pixel_std.shape == (3, ), 'pixel std is not correct'
+		pixel_std_reshape = np.reshape(pixel_std, (1, 3, 1, 1))
+		image_data *= pixel_std_reshape
 
 	if pixel_mean is not None:
-		assert pixel_mean.shape == (1, 1, 3) or pixel_mean.shape == (1, ), 'pixel mean is not correct'
+		assert pixel_mean.shape == (1, 1, 3) or pixel_mean.shape == (3, ), 'pixel mean is not correct'
 		pixel_mean_reshape = np.reshape(pixel_mean, (1, 3, 1, 1))
-		image_datablob += pixel_mean_reshape
+		image_data += pixel_mean_reshape
 
-	image_datablob = np.transpose(image_datablob, (0, 2, 3, 1))         # permute to [batch, height, weight, channel]	
+	if chw2hwc:
+		image_data = np.transpose(image_data, (0, 2, 3, 1))         # permute to [batch, height, weight, channel]	
 
-	if image_datablob.shape[-1] == 3 and swap_channel:	# channel dimension
-		image_datablob = image_datablob[:, :, :, [2, 1, 0]]             # from bgr to rgb for color image
+	if image_data.shape[-1] == 3 and bgr2rgb:	# channel dimension
+		image_data = image_data[:, :, :, [2, 1, 0]]             # from bgr to rgb for color image
 	image_data_list = list()
-	for i in xrange(image_datablob.shape[0]):
-		image_data_list.append(image_datablob[i, :, :, :])
+	for i in xrange(image_data.shape[0]):
+		image_tmp = image_data[i, :, :, :]
+		if mode == 'pil':
+			image_data_list.append(Image.fromarray((image_tmp * 255).astype('uint8')))
+		elif mode == 'np':
+			image_data_list.append(image_tmp)
+		else:
+			assert False, 'the mode %s is not supported' % mode
 	return image_data_list

@@ -286,7 +286,7 @@ def visualize_pts_array(pts_array, covariance=False, color_index=0, fig=None, ax
 
     return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig, transparent=False)
 
-def visualize_image_with_pts(image_path, pts, pts_size=20, label=False, label_list=None, label_size=2, color_index=0, is_cvimage=False, vis=False, save_path=None, debug=True, closefig=True):
+def visualize_image_with_pts(image_path, pts, pts_size=20, label=False, label_list=None, label_size=20, color_index=0, is_cvimage=False, vis=False, save_path=None, debug=True, closefig=True):
     '''
     visualize image and plot keypoints on top of it
 
