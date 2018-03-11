@@ -2,12 +2,9 @@
 # email: xinshuo.weng@gmail.com
 
 # this file define a set of functions which converting data type
-import os
 import numpy as np
-import math
+import math, copy, os, struct, functools
 from itertools import islice
-import struct
-import functools
 
 from xinshuo_python import *
 
@@ -206,13 +203,14 @@ def merge_listoflist(listoflist, debug=True):
 
 	return merged
 
-def remove_item_from_list(list_to_remove, item, debug=True):
+def remove_item_from_list(list_src, item, debug=True):
 	'''
 	remove a single item from a list
 	'''
 	if debug:
-		assert islist(list_to_remove), 'input list is not a list'
-		
+		assert islist(list_src), 'input list is not a list'
+
+	list_to_remove = copy.copy(list_src)
 	try:
 		list_to_remove.remove(item)
 	except ValueError:
@@ -220,17 +218,37 @@ def remove_item_from_list(list_to_remove, item, debug=True):
 
 	return list_to_remove
 
-def remove_list_from_list(list_all, list_to_remove, debug=True):
+def remove_list_from_list(list_all_src, list_to_remove, debug=True):
 	'''
-	remove a list "list_to_remove" from a list "list_all"
+	remove a list "list_to_remove" from a list "list_all_src" based on value
 	'''
 	if debug:
-		assert islist(list_all), 'input list is not a list'
+		assert islist(list_all_src), 'input list is not a list'
 		assert islist(list_to_remove), 'remove list is not a list'
 		
+	list_all = copy.copy(list_all_src)
 	for item in list_to_remove:
 		try:
 			list_all.remove(item)
+		except ValueError:
+			print('Warning!!!!!! Item to remove is not in the list. Remove operation is not done.')
+
+	return list_all
+
+def remove_list_from_list_index(list_all_src, list_index_to_remove, debug=True):
+	'''
+	remove a list "list_to_remove" from a list "list_all_src" based on value
+	'''
+	if debug:
+		assert islist(list_all_src), 'input list is not a list'
+		assert islist(list_index_to_remove), 'remove list is not a list'
+
+	list_all = copy.copy(list_all_src)
+	list_index_sorted = copy.copy(list_index_to_remove)
+	list_index_sorted.sort(reverse=True)
+	for item_index in list_index_sorted:
+		try:
+			del list_all[item_index]
 		except ValueError:
 			print('Warning!!!!!! Item to remove is not in the list. Remove operation is not done.')
 

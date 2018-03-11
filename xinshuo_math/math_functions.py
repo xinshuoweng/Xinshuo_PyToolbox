@@ -109,7 +109,8 @@ def pts_rotate2D(pts_array, rotation_angle, im_height, im_width, debug=True):
 
     return np.dot(rotation_matrix, pts_rotate)         # 2 x num_pts
 
-def pts_euclidean(pts1, pts2, debug=True):
+# done
+def pts_euclidean(pts1_src, pts2_src, debug=True):
     '''
     calculate the euclidean distance of two sets of points
 
@@ -120,13 +121,15 @@ def pts_euclidean(pts1, pts2, debug=True):
         average euclidean distance
     '''
     if debug:
-        assert is2dptsarray(pts1) and is2dptsarray(pts2), 'the input points are not correct'
-        assert pts1.shape == pts2.shape, 'shape of two points is not equal'
+        assert pts1_src.shape == pts2_src.shape, 'shape of two points is not equal'
     
     # if the shape of input points is (2, ), reshape them to (2, 1)
-    if len(pts1.shape) == 1:
-        pts1 = np.reshape(pts1, (2, 1))
-        pts2 = np.reshape(pts2, (2, 1))
+    if len(pts1_src.shape) == 1:
+        pts1 = np.reshape(pts1_src.copy(), (2, 1))
+        pts2 = np.reshape(pts2_src.copy(), (2, 1))
+
+    if debug:
+        assert is2dptsarray(pts1) and is2dptsarray(pts2), 'the input points are not correct'
 
     eculidean_list = np.zeros((pts1.shape[1], ), dtype='float32')
     # calculate the distance
