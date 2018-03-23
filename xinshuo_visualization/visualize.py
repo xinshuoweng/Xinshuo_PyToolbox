@@ -217,7 +217,7 @@ def visualize_pts_array(pts_array, covariance=False, color_index=0, fig=None, ax
             assert not covariance, 'the covariance is not compatible with plotting different colors during scattering'
         color_tmp = [color_set_big[index_tmp] for index_tmp in color_index]
     else:
-        color_tmp = color_set_big[color_index]
+        color_tmp = color_set_big[color_index % len(color_set_big)]
     num_pts = pts_array.shape[1]
 
     if is2dptsarray(pts_array):    
