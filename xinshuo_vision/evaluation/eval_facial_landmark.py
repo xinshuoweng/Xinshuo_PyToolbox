@@ -202,7 +202,7 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 	table_savedir = os.path.join(save_path, 'metrics')
 	mkdir_if_missing(table_savedir)
 	table_savepath = os.path.join(table_savedir, 'detailed_metrics_overall.txt')
-	_, metrics_all = visualize_ced(normed_mean_error_dict, error_threshold=error_threshold, normalized=normalization_ced, truncated_list=truncated_list, title='2D PCK curve (all %d points)' % num_pts, display_list=display_list, debug=debug, vis=vis, save=save, pck_savepath=pck_savepath, table_savepath=table_savepath)
+	_, metrics_all = visualize_ced(normed_mean_error_dict, error_threshold=error_threshold, normalized=normalization_ced, truncated_list=truncated_list, title='2D PCK curve (all %d points)' % num_pts, display_list=display_list, debug=debug, vis=vis, pck_savepath=pck_savepath, table_savepath=table_savepath)
 	metrics_title = ['Method Name / Point Index']
 	ptswise_mse_table = [[normed_mean_error_pts_specific_dict.keys()[index_tmp]] for index_tmp in xrange(num_methods)]
 	for pts_index in xrange(num_pts):
@@ -220,7 +220,7 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 			normed_mean_error_dict_tmp[method_name] = np.reshape(error_array_per_pts, (num_image_tmp, ))
 		pck_savepath = os.path.join(pck_savedir, 'pck_curve_pts_%d.png' % (pts_index+1))
 		table_savepath = os.path.join(table_savedir, 'detailed_metrics_pts_%d.txt' % (pts_index+1))
-		metrics_dict, _ = visualize_ced(normed_mean_error_dict_tmp, error_threshold=error_threshold, normalized=normalization_ced, truncated_list=truncated_list, display2terminal=False, title='2D PCK curve for point %d' % (pts_index+1), display_list=display_list, debug=debug, vis=vis, save=save, pck_savepath=pck_savepath, table_savepath=table_savepath)
+		metrics_dict, _ = visualize_ced(normed_mean_error_dict_tmp, error_threshold=error_threshold, normalized=normalization_ced, truncated_list=truncated_list, display2terminal=False, title='2D PCK curve for point %d' % (pts_index+1), display_list=display_list, debug=debug, vis=vis, pck_savepath=pck_savepath, table_savepath=table_savepath)
 		for method_index in range(num_methods):
 			method_name = normed_mean_error_pts_specific_dict.keys()[method_index]
 			ptswise_mse_table[method_index].append('%.1f' % metrics_dict[method_name]['MSE'])
@@ -246,7 +246,7 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 	error_vec_save_dir = os.path.join(save_path, 'error_vec')
 	mkdir_if_missing(error_vec_save_dir)
 	savepath_tmp = os.path.join(error_vec_save_dir, 'error_vector_distribution_all.png')
-	visualize_pts(pts_error_vec_dict, title='Point Error Vector Distribution (all %d points)' % num_pts, mse=mse, mse_value=mse_value, display_range=display_range, display_list=display_list, xlim=xlim, ylim=ylim, covariance=covariance, debug=debug, vis=vis, save=save, save_path=savepath_tmp)
+	visualize_pts(pts_error_vec_dict, title='Point Error Vector Distribution (all %d points)' % num_pts, mse=mse, mse_value=mse_value, display_range=display_range, display_list=display_list, xlim=xlim, ylim=ylim, covariance=covariance, debug=debug, vis=vis, save_path=savepath_tmp)
 	for pts_index in xrange(num_pts):
 		pts_error_vec_pts_specific_dict_tmp = dict()
 		for method_name, error_vec_dict in pts_error_vec_pts_specific_dict.items():
@@ -256,14 +256,14 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 			pts_error_vec_pts_specific_dict_tmp[method_name] = np.transpose(error_vec_dict[valid_image_index_per_pts, :, pts_index])		# 2 x num_images
 		savepath_tmp = os.path.join(error_vec_save_dir, 'error_vector_distribution_pts_%d.png' % (pts_index+1))
 		if mse:
-			mse_dict_tmp = visualize_pts(pts_error_vec_pts_specific_dict_tmp, title='Point Error Vector Distribution for Point %d' % (pts_index+1), mse=mse, display_range=display_range, display_list=display_list, xlim=xlim, ylim=ylim, covariance=covariance, debug=debug, vis=vis, save=save, save_path=savepath_tmp)
+			mse_dict_tmp = visualize_pts(pts_error_vec_pts_specific_dict_tmp, title='Point Error Vector Distribution for Point %d' % (pts_index+1), mse=mse, display_range=display_range, display_list=display_list, xlim=xlim, ylim=ylim, covariance=covariance, debug=debug, vis=vis, save_path=savepath_tmp)
 			mse_best = min(mse_dict_tmp.values())
 			mse_single = dict()
 			mse_single['mse'] = mse_best
 			mse_single['num_images'] = len(valid_image_index_per_pts)			# assume number of valid images is equal for all methods
 			mse_dict[pts_index] = mse_single
 		else:
-			visualize_pts(pts_error_vec_pts_specific_dict_tmp, title='Point Error Vector Distribution for Point %d' % (pts_index+1), mse=mse, display_range=display_range, display_list=display_list, xlim=xlim, ylim=ylim, covariance=covariance, debug=debug, vis=vis, save=save, save_path=savepath_tmp)
+			visualize_pts(pts_error_vec_pts_specific_dict_tmp, title='Point Error Vector Distribution for Point %d' % (pts_index+1), mse=mse, display_range=display_range, display_list=display_list, xlim=xlim, ylim=ylim, covariance=covariance, debug=debug, vis=vis, save_path=savepath_tmp)
 
 	# save mse to json file for further use
 	if mse:

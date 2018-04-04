@@ -127,6 +127,9 @@ def pts_euclidean(pts1_src, pts2_src, debug=True):
     if len(pts1_src.shape) == 1:
         pts1 = np.reshape(pts1_src.copy(), (2, 1))
         pts2 = np.reshape(pts2_src.copy(), (2, 1))
+    else:
+        pts1 = pts1_src.copy()
+        pts2 = pts2_src.copy()
 
     if debug:
         assert is2dptsarray(pts1) and is2dptsarray(pts2), 'the input points are not correct'

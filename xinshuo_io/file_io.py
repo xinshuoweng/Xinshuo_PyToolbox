@@ -132,7 +132,7 @@ def load_list_from_folder(folder_path, ext_filter=None, depth=1, recursive=False
         depth: maximum depth of folder to search, when it's None, all levels of folders will be searched
         recursive: 
             False: only return current level
-            True: return all levels till to the depth
+            True: return all levels till to the input depth
     '''
     folder_path = safepath(folder_path)
     if debug:
@@ -281,11 +281,7 @@ def save_2dmatrix_to_file(data, save_path, formatting='%.1f', debug=True):
         assert is_path_exists_or_creatable(save_path), 'save path is not correct'
         mkdir_if_missing(save_path)
         # assert isnparray(data) and len(data.shape) <= 2, 'the data is not correct'
-
-    # if len(data.shape) == 2:
-        # num_elem = data.size
-        # data = np.reshape(data, (1, num_elem))
-    # if 
+        
     np.savetxt(save_path, data, delimiter=' ', fmt=formatting)
 
 def load_2dmatrix_from_file(src_path, delimiter=' ', dtype='float32', debug=True):

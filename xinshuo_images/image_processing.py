@@ -362,7 +362,6 @@ def find_peaks(heatmap, thre):
     map_aug4[2:, 2:] = map_smooth
 
     peakMap = np.multiply(np.multiply(np.multiply((map_aug > map_aug1),(map_aug > map_aug2)),(map_aug > map_aug3)),(map_aug > map_aug4))
-
     peakMap = peakMap[1:-1, 1:-1]
 
     idx_tuple = np.nonzero(peakMap)     # find 1

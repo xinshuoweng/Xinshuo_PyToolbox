@@ -682,9 +682,10 @@ def visualize_pts(pts, title=None, fig=None, ax=None, display_range=False, xlim=
         plt.yticks(np.arange(ylim[0], ylim[1] + interval_y, interval_y))
     plt.grid()
 
-    return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
+    save_vis_close_helper(fig=fig, ax=ax, vis=vis, transparent=False, save_path=save_path, debug=debug, closefig=closefig)
+    return mse_return
 
-def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, truncated_list=None, display2terminal=True, display_list=None, title=None, debug=True, vis=True, save=False, pck_savepath=None, table_savepath=None):
+def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, truncated_list=None, display2terminal=True, display_list=None, title=None, fig=None, ax=None, debug=True, vis=True, pck_savepath=None, table_savepath=None, closefig=True):
     '''
     visualize the cumulative error distribution curve (alse called NME curve or pck curve)
     all parameters are represented by percentage
@@ -815,13 +816,15 @@ def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, trun
 
     plt.grid()
     plt.ylabel('{} Test Images (%)'.format(num_images), fontsize=16)
-    if vis:
-        plt.show()
-    if save:
-        fig.savefig(pck_savepath, dpi=dpi)
-        if display2terminal:
-            print 'save PCK curve to %s' % pck_savepath
-    plt.close(fig)
+
+    save_vis_close_helper(fig=fig, ax=ax, vis=vis, transparent=False, save_path=pck_savepath, debug=debug, closefig=closefig)
+    # if vis:
+        # plt.show()
+    # if save:
+        # fig.savefig(pck_savepath, dpi=dpi)
+        # if display2terminal:
+            # print 'save PCK curve to %s' % pck_savepath
+    # plt.close(fig)
 
     # reorder the table
     order_index_list = [display_list.index(method_name_tmp) for method_name_tmp in normed_mean_error_dict.keys()]
@@ -836,7 +839,7 @@ def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, trun
         print table.table
         
     # save table to file
-    if save:
+    if table_savepath is not None:
         table_file = open(table_savepath, 'w')
         table_file.write(table.table)
         table_file.close()
