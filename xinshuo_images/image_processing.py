@@ -312,7 +312,6 @@ def crop_center(img1, rect, pad_value):
             cropped = tmp
     cropped = cropped.astype('uint8')
 
-    # TODO: with padding
     [im_height, im_width, im_channel] = img1.shape
     
     crop_rect_ori = clip_bboxes_TLWH(crop_rect, im_width, im_height)
