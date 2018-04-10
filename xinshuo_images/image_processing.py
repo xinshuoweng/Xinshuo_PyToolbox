@@ -20,7 +20,7 @@ def safe_image(input_image):
 	else:
 		assert False, 'only pil and numpy images are supported, might be the case the image is float but has range of [0, 255]'
 
-	return np_image
+	return np_image	
 
 ############################################# color transform #################################
 def gray2rgb(input_image, with_color=True, cmap='jet', debug=True):
@@ -89,20 +89,22 @@ def chw2hwc_npimage(np_image, debug=True):
 # done
 def	unnormalize_npimage(input_image, img_type='uint8', debug=True):
 	'''
-	un-normalize a numpy image and scale it
-		for uint8, scaled to [0, 255]
+	un-normalize an image to an uint8 with range of [0, 255]
+	note that: the input might not be an image because the value range might be arbitrary
 	'''
-	np_image = safe_image(input_image)
+	if ispilimage(input_image):
+		np_image = np.array(input_image)
+	elif isnparray(input_image):
+		np_image = input_image.copy()
+	else:
+		assert False, 'only pil image and numpy array are supported'
 
 	if debug:
 		assert isnpimage_dimension(np_image), 'the input numpy image is not correct: {}'.format(np_image.shape)
-		assert isfloatimage(np_image) or isuintimage(np_image), 'the image is neither a uint8 image or a float32 image'
 		assert img_type in {'uint8'}, 'the image does not contain a good type'
 
 	min_val = float(np.min(np_image))
 	max_val = float(np.max(np_image))
-	print(min_val)
-	print(max_val)
 	if math.isnan(min_val) or math.isnan(max_val):			# with nan
 		assert False, 'the input image has nan'
 	elif min_val == max_val:								# all same
@@ -371,7 +373,7 @@ def crop_center(img1, rect, pad_value):
 def imresize(img, portion, interp='bicubic', debug=True):
 	if debug:
 		assert interp == 'bicubic' or interp == 'bilinear', 'the interpolation method is not correct'
-		assert isnpimage_dimension(img), 'the input image is not correct'
+		assert isnparray(img), 'the input image is not correct'
 
 	height, width = img.shape[:2]
 	if interp == 'bicubic':
