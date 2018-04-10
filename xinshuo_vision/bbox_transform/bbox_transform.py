@@ -280,7 +280,7 @@ def bboxcheck(bbox, debug=True):
     return:
         True or False
     '''    
-    return isnparray(bbox) and bbox.shape[1] == 4 and bbox.shape[0] >= 0
+    return (isnparray(bbox) and bbox.shape[1] == 4 and bbox.shape[0] >= 0) or len(bbox) == 4
 
 def bboxcheck_TLBR(bbox, debug=True):
     '''
@@ -367,6 +367,9 @@ def pts_conversion_bbox(pts_array, bbox, debug=True):
         assert is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array), 'the input points should have shape: 2 or 3 x num_pts vs %d x %s' % (pts_array.shape[0], pts_array.shape[1])
         assert bboxcheck(bbox), 'the input bounding box is not correct'
 
+    if len(bbox) == 4:
+        bbox = np.array(bbox).reshape((1, 4))
+
     pts_out = pts_array.copy()
     pts_out[0, :] = pts_array[0, :] - bbox[0, 0]
     pts_out[1, :] = pts_array[1, :] - bbox[0, 1]
@@ -386,6 +389,9 @@ def pts_conversion_back_bbox(pts_array, bbox, debug=True):
     if debug:
         assert is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array), 'the input points should have shape: 2 or 3 x num_pts vs %d x %s' % (pts_array.shape[0], pts_array.shape[1])
         assert bboxcheck(bbox), 'the input bounding box is not correct'
+
+    if len(bbox) == 4:
+        bbox = np.array(bbox).reshape((1, 4))
     
     pts_out = pts_array.copy()
     pts_out[0, :] = pts_array[0, :] + bbox[0, 0]
@@ -421,3 +427,30 @@ def get_centered_bbox(pts_array, width, height, debug=True):
     
     bbox = np.vstack((xmin, ymin, xmax, ymax))
     return np.transpose(bbox)
+
+def get_crop_bbox(rect, width, height, debug=True):
+    '''
+    given a target width and height (and center), obtain the bbox to crop in an image
+    '''
+    if debug:
+        assert len(rect) == 4 or len(rect) == 2, 'the input rect should be length of 2 or 4'
+
+    rect = [int(x) for x in rect]
+    if len(rect) == 4:            # crop around the given center and width and height
+        center_x = rect[0]
+        center_y = rect[1]
+        crop_width = rect[2]
+        crop_height = rect[3]
+    else:                            # crop around the center of the image
+        center_x = math.ceil(width/2)
+        center_y = math.ceil(height/2)   
+        crop_width = rect[0]
+        crop_height = rect[1]
+    
+    # calculate cropped region
+    xmin = int(center_x - math.ceil(crop_width/2) + 1) -1
+    ymin = int(center_y - math.ceil(crop_height/2) + 1) -1
+    xmax = int(xmin + crop_width - 1)
+    ymax = int(ymin + crop_height - 1) 
+
+    return [xmin, ymin, crop_width - 1, crop_height - 1]

@@ -174,7 +174,10 @@ def unpreprocess_image_caffe(image_datablob, pixel_mean=None, pixel_std=None, bg
 		assert mode in ['pil', 'np'], 'the mode is not correct'
 	image_data = image_datablob.copy()
 
-	if image_data.ndim == 3:
+	if image_data.ndim == 2:		# expand 2d gradscale image to 3 channel
+		image_data = np.expand_dims(image_data, axis=0)
+
+	if image_data.ndim == 3:		# expand to 4-d version of batch of 1
 		image_data = np.expand_dims(image_data, axis=0)
 
 	if debug:

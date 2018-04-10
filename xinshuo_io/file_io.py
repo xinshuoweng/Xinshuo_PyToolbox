@@ -397,8 +397,10 @@ def load_image(src_path, resize_factor=1.0, rotate=0, mode='numpy', debug=True):
 
             if mode == 'numpy':
                 return np.array(img)
-            else:
+            elif mode == 'pil':
                 return img
+            else:
+                assert False, 'the mode %s is not supported' % mode
 
 def save_image_from_data(save_path, data, debug=True, vis=False):
     save_path = safepath(save_path)

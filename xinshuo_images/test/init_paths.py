@@ -11,6 +11,5 @@ thisdir = os.path.dirname(os.path.abspath(__file__))
 python_path = os.path.join(thisdir, '../')
 add_path(python_path)
 
-
 python_path = os.path.join(thisdir, '../../python')
 add_path(python_path)

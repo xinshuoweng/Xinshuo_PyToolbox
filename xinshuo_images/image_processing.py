@@ -5,39 +5,42 @@ import numpy as np
 from PIL import Image
 
 from xinshuo_python import *
-from xinshuo_vision import clip_bboxes_TLWH
+from xinshuo_vision import clip_bboxes_TLWH, get_crop_bbox
 
-def generate_mean_image(images_dir, save_path, debug=True, vis=False):
-	'''
-	this function generates the mean image over all images. It assume the image has the same size
+############################################# color transform #################################
 
-	parameters:
-			images_dir: 		path to all images
+# done
+def gray2rgb(image_test, with_color=True, cmap='jet', debug=True):
 	'''
+	convert a grayscale image (1-channel) to a rgb image
+		with_color:	add colormap
+
+	note: only support uint8 image
+	'''
+	if ispilimage(image_test):
+		image_test = np.array(image_test)
+	image_test = image_test.copy()
+
 	if debug:
-		assert is_path_exists(images_dir), 'the image path is not existing at %s' % images_dir
-		assert is_path_exists_or_creable(save_path), 'the path for saving is not correct: %s' % save_path
+		assert isgrayimage(np_image), 'the input numpy image is not correct: {}'.format(np_image.shape)
 
-	print('loading image data from %s' % images_dir)
-	imagelist, num_images = load_list_from_folders(images_dir, ext_filter=['png', 'jpg', 'jpeg'], depth=None)
-	print('{} images loaded'.format(num_images))
+	if with_color:
+		if cmap == 'jet':
+			rgb_image = cv2.applyColorMap(np_image, cv2.COLORMAP_JET)
+		else:
+			assert False, 'cmap %s is not supported' % cmap
+	else:
+		rgb_image = cv2.cvtColor(np_image, cv2.COLOR_GRAY2RGB)
 
-	# load the first image to see the image size
-	img = Image.open(imagelist[0]).convert('L')
-	width, height = img.size
+	return rgb_image
 
-	image_blob = np.zeros((height, width, num_images), dtype='float32')
-	count = 0
-	for image_path in imagelist:
-		print('generating sharpness: processing %d/%d' % (count+1, num_images))
-		img = Image.open(image_path).convert('L')	
-		image_blob[:, :, count] = np.asarray(img, dtype='float32') / 255
-		count += 1
+def rgb2hsv():
+	pass
 
-	mean_im = np.mean(image_blob, axis=2)
-	visualize_image(mean_im, debug=debug, vis=vis, save=True, save_path=save_path)
+def rgb2hsl():
+	pass
 
-############################################# image conversion #################################
+############################################# format transform #################################
 
 def pil2cv_colorimage(pil_image, debug=True, vis=False):
 	'''
@@ -88,26 +91,6 @@ def	unnormalize_npimage(np_image, img_type='uint8', debug=True):
 	unnormalized_img = unnormalized_img.astype(img_type)
 	return unnormalized_img
 
-# done
-def gray2rgb(np_image, with_color=True, cmap='jet', debug=True):
-	'''
-	convert a grayscale image (1-channel) to a rgb image
-		with_color:	add colormap
-	'''
-	if debug:
-		assert isgrayimage(np_image), 'the input numpy image is not correct: {}'.format(np_image.shape)
-
-	if with_color:
-		if cmap == 'jet':
-			rgb_image = cv2.applyColorMap(np_image, cv2.COLORMAP_JET)
-		else:
-			assert False, 'cmap %s is not supported' % cmap
-	else:
-		rgb_image = cv2.cvtColor(np_image, cv2.COLOR_GRAY2RGB)
-
-	return rgb_image
-
-
 # to test, supposed to be equivalent to gray2rgb
 def mat2im(mat, cmap, limits):
   '''
@@ -154,7 +137,6 @@ def mat2im(mat, cmap, limits):
   image = np.reshape(cmap[ np.reshape(mat, (mat.size)), : ], mat.shape + (3,))
   return image
 
-
 def jet(m):
   cm_subsection = linspace(0, 1, m)
   colors = [ cm.jet(x) for x in cm_subsection ]
@@ -173,6 +155,39 @@ def generate_color_from_heatmap(maps, num_of_color=100, index=None):
     
 
 ############################################## miscellaneous
+
+
+############################################# batch processing #################################
+
+def generate_mean_image(images_dir, save_path, debug=True, vis=False):
+	'''
+	this function generates the mean image over all images. It assume the image has the same size
+
+	parameters:
+			images_dir: 		path to all images
+	'''
+	if debug:
+		assert is_path_exists(images_dir), 'the image path is not existing at %s' % images_dir
+		assert is_path_exists_or_creable(save_path), 'the path for saving is not correct: %s' % save_path
+
+	print('loading image data from %s' % images_dir)
+	imagelist, num_images = load_list_from_folders(images_dir, ext_filter=['png', 'jpg', 'jpeg'], depth=None)
+	print('{} images loaded'.format(num_images))
+
+	# load the first image to see the image size
+	img = Image.open(imagelist[0]).convert('L')
+	width, height = img.size
+
+	image_blob = np.zeros((height, width, num_images), dtype='float32')
+	count = 0
+	for image_path in imagelist:
+		print('generating sharpness: processing %d/%d' % (count+1, num_images))
+		img = Image.open(image_path).convert('L')	
+		image_blob[:, :, count] = np.asarray(img, dtype='float32') / 255
+		count += 1
+
+	mean_im = np.mean(image_blob, axis=2)
+	visualize_image(mean_im, debug=debug, vis=vis, save=True, save_path=save_path)
 
 def concatenate_grid(image_list, im_size=[1600, 2560], grid_size=None, edge_factor=0.99, debug=True):
 	'''
@@ -225,7 +240,29 @@ def concatenate_grid(image_list, im_size=[1600, 2560], grid_size=None, edge_fact
 
 	return image_merged
 
+def hstack_images( images, gap ):
+	images = [np.array(image) for image in images]
+	imagelist = []
+	for image in images:
+		gap_shape = list(image.shape)
+		gap_shape[1] = gap
+		imagelist.append(image)
+		imagelist.append(np.zeros(gap_shape).astype('uint8'))
+	imagelist = imagelist[:-1]
+	hstack = np.hstack( imagelist )
+	return Image.fromarray( hstack )
 
+def vstack_images( images, gap ):
+	images = [np.array(image) for image in images]
+	imagelist = []
+	for image in images:
+		gap_shape = list(image.shape)
+		gap_shape[0] = gap
+		imagelist.append(image)
+		imagelist.append(np.zeros(gap_shape).astype('uint8'))
+	imagelist = imagelist[:-1]
+	hstack = np.vstack( imagelist )
+	return Image.fromarray( hstack )
 
 
 # this function is to pad given value to an image in provided region, all images in this function are floating images
@@ -256,74 +293,58 @@ def pad_around(img, pad_rect, pad_value):
 def crop_center(img1, rect, pad_value):
 	# rect is XYWH, only uint8 is supported
 
-    if not pad_value:
-        pad_value = 128
+	if not pad_value:
+	    pad_value = 128
 
-    # calculate crop rectangles
-    [im_height, im_width, im_channel] = img1.shape
-    im_size = [im_height, im_width]
+	# calculate crop rectangles
+	[im_height, im_width, im_channel] = img1.shape
+	im_size = [im_height, im_width]
 
-    rect = [int(x) for x in rect]
-    if len(rect) == 4:            # crop around the given center and width and height
-        center_x = rect[0]
-        center_y = rect[1]
-        crop_width = rect[2]
-        crop_height = rect[3]
-    else:                            # crop around the center of the image
-        center_x = math.ceil(im_width/2)
-        center_y = math.ceil(im_height/2)   
-        crop_width = rect[0]
-        crop_height = rect[1]
-    
-    # calculate cropped region
-    xmin = int(center_x - math.ceil(crop_width/2) + 1) -1
-    ymin = int(center_y - math.ceil(crop_height/2) + 1) -1
-    xmax = int(xmin + crop_width - 1)
-    ymax = int(ymin + crop_height - 1)
-    
-    crop_rect = [xmin, ymin, crop_width - 1, crop_height - 1]
-    tmp_min_x = xmin if xmin>=0 else 0
-    tmp_max_x = xmax if xmax<img1.shape[1] else (img1.shape[1]-1)
-    tmp_min_y = ymin if ymin>=0 else 0
-    tmp_max_y = ymax if ymax<img1.shape[0] else (img1.shape[0]-1)
-    cropped = img1[tmp_min_y:tmp_max_y+1, tmp_min_x:tmp_max_x+1, :]
+	crop_rect = get_crop_bbox(rect, im_width, im_height, debug=False)
 
-    # if original image is not enough to cover the crop area, we pad value around outside after cropping
-    if (xmin < 0 or ymin < 0 or xmax > im_width-1 or ymax > im_height-1):
-        pad_left    = max(0 - xmin, 0)
-        pad_top     = max(0 - ymin, 0)
-        pad_right   = max(xmax - (im_width-1), 0)
-        pad_bottom  = max(ymax - (im_height-1), 0)
-        if pad_left > 0:
-            tmp = np.ones((cropped.shape[0], pad_left + cropped.shape[1], img1.shape[2]))*pad_value
-            tmp[: , pad_left:, :] = cropped
-            cropped = tmp
-        if pad_right > 0:
-            tmp = np.ones((cropped.shape[0], pad_right + cropped.shape[1], img1.shape[2]))*pad_value
-            tmp[:, :cropped.shape[1], :] = cropped
-            cropped = tmp
-        if pad_top > 0:
-            tmp = np.ones((pad_top + cropped.shape[0], cropped.shape[1], img1.shape[2])) * pad_value
-            tmp[pad_top:, :, :] = cropped
-            cropped = tmp
-        if pad_bottom > 0:
-            tmp = np.ones((pad_bottom + cropped.shape[0], cropped.shape[1], img1.shape[2])) * pad_value
-            tmp[:cropped.shape[0] , :, :] = cropped
-            cropped = tmp
-    cropped = cropped.astype('uint8')
+	xmin, ymin, xmax, ymax = crop_rect[0], crop_rect[1], crop_rect[0] + crop_rect[2], crop_rect[1] + crop_rect[3]
+	tmp_min_x = xmin if xmin>=0 else 0
+	tmp_max_x = xmax if xmax<img1.shape[1] else (img1.shape[1]-1)
+	tmp_min_y = ymin if ymin>=0 else 0
+	tmp_max_y = ymax if ymax<img1.shape[0] else (img1.shape[0]-1)
+	cropped = img1[tmp_min_y:tmp_max_y+1, tmp_min_x:tmp_max_x+1, :]
 
-    [im_height, im_width, im_channel] = img1.shape
-    
-    crop_rect_ori = clip_bboxes_TLWH(crop_rect, im_width, im_height)
-    
-    crop_rect = np.array(crop_rect).reshape((1, 4))
-    crop_rect_ori = np.array(crop_rect_ori).reshape((1, 4))
-    return cropped, crop_rect, crop_rect_ori
+	# if original image is not enough to cover the crop area, we pad value around outside after cropping
+	if (xmin < 0 or ymin < 0 or xmax > im_width-1 or ymax > im_height-1):
+		pad_left    = max(0 - xmin, 0)
+		pad_top     = max(0 - ymin, 0)
+		pad_right   = max(xmax - (im_width-1), 0)
+		pad_bottom  = max(ymax - (im_height-1), 0)
+		if pad_left > 0:
+			tmp = np.ones((cropped.shape[0], pad_left + cropped.shape[1], img1.shape[2]))*pad_value
+			tmp[: , pad_left:, :] = cropped
+			cropped = tmp
+		if pad_right > 0:
+			tmp = np.ones((cropped.shape[0], pad_right + cropped.shape[1], img1.shape[2]))*pad_value
+			tmp[:, :cropped.shape[1], :] = cropped
+			cropped = tmp
+		if pad_top > 0:
+			tmp = np.ones((pad_top + cropped.shape[0], cropped.shape[1], img1.shape[2])) * pad_value
+			tmp[pad_top:, :, :] = cropped
+			cropped = tmp
+		if pad_bottom > 0:
+			tmp = np.ones((pad_bottom + cropped.shape[0], cropped.shape[1], img1.shape[2])) * pad_value
+			tmp[:cropped.shape[0] , :, :] = cropped
+			cropped = tmp
+	cropped = cropped.astype('uint8')
+
+	[im_height, im_width, im_channel] = img1.shape
+	crop_rect_ori = clip_bboxes_TLWH(crop_rect, im_width, im_height)
+
+	crop_rect = np.array(crop_rect).reshape((1, 4))
+	crop_rect_ori = np.array(crop_rect_ori).reshape((1, 4))
+	return cropped, crop_rect, crop_rect_ori
 
 
 def imresize(img, portion, interp='bicubic', debug=True):
 	if debug:
 		assert interp == 'bicubic' or interp == 'bilinear', 'the interpolation method is not correct'
+		assert isnpimage_dimension(img), 'the input image is not correct'
 
 	height, width = img.shape[:2]
 	if interp == 'bicubic':
@@ -392,8 +413,8 @@ def draw_mask(np_image, np_image_mask, alpha=0.3, debug=True):
 		assert isnpimage_dimension(np_image), 'the input image is not correct: {}'.format(np_image.shape)
 		assert isnpimage_dimension(np_image_mask), 'the input mask image is not correct: {}'.format(np_image_mask.shape)
 
-	pil_image = Image.fromarray(np_image)
-	pil_image_mask = Image.fromarray(np_image_mask)
+	pil_image = Image.fromarray(np_image.copy())
+	pil_image_mask = Image.fromarray(np_image_mask.copy())
 	pil_image_out = Image.blend(pil_image, pil_image_mask, alpha=alpha)
 
 	return pil_image_out
