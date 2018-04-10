@@ -1,6 +1,5 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
-import pytest
 from PIL import Image
 import numpy as np
 

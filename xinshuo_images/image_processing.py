@@ -11,6 +11,7 @@ from xinshuo_vision import clip_bboxes_TLWH, get_crop_bbox
 def safe_image(input_image):
 	'''
 	return a numpy image no matter what input is
+	make sure the output numpy image is a copy of the input image
 	'''
 	if ispilimage(input_image):
 		np_image = np.array(input_image)
@@ -46,11 +47,20 @@ def gray2rgb(input_image, with_color=True, cmap='jet', debug=True):
 		rgb_image = cv2.cvtColor(np_image, cv2.COLOR_GRAY2RGB)
 	return rgb_image
 
-def rgb2hsv():
-	pass
+def rgb2hsv(input_image, debug=True):
+	'''
+	convert a rgb image to a hsv image
+	'''
+	np_image = safe_image(input_image)
 
-def rgb2hsl():
-	pass
+	if debug:
+		assert iscolorimage(np_image), 'the input image should be a rgb image'
+
+	pil_rgb_img = Image.fromarray(np_image)
+	pil_hsv_img = pil_rgb_img.convert('HSV')
+	pil_hsv_img = np.array(pil_hsv_img)
+
+	return pil_hsv_img
 
 ############################################# format transform #################################
 

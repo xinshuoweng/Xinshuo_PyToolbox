@@ -250,8 +250,6 @@ def isscaledimage(image_test):
     else:
         assert False, 'Unknown error'
 
-
-
 ############################################################# io_related
 def is_path_valid(pathname):
     '''
@@ -378,3 +376,13 @@ def CHECK_EQ_LIST_UNORDERED(input_list1, input_list2, debug=True):
         assert islist(input_list1) and islist(input_list2), 'input lists are not correct'
 
     return set(input_list1) == set(input_list2)
+
+def CHECK_EQ_NUMPY(np_data1, np_data2, debug=True):
+    '''
+    check two numpy data are equal
+    '''
+    if debug:
+        assert isnparray(np_data1) and isnparray(np_data2), 'the input numpy data is not correct'
+        assert np_data2.shape == np_data1.shape, 'the shapes of two data blob are not equal'
+
+    return np.all(np_data1 == np_data2)
