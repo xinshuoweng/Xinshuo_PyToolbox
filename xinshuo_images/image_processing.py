@@ -7,22 +7,35 @@ from PIL import Image
 from xinshuo_python import *
 from xinshuo_vision import clip_bboxes_TLWH, get_crop_bbox
 
-############################################# color transform #################################
 
-# done
-def gray2rgb(image_test, with_color=True, cmap='jet', debug=True):
+def safe_image(input_image):
+	'''
+	return a numpy image no matter what input is
+	'''
+	if ispilimage(input_image):
+		np_image = np.array(input_image)
+	elif isnpimage(input_image):
+		np_image = input_image.copy()
+	else:
+		assert False, 'only pil and numpy images are supported, might be the case the image is float but has range of [0, 255]'
+
+	return np_image
+
+############################################# color transform #################################
+def gray2rgb(input_image, with_color=True, cmap='jet', debug=True):
 	'''
 	convert a grayscale image (1-channel) to a rgb image
 		with_color:	add colormap
 
 	note: only support uint8 image
 	'''
-	if ispilimage(image_test):
-		image_test = np.array(image_test)
-	image_test = image_test.copy()
+	np_image = safe_image(input_image)
+	if isfloatimage(np_image):
+		np_image = (np_image * 255.).astype('uint8')
 
 	if debug:
 		assert isgrayimage(np_image), 'the input numpy image is not correct: {}'.format(np_image.shape)
+		assert isuintimage(np_image), 'the input numpy image should be uint8 image in order to use opencv'
 
 	if with_color:
 		if cmap == 'jet':
@@ -31,7 +44,6 @@ def gray2rgb(image_test, with_color=True, cmap='jet', debug=True):
 			assert False, 'cmap %s is not supported' % cmap
 	else:
 		rgb_image = cv2.cvtColor(np_image, cv2.COLOR_GRAY2RGB)
-
 	return rgb_image
 
 def rgb2hsv():
@@ -65,30 +77,35 @@ def chw2hwc_npimage(np_image, debug=True):
 	return np.transpose(np_image, (1, 2, 0)) 
 
 # done
-def	unnormalize_npimage(np_image, img_type='uint8', debug=True):
+def	unnormalize_npimage(input_image, img_type='uint8', debug=True):
 	'''
 	un-normalize a numpy image and scale it
 		for uint8, scaled to [0, 255]
 	'''
+	np_image = safe_image(input_image)
+
 	if debug:
 		assert isnpimage_dimension(np_image), 'the input numpy image is not correct: {}'.format(np_image.shape)
+		assert isfloatimage(np_image) or isuintimage(np_image), 'the image is neither a uint8 image or a float32 image'
 		assert img_type in {'uint8'}, 'the image does not contain a good type'
 
-	unnormalized_img = np_image.copy()
-	min_val = np.min(unnormalized_img)
-	max_val = np.max(unnormalized_img)
+	min_val = float(np.min(np_image))
+	max_val = float(np.max(np_image))
+	print(min_val)
+	print(max_val)
 	if math.isnan(min_val) or math.isnan(max_val):			# with nan
 		assert False, 'the input image has nan'
 	elif min_val == max_val:								# all same
-		unnormalized_img.fill(0)
+		np_image.fill(0)
 	else:													# normal case
-		unnormalized_img = unnormalized_img - min_val
-		unnormalized_img = unnormalized_img / (max_val - min_val)
-		unnormalized_img = unnormalized_img * 255.
-		if debug:
-			assert np.min(unnormalized_img) == 0 and np.max(unnormalized_img) == 255, 'the value range is not right [%f, %f]' % (min_val, max_val)
+		np_image = np_image - min_val
+		np_image = np_image / (max_val - min_val)
+		np_image = np_image * 255.
 
-	unnormalized_img = unnormalized_img.astype(img_type)
+		if debug:
+			assert np.min(np_image) == 0 and np.max(np_image) == 255, 'the value range is not right [%f, %f]' % (np.min(np_image), np.max(np_image))
+
+	unnormalized_img = np_image.astype(img_type)
 	return unnormalized_img
 
 # to test, supposed to be equivalent to gray2rgb
