@@ -7,7 +7,7 @@ from PIL import Image
 from xinshuo_python import *
 from xinshuo_vision import clip_bboxes_TLWH, get_crop_bbox
 
-
+############################################# internal use ################################
 def safe_image(input_image):
 	'''
 	return a numpy image no matter what input is

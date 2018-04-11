@@ -4,7 +4,7 @@
 from __future__ import print_function
 import functools
 
-from xinshuo_python import isnparray
+from check import isnparray
 # logging
 
 def print_log(print_string, log, same_line=False):

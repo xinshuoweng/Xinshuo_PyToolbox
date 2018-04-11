@@ -6,7 +6,7 @@ import numpy as np
 import math, copy, os, struct, functools
 from itertools import islice
 
-from xinshuo_python import *
+from check import *
 
 ######################################################### string related #########################################################
 def character2onehot(character):

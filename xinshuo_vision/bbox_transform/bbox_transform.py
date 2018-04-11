@@ -4,17 +4,13 @@
 # this file contains all functions related to operation of bounding box
 # import __init__paths__
 import numpy as np
-import math
-import time
+import math, time
 import matplotlib.pyplot as plt
 from numpy.testing import assert_almost_equal
 from math import radians as rad
 
-
 from xinshuo_math import get_line, get_intersection
-from xinshuo_miscellaneous import imagecoor2cartesian, cartesian2imagecoor
-from xinshuo_python import isnparray, is2dptsarray, is2dptsarray_occlusion, is2dpts
-
+from xinshuo_miscellaneous import imagecoor2cartesian, cartesian2imagecoor, isnparray, is2dptsarray, is2dptsarray_occlusion, is2dpts
 
 def bbox_transform(ex_rois, gt_rois):
     ex_widths = ex_rois[:, 2] - ex_rois[:, 0] + 1.0

@@ -1,10 +1,11 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
+
+# this file includes functions of basic geometry in math
 import math, cv2
 import numpy as np
 from numpy.testing import assert_almost_equal
 
-from xinshuo_python import *
 from xinshuo_miscellaneous import print_np_shape
 
 ################################################################## 2d math ##################################################################

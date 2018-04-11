@@ -17,10 +17,9 @@ from terminaltables import AsciiTable
 from collections import Counter
 
 # this file define a set of functions related to matplotlib
-from xinshuo_python import *
 from xinshuo_io import mkdir_if_missing, fileparts
 from xinshuo_vision import bbox_TLBR2TLWH, bboxcheck_TLBR, get_centered_bbox
-from xinshuo_miscellaneous import print_np_shape, list2tuple, list_reorder, remove_list_from_list, scalar_list2str_list
+from xinshuo_miscellaneous import print_np_shape, list2tuple, list_reorder, remove_list_from_list, scalar_list2str_list, istuple, isdict, islistoflist, islist, isnparray, isstring, ispilimage, iscolorimage, isgrayimage, isfloatimage, isuintimage
 from xinshuo_math import pts_euclidean, calculate_truncated_mse
 
 dpi = 80

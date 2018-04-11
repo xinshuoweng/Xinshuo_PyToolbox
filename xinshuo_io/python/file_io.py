@@ -5,13 +5,11 @@
 from __future__ import print_function
 from pprint import pprint
 
-import os, sys, time
-import glob, glob2
+import os, sys, time, glob, glob2
 import numpy as np
 from scipy.misc import imsave
 from PIL import Image
 
-from xinshuo_python import *
 from xinshuo_miscellaneous import string2ext_filter, remove_empty_item_from_list, str2num
 
 import httplib2
