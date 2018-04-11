@@ -34,7 +34,7 @@ def test_image_hist_equalization():
 	data_equalized = image_hist_equalization(img)
 	visualize_image(data_equalized, vis=True)
 
-
-
+	print('\n\nDONE! SUCCESSFULLY!!\n')
+	
 if __name__ == '__main__':
 	test_image_hist_equalization()

@@ -27,12 +27,13 @@ def test_gray2rgb():
 	test_floatimage = (img.astype('float32')) / 255.
 	img_rgb = gray2rgb(test_floatimage, with_color=True)
 	assert iscolorimage(img_rgb), 'the converted image is not a color image'
-	# visualize_image(img_rgb, vis=True)
+	visualize_image(img_rgb, vis=True)
 
 	# test when input image is PIL image
 	test_pil_format_image = Image.fromarray(img)
 	img_rgb = gray2rgb(test_pil_format_image, with_color=True)
 	assert iscolorimage(img_rgb), 'the converted image is not a color image'
 
+	print('\n\nDONE! SUCCESSFULLY!!\n')
 if __name__ == '__main__':
 	test_gray2rgb()

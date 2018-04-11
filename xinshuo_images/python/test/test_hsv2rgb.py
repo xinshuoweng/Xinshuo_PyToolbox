@@ -22,5 +22,6 @@ def test_hsv2rgb():
 	rgb_img = hsv2rgb(hsv_img)
 	visualize_image(rgb_img, vis=True)
 
+	print('\n\nDONE! SUCCESSFULLY!!\n')
 if __name__ == '__main__':
 	test_hsv2rgb()

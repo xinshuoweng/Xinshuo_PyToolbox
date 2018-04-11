@@ -29,5 +29,7 @@ def test_safe_image():
 	assert not CHECK_EQ_NUMPY(copy_image, img_numpy), 'the original image should be equal to the copy'
 	assert CHECK_EQ_NUMPY(img_bak, img_numpy), 'the original image should be equal to the backup version'
 	
+	print('\n\nDONE! SUCCESSFULLY!!\n')
+	
 if __name__ == '__main__':
 	test_safe_image()

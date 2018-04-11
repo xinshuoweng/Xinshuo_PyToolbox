@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from numpy.testing import assert_almost_equal
 from math import radians as rad
 
-from private import safe_bbox, bboxcheck_TLBR
+from private import safe_bbox, bboxcheck_TLBR, bboxcheck_TLWH
 from math_geometry import get_line, get_intersection
 from xinshuo_miscellaneous import imagecoor2cartesian, cartesian2imagecoor, isnparray, is2dptsarray, is2dptsarray_occlusion, is2dpts, isinteger, isbbox
 
@@ -18,14 +18,15 @@ from xinshuo_miscellaneous import imagecoor2cartesian, cartesian2imagecoor, isnp
 # TLWH:     top left width height, stands for one corner point and range, the range means how many points are included along an axis
 #           e.g., TLWH = [0, 0, 5, 5], it indicates point coordinates from 0 to 4, not including 5
 
+############################################# format transform #################################
 def bbox_TLBR2TLWH(bboxes_in, debug=True):
     '''
     transform the input bounding box with TLBR format to TLWH format
 
-    parameter:
+    parameters:
         bboxes_in: TLBR format, a list of 4 elements, a numpy array with shape or (N, 4) or (4, )
 
-    output: 
+    outputs: 
         bbox_TLWH: N X 4 numpy array, TLWH format
     '''
     np_bboxes = safe_bbox(bboxes_in, debug=debug)
@@ -43,10 +44,10 @@ def bbox_TLWH2TLBR(bboxes_in, debug=True):
     '''
     transform the input bounding box with TLWH format to TLBR format
 
-    parameter:
+    parameters:
         bboxes_in: TLWH format, a list of 4 elements, a numpy array with shape or (N, 4) or (4, )
 
-    output: 
+    outputs: 
         bbox_TLBR: N X 4 numpy array, TLBR format
     '''
     np_bboxes = safe_bbox(bboxes_in, debug=debug)
@@ -56,48 +57,194 @@ def bbox_TLWH2TLBR(bboxes_in, debug=True):
     bbox_TLBR = np.zeros_like(np_bboxes)
     bbox_TLBR[:, 0] = np_bboxes[:, 0]
     bbox_TLBR[:, 1] = np_bboxes[:, 1]
-    bbox_TLBR[:, 2] = np_bboxes[:, 2] - np_bboxes[:, 0]
-    bbox_TLBR[:, 3] = np_bboxes[:, 3] - np_bboxes[:, 1]
+    bbox_TLBR[:, 2] = np_bboxes[:, 2] + np_bboxes[:, 0]
+    bbox_TLBR[:, 3] = np_bboxes[:, 3] + np_bboxes[:, 1]
     return bbox_TLBR
 
+############################################# 2D transform #################################
 def clip_bboxes_TLBR(bboxes_in, im_width, im_height, debug=True):
     '''
-    Clip boxes to image boundaries.
+    this function clips bboxes inside the image boundary, the coordinates in the clipped bbox are half-included [x, y)
+
+    parameters:     
+        bboxes_in:              TLBR format, a list of 4 elements, a numpy array with shape or (N, 4) or (4, )
+        im_width/im_height:     scalar
+
+    outputs:        
+        clipped_bboxes_TLWH:    TLBR format, numpy array with shape of (N, 4)
     '''
     np_bboxes = safe_bbox(bboxes_in, debug=debug)
     if debug:
         assert isinteger(im_width) and isinteger(im_height), 'the image width and height are not correct'   
-        assert isbbox(np_bboxes), 'the input bboxes are not good'
+        assert bboxcheck_TLBR(np_bboxes), 'the input bboxes are not good'
 
-    clipped_bboxes[:, 0] = np.maximum(np.minimum(np_bboxes[:, 0], im_width - 1), 0)     # x1 >= 0
-    clipped_bboxes[:, 1] = np.maximum(np.minimum(np_bboxes[:, 1], im_height - 1), 0)     # y1 >= 0
-    clipped_bboxes[:, 2] = np.maximum(np.minimum(np_bboxes[:, 2], im_width - 1), 0)     # x2 < im_shape[1]
-    clipped_bboxes[:, 3] = np.maximum(np.minimum(np_bboxes[:, 3], im_height - 1), 0)     # y2 < im_shape[0]
+    clipped_bboxes = np.zeros_like(np_bboxes)
+    clipped_bboxes[:, 0] = np.maximum(np.minimum(np_bboxes[:, 0], im_width), 0)         # x1 >= 0 & x1 <= width, included
+    clipped_bboxes[:, 1] = np.maximum(np.minimum(np_bboxes[:, 1], im_height), 0)        # y1 >= 0 & y1 <= height, included
+    clipped_bboxes[:, 2] = np.maximum(np.minimum(np_bboxes[:, 2], im_width), 0)             # x2 >= 0 & x2 <= width, not included
+    clipped_bboxes[:, 3] = np.maximum(np.minimum(np_bboxes[:, 3], im_height), 0)            # y2 >= 0 & y2 <= height, not included
     return clipped_bboxes
 
 def clip_bboxes_TLWH(bboxes_in, im_width, im_height, debug=True):
     '''
-    this function takes boxes in and process it to make them inside the image
+    this function clips bboxes inside the image boundary
 
     parameters:     
-        bboxes_in:     TLWH format, a list of 4 elements, a numpy array with shape or (N, 4) or (4, )
-        im_width/im_height: scalar
+        bboxes_in:              TLWH format, a list of 4 elements, a numpy array with shape or (N, 4) or (4, )
+        im_width/im_height:     scalar
 
-        output:        TLWH format, numpy array with shape of (N, 4)
+    outputs:        
+        clipped_bboxes_TLWH:    TLWH format, numpy array with shape of (N, 4)
     '''
     np_bboxes = safe_bbox(bboxes_in, debug=debug)
     if debug:
         assert isinteger(im_width) and isinteger(im_height), 'the image width and height are not correct'   
-        assert isbbox(np_bboxes), 'the input bboxes are not good'
+        assert bboxcheck_TLWH(np_bboxes), 'the input bboxes are not good'
 
-    bboxes_TLBR = 
+    bboxes_TLBR = bbox_TLWH2TLBR(np_bboxes, debug=debug)
+    clipped_bboxes_TLBR = clip_bboxes_TLBR(bboxes_TLBR, im_width, im_height, debug=debug)
+    clipped_bboxes_TLWH = bbox_TLBR2TLWH(clipped_bboxes_TLBR, debug=debug)
 
-    clipped_bboxes = np_bboxes.copy()
-    clipped_bboxes[:, 0] = np.maximum(np.minimum(np_bboxes[:, 0], im_width - 1), 0)       # x1 >= 0 & < im_width
-    clipped_bboxes[:, 1] = np.maximum(np.minimum(np_bboxes[:, 1], im_height - 1), 0)       # y1 >= 0 & < im_height
-    clipped_bboxes[:, 2] = np.maximum(np.minimum(np_bboxes[:, 2], im_width - np_bboxes[:, 0]), 0)        # width
-    clipped_bboxes[:, 3] = np.maximum(np.minimum(np_bboxes[:, 3], im_height - np_bboxes[:, 1]), 0)       # height
-    return clipped_bboxes
+    # clipped_bboxes = np_bboxes.copy()
+    # clipped_bboxes[:, 0] = np.maximum(np.minimum(np_bboxes[:, 0], im_width - 1), 0)       # x1 >= 0 & < im_width
+    # clipped_bboxes[:, 1] = np.maximum(np.minimum(np_bboxes[:, 1], im_height - 1), 0)       # y1 >= 0 & < im_height
+    # clipped_bboxes[:, 2] = np.maximum(np.minimum(np_bboxes[:, 2], im_width - np_bboxes[:, 0]), 0)        # width
+    # clipped_bboxes[:, 3] = np.maximum(np.minimum(np_bboxes[:, 3], im_height - np_bboxes[:, 1]), 0)       # height
+    return clipped_bboxes_TLWH
+
+def get_crop_bbox(rect, width, height, debug=True):
+    '''
+    given a target width and height (and center), obtain the bbox to crop in an image
+    '''
+    if debug:
+        assert len(rect) == 4 or len(rect) == 2, 'the input rect should be length of 2 or 4'
+
+    rect = [int(x) for x in rect]
+    if len(rect) == 4:            # crop around the given center and width and height
+        center_x = rect[0]
+        center_y = rect[1]
+        crop_width = rect[2]
+        crop_height = rect[3]
+    else:                            # crop around the center of the image
+        center_x = math.ceil(width/2)
+        center_y = math.ceil(height/2)   
+        crop_width = rect[0]
+        crop_height = rect[1]
+    
+    # calculate cropped region
+    xmin = int(center_x - math.ceil(crop_width/2) + 1) -1
+    ymin = int(center_y - math.ceil(crop_height/2) + 1) -1
+    # xmax = int(xmin + crop_width - 1)               # the actual xmax and ymax, included [xmin, xmax] instead of [xmin, xmax)
+    # ymax = int(ymin + crop_height - 1) 
+
+    return [xmin, ymin, crop_width, crop_height]
+
+############################################# pts related transform #################################
+def pts2bbox(pts, debug=True, vis=False):
+    '''
+    convert a set of 2d points to a bounding box
+
+    parameter:  
+        pts:    2 x N numpy array, N should >= 2
+
+    return:
+        bbox:   1 x 4 numpy array, TLBR format
+    '''
+    if debug:
+        assert is2dptsarray(pts) or is2dptsarray_occlusion(pts), 'the input points should have shape: 2 or 3 x num_pts vs %d x %s' % (pts.shape[0], pts.shape[1])
+        assert pts.shape[1] >= 2, 'number of points should be larger or equal than 2'
+
+    bbox = np.zeros((1, 4), dtype='float32')
+    bbox[0, 0] = np.min(pts[0, :])          # x coordinate of left top point
+    bbox[0, 1] = np.min(pts[1, :])          # y coordinate of left top point
+    bbox[0, 2] = np.max(pts[0, :])          # x coordinate of bottom right point
+    bbox[0, 3] = np.max(pts[1, :])          # y coordinate of bottom right point
+    
+    if vis:
+        fig = plt.figure()
+        pts = imagecoor2cartesian(pts)
+        plt.scatter(pts[0, :], pts[1, :], color='r')
+        plt.scatter(bbox[0, 0], -bbox[0, 1], color='b')         # -1 is to convert the coordinate from image to cartesian
+        plt.scatter(bbox[0, 2], -bbox[0, 3], color='b')
+        plt.show()
+        plt.close(fig)
+    return bbox
+
+def bbox2center(bbox, debug=True, vis=False):
+    '''
+    convert a bounding box to a point, which is the center of this bounding box
+
+    parameter:
+        bbox:   N x 4 numpy array, TLBR format
+
+    return:
+        center: 2 x N numpy array, x and y correspond to first and second row respectively
+    '''
+    if debug:
+        assert bboxcheck_TLBR(bbox), 'the input bounding box should be TLBR format'
+
+    num_bbox = bbox.shape[0]        
+    center = np.zeros((num_bbox, 2), dtype='float32')
+    center[:, 0] = (bbox[:, 0] + bbox[:, 2]) / 2.
+    center[:, 1] = (bbox[:, 1] + bbox[:, 3]) / 2.
+
+    if vis:
+        fig = plt.figure()
+        plt.scatter(bbox[0, 0], -bbox[0, 1], color='b')         # -1 is to convert the coordinate from image to cartesian
+        plt.scatter(bbox[0, 2], -bbox[0, 3], color='b')
+        center_show = imagecoor2cartesian(center)
+        plt.scatter(center_show[0], center_show[1], color='r')        
+        plt.show()
+        plt.close(fig)
+    return np.transpose(center)
+
+def pts_conversion_bbox(pts_array, bbox, debug=True):
+    '''
+    convert pts in the original image to pts in the cropped image
+
+    parameters:
+        bbox:       1 X 4 numpy array, TLBR or TLWH format
+        pts_array:  2(3) x N numpy array, N should >= 1
+    '''
+    bbox = safe_bbox(bbox, debug=debug)
+    if debug:
+        assert is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array), 'the input points should have shape: 2 or 3 x num_pts vs %d x %s' % (pts_array.shape[0], pts_array.shape[1])
+        assert isbbox(bbox), 'the input bounding box is not correct'
+
+    if len(bbox) == 4:
+        bbox = np.array(bbox).reshape((1, 4))
+
+    pts_out = pts_array.copy()
+    pts_out[0, :] = pts_array[0, :] - bbox[0, 0]
+    pts_out[1, :] = pts_array[1, :] - bbox[0, 1]
+
+    return pts_out
+
+def pts_conversion_back_bbox(pts_array, bbox, debug=True):
+    '''
+    convert pts in the cropped image to the pts in the original image 
+
+    parameters:
+        bbox:       1 X 4 numpy array, TLBR or TLWH format
+        pts_array:  2(3) x N numpy array, N should >= 1
+    '''
+    bbox = safe_bbox(bbox, debug=debug)
+    if debug:
+        assert is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array), 'the input points should have shape: 2 or 3 x num_pts vs %d x %s' % (pts_array.shape[0], pts_array.shape[1])
+        assert isbbox(bbox), 'the input bounding box is not correct'
+
+    if len(bbox) == 4:
+        bbox = np.array(bbox).reshape((1, 4))
+    
+    pts_out = pts_array.copy()
+    pts_out[0, :] = pts_array[0, :] + bbox[0, 0]
+    pts_out[1, :] = pts_array[1, :] + bbox[0, 1]
+
+    return pts_out
+
+
+
+############################################# to test #################################
 
 def bbox_transform(ex_rois, gt_rois):
     ex_widths = ex_rois[:, 2] - ex_rois[:, 0] + 1.0
@@ -263,64 +410,6 @@ def apply_rotation_tight(bbox_in, angle_in_degree, im_shape, debug=True):
     pts_total[3, :] = np.reshape(pts_bl, (1, 2))
     return pts_total
 
-def pts2bbox(pts, debug=True, vis=False):
-    '''
-    convert a set of 2d points to a bounding box
-
-    parameter:  
-        pts:    2 x N numpy array, N should >= 2
-
-    return:
-        bbox:   1 x 4 numpy array, TLBR format
-    '''
-    if debug:
-        assert is2dptsarray(pts) or is2dptsarray_occlusion(pts), 'the input points should have shape: 2 or 3 x num_pts vs %d x %s' % (pts.shape[0], pts.shape[1])
-        assert pts.shape[1] >= 2, 'number of points should be larger or equal than 2'
-
-    bbox = np.zeros((1, 4), dtype='float32')
-    bbox[0, 0] = np.min(pts[0, :])          # x coordinate of left top point
-    bbox[0, 1] = np.min(pts[1, :])          # y coordinate of left top point
-    bbox[0, 2] = np.max(pts[0, :])          # x coordinate of bottom right point
-    bbox[0, 3] = np.max(pts[1, :])          # y coordinate of bottom right point
-    
-    if vis:
-        fig = plt.figure()
-        pts = imagecoor2cartesian(pts)
-        plt.scatter(pts[0, :], pts[1, :], color='r')
-        plt.scatter(bbox[0, 0], -bbox[0, 1], color='b')         # -1 is to convert the coordinate from image to cartesian
-        plt.scatter(bbox[0, 2], -bbox[0, 3], color='b')
-        plt.show()
-        plt.close(fig)
-    return bbox
-
-def bbox2center(bbox, debug=True, vis=False):
-    '''
-    convert a bounding box to a point, which is the center of this bounding box
-
-    parameter:
-        bbox:   N x 4 numpy array, TLBR format
-
-    return:
-        center: 2 x N numpy array, x and y correspond to first and second row respectively
-    '''
-    if debug:
-        assert bboxcheck_TLBR(bbox), 'the input bounding box should be TLBR format'
-
-    num_bbox = bbox.shape[0]        
-    center = np.zeros((num_bbox, 2), dtype='float32')
-    center[:, 0] = (bbox[:, 0] + bbox[:, 2]) / 2.
-    center[:, 1] = (bbox[:, 1] + bbox[:, 3]) / 2.
-
-    if vis:
-        fig = plt.figure()
-        plt.scatter(bbox[0, 0], -bbox[0, 1], color='b')         # -1 is to convert the coordinate from image to cartesian
-        plt.scatter(bbox[0, 2], -bbox[0, 3], color='b')
-        center_show = imagecoor2cartesian(center)
-        plt.scatter(center_show[0], center_show[1], color='r')        
-        plt.show()
-        plt.close(fig)
-    return np.transpose(center)
-
 def bbox_enlarge(bbox, ratio=0.2, width_ratio=None, height_ratio=None, min_length=128, min_width=None, min_height=None, debug=True):
     '''
     enlarge the bbox around the edge
@@ -356,51 +445,6 @@ def bbox_enlarge(bbox, ratio=0.2, width_ratio=None, height_ratio=None, min_lengt
 
     return bbox
 
-# done
-def pts_conversion_bbox(pts_array, bbox, debug=True):
-    '''
-    convert pts in the original image to pts in the cropped image
-
-    parameters:
-        bbox:       1 X 4 numpy array, TLBR or TLWH format
-        pts_array:  2(3) x N numpy array, N should >= 1
-    '''
-    bbox = safe_bbox(bbox, debug=debug)
-    if debug:
-        assert is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array), 'the input points should have shape: 2 or 3 x num_pts vs %d x %s' % (pts_array.shape[0], pts_array.shape[1])
-        assert isbbox(bbox), 'the input bounding box is not correct'
-
-    if len(bbox) == 4:
-        bbox = np.array(bbox).reshape((1, 4))
-
-    pts_out = pts_array.copy()
-    pts_out[0, :] = pts_array[0, :] - bbox[0, 0]
-    pts_out[1, :] = pts_array[1, :] - bbox[0, 1]
-
-    return pts_out
-
-# done
-def pts_conversion_back_bbox(pts_array, bbox, debug=True):
-    '''
-    convert pts in the cropped image to the pts in the original image 
-
-    parameters:
-        bbox:       1 X 4 numpy array, TLBR or TLWH format
-        pts_array:  2(3) x N numpy array, N should >= 1
-    '''
-    bbox = safe_bbox(bbox, debug=debug)
-    if debug:
-        assert is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array), 'the input points should have shape: 2 or 3 x num_pts vs %d x %s' % (pts_array.shape[0], pts_array.shape[1])
-        assert isbbox(bbox), 'the input bounding box is not correct'
-
-    if len(bbox) == 4:
-        bbox = np.array(bbox).reshape((1, 4))
-    
-    pts_out = pts_array.copy()
-    pts_out[0, :] = pts_array[0, :] + bbox[0, 0]
-    pts_out[1, :] = pts_array[1, :] + bbox[0, 1]
-
-    return pts_out
 
 # done
 def get_centered_bbox(pts_array, width, height, debug=True):
@@ -430,30 +474,3 @@ def get_centered_bbox(pts_array, width, height, debug=True):
     
     bbox = np.vstack((xmin, ymin, xmax, ymax))
     return np.transpose(bbox)
-
-def get_crop_bbox(rect, width, height, debug=True):
-    '''
-    given a target width and height (and center), obtain the bbox to crop in an image
-    '''
-    if debug:
-        assert len(rect) == 4 or len(rect) == 2, 'the input rect should be length of 2 or 4'
-
-    rect = [int(x) for x in rect]
-    if len(rect) == 4:            # crop around the given center and width and height
-        center_x = rect[0]
-        center_y = rect[1]
-        crop_width = rect[2]
-        crop_height = rect[3]
-    else:                            # crop around the center of the image
-        center_x = math.ceil(width/2)
-        center_y = math.ceil(height/2)   
-        crop_width = rect[0]
-        crop_height = rect[1]
-    
-    # calculate cropped region
-    xmin = int(center_x - math.ceil(crop_width/2) + 1) -1
-    ymin = int(center_y - math.ceil(crop_height/2) + 1) -1
-    # xmax = int(xmin + crop_width - 1)               # the actual xmax and ymax, included [xmin, xmax] instead of [xmin, xmax)
-    # ymax = int(ymin + crop_height - 1) 
-
-    return [xmin, ymin, crop_width, crop_height]

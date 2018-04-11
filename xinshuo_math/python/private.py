@@ -13,7 +13,7 @@ def safe_npdata(input_data):
 	parameters:
 		input_data:		a list or numpy data
 
-	output:
+	outputs:
 		np_data:		a copy of numpy data
 	'''
 	if islist(input_data):
@@ -32,7 +32,7 @@ def safe_bbox(input_bbox, debug=True):
 	parameters:
 		input_bbox: 	a list of 4 elements, a numpy array with shape or (N, 4) or (4, )
 
-	output:
+	outputs:
 		np_bboxes:		N X 4 numpy array
 	'''
 	if islist(input_bbox):
@@ -52,34 +52,34 @@ def safe_bbox(input_bbox, debug=True):
 
 	return np_bboxes
 
-def bboxcheck_TLBR(bbox, debug=True):
+def bboxcheck_TLBR(input_bbox, debug=True):
     '''
     check the input bounding box to be TLBR format
 
     parameters:
-        bbox:   TLBR format, a list of 4 elements, a numpy array with shape or (N, 4) or (4, )
+        input_bbox:   TLBR format, a list of 4 elements, a numpy array with shape or (N, 4) or (4, )
     
-    return:
-        True or False
+    outputs:
+        True if the x2 > x1 and y2 > y1
     '''
-    bbox = safe_bbox(bbox, debug=debug)
+    np_bboxes = safe_bbox(input_bbox, debug=debug)
     if debug:
         assert isbbox(np_bboxes), 'the input bboxes are not good'
 
-    return (bbox[:, 3] >= bbox[:, 1]).all() and (bbox[:, 2] >= bbox[:, 0]).all()      # coordinate of bottom right point should be larger or equal than top left point
+    return (np_bboxes[:, 3] >= np_bboxes[:, 1]).all() and (np_bboxes[:, 2] >= np_bboxes[:, 0]).all()      # coordinate of bottom right point should be larger or equal than top left point
 
-def bboxcheck_TLWH(bbox, debug=True):
+def bboxcheck_TLWH(input_bbox, debug=True):
     '''
     check the input bounding box to be TLBR format
 
     parameters:
-        bbox:   TLBR format, a list of 4 elements, a numpy array with shape or (N, 4) or (4, )
+        input_bbox:   TLBR format, a list of 4 elements, a numpy array with shape or (N, 4) or (4, )
     
-    return:
-        True or False
+    outputs:
+        True if the width and height are >= 0
     '''
-    bbox = safe_bbox(bbox, debug=debug)
+    np_bboxes = safe_bbox(input_bbox, debug=debug)
     if debug:
         assert isbbox(np_bboxes), 'the input bboxes are not good'
 
-    return (bbox[:, 3] >= 0).all() and (bbox[:, 2] >= 0).all()      # coordinate of bottom right point should be larger or equal than top left point
+    return (np_bboxes[:, 3] >= 0).all() and (np_bboxes[:, 2] >= 0).all()      # coordinate of bottom right point should be larger or equal than top left point

@@ -23,5 +23,6 @@ def test_hist_equalization():
 	data_equalized = hist_equalization(img, num_bins=num_bins)
 	visualize_image(data_equalized, vis=True)
 
+	print('\n\nDONE! SUCCESSFULLY!!\n')
 if __name__ == '__main__':
 	test_hist_equalization()
