@@ -1,7 +1,7 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
 
-# this file contains all functions related to operation of bounding box
+# this file includes functions about transforming the bounding box
 import numpy as np
 import math, time
 import matplotlib.pyplot as plt
@@ -79,10 +79,10 @@ def clip_bboxes_TLBR(bboxes_in, im_width, im_height, debug=True):
         assert bboxcheck_TLBR(np_bboxes), 'the input bboxes are not good'
 
     clipped_bboxes = np.zeros_like(np_bboxes)
-    clipped_bboxes[:, 0] = np.maximum(np.minimum(np_bboxes[:, 0], im_width), 0)         # x1 >= 0 & x1 <= width, included
-    clipped_bboxes[:, 1] = np.maximum(np.minimum(np_bboxes[:, 1], im_height), 0)        # y1 >= 0 & y1 <= height, included
-    clipped_bboxes[:, 2] = np.maximum(np.minimum(np_bboxes[:, 2], im_width), 0)             # x2 >= 0 & x2 <= width, not included
-    clipped_bboxes[:, 3] = np.maximum(np.minimum(np_bboxes[:, 3], im_height), 0)            # y2 >= 0 & y2 <= height, not included
+    clipped_bboxes[:, 0] = np.maximum(np.minimum(np_bboxes[:, 0], im_width), 0)      # x1 >= 0 & x1 <= width, included
+    clipped_bboxes[:, 1] = np.maximum(np.minimum(np_bboxes[:, 1], im_height), 0)     # y1 >= 0 & y1 <= height, included
+    clipped_bboxes[:, 2] = np.maximum(np.minimum(np_bboxes[:, 2], im_width), 0)      # x2 >= 0 & x2 <= width, not included
+    clipped_bboxes[:, 3] = np.maximum(np.minimum(np_bboxes[:, 3], im_height), 0)     # y2 >= 0 & y2 <= height, not included
     return clipped_bboxes
 
 def clip_bboxes_TLWH(bboxes_in, im_width, im_height, debug=True):
@@ -104,12 +104,6 @@ def clip_bboxes_TLWH(bboxes_in, im_width, im_height, debug=True):
     bboxes_TLBR = bbox_TLWH2TLBR(np_bboxes, debug=debug)
     clipped_bboxes_TLBR = clip_bboxes_TLBR(bboxes_TLBR, im_width, im_height, debug=debug)
     clipped_bboxes_TLWH = bbox_TLBR2TLWH(clipped_bboxes_TLBR, debug=debug)
-
-    # clipped_bboxes = np_bboxes.copy()
-    # clipped_bboxes[:, 0] = np.maximum(np.minimum(np_bboxes[:, 0], im_width - 1), 0)       # x1 >= 0 & < im_width
-    # clipped_bboxes[:, 1] = np.maximum(np.minimum(np_bboxes[:, 1], im_height - 1), 0)       # y1 >= 0 & < im_height
-    # clipped_bboxes[:, 2] = np.maximum(np.minimum(np_bboxes[:, 2], im_width - np_bboxes[:, 0]), 0)        # width
-    # clipped_bboxes[:, 3] = np.maximum(np.minimum(np_bboxes[:, 3], im_height - np_bboxes[:, 1]), 0)       # height
     return clipped_bboxes_TLWH
 
 def get_crop_bbox(rect, width, height, debug=True):
