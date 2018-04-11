@@ -4,8 +4,8 @@ from PIL import Image
 import numpy as np
 
 import init_paths
-from image_processing import safe_image
-from xinshuo_python import CHECK_EQ_NUMPY
+from private import safe_image
+from xinshuo_miscellaneous import CHECK_EQ_NUMPY
 from xinshuo_visualization import visualize_image
 
 def test_safe_image():

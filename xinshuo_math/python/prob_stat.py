@@ -17,14 +17,19 @@ def hist_equalization(input_data, num_bins=256, debug=True):
 	that the density can be the same for the middle and the rest
 
 	parameters:
-		input_data:		a list or a numpy data
+		input_data:		a list or a numpy data, could be any shape, not necessarily a 1-d data, can be integer data (uint8 image) or float data (float32 image)
 		num_bins:		bigger, the histogram of equalized data points is more flat
+
+	output:
+		equalized data with the same shape as input, it is float with [0, 1]
 	'''
 	np_data = safe_data(input_data)
 
 	if debug:
 		assert isnparray(np_data), 'the input data is not a numpy data'
 
+	ori_shape = np_data.shape
+	np_data = np_data.flatten()
 	hist, xs = np.histogram(np_data, num_bins, density=True)	# return distribution and X's coordinates
 	cdf = hist.cumsum()
 	cdf = cdf / cdf[-1]			# sparse in the middle
@@ -33,4 +38,4 @@ def hist_equalization(input_data, num_bins=256, debug=True):
 	# plt.plot(np_data, data_equalized, 'o')
 	# plt.show()
 
-	return data_equalized
+	return data_equalized.reshape((ori_shape))

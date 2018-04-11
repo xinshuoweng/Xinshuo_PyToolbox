@@ -18,11 +18,9 @@ def test_hist_equalization():
 	print('testing for image data')
 	image_path = 'lena.jpg'
 	img = np.array(Image.open(image_path).convert('L'))
-	random_data = img.flatten()
 	visualize_image(img, vis=True)	
 	num_bins = 256
-	data_equalized = hist_equalization(random_data, num_bins=num_bins)
-	data_equalized = data_equalized.reshape(img.shape)
+	data_equalized = hist_equalization(img, num_bins=num_bins)
 	visualize_image(data_equalized, vis=True)
 
 if __name__ == '__main__':

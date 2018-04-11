@@ -5,7 +5,7 @@ import numpy as np
 
 import init_paths
 from image_processing import gray2rgb, unnormalize_npimage
-from xinshuo_python import isgrayimage, iscolorimage
+from xinshuo_miscellaneous import isgrayimage, iscolorimage
 from xinshuo_visualization import visualize_image
 
 def test_gray2rgb():

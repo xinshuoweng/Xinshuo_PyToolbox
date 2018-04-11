@@ -4,31 +4,22 @@ import math, cv2
 import numpy as np
 from PIL import Image
 
-from xinshuo_python import *
+from private import safe_image
+from xinshuo_miscellaneous import isfloatimage, iscolorimage, isnparray, isnpimage_dimension, isuintimage, isgrayimage
 from xinshuo_vision import clip_bboxes_TLWH, get_crop_bbox
-
-############################################# internal use ################################
-def safe_image(input_image):
-	'''
-	return a numpy image no matter what input is
-	make sure the output numpy image is a copy of the input image
-	'''
-	if ispilimage(input_image):
-		np_image = np.array(input_image)
-	elif isnpimage(input_image):
-		np_image = input_image.copy()
-	else:
-		assert False, 'only pil and numpy images are supported, might be the case the image is float but has range of [0, 255]'
-
-	return np_image	
+from xinshuo_math import hist_equalization
+from xinshuo_visualization import visualize_image
 
 ############################################# color transform #################################
 def gray2rgb(input_image, with_color=True, cmap='jet', debug=True):
 	'''
 	convert a grayscale image (1-channel) to a rgb image
-		with_color:	add colormap
+		
+	parameters:
+		with_color:		add false colormap
 
-	note: only support uint8 image
+	output:
+		rgb_image:		an uint8 rgb numpy image
 	'''
 	np_image = safe_image(input_image)
 	if isfloatimage(np_image):
@@ -50,17 +41,68 @@ def gray2rgb(input_image, with_color=True, cmap='jet', debug=True):
 def rgb2hsv(input_image, debug=True):
 	'''
 	convert a rgb image to a hsv image
+
+	output:
+		hsv_image: 	an uint8 hsv numpy image
 	'''
 	np_image = safe_image(input_image)
+	if isfloatimage(np_image):
+		np_image = (np_image * 255.).astype('uint8')	
 
 	if debug:
 		assert iscolorimage(np_image), 'the input image should be a rgb image'
+		assert isuintimage(np_image), 'the input numpy image should be uint8 image in order to use PIL'
 
 	pil_rgb_img = Image.fromarray(np_image)
 	pil_hsv_img = pil_rgb_img.convert('HSV')
-	pil_hsv_img = np.array(pil_hsv_img)
+	hsv_img = np.array(pil_hsv_img)
 
-	return pil_hsv_img
+	return hsv_img
+
+def hsv2rgb(input_image, debug=True):
+	'''
+	convert a hsv image to a rgb image
+
+	output:
+		rgb_img: 	an uint8 rgb numpy image
+	'''
+	np_image = safe_image(input_image)
+	if isfloatimage(np_image):
+		np_image = (np_image * 255.).astype('uint8')	
+
+	if debug:
+		assert iscolorimage(np_image), 'the input image should be a rgb image'
+		assert isuintimage(np_image), 'the input numpy image should be uint8 image in order to use PIL'
+
+	rgb_img = cv2.cvtColor(np_image, cv2.COLOR_HSV2RGB)
+	return rgb_img
+
+def image_hist_equalization(input_image, debug=True):
+	'''
+	do histogram equalization for an image: could be a color image or gray image
+
+	output:
+		equalized_image:	an float32 numpy image (rgb or gray)
+	'''
+	np_image = safe_image(input_image)
+	if isuintimage(np_image):
+		np_image = np_image.astype('float32') / 255.
+
+	if debug:
+		assert isfloatimage(np_image), 'the input image should be a float image'
+
+	if iscolorimage(np_image):
+		hsv_image = rgb2hsv(np_image, debug=debug)
+		input_data = hsv_image[:, :, 2]			# extract the value channel
+		equalized_hsv_image = (hist_equalization(input_data, num_bins=256, debug=debug) * 255.).astype('uint8')
+		hsv_image[:, :, 2] = equalized_hsv_image
+		equalized_image = hsv2rgb(hsv_image, debug=debug).astype('float32') / 255.
+	elif isgrayimage(np_image):
+		equalized_image = hist_equalization(np_image, num_bins=256, debug=debug)
+	else:
+		assert False, 'the input image is neither a color image or a grayscale image'
+
+	return equalized_image
 
 ############################################# format transform #################################
 
