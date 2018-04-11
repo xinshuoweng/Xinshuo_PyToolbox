@@ -7,9 +7,7 @@
 import numpy as np
 from scipy.misc import imresize
 
-from xinshuo_python import *
 from xinshuo_io import load_image
-# from visualize import visualize_image
 
 class synthetic_image_data(object):
 	def __init__(self, img, debug=True):

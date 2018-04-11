@@ -7,10 +7,9 @@ from scipy.misc import imread
 import numpy as np
 import os, time, h5py, random
 
-from xinshuo_python import is_path_exists, isnparray, is_path_exists_or_creatable, isfile, isfolder, isfunction, isdict, isstring, islist, isimage
 from xinshuo_io import load_list_from_file, mkdir_if_missing, fileparts, load_list_from_folder
 from preprocess import preprocess_image_caffe, identity
-from xinshuo_miscellaneous import Timer, convert_secs2time
+from xinshuo_miscellaneous import Timer, convert_secs2time, is_path_exists, isnparray, is_path_exists_or_creatable, isfile, isfolder, isfunction, isdict, isstring, islist, isimage
 
 def generate_hdf5(data_src, save_dir, data_name='data', batch_size=1, ext_filter='png', label_src1=None, label_name1='label', label_preprocess_function1=identity, label_range1=None, label_src2=None, label_name2='label2', label_preprocess_function2=identity, label_range2=None, debug=True, vis=False):
     '''

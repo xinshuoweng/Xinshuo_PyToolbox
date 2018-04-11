@@ -6,7 +6,7 @@ import math, cv2
 import numpy as np
 # import matplotlib.pyplot as plt
 
-from private import safe_data
+from private import safe_npdata
 from xinshuo_miscellaneous import isnparray
 
 def hist_equalization(input_data, num_bins=256, debug=True):
@@ -23,7 +23,7 @@ def hist_equalization(input_data, num_bins=256, debug=True):
 	output:
 		equalized data with the same shape as input, it is float with [0, 1]
 	'''
-	np_data = safe_data(input_data)
+	np_data = safe_npdata(input_data)
 
 	if debug:
 		assert isnparray(np_data), 'the input data is not a numpy data'

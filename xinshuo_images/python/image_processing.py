@@ -5,9 +5,8 @@ import numpy as np
 from PIL import Image
 
 from private import safe_image
-from xinshuo_miscellaneous import isfloatimage, iscolorimage, isnparray, isnpimage_dimension, isuintimage, isgrayimage
-from xinshuo_vision import clip_bboxes_TLWH, get_crop_bbox
-from xinshuo_math import hist_equalization
+from xinshuo_miscellaneous import isfloatimage, iscolorimage, isnparray, isnpimage_dimension, isuintimage, isgrayimage, ispilimage
+from xinshuo_math import hist_equalization, clip_bboxes_TLWH, get_crop_bbox
 from xinshuo_visualization import visualize_image
 
 ############################################# color transform #################################
@@ -104,8 +103,69 @@ def image_hist_equalization(input_image, debug=True):
 
 	return equalized_image
 
-############################################# format transform #################################
+# # to test, supposed to be equivalent to gray2rgb
+# def mat2im(mat, cmap, limits):
+#   '''
+# % PURPOSE
+# % Uses vectorized code to convert matrix "mat" to an m-by-n-by-3
+# % image matrix which can be handled by the Mathworks image-processing
+# % functions. The the image is created using a specified color-map
+# % and, optionally, a specified maximum value. Note that it discards
+# % negative values!
+# %
+# % INPUTS
+# % mat     - an m-by-n matrix  
+# % cmap    - an m-by-3 color-map matrix. e.g. hot(100). If the colormap has 
+# %           few rows (e.g. less than 20 or so) then the image will appear 
+# %           contour-like.
+# % limits  - by default the image is normalised to it's max and min values
+# %           so as to use the full dynamic range of the
+# %           colormap. Alternatively, it may be normalised to between
+# %           limits(1) and limits(2). Nan values in limits are ignored. So
+# %           to clip the max alone you would do, for example, [nan, 2]
+# %          
+# %
+# % OUTPUTS
+# % im - an m-by-n-by-3 image matrix  
+#   '''
+#   assert len(mat.shape) == 2
+#   if len(limits) == 2:
+#     minVal = limits[0]
+#     tempss = np.zeros(mat.shape) + minVal
+#     mat    = np.maximum(tempss, mat)
+#     maxVal = limits[1]
+#     tempss = np.zeros(mat.shape) + maxVal
+#     mat    = np.minimum(tempss, mat)
+#   else:
+#     minVal = mat.min()
+#     maxVal = mat.max()
+#   L = len(cmap)
+#   if maxVal <= minVal:
+#     mat = mat-minVal
+#   else:
+#     mat = (mat-minVal) / (maxVal-minVal) * (L-1)
+#   mat = mat.astype(np.int32)
+  
+#   image = np.reshape(cmap[ np.reshape(mat, (mat.size)), : ], mat.shape + (3,))
+#   return image
 
+# def jet(m):
+#   cm_subsection = linspace(0, 1, m)
+#   colors = [ cm.jet(x) for x in cm_subsection ]
+#   J = np.array(colors)
+#   J = J[:, :3]
+#   return J
+
+# def generate_color_from_heatmap(maps, num_of_color=100, index=None):
+#   assert isinstance(maps, np.ndarray)
+#   if len(maps.shape) == 3:
+#     return generate_color_from_heatmaps(maps, num_of_color, index)
+#   elif len(maps.shape) == 2:
+#     return mat2im( maps, jet(num_of_color), [maps.min(), maps.max()] )
+#   else:
+#     assert False, 'generate_color_from_heatmap wrong shape : {}'.format(maps.shape)
+
+############################################# format transform #################################
 def pil2cv_colorimage(pil_image, debug=True, vis=False):
 	'''
 	this function converts a PIL image to a cv2 image, which has RGB and BGR format respectively
@@ -162,74 +222,124 @@ def	unnormalize_npimage(input_image, img_type='uint8', debug=True):
 	unnormalized_img = np_image.astype(img_type)
 	return unnormalized_img
 
-# to test, supposed to be equivalent to gray2rgb
-def mat2im(mat, cmap, limits):
-  '''
-% PURPOSE
-% Uses vectorized code to convert matrix "mat" to an m-by-n-by-3
-% image matrix which can be handled by the Mathworks image-processing
-% functions. The the image is created using a specified color-map
-% and, optionally, a specified maximum value. Note that it discards
-% negative values!
-%
-% INPUTS
-% mat     - an m-by-n matrix  
-% cmap    - an m-by-3 color-map matrix. e.g. hot(100). If the colormap has 
-%           few rows (e.g. less than 20 or so) then the image will appear 
-%           contour-like.
-% limits  - by default the image is normalised to it's max and min values
-%           so as to use the full dynamic range of the
-%           colormap. Alternatively, it may be normalised to between
-%           limits(1) and limits(2). Nan values in limits are ignored. So
-%           to clip the max alone you would do, for example, [nan, 2]
-%          
-%
-% OUTPUTS
-% im - an m-by-n-by-3 image matrix  
-  '''
-  assert len(mat.shape) == 2
-  if len(limits) == 2:
-    minVal = limits[0]
-    tempss = np.zeros(mat.shape) + minVal
-    mat    = np.maximum(tempss, mat)
-    maxVal = limits[1]
-    tempss = np.zeros(mat.shape) + maxVal
-    mat    = np.minimum(tempss, mat)
-  else:
-    minVal = mat.min()
-    maxVal = mat.max()
-  L = len(cmap)
-  if maxVal <= minVal:
-    mat = mat-minVal
-  else:
-    mat = (mat-minVal) / (maxVal-minVal) * (L-1)
-  mat = mat.astype(np.int32)
-  
-  image = np.reshape(cmap[ np.reshape(mat, (mat.size)), : ], mat.shape + (3,))
-  return image
+############################################# 2D transformation #################################
+def rotate_bound(image, angle):
+    # angle is counter_clockwise
+    if angle == -90:
+        # rotate clockwise
+        return np.rot90(image, 3)
+    else:
+        return np.rot90(image)
+        # rotate counter-clockwise
 
-def jet(m):
-  cm_subsection = linspace(0, 1, m)
-  colors = [ cm.jet(x) for x in cm_subsection ]
-  J = np.array(colors)
-  J = J[:, :3]
-  return J
+def pad_around(img, pad_rect, pad_value):
+	'''
+	this function is to pad given value to an image in provided region, all images in this function are floating images
+	parameters:
+		img:        a floating image
+	  	pad_rect:   4 element array, which describes where to pad the value. The order is [left, top, right, bottom]
+	  	pad_value:  a scalar defines what value we should pad
+	'''
 
-def generate_color_from_heatmap(maps, num_of_color=100, index=None):
-  assert isinstance(maps, np.ndarray)
-  if len(maps.shape) == 3:
-    return generate_color_from_heatmaps(maps, num_of_color, index)
-  elif len(maps.shape) == 2:
-    return mat2im( maps, jet(num_of_color), [maps.min(), maps.max()] )
-  else:
-    assert False, 'generate_color_from_heatmap wrong shape : {}'.format(maps.shape)
-    
+	[im_height, im_width, channel] = img.shape
 
-############################################## miscellaneous
+	# calculate the new size of image
+	pad_left    = pad_rect[0];
+	pad_top     = pad_rect[1];
+	pad_right   = pad_rect[2];
+	pad_bottom  = pad_rect[3];
+	new_height  = im_height + pad_top + pad_bottom;
+	new_width   = im_width + pad_left + pad_right;
+
+	# pad
+	padded = np.zeros([new_height, new_width, channel]);
+	padded[:] = pad_value;
+	padded[pad_top: new_height-pad_bottom, pad_left: new_width-pad_right, :] = img;
+	return padded
+
+def crop_center(input_image, center_rect, pad_value=0, debug=True):
+	'''
+	crop the image around a specific center with padded value around the empty area
+	when the crop width/height are even, the cropped image has 1 additional pixel towards left/up
+
+	parameters:
+		center_rect:	a list or numpy array containing [center_x, center_y, (crop_width, crop_height)]
+		pad_value:		scalar within [0, 255]
+
+	outputs:
+		cropped_img:	
+		crop_rect_expand:
+		crop_rect_boundary
+	'''	
+	np_image = safe_image(input_image)
+	if isfloatimage(np_image):
+		np_image = (np_image * 255.).astype('uint8')
+	if len(np_image.shape) == 2:
+		np_image = np.expand_dims(np_image, axis=2)
+
+	# center_rect and pad_value are checked in get_crop_bbox and pad_around functions
+	if debug:
+		assert isuintimage(np_image), 'the input image is not an uint8 image'
+	im_height, im_width = np_image.shape[0], np_image.shape[1]
+	
+	# calculate crop rectangles
+	crop_rect = get_crop_bbox(center_rect, im_width, im_height, debug=False)
+	xmin, ymin, xmax, ymax = crop_rect[0], crop_rect[1], crop_rect[0] + crop_rect[2] - 1, crop_rect[1] + crop_rect[3] - 1
+
+	tmp_min_x = xmin if xmin>=0 else 0
+	tmp_max_x = xmax if xmax<np_image.shape[1] else (np_image.shape[1]-1)
+	tmp_min_y = ymin if ymin>=0 else 0
+	tmp_max_y = ymax if ymax<np_image.shape[0] else (np_image.shape[0]-1)
+	cropped = np_image[tmp_min_y:tmp_max_y+1, tmp_min_x:tmp_max_x+1, :]
+
+	# if original image is not enough to cover the crop area, we pad value around outside after cropping
+	if (xmin < 0 or ymin < 0 or xmax > im_width-1 or ymax > im_height-1):
+		pad_left    = max(0 - xmin, 0)
+		pad_top     = max(0 - ymin, 0)
+		pad_right   = max(xmax - (im_width-1), 0)
+		pad_bottom  = max(ymax - (im_height-1), 0)
+		if pad_left > 0:
+			tmp = np.ones((cropped.shape[0], pad_left + cropped.shape[1], np_image.shape[2]))*pad_value
+			tmp[: , pad_left:, :] = cropped
+			cropped = tmp
+		if pad_right > 0:
+			tmp = np.ones((cropped.shape[0], pad_right + cropped.shape[1], np_image.shape[2]))*pad_value
+			tmp[:, :cropped.shape[1], :] = cropped
+			cropped = tmp
+		if pad_top > 0:
+			tmp = np.ones((pad_top + cropped.shape[0], cropped.shape[1], np_image.shape[2])) * pad_value
+			tmp[pad_top:, :, :] = cropped
+			cropped = tmp
+		if pad_bottom > 0:
+			tmp = np.ones((pad_bottom + cropped.shape[0], cropped.shape[1], np_image.shape[2])) * pad_value
+			tmp[:cropped.shape[0] , :, :] = cropped
+			cropped = tmp
+	cropped = cropped.astype('uint8')
+
+	[im_height, im_width, im_channel] = np_image.shape
+	crop_rect_ori = clip_bboxes_TLWH(crop_rect, im_width, im_height)
+
+	crop_rect = np.array(crop_rect).reshape((1, 4))
+	crop_rect_ori = np.array(crop_rect_ori).reshape((1, 4))
+	return cropped, crop_rect, crop_rect_ori
+
+def imresize(img, portion, interp='bicubic', debug=True):
+	if debug:
+		assert interp == 'bicubic' or interp == 'bilinear', 'the interpolation method is not correct'
+		assert isnparray(img), 'the input image is not correct'
+
+	height, width = img.shape[:2]
+	if interp == 'bicubic':
+	    img_ = cv2.resize(img, (int(portion*width), int(portion*height)), interpolation = cv2.INTER_CUBIC)
+	elif interp == 'bilinear':
+		img_ = cv2.resize(img, (int(portion*width), int(portion*height)), interpolation = cv2.INTER_LINEAR)
+	else:
+		assert False, 'interpolation is wrong'
+
+	return img_
 
 
 ############################################# batch processing #################################
-
 def generate_mean_image(images_dir, save_path, debug=True, vis=False):
 	'''
 	this function generates the mean image over all images. It assume the image has the same size
@@ -335,99 +445,6 @@ def vstack_images( images, gap ):
 	hstack = np.vstack( imagelist )
 	return Image.fromarray( hstack )
 
-
-# this function is to pad given value to an image in provided region, all images in this function are floating images
-# parameters:
-#   img:        a floating image
-#   pad_rect:   4 element array, which describes where to pad the value. The order is [left, top, right, bottom]
-#   pad_value:  a scalar defines what value we should pad
-def pad_around(img, pad_rect, pad_value):
-
-    [im_height, im_width, channel] = img.shape
-    
-    # calculate the new size of image
-    pad_left    = pad_rect[0];
-    pad_top     = pad_rect[1];
-    pad_right   = pad_rect[2];
-    pad_bottom  = pad_rect[3];
-    new_height  = im_height + pad_top + pad_bottom;
-    new_width   = im_width + pad_left + pad_right;
-    
-    # pad
-    padded = np.zeros([new_height, new_width, channel]);
-    padded[:] = pad_value;
-    padded[pad_top: new_height-pad_bottom, pad_left: new_width-pad_right, :] = img;
-    return padded
-
-
-# TODO
-def crop_center(img1, rect, pad_value):
-	# rect is XYWH, only uint8 is supported
-
-	if not pad_value:
-	    pad_value = 128
-
-	# calculate crop rectangles
-	[im_height, im_width, im_channel] = img1.shape
-	im_size = [im_height, im_width]
-
-	crop_rect = get_crop_bbox(rect, im_width, im_height, debug=False)
-
-	xmin, ymin, xmax, ymax = crop_rect[0], crop_rect[1], crop_rect[0] + crop_rect[2], crop_rect[1] + crop_rect[3]
-	tmp_min_x = xmin if xmin>=0 else 0
-	tmp_max_x = xmax if xmax<img1.shape[1] else (img1.shape[1]-1)
-	tmp_min_y = ymin if ymin>=0 else 0
-	tmp_max_y = ymax if ymax<img1.shape[0] else (img1.shape[0]-1)
-	cropped = img1[tmp_min_y:tmp_max_y+1, tmp_min_x:tmp_max_x+1, :]
-
-	# if original image is not enough to cover the crop area, we pad value around outside after cropping
-	if (xmin < 0 or ymin < 0 or xmax > im_width-1 or ymax > im_height-1):
-		pad_left    = max(0 - xmin, 0)
-		pad_top     = max(0 - ymin, 0)
-		pad_right   = max(xmax - (im_width-1), 0)
-		pad_bottom  = max(ymax - (im_height-1), 0)
-		if pad_left > 0:
-			tmp = np.ones((cropped.shape[0], pad_left + cropped.shape[1], img1.shape[2]))*pad_value
-			tmp[: , pad_left:, :] = cropped
-			cropped = tmp
-		if pad_right > 0:
-			tmp = np.ones((cropped.shape[0], pad_right + cropped.shape[1], img1.shape[2]))*pad_value
-			tmp[:, :cropped.shape[1], :] = cropped
-			cropped = tmp
-		if pad_top > 0:
-			tmp = np.ones((pad_top + cropped.shape[0], cropped.shape[1], img1.shape[2])) * pad_value
-			tmp[pad_top:, :, :] = cropped
-			cropped = tmp
-		if pad_bottom > 0:
-			tmp = np.ones((pad_bottom + cropped.shape[0], cropped.shape[1], img1.shape[2])) * pad_value
-			tmp[:cropped.shape[0] , :, :] = cropped
-			cropped = tmp
-	cropped = cropped.astype('uint8')
-
-	[im_height, im_width, im_channel] = img1.shape
-	crop_rect_ori = clip_bboxes_TLWH(crop_rect, im_width, im_height)
-
-	crop_rect = np.array(crop_rect).reshape((1, 4))
-	crop_rect_ori = np.array(crop_rect_ori).reshape((1, 4))
-	return cropped, crop_rect, crop_rect_ori
-
-
-def imresize(img, portion, interp='bicubic', debug=True):
-	if debug:
-		assert interp == 'bicubic' or interp == 'bilinear', 'the interpolation method is not correct'
-		assert isnparray(img), 'the input image is not correct'
-
-	height, width = img.shape[:2]
-	if interp == 'bicubic':
-	    img_ = cv2.resize(img, (int(portion*width), int(portion*height)), interpolation = cv2.INTER_CUBIC)
-	elif interp == 'bilinear':
-		img_ = cv2.resize(img, (int(portion*width), int(portion*height)), interpolation = cv2.INTER_LINEAR)
-	else:
-		assert False, 'interpolation is wrong'
-
-	return img_
-
-
 # TODO
 def find_peaks(heatmap, thre):
     #filter = fspecial('gaussian', [3 3], 2)
@@ -464,16 +481,6 @@ def find_peaks(heatmap, thre):
         score[i] = heatmap[Y[i], X[i]]
 
     return X, Y, score
-
-def rotate_bound(image, angle):
-    # angle is counter_clockwise
-    if angle == -90:
-        # rotate clockwise
-        return np.rot90(image, 3)
-    else:
-        return np.rot90(image)
-        # rotate counter-clockwise
-
 
 # done
 def draw_mask(np_image, np_image_mask, alpha=0.3, debug=True):

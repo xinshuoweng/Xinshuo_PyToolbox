@@ -6,7 +6,7 @@ import numpy as np
 from PIL import Image
 from numpy.testing import assert_almost_equal
 
-from xinshuo_python import isnparray, iscolorimage, istuple, islist, CHECK_EQ_LIST_SELF, isimage, isgrayimage, isuintimage, isfloatimage
+from xinshuo_miscellaneous import isnparray, iscolorimage, istuple, islist, CHECK_EQ_LIST_SELF, isimage, isgrayimage, isuintimage, isfloatimage
 from xinshuo_visualization import visualize_image
 
 

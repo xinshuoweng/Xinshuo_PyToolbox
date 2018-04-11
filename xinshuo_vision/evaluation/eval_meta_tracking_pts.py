@@ -3,8 +3,7 @@
 import os, time, torch, json
 import numpy as np
 
-from xinshuo_python import isnonnegativeinteger, is2dptsarray, isstring, is2dptsarray_occlusion, is_path_exists_or_creatable, is_path_exists
-from xinshuo_miscellaneous import print_log, print_np_shape
+from xinshuo_miscellaneous import print_log, print_np_shape, isnonnegativeinteger, is2dptsarray, isstring, is2dptsarray_occlusion, is_path_exists_or_creatable, is_path_exists
 from xinshuo_math import pts_euclidean
 
 # zero-indexed

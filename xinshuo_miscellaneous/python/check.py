@@ -5,7 +5,6 @@ import numpy as np
 from PIL import Image
 
 ############################################################# basic
-
 def isstring(string_test):
 	return isinstance(string_test, basestring)
 
@@ -45,6 +44,8 @@ def isdict(dict_test):
 def isext(ext_test):
     return isstring(ext_test) and ext_test[0] == '.'
 
+def isbbox(bbox_test):
+    return isnparray(bbox_test) and len(bbox_test.shape) == 2 and bbox_test.shape[0] > 0 and bbox_test.shape[1] == 4
 
 ############################################################# list-related
 
@@ -250,7 +251,14 @@ def isscaledimage(image_test):
     else:
         assert False, 'Unknown error'
 
-############################################################# io_related
+############################################################# path related
+def safepath(pathname):
+    '''
+    convert path to a normal representation
+    '''
+    assert is_path_valid(pathname), 'path is not valid: %s' % pathname
+    return os.path.normpath(pathname)
+
 def is_path_valid(pathname):
     '''
     `True` if the passed pathname is a valid pathname for the current OS;
@@ -326,16 +334,7 @@ def isfolder(pathname):
     else:
         return False
 
-def safepath(pathname):
-    '''
-    convert path to a normal representation
-    '''
-    assert is_path_valid(pathname), 'path is not valid: %s' % pathname
-    return os.path.normpath(pathname)
-
-
 ############################################################# equality check
-
 def CHECK_EQ_LIST_SELF(input_list, debug=True):
 	'''
 	check all elements in a list are equal

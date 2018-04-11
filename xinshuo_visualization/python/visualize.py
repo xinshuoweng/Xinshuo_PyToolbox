@@ -18,9 +18,8 @@ from collections import Counter
 
 # this file define a set of functions related to matplotlib
 from xinshuo_io import mkdir_if_missing, fileparts
-from xinshuo_vision import bbox_TLBR2TLWH, bboxcheck_TLBR, get_centered_bbox
-from xinshuo_miscellaneous import print_np_shape, list2tuple, list_reorder, remove_list_from_list, scalar_list2str_list, istuple, isdict, islistoflist, islist, isnparray, isstring, ispilimage, iscolorimage, isgrayimage, isfloatimage, isuintimage
-from xinshuo_math import pts_euclidean, calculate_truncated_mse
+from xinshuo_miscellaneous import print_np_shape, list2tuple, list_reorder, remove_list_from_list, scalar_list2str_list, istuple, isdict, islistoflist, islist, isnparray, isstring, ispilimage, iscolorimage, isgrayimage, isfloatimage, isuintimage, is2dptsarray, is2dptsarray_occlusion, islogical, is_path_exists_or_creatable, isfile
+from xinshuo_math import pts_euclidean, calculate_truncated_mse, bbox_TLBR2TLWH, bboxcheck_TLBR, get_centered_bbox
 
 dpi = 80
 color_set = ['r', 'b', 'g', 'c', 'm', 'y', 'k', 'w', 'lime', 'cyan', 'aqua']
