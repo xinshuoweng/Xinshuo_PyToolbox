@@ -307,15 +307,19 @@ def crop_center(input_image, center_rect, pad_value=0, debug=True):
 	
 	# calculate crop rectangles
 	crop_bbox = get_center_crop_bbox(center_rect, im_width, im_height, debug=debug)
-	xmin, ymin, xmax, ymax = crop_bbox[0, 0], crop_bbox[0, 1], crop_bbox[0, 0] + crop_bbox[0, 2], crop_bbox[0, 1] + crop_bbox[0, 3]
+	crop_bbox_clipped = clip_bboxes_TLWH(crop_bbox, im_width, im_height, debug=debug)
 
-	tmp_min_x = xmin if xmin>=0 else 0
-	tmp_max_x = xmax if xmax<=np_image.shape[1] else (np_image.shape[1])
-	tmp_min_y = ymin if ymin>=0 else 0
-	tmp_max_y = ymax if ymax<=np_image.shape[0] else (np_image.shape[0])
-	img_cropped = np_image[tmp_min_y:tmp_max_y, tmp_min_x:tmp_max_x, :]
+	# tmp_min_x = xmin if xmin>=0 else 0
+	# tmp_max_x = xmax if xmax<=np_image.shape[1] else (np_image.shape[1])
+	# tmp_min_y = ymin if ymin>=0 else 0
+	# tmp_max_y = ymax if ymax<=np_image.shape[0] else (np_image.shape[0])
+	x1, y1, x2, y2 = crop_bbox_clipped[0, 0], crop_bbox_clipped[0, 1], crop_bbox_clipped[0, 0] + crop_bbox_clipped[0, 2], crop_bbox_clipped[0, 1] + crop_bbox_clipped[0, 3]
+	
+	# img_cropped = np_image[tmp_min_y:tmp_max_y, tmp_min_x:tmp_max_x, :]
+	img_cropped = np_image[y1 : y2, x1 : x2, :]
 
 	# if original image is not enough to cover the crop area, we pad value around outside after cropping
+	xmin, ymin, xmax, ymax = crop_bbox[0, 0], crop_bbox[0, 1], crop_bbox[0, 0] + crop_bbox[0, 2], crop_bbox[0, 1] + crop_bbox[0, 3]
 	if (xmin < 0 or ymin < 0 or xmax > im_width or ymax > im_height):
 		pad_left    = max(0 - xmin, 0)
 		pad_top     = max(0 - ymin, 0)
@@ -339,10 +343,7 @@ def crop_center(input_image, center_rect, pad_value=0, debug=True):
 		# 	tmp = np.ones((pad_bottom + cropped.shape[0], cropped.shape[1], np_image.shape[2])) * pad_value
 		# 	tmp[:cropped.shape[0] , :, :] = cropped
 		# 	cropped = tmp
-	# cropped = cropped.astype('uint8')
 
-	# [im_height, im_width, im_channel] = np_image.shape
-	crop_bbox_clipped = clip_bboxes_TLWH(crop_bbox, im_width, im_height, debug=debug)
 	return img_cropped, crop_bbox, crop_bbox_clipped
 
 def imresize(img, portion, interp='bicubic', debug=True):

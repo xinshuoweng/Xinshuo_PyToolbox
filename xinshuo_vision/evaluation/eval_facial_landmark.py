@@ -9,8 +9,7 @@ import time
 from terminaltables import AsciiTable
 from tabulate import tabulate
 
-from xinshuo_vision import bbox_TLBR2TLWH, pts2bbox
-from xinshuo_math import pts_euclidean
+from xinshuo_math import pts_euclidean, bbox_TLBR2TLWH, pts2bbox
 from xinshuo_visualization import visualize_ced, visualize_pts
 from xinshuo_io import fileparts, mkdir_if_missing
 from xinshuo_miscellaneous import print_np_shape, list_reorder

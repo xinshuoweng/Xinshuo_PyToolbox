@@ -6,28 +6,42 @@ import numpy as np
 import init_paths
 from image_processing import crop_center
 from xinshuo_visualization import visualize_image
+from xinshuo_miscellaneous import CHECK_EQ_NUMPY
 
 def test_crop_center():
-	image_path = 'lena.jpg'
-	img = Image.open(image_path).convert('L')
-	img = np.array(img)
-	print(img.shape)
+	image_path = '../lena.jpg'
+	img = Image.open(image_path).convert('RGB')
 
-	center_rect = [5, 50, 20, 20]
-	_, crop1, crop2 = crop_center(img, center_rect=center_rect)
-	print(crop1)
-	print(crop2)
+	#################################### test with 4 elements in center_rect #########################################
+	print('test 2d matrix')
+	np_data = (np.random.rand(5, 5) * 255.).astype('uint8')
+	center_rect = [1, 2, 4, 6]
+	img_padded, crop_bbox, crop_bbox_clipped = crop_center(np_data, center_rect=center_rect, pad_value=10)
+	print(np_data)
+	print(img_padded)
+	assert img_padded.shape == (6, 4), 'the padded image does not have a good shape'
+	assert CHECK_EQ_NUMPY(crop_bbox, np.array([[-1, -1, 4, 6]]))
+	assert CHECK_EQ_NUMPY(crop_bbox_clipped, np.array([[0, 0, 3, 5]]))
 
-	# print('input grayscale image has dimension of: '),
-	# print(img.shape)
-	# assert isgrayimage(img), 'the input image is not a gray image'
-	# visualize_image(img, vis=True)
+	print('test 2d matrix')
+	np_data = (np.random.rand(5, 5) * 255.).astype('uint8')
+	center_rect = [3, 2, 4, 6]
+	img_padded, crop_bbox, crop_bbox_clipped = crop_center(np_data, center_rect=center_rect, pad_value=10)
+	print(np_data)
+	print(img_padded)
+	assert img_padded.shape == (6, 4), 'the padded image does not have a good shape'
+	assert CHECK_EQ_NUMPY(crop_bbox, np.array([[1, -1, 4, 6]]))
+	assert CHECK_EQ_NUMPY(crop_bbox_clipped, np.array([[1, 0, 4, 5]]))
 
-	# img_rgb = gray2rgb(img, with_color=True)
-	# print('converted rgb image has dimension of: '),
-	# print(img_rgb.shape)
-	# assert iscolorimage(img_rgb), 'the converted image is not a color image'
-	# visualize_image(img_rgb, vis=True)
+	print('test with grayscale image, clipped on the left')
+	center_rect = [0, 50, 100, 100]
+	img_cropped, crop_bbox, crop_bbox_clipped = crop_center(img, center_rect=center_rect, pad_value=100)
+	assert CHECK_EQ_NUMPY(crop_bbox, np.array([[-50, 0, 100, 100]]))
+	assert CHECK_EQ_NUMPY(crop_bbox_clipped, np.array([[0, 0, 50, 100]]))
+	visualize_image(img, vis=True)
+	visualize_image(img_cropped, vis=True)
+
+	#################################### test with 2 elements in center_rect #########################################
 
 	print('\n\nDONE! SUCCESSFUL!!\n')
 
