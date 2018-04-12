@@ -86,7 +86,7 @@ def test_clip_bboxes_TLBR():
 	except AssertionError:
 		print('the bottom right point coordinate should be larger than bottom left one')
 
-	print('\n\nDONE! SUCCESSFULLY!!\n')
+	print('\n\nDONE! SUCCESSFUL!!\n')
 	
 if __name__ == '__main__':
 	test_clip_bboxes_TLBR()

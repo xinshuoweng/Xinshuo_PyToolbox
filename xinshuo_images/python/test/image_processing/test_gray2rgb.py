@@ -9,7 +9,7 @@ from xinshuo_miscellaneous import isgrayimage, iscolorimage
 from xinshuo_visualization import visualize_image
 
 def test_gray2rgb():
-	image_path = 'lena.jpg'
+	image_path = '../lena.jpg'
 	img = Image.open(image_path).convert('L')
 	img = np.array(img)
 	print('input grayscale image has dimension of: '),
@@ -34,6 +34,6 @@ def test_gray2rgb():
 	img_rgb = gray2rgb(test_pil_format_image, with_color=True)
 	assert iscolorimage(img_rgb), 'the converted image is not a color image'
 
-	print('\n\nDONE! SUCCESSFULLY!!\n')
+	print('\n\nDONE! SUCCESSFUL!!\n')
 if __name__ == '__main__':
 	test_gray2rgb()

@@ -5,8 +5,8 @@ import numpy as np
 from PIL import Image
 
 from private import safe_image
-from xinshuo_miscellaneous import isfloatimage, iscolorimage, isnparray, isnpimage_dimension, isuintimage, isgrayimage, ispilimage
-from xinshuo_math import hist_equalization, clip_bboxes_TLWH, get_crop_bbox
+from xinshuo_miscellaneous import isfloatimage, iscolorimage, isnparray, isnpimage_dimension, isuintimage, isgrayimage, ispilimage, islist, isinteger, islistofnonnegativeinteger
+from xinshuo_math import hist_equalization, clip_bboxes_TLWH, get_center_crop_bbox
 from xinshuo_visualization import visualize_image
 
 ############################################# color transform #################################
@@ -15,6 +15,7 @@ def gray2rgb(input_image, with_color=True, cmap='jet', debug=True):
 	convert a grayscale image (1-channel) to a rgb image
 		
 	parameters:
+		input_image:	an pil or numpy image
 		with_color:		add false colormap
 
 	output:
@@ -41,6 +42,9 @@ def rgb2hsv(input_image, debug=True):
 	'''
 	convert a rgb image to a hsv image
 
+	parameters:
+		input_image:	an pil or numpy image
+
 	output:
 		hsv_image: 	an uint8 hsv numpy image
 	'''
@@ -62,6 +66,9 @@ def hsv2rgb(input_image, debug=True):
 	'''
 	convert a hsv image to a rgb image
 
+	parameters:
+		input_image:	an pil or numpy image
+
 	output:
 		rgb_img: 	an uint8 rgb numpy image
 	'''
@@ -79,6 +86,9 @@ def hsv2rgb(input_image, debug=True):
 def image_hist_equalization(input_image, debug=True):
 	'''
 	do histogram equalization for an image: could be a color image or gray image
+
+	parameters:
+		input_image:	an pil or numpy image
 
 	output:
 		equalized_image:	an float32 numpy image (rgb or gray)
@@ -232,30 +242,43 @@ def rotate_bound(image, angle):
         return np.rot90(image)
         # rotate counter-clockwise
 
-def pad_around(img, pad_rect, pad_value):
+def pad_around(input_image, pad_rect, pad_value=0, debug=True):
 	'''
 	this function is to pad given value to an image in provided region, all images in this function are floating images
+	
 	parameters:
-		img:        a floating image
-	  	pad_rect:   4 element array, which describes where to pad the value. The order is [left, top, right, bottom]
-	  	pad_value:  a scalar defines what value we should pad
+		input_image:	an pil or numpy image
+	  	pad_rect:   	a list of 4 non-negative integers, describing how many pixels to pad. The order is [left, top, right, bottom]
+	  	pad_value:  	an intger between [0, 255]
+
+	outputs:
+		img_padded:		an uint8 numpy image with padding
 	'''
+	np_image = safe_image(input_image)
+	if isfloatimage(np_image):
+		np_image = (np_image * 255.).astype('uint8')
+	if len(np_image.shape) == 2:
+		np_image = np.expand_dims(np_image, axis=2)		# extend the third channel if the image is grayscale
 
-	[im_height, im_width, channel] = img.shape
+	if debug:
+		assert isuintimage(np_image), 'the input image is not an uint8 image'
+		assert isinteger(pad_value) and pad_value >= 0 and pad_value <= 255, 'the pad value should be an integer within [0, 255]'
+		assert islistofnonnegativeinteger(pad_rect) and len(pad_rect) == 4, 'the input pad rect is not a list of 4 non-negative integers'
 
-	# calculate the new size of image
-	pad_left    = pad_rect[0];
-	pad_top     = pad_rect[1];
-	pad_right   = pad_rect[2];
-	pad_bottom  = pad_rect[3];
-	new_height  = im_height + pad_top + pad_bottom;
-	new_width   = im_width + pad_left + pad_right;
+	im_height, im_width, im_channel = np_image.shape[0], np_image.shape[1], np_image.shape[2]
 
-	# pad
-	padded = np.zeros([new_height, new_width, channel]);
-	padded[:] = pad_value;
-	padded[pad_top: new_height-pad_bottom, pad_left: new_width-pad_right, :] = img;
-	return padded
+	# calculate the padded size of image
+	pad_left, pad_top, pad_right, pad_bottom = pad_rect[0], pad_rect[1], pad_rect[2], pad_rect[3]
+	new_height  = im_height + pad_top + pad_bottom
+	new_width   = im_width + pad_left + pad_right
+
+	# padding
+	img_padded = np.zeros([new_height, new_width, im_channel]).astype('uint8')
+	img_padded.fill(pad_value)
+	img_padded[pad_top : new_height - pad_bottom, pad_left : new_width - pad_right, :] = np_image
+	if img_padded.shape[2] == 1: img_padded = img_padded[:, :, 0]
+
+	return img_padded
 
 def crop_center(input_image, center_rect, pad_value=0, debug=True):
 	'''
@@ -263,7 +286,7 @@ def crop_center(input_image, center_rect, pad_value=0, debug=True):
 	when the crop width/height are even, the cropped image has 1 additional pixel towards left/up
 
 	parameters:
-		center_rect:	a list or numpy array containing [center_x, center_y, (crop_width, crop_height)]
+		center_rect:	a list contains [center_x, center_y, (crop_width, crop_height)]
 		pad_value:		scalar within [0, 255]
 
 	outputs:
@@ -275,7 +298,7 @@ def crop_center(input_image, center_rect, pad_value=0, debug=True):
 	if isfloatimage(np_image):
 		np_image = (np_image * 255.).astype('uint8')
 	if len(np_image.shape) == 2:
-		np_image = np.expand_dims(np_image, axis=2)
+		np_image = np.expand_dims(np_image, axis=2)		# extend the third channel if the image is grayscale
 
 	# center_rect and pad_value are checked in get_crop_bbox and pad_around functions
 	if debug:
@@ -283,45 +306,44 @@ def crop_center(input_image, center_rect, pad_value=0, debug=True):
 	im_height, im_width = np_image.shape[0], np_image.shape[1]
 	
 	# calculate crop rectangles
-	crop_rect = get_crop_bbox(center_rect, im_width, im_height, debug=False)
-	xmin, ymin, xmax, ymax = crop_rect[0], crop_rect[1], crop_rect[0] + crop_rect[2] - 1, crop_rect[1] + crop_rect[3] - 1
+	crop_bbox = get_center_crop_bbox(center_rect, im_width, im_height, debug=debug)
+	xmin, ymin, xmax, ymax = crop_bbox[0, 0], crop_bbox[0, 1], crop_bbox[0, 0] + crop_bbox[0, 2], crop_bbox[0, 1] + crop_bbox[0, 3]
 
 	tmp_min_x = xmin if xmin>=0 else 0
-	tmp_max_x = xmax if xmax<np_image.shape[1] else (np_image.shape[1]-1)
+	tmp_max_x = xmax if xmax<=np_image.shape[1] else (np_image.shape[1])
 	tmp_min_y = ymin if ymin>=0 else 0
-	tmp_max_y = ymax if ymax<np_image.shape[0] else (np_image.shape[0]-1)
-	cropped = np_image[tmp_min_y:tmp_max_y+1, tmp_min_x:tmp_max_x+1, :]
+	tmp_max_y = ymax if ymax<=np_image.shape[0] else (np_image.shape[0])
+	img_cropped = np_image[tmp_min_y:tmp_max_y, tmp_min_x:tmp_max_x, :]
 
 	# if original image is not enough to cover the crop area, we pad value around outside after cropping
-	if (xmin < 0 or ymin < 0 or xmax > im_width-1 or ymax > im_height-1):
+	if (xmin < 0 or ymin < 0 or xmax > im_width or ymax > im_height):
 		pad_left    = max(0 - xmin, 0)
 		pad_top     = max(0 - ymin, 0)
-		pad_right   = max(xmax - (im_width-1), 0)
-		pad_bottom  = max(ymax - (im_height-1), 0)
-		if pad_left > 0:
-			tmp = np.ones((cropped.shape[0], pad_left + cropped.shape[1], np_image.shape[2]))*pad_value
-			tmp[: , pad_left:, :] = cropped
-			cropped = tmp
-		if pad_right > 0:
-			tmp = np.ones((cropped.shape[0], pad_right + cropped.shape[1], np_image.shape[2]))*pad_value
-			tmp[:, :cropped.shape[1], :] = cropped
-			cropped = tmp
-		if pad_top > 0:
-			tmp = np.ones((pad_top + cropped.shape[0], cropped.shape[1], np_image.shape[2])) * pad_value
-			tmp[pad_top:, :, :] = cropped
-			cropped = tmp
-		if pad_bottom > 0:
-			tmp = np.ones((pad_bottom + cropped.shape[0], cropped.shape[1], np_image.shape[2])) * pad_value
-			tmp[:cropped.shape[0] , :, :] = cropped
-			cropped = tmp
-	cropped = cropped.astype('uint8')
+		pad_right   = max(xmax - im_width, 0)
+		pad_bottom  = max(ymax - im_height, 0)
+		pad_rect 	= [pad_left, pad_top, pad_right, pad_bottom]
+		img_cropped = pad_around(img_cropped, pad_rect=pad_rect, pad_value=pad_value, debug=debug)
+		# if pad_left > 0:
+		# 	tmp = np.ones((cropped.shape[0], pad_left + cropped.shape[1], np_image.shape[2]))*pad_value
+		# 	tmp[: , pad_left:, :] = cropped
+		# 	cropped = tmp
+		# if pad_right > 0:
+		# 	tmp = np.ones((cropped.shape[0], pad_right + cropped.shape[1], np_image.shape[2]))*pad_value
+		# 	tmp[:, :cropped.shape[1], :] = cropped
+		# 	cropped = tmp
+		# if pad_top > 0:
+		# 	tmp = np.ones((pad_top + cropped.shape[0], cropped.shape[1], np_image.shape[2])) * pad_value
+		# 	tmp[pad_top:, :, :] = cropped
+		# 	cropped = tmp
+		# if pad_bottom > 0:
+		# 	tmp = np.ones((pad_bottom + cropped.shape[0], cropped.shape[1], np_image.shape[2])) * pad_value
+		# 	tmp[:cropped.shape[0] , :, :] = cropped
+		# 	cropped = tmp
+	# cropped = cropped.astype('uint8')
 
-	[im_height, im_width, im_channel] = np_image.shape
-	crop_rect_ori = clip_bboxes_TLWH(crop_rect, im_width, im_height)
-
-	crop_rect = np.array(crop_rect).reshape((1, 4))
-	crop_rect_ori = np.array(crop_rect_ori).reshape((1, 4))
-	return cropped, crop_rect, crop_rect_ori
+	# [im_height, im_width, im_channel] = np_image.shape
+	crop_bbox_clipped = clip_bboxes_TLWH(crop_bbox, im_width, im_height, debug=debug)
+	return img_cropped, crop_bbox, crop_bbox_clipped
 
 def imresize(img, portion, interp='bicubic', debug=True):
 	if debug:

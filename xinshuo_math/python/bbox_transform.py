@@ -3,14 +3,14 @@
 
 # this file includes functions about transforming the bounding box
 import numpy as np
-import math, time
+import math, time, copy
 import matplotlib.pyplot as plt
 from numpy.testing import assert_almost_equal
 from math import radians as rad
 
 from private import safe_bbox, bboxcheck_TLBR, bboxcheck_TLWH
 from math_geometry import get_line, get_intersection
-from xinshuo_miscellaneous import imagecoor2cartesian, cartesian2imagecoor, isnparray, is2dptsarray, is2dptsarray_occlusion, is2dpts, isinteger, isbbox
+from xinshuo_miscellaneous import imagecoor2cartesian, cartesian2imagecoor, isnparray, is2dptsarray, is2dptsarray_occlusion, is2dpts, isinteger, isbbox, islist
 
 # general format instruction
 # TLBR:     top left bottom right, stands for two corner points, the top left point is included, the bottom right point is not included
@@ -106,32 +106,43 @@ def clip_bboxes_TLWH(bboxes_in, im_width, im_height, debug=True):
     clipped_bboxes_TLWH = bbox_TLBR2TLWH(clipped_bboxes_TLBR, debug=debug)
     return clipped_bboxes_TLWH
 
-def get_crop_bbox(rect, width, height, debug=True):
+def get_center_crop_bbox(center_rect, im_width=None, im_height=None, debug=True):
     '''
-    given a target width and height (and center), obtain the bbox to crop in an image
+    obtain a bbox to crop around a center point
+
+    parameters:
+        center_rect:        a list of 2 or 4 scalar elements, 
+                            2 - > [crop_width, crop_height], the center is the image center
+                            4 - > [center_x, center_y, crop_width, crop_height]
+        im_width/im_height:     scalar
+
+    outputs:
+        crop_bbox:          TLHW format, a numpy array with shape of (1, 4)     
     '''
     if debug:
-        assert len(rect) == 4 or len(rect) == 2, 'the input rect should be length of 2 or 4'
+        assert islist(center_rect), 'the center rect should be a list'
+        assert len(center_rect) == 4 or len(center_rect) == 2, 'the input rect should be length of 2 or 4'
+    center_rect = copy.copy(center_rect)
+    center_rect = [int(x) for x in center_rect]
 
-    rect = [int(x) for x in rect]
-    if len(rect) == 4:            # crop around the given center and width and height
-        center_x = rect[0]
-        center_y = rect[1]
-        crop_width = rect[2]
-        crop_height = rect[3]
+    if len(center_rect) == 4:            # crop around the given center and width and height
+        center_x = center_rect[0]
+        center_y = center_rect[1]
+        crop_width = center_rect[2]
+        crop_height = center_rect[3]
     else:                            # crop around the center of the image
-        center_x = math.ceil(width/2)
-        center_y = math.ceil(height/2)   
-        crop_width = rect[0]
-        crop_height = rect[1]
+        if debug:
+            assert (im_width is not None) and (im_height is not None), 'the image shape should be known when center is not provided'
+        center_x = math.ceil(im_width / 2)
+        center_y = math.ceil(im_height / 2)   
+        crop_width = center_rect[0]
+        crop_height = center_rect[1]
     
-    # calculate cropped region
-    xmin = int(center_x - math.ceil(crop_width/2) + 1) -1
-    ymin = int(center_y - math.ceil(crop_height/2) + 1) -1
-    # xmax = int(xmin + crop_width - 1)               # the actual xmax and ymax, included [xmin, xmax] instead of [xmin, xmax)
-    # ymax = int(ymin + crop_height - 1) 
+    xmin = int(center_x - math.ceil(crop_width / 2) + 1) - 1
+    ymin = int(center_y - math.ceil(crop_height / 2) + 1) - 1
+    crop_bbox = np.array([xmin, ymin, crop_width, crop_height]).reshape((1, 4))
 
-    return [xmin, ymin, crop_width, crop_height]
+    return crop_bbox
 
 ############################################# pts related transform #################################
 def pts2bbox(pts, debug=True, vis=False):

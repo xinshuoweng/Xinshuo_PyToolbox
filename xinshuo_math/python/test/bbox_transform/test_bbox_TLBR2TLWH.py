@@ -39,6 +39,6 @@ def test_bbox_TLBR2TLWH():
 	print(clipped)
 	assert CHECK_EQ_NUMPY(clipped, np.array([[10, 30, 0, 0], [-1, 3, 21, 0]]).reshape((2, 4)))
 
-	print('\n\nDONE! SUCCESSFULLY!!\n')
+	print('\n\nDONE! SUCCESSFUL!!\n')
 if __name__ == '__main__':
 	test_bbox_TLBR2TLWH()

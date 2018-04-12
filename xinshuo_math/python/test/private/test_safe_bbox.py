@@ -24,6 +24,6 @@ def test_safe_bbox():
 	print(good_bbox.shape)
 	assert CHECK_EQ_NUMPY(good_bbox, bbox)
 
-	print('\n\nDONE! SUCCESSFULLY!!\n')
+	print('\n\nDONE! SUCCESSFUL!!\n')
 if __name__ == '__main__':
 	test_safe_bbox()

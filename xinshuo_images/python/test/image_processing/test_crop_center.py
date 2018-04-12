@@ -29,5 +29,7 @@ def test_crop_center():
 	# assert iscolorimage(img_rgb), 'the converted image is not a color image'
 	# visualize_image(img_rgb, vis=True)
 
+	print('\n\nDONE! SUCCESSFUL!!\n')
+
 if __name__ == '__main__':
 	test_crop_center()

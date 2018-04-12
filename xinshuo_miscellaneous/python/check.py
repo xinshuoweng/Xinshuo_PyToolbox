@@ -72,7 +72,23 @@ def islistofscalar(list_test):
         return True
     else:
         return False  
-        
+
+def islistofpositiveinteger(list_test):
+    if not islist(list_test):
+        return False
+    if all(ispositiveinteger(tmp) for tmp in list_test):
+        return True
+    else:
+        return False  
+
+def islistofnonnegativeinteger(list_test):
+    if not islist(list_test):
+        return False
+    if all(isnonnegativeinteger(tmp) for tmp in list_test):
+        return True
+    else:
+        return False  
+
 ############################################################# geometry-related
 
 def is2dline(line_test):

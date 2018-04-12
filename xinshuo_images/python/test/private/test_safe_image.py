@@ -9,7 +9,7 @@ from xinshuo_miscellaneous import CHECK_EQ_NUMPY
 from xinshuo_visualization import visualize_image
 
 def test_safe_image():
-	image_path = 'lena.jpg'
+	image_path = '../lena.jpg'
 
 	# test when the input image is pil image
 	img_pil = Image.open(image_path)
@@ -29,7 +29,7 @@ def test_safe_image():
 	assert not CHECK_EQ_NUMPY(copy_image, img_numpy), 'the original image should be equal to the copy'
 	assert CHECK_EQ_NUMPY(img_bak, img_numpy), 'the original image should be equal to the backup version'
 	
-	print('\n\nDONE! SUCCESSFULLY!!\n')
+	print('\n\nDONE! SUCCESSFUL!!\n')
 	
 if __name__ == '__main__':
 	test_safe_image()

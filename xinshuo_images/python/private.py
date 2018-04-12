@@ -15,6 +15,6 @@ def safe_image(input_image):
 	elif isnpimage(input_image):
 		np_image = input_image.copy()
 	else:
-		assert False, 'only pil and numpy images are supported, might be the case the image is float but has range of [0, 255]'
+		assert False, 'only pil and numpy images are supported, might be the case the image is float but has range of [0, 255], or might because the data is float64'
 
 	return np_image	

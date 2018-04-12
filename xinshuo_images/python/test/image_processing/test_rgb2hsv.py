@@ -38,7 +38,7 @@ def test_rgb2hsv():
 	except AssertionError:
 		print('the function does not work when the input is not a rgb image')
 
-	print('\n\nDONE! SUCCESSFULLY!!\n')
+	print('\n\nDONE! SUCCESSFUL!!\n')
 
 if __name__ == '__main__':
 	test_rgb2hsv()
