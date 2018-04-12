@@ -47,6 +47,9 @@ def isext(ext_test):
 def isbbox(bbox_test):
     return isnparray(bbox_test) and len(bbox_test.shape) == 2 and bbox_test.shape[0] > 0 and bbox_test.shape[1] == 4
 
+def iscenterbbox(bbox_test):
+    return isnparray(bbox_test) and len(bbox_test.shape) == 2 and bbox_test.shape[0] > 0 and (bbox_test.shape[1] == 4 or bbox_test.shape[1] == 2)
+
 ############################################################# list-related
 
 def islistoflist(list_test):

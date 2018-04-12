@@ -8,9 +8,9 @@ import matplotlib.pyplot as plt
 from numpy.testing import assert_almost_equal
 from math import radians as rad
 
-from private import safe_bbox, bboxcheck_TLBR, bboxcheck_TLWH
+from private import safe_bbox, safe_center_bbox, bboxcheck_TLBR, bboxcheck_TLWH
 from math_geometry import get_line, get_intersection
-from xinshuo_miscellaneous import imagecoor2cartesian, cartesian2imagecoor, isnparray, is2dptsarray, is2dptsarray_occlusion, is2dpts, isinteger, isbbox, islist
+from xinshuo_miscellaneous import imagecoor2cartesian, cartesian2imagecoor, isnparray, is2dptsarray, is2dptsarray_occlusion, is2dpts, isinteger, isbbox, islist, iscenterbbox
 
 # general format instruction
 # TLBR:     top left bottom right, stands for two corner points, the top left point is included, the bottom right point is not included
@@ -24,7 +24,8 @@ def bbox_TLBR2TLWH(bboxes_in, debug=True):
     transform the input bounding box with TLBR format to TLWH format
 
     parameters:
-        bboxes_in: TLBR format, a list of 4 elements, a numpy array with shape or (N, 4) or (4, )
+        bboxes_in: TLBR format, a list of 4 elements, a listoflist of 4 elements: e.g., [[1,2,3,4], [5,6,7,8]], 
+                    a numpy array with shape or (N, 4) or (4, )
 
     outputs: 
         bbox_TLWH: N X 4 numpy array, TLWH format
@@ -45,7 +46,8 @@ def bbox_TLWH2TLBR(bboxes_in, debug=True):
     transform the input bounding box with TLWH format to TLBR format
 
     parameters:
-        bboxes_in: TLWH format, a list of 4 elements, a numpy array with shape or (N, 4) or (4, )
+        bboxes_in: TLWH format, a list of 4 elements, a listoflist of 4 elements: e.g., [[1,2,3,4], [5,6,7,8]], 
+                    a numpy array with shape or (N, 4) or (4, )
 
     outputs: 
         bbox_TLBR: N X 4 numpy array, TLBR format
@@ -67,7 +69,8 @@ def clip_bboxes_TLBR(bboxes_in, im_width, im_height, debug=True):
     this function clips bboxes inside the image boundary, the coordinates in the clipped bbox are half-included [x, y)
 
     parameters:     
-        bboxes_in:              TLBR format, a list of 4 elements, a numpy array with shape or (N, 4) or (4, )
+        bboxes_in:              TLBR format, a list of 4 elements, a listoflist of 4 elements: e.g., [[1,2,3,4], [5,6,7,8]], 
+                                a numpy array with shape or (N, 4) or (4, )
         im_width/im_height:     scalar
 
     outputs:        
@@ -90,7 +93,8 @@ def clip_bboxes_TLWH(bboxes_in, im_width, im_height, debug=True):
     this function clips bboxes inside the image boundary
 
     parameters:     
-        bboxes_in:              TLWH format, a list of 4 elements, a numpy array with shape or (N, 4) or (4, )
+        bboxes_in:              TLWH format, a list of 4 elements, a listoflist of 4 elements: e.g., [[1,2,3,4], [5,6,7,8]], 
+                                a numpy array with shape or (N, 4) or (4, )
         im_width/im_height:     scalar
 
     outputs:        
@@ -106,43 +110,42 @@ def clip_bboxes_TLWH(bboxes_in, im_width, im_height, debug=True):
     clipped_bboxes_TLWH = bbox_TLBR2TLWH(clipped_bboxes_TLBR, debug=debug)
     return clipped_bboxes_TLWH
 
-def get_center_crop_bbox(center_rect, im_width=None, im_height=None, debug=True):
+def get_center_crop_bbox(center_bboxes_in, im_width=None, im_height=None, debug=True):
     '''
     obtain a bbox to crop around a center point
 
     parameters:
-        center_rect:        a list of 2 or 4 scalar elements, 
+        center_bboxes_in:   a list of 2 or 4 scalar elements, or (N, 2) / (N, 4) numpy array
                             2 - > [crop_width, crop_height], the center is the image center
                             4 - > [center_x, center_y, crop_width, crop_height]
         im_width/im_height:     scalar
 
     outputs:
-        crop_bbox:          TLHW format, a numpy array with shape of (1, 4)     
+        crop_bboxes:          TLHW format, a numpy array with shape of (N, 4)     
     '''
+    np_center_bboxes = safe_center_bbox(center_bboxes_in, debug=debug)
     if debug:
-        assert islist(center_rect), 'the center rect should be a list'
-        assert len(center_rect) == 4 or len(center_rect) == 2, 'the input rect should be length of 2 or 4'
-    center_rect = copy.copy(center_rect)
-    center_rect = [int(x) for x in center_rect]
+        assert iscenterbbox(np_center_bboxes), 'the center bbox does not have a good shape'
 
-    if len(center_rect) == 4:            # crop around the given center and width and height
-        center_x = center_rect[0]
-        center_y = center_rect[1]
-        crop_width = center_rect[2]
-        crop_height = center_rect[3]
+    if np_center_bboxes.shape[1] == 4:            # crop around the given center and width and height
+        center_x = np_center_bboxes[:, 0]
+        center_y = np_center_bboxes[:, 1]
+        crop_width = np_center_bboxes[:, 2]
+        crop_height = np_center_bboxes[:, 3]
     else:                            # crop around the center of the image
         if debug:
             assert (im_width is not None) and (im_height is not None), 'the image shape should be known when center is not provided'
-        center_x = math.ceil(im_width / 2)
-        center_y = math.ceil(im_height / 2)   
-        crop_width = center_rect[0]
-        crop_height = center_rect[1]
+        center_x = np.ceil(im_width / 2)
+        center_y = np.ceil(im_height / 2)   
+        crop_width = np_center_bboxes[:, 0]
+        crop_height = np_center_bboxes[:, 1]
     
-    xmin = int(center_x - math.ceil(crop_width / 2) + 1) - 1
-    ymin = int(center_y - math.ceil(crop_height / 2) + 1) - 1
-    crop_bbox = np.array([xmin, ymin, crop_width, crop_height]).reshape((1, 4))
-
-    return crop_bbox
+    xmin = center_x - np.ceil(crop_width / 2)
+    ymin = center_y - np.ceil(crop_height / 2)
+    crop_bboxes = np.hstack((xmin.reshape((-1, 1)), ymin.reshape((-1, 1)), crop_width.reshape((-1, 1)), crop_height.reshape((-1, 1))))
+    crop_bboxes = crop_bboxes.astype('int64')
+    
+    return crop_bboxes
 
 ############################################# pts related transform #################################
 def pts2bbox(pts, debug=True, vis=False):
@@ -175,7 +178,7 @@ def pts2bbox(pts, debug=True, vis=False):
         plt.close(fig)
     return bbox
 
-def bbox2center(bbox, debug=True, vis=False):
+def bbox2center(bboxes_in, debug=True, vis=False):
     '''
     convert a bounding box to a point, which is the center of this bounding box
 
@@ -185,25 +188,26 @@ def bbox2center(bbox, debug=True, vis=False):
     return:
         center: 2 x N numpy array, x and y correspond to first and second row respectively
     '''
+    np_bboxes = safe_bbox(bboxes_in, debug=debug)
     if debug:
-        assert bboxcheck_TLBR(bbox), 'the input bounding box should be TLBR format'
+        assert bboxcheck_TLBR(np_bboxes), 'the input bounding box should be TLBR format'
 
-    num_bbox = bbox.shape[0]        
+    num_bbox = np_bboxes.shape[0]        
     center = np.zeros((num_bbox, 2), dtype='float32')
-    center[:, 0] = (bbox[:, 0] + bbox[:, 2]) / 2.
-    center[:, 1] = (bbox[:, 1] + bbox[:, 3]) / 2.
+    center[:, 0] = (np_bboxes[:, 0] + np_bboxes[:, 2]) / 2.
+    center[:, 1] = (np_bboxes[:, 1] + np_bboxes[:, 3]) / 2.
 
     if vis:
         fig = plt.figure()
-        plt.scatter(bbox[0, 0], -bbox[0, 1], color='b')         # -1 is to convert the coordinate from image to cartesian
-        plt.scatter(bbox[0, 2], -bbox[0, 3], color='b')
+        plt.scatter(np_bboxes[0, 0], -np_bboxes[0, 1], color='b')         # -1 is to convert the coordinate from image to cartesian
+        plt.scatter(np_bboxes[0, 2], -np_bboxes[0, 3], color='b')
         center_show = imagecoor2cartesian(center)
         plt.scatter(center_show[0], center_show[1], color='r')        
         plt.show()
         plt.close(fig)
     return np.transpose(center)
 
-def pts_conversion_bbox(pts_array, bbox, debug=True):
+def pts_conversion_bbox(pts_array, bboxes_in, debug=True):
     '''
     convert pts in the original image to pts in the cropped image
 
@@ -211,17 +215,14 @@ def pts_conversion_bbox(pts_array, bbox, debug=True):
         bbox:       1 X 4 numpy array, TLBR or TLWH format
         pts_array:  2(3) x N numpy array, N should >= 1
     '''
-    bbox = safe_bbox(bbox, debug=debug)
+    np_bboxes = safe_bbox(bboxes_in, debug=debug)
     if debug:
         assert is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array), 'the input points should have shape: 2 or 3 x num_pts vs %d x %s' % (pts_array.shape[0], pts_array.shape[1])
-        assert isbbox(bbox), 'the input bounding box is not correct'
-
-    if len(bbox) == 4:
-        bbox = np.array(bbox).reshape((1, 4))
+        assert isbbox(np_bboxes), 'the input bounding box is not correct'
 
     pts_out = pts_array.copy()
-    pts_out[0, :] = pts_array[0, :] - bbox[0, 0]
-    pts_out[1, :] = pts_array[1, :] - bbox[0, 1]
+    pts_out[0, :] = pts_array[0, :] - np_bboxes[0, 0]
+    pts_out[1, :] = pts_array[1, :] - np_bboxes[0, 1]
 
     return pts_out
 
@@ -233,24 +234,18 @@ def pts_conversion_back_bbox(pts_array, bbox, debug=True):
         bbox:       1 X 4 numpy array, TLBR or TLWH format
         pts_array:  2(3) x N numpy array, N should >= 1
     '''
-    bbox = safe_bbox(bbox, debug=debug)
+    np_bboxes = safe_bbox(bboxes_in, debug=debug)
     if debug:
         assert is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array), 'the input points should have shape: 2 or 3 x num_pts vs %d x %s' % (pts_array.shape[0], pts_array.shape[1])
-        assert isbbox(bbox), 'the input bounding box is not correct'
+        assert isbbox(np_bboxes), 'the input bounding box is not correct'
 
-    if len(bbox) == 4:
-        bbox = np.array(bbox).reshape((1, 4))
-    
     pts_out = pts_array.copy()
-    pts_out[0, :] = pts_array[0, :] + bbox[0, 0]
-    pts_out[1, :] = pts_array[1, :] + bbox[0, 1]
+    pts_out[0, :] = pts_array[0, :] + np_bboxes[0, 0]
+    pts_out[1, :] = pts_array[1, :] + np_bboxes[0, 1]
 
     return pts_out
 
-
-
 ############################################# to test #################################
-
 def bbox_transform(ex_rois, gt_rois):
     ex_widths = ex_rois[:, 2] - ex_rois[:, 0] + 1.0
     ex_heights = ex_rois[:, 3] - ex_rois[:, 1] + 1.0
@@ -451,31 +446,31 @@ def bbox_enlarge(bbox, ratio=0.2, width_ratio=None, height_ratio=None, min_lengt
     return bbox
 
 
-# done
-def get_centered_bbox(pts_array, width, height, debug=True):
-    '''
-    given a set of points, return a set of bbox which are centered at the points
+# # done
+# def get_centered_bbox(pts_array, width, height, debug=True):
+#     '''
+#     given a set of points, return a set of bbox which are centered at the points
     
-    parameters:
-        pts_array:      2 x num_pts
+#     parameters:
+#         pts_array:      2 x num_pts
 
-    return:
-        bbox:           N x 4 (TLBR format)
+#     return:
+#         bbox:           N x 4 (TLBR format)
 
-    '''
+#     '''
     
-    if debug:
-        assert is2dpts(pts_array) or is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array), 'the input points should have shape: 2 or 3 x num_pts vs %d x %s' % (pts_array.shape[0], pts_array.shape[1])
+#     if debug:
+#         assert is2dpts(pts_array) or is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array), 'the input points should have shape: 2 or 3 x num_pts vs %d x %s' % (pts_array.shape[0], pts_array.shape[1])
 
-    if is2dpts(pts_array):
-        xmin = pts_array[0] - np.ceil(width/2.0) + 1    
-        ymin = pts_array[1] - np.ceil(height/2.0) + 1
-    else: 
-        xmin = pts_array[0, :] - np.ceil(width/2.0) + 1    
-        ymin = pts_array[1, :] - np.ceil(height/2.0) + 1
+#     if is2dpts(pts_array):
+#         xmin = pts_array[0] - np.ceil(width/2.0) + 1    
+#         ymin = pts_array[1] - np.ceil(height/2.0) + 1
+#     else: 
+#         xmin = pts_array[0, :] - np.ceil(width/2.0) + 1    
+#         ymin = pts_array[1, :] - np.ceil(height/2.0) + 1
 
-    xmax = xmin + width - 1;
-    ymax = ymin + height - 1;
+#     xmax = xmin + width - 1;
+#     ymax = ymin + height - 1;
     
-    bbox = np.vstack((xmin, ymin, xmax, ymax))
-    return np.transpose(bbox)
+#     bbox = np.vstack((xmin, ymin, xmax, ymax))
+#     return np.transpose(bbox)

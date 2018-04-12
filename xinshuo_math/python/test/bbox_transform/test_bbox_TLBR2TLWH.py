@@ -1,6 +1,5 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
-from PIL import Image
 import numpy as np
 
 import init_paths
