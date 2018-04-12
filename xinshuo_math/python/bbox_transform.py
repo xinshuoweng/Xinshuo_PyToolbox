@@ -121,7 +121,7 @@ def get_center_crop_bbox(center_bboxes_in, im_width=None, im_height=None, debug=
         im_width/im_height:     scalar
 
     outputs:
-        crop_bboxes:          TLHW format, a numpy array with shape of (N, 4)     
+        crop_bboxes:          TLHW format, an int64 numpy array with shape of (N, 4)     
     '''
     np_center_bboxes = safe_center_bbox(center_bboxes_in, debug=debug)
     if debug:

@@ -255,10 +255,8 @@ def pad_around(input_image, pad_rect, pad_value=0, debug=True):
 		img_padded:		an uint8 numpy image with padding
 	'''
 	np_image = safe_image(input_image)
-	if isfloatimage(np_image):
-		np_image = (np_image * 255.).astype('uint8')
-	if len(np_image.shape) == 2:
-		np_image = np.expand_dims(np_image, axis=2)		# extend the third channel if the image is grayscale
+	if isfloatimage(np_image): np_image = (np_image * 255.).astype('uint8')
+	if len(np_image.shape) == 2: np_image = np.expand_dims(np_image, axis=2)		# extend the third channel if the image is grayscale
 
 	if debug:
 		assert isuintimage(np_image), 'the input image is not an uint8 image'
@@ -295,10 +293,8 @@ def crop_center(input_image, center_rect, pad_value=0, debug=True):
 		crop_bbox_clipped:		numpy array with shape of (1, 4), clipped bbox within the boundary
 	'''	
 	np_image = safe_image(input_image)
-	if isfloatimage(np_image):
-		np_image = (np_image * 255.).astype('uint8')
-	if len(np_image.shape) == 2:
-		np_image = np.expand_dims(np_image, axis=2)		# extend the third channel if the image is grayscale
+	if isfloatimage(np_image): np_image = (np_image * 255.).astype('uint8')
+	if len(np_image.shape) == 2: np_image = np.expand_dims(np_image, axis=2)		# extend the third channel if the image is grayscale
 
 	# center_rect and pad_value are checked in get_crop_bbox and pad_around functions
 	if debug:
@@ -320,6 +316,7 @@ def crop_center(input_image, center_rect, pad_value=0, debug=True):
 		pad_bottom  = max(ymax - im_height, 0)
 		pad_rect 	= [pad_left, pad_top, pad_right, pad_bottom]
 		img_cropped = pad_around(img_cropped, pad_rect=pad_rect, pad_value=pad_value, debug=debug)
+	if len(img_cropped.shape) == 3 and img_cropped.shape[2] == 1: img_cropped = img_cropped[:, :, 0]
 
 	return img_cropped, crop_bbox, crop_bbox_clipped
 
@@ -345,7 +342,7 @@ def generate_mean_image(images_dir, save_path, debug=True, vis=False):
 	this function generates the mean image over all images. It assume the image has the same size
 
 	parameters:
-			images_dir: 		path to all images
+		images_dir: 		path to all images
 	'''
 	if debug:
 		assert is_path_exists(images_dir), 'the image path is not existing at %s' % images_dir
