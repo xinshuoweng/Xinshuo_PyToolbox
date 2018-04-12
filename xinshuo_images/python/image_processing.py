@@ -290,9 +290,9 @@ def crop_center(input_image, center_rect, pad_value=0, debug=True):
 		pad_value:		scalar within [0, 255]
 
 	outputs:
-		cropped_img:	
-		crop_rect_expand:
-		crop_rect_boundary
+		img_cropped:			an uint8 numpy image
+		crop_bbox:				numpy array with shape of (1, 4), user-attempted cropping bbox, might out of boundary
+		crop_bbox_clipped:		numpy array with shape of (1, 4), clipped bbox within the boundary
 	'''	
 	np_image = safe_image(input_image)
 	if isfloatimage(np_image):
@@ -308,14 +308,7 @@ def crop_center(input_image, center_rect, pad_value=0, debug=True):
 	# calculate crop rectangles
 	crop_bbox = get_center_crop_bbox(center_rect, im_width, im_height, debug=debug)
 	crop_bbox_clipped = clip_bboxes_TLWH(crop_bbox, im_width, im_height, debug=debug)
-
-	# tmp_min_x = xmin if xmin>=0 else 0
-	# tmp_max_x = xmax if xmax<=np_image.shape[1] else (np_image.shape[1])
-	# tmp_min_y = ymin if ymin>=0 else 0
-	# tmp_max_y = ymax if ymax<=np_image.shape[0] else (np_image.shape[0])
 	x1, y1, x2, y2 = crop_bbox_clipped[0, 0], crop_bbox_clipped[0, 1], crop_bbox_clipped[0, 0] + crop_bbox_clipped[0, 2], crop_bbox_clipped[0, 1] + crop_bbox_clipped[0, 3]
-	
-	# img_cropped = np_image[tmp_min_y:tmp_max_y, tmp_min_x:tmp_max_x, :]
 	img_cropped = np_image[y1 : y2, x1 : x2, :]
 
 	# if original image is not enough to cover the crop area, we pad value around outside after cropping
@@ -327,22 +320,6 @@ def crop_center(input_image, center_rect, pad_value=0, debug=True):
 		pad_bottom  = max(ymax - im_height, 0)
 		pad_rect 	= [pad_left, pad_top, pad_right, pad_bottom]
 		img_cropped = pad_around(img_cropped, pad_rect=pad_rect, pad_value=pad_value, debug=debug)
-		# if pad_left > 0:
-		# 	tmp = np.ones((cropped.shape[0], pad_left + cropped.shape[1], np_image.shape[2]))*pad_value
-		# 	tmp[: , pad_left:, :] = cropped
-		# 	cropped = tmp
-		# if pad_right > 0:
-		# 	tmp = np.ones((cropped.shape[0], pad_right + cropped.shape[1], np_image.shape[2]))*pad_value
-		# 	tmp[:, :cropped.shape[1], :] = cropped
-		# 	cropped = tmp
-		# if pad_top > 0:
-		# 	tmp = np.ones((pad_top + cropped.shape[0], cropped.shape[1], np_image.shape[2])) * pad_value
-		# 	tmp[pad_top:, :, :] = cropped
-		# 	cropped = tmp
-		# if pad_bottom > 0:
-		# 	tmp = np.ones((pad_bottom + cropped.shape[0], cropped.shape[1], np_image.shape[2])) * pad_value
-		# 	tmp[:cropped.shape[0] , :, :] = cropped
-		# 	cropped = tmp
 
 	return img_cropped, crop_bbox, crop_bbox_clipped
 

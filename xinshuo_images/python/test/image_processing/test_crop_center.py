@@ -43,6 +43,8 @@ def test_crop_center():
 
 	#################################### test with 2 elements in center_rect #########################################
 
+
+
 	print('\n\nDONE! SUCCESSFUL!!\n')
 
 if __name__ == '__main__':
