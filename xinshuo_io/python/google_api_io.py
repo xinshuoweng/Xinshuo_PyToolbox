@@ -2,12 +2,14 @@
 # email: xinshuo.weng@gmail.com
 
 # this file includes functions for google gpi, such as google sheet
+import os
 
 import httplib2
 from oauth2client import client, tools
 from oauth2client.file import Storage
 from googleapiclient import discovery
 
+from xinshuo_miscellaneous import isstring, islistoflist, islist
 
 """
 BEFORE RUNNING:

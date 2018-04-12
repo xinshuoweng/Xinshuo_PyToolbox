@@ -12,7 +12,7 @@ from tabulate import tabulate
 from xinshuo_math import pts_euclidean, bbox_TLBR2TLWH, pts2bbox
 from xinshuo_visualization import visualize_ced, visualize_pts
 from xinshuo_io import fileparts, mkdir_if_missing
-from xinshuo_miscellaneous import print_np_shape, list_reorder
+from xinshuo_miscellaneous import print_np_shape, list_reorder, islist, isdict, ispositiveinteger, is2dptsarray_occlusion, isscalar, is_path_exists, is2dptsarray
 
 # for better visualization in error distribution, we center the distribution map and set fixed visualization range for fair comparison
 display_range = True
