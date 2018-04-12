@@ -335,7 +335,6 @@ def imresize(img, portion, interp='bicubic', debug=True):
 
 	return img_
 
-
 ############################################# batch processing #################################
 def generate_mean_image(images_dir, save_path, debug=True, vis=False):
 	'''
