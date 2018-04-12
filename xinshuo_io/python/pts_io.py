@@ -2,8 +2,10 @@
 # email: xinshuo.weng@gmail.com
 
 # this file includes functions about point file I/O stream
+import numpy as np
+
 from file_io import load_txt_file
-from xinshuo_miscellaneous import is_path_exists_or_creatable, is2dptsarray_occlusion, is2dptsarray, remove_empty_item_from_list
+from xinshuo_miscellaneous import is_path_exists_or_creatable, is2dptsarray_occlusion, is2dptsarray, remove_empty_item_from_list, str2num
 
 # note that, the top left point is (1, 1) in 300-W instead of zero-indexed
 def anno_writer(pts_array, pts_savepath, num_pts=68, anno_version=1, debug=True):
