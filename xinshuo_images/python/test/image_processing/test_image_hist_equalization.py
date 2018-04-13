@@ -8,7 +8,7 @@ from image_processing import image_hist_equalization
 from xinshuo_visualization import visualize_image
 
 def test_image_hist_equalization():
-	image_path = 'lena.jpg'
+	image_path = '../lena.png'
 
 	print('testing for grayscale pil image')
 	img = Image.open(image_path).convert('L')

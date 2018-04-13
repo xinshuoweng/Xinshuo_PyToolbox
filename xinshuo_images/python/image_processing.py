@@ -40,7 +40,28 @@ def gray2rgb(input_image, with_color=True, cmap='jet', debug=True):
 
 def rgb2hsv(input_image, debug=True):
 	'''
-	convert a rgb image to a hsv image
+	convert a rgb image to a hsv image using opencv package
+
+	parameters:
+		input_image:	an pil or numpy image
+
+	output:
+		hsv_image: 	an uint8 hsv numpy image
+	'''
+	np_image = safe_image(input_image)
+	if isfloatimage(np_image):
+		np_image = (np_image * 255.).astype('uint8')	
+
+	if debug:
+		assert iscolorimage(np_image), 'the input image should be a rgb image'
+		assert isuintimage(np_image), 'the input numpy image should be uint8 image in order to use opencv'
+
+	hsv_img = cv2.cvtColor(np_image, cv2.COLOR_RGB2HSV)
+	return hsv_img
+
+def rgb2hsv_v2(input_image, debug=True):
+	'''
+	convert a rgb image to a hsv image, using PIL package, not compatible with opencv package
 
 	parameters:
 		input_image:	an pil or numpy image
@@ -59,12 +80,11 @@ def rgb2hsv(input_image, debug=True):
 	pil_rgb_img = Image.fromarray(np_image)
 	pil_hsv_img = pil_rgb_img.convert('HSV')
 	hsv_img = np.array(pil_hsv_img)
-
 	return hsv_img
 
 def hsv2rgb(input_image, debug=True):
 	'''
-	convert a hsv image to a rgb image
+	convert a hsv image to a rgb image using opencv package
 
 	parameters:
 		input_image:	an pil or numpy image
@@ -78,9 +98,51 @@ def hsv2rgb(input_image, debug=True):
 
 	if debug:
 		assert iscolorimage(np_image), 'the input image should be a rgb image'
-		assert isuintimage(np_image), 'the input numpy image should be uint8 image in order to use PIL'
+		assert isuintimage(np_image), 'the input numpy image should be uint8 image in order to use opencv'
 
 	rgb_img = cv2.cvtColor(np_image, cv2.COLOR_HSV2RGB)
+	return rgb_img
+
+def rgb2lab(input_image, debug=True):
+	'''
+	convert a rgb image to a lab image using opencv package
+
+	parameters:
+		input_image:	an pil or numpy image
+
+	output:
+		lab_image: 	an uint8 lab numpy image
+	'''
+	np_image = safe_image(input_image)
+	if isfloatimage(np_image):
+		np_image = (np_image * 255.).astype('uint8')	
+
+	if debug:
+		assert iscolorimage(np_image), 'the input image should be a rgb image'
+		assert isuintimage(np_image), 'the input numpy image should be uint8 image in order to use opencv'
+
+	lab_img = cv2.cvtColor(np_image, cv2.COLOR_RGB2LAB)
+	return lab_img
+
+def lab2rgb(input_image, debug=True):
+	'''
+	convert a lab image to a rgb image using opencv package
+
+	parameters:
+		input_image:	an pil or numpy image
+
+	output:
+		rgb_img: 	an uint8 rgb numpy image
+	'''
+	np_image = safe_image(input_image)
+	if isfloatimage(np_image):
+		np_image = (np_image * 255.).astype('uint8')	
+
+	if debug:
+		assert iscolorimage(np_image), 'the input image should be a rgb image'
+		assert isuintimage(np_image), 'the input numpy image should be uint8 image in order to use opencv'
+
+	rgb_img = cv2.cvtColor(np_image, cv2.COLOR_LAB2RGB)
 	return rgb_img
 
 def image_hist_equalization(input_image, debug=True):

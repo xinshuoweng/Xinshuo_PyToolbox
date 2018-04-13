@@ -35,5 +35,6 @@ def test_gray2rgb():
 	assert iscolorimage(img_rgb), 'the converted image is not a color image'
 
 	print('\n\nDONE! SUCCESSFUL!!\n')
+	
 if __name__ == '__main__':
 	test_gray2rgb()
