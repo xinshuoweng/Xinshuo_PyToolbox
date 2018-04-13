@@ -46,7 +46,7 @@ def rgb2hsv(input_image, debug=True):
 		input_image:	an pil or numpy image
 
 	output:
-		hsv_image: 	an uint8 hsv numpy image
+		hsv_image: 		an uint8 hsv numpy image
 	'''
 	np_image = safe_image(input_image)
 	if isfloatimage(np_image):
@@ -67,7 +67,7 @@ def rgb2hsv_v2(input_image, debug=True):
 		input_image:	an pil or numpy image
 
 	output:
-		hsv_image: 	an uint8 hsv numpy image
+		hsv_image: 		an uint8 hsv numpy image
 	'''
 	np_image = safe_image(input_image)
 	if isfloatimage(np_image):
@@ -90,7 +90,7 @@ def hsv2rgb(input_image, debug=True):
 		input_image:	an pil or numpy image
 
 	output:
-		rgb_img: 	an uint8 rgb numpy image
+		rgb_img: 		an uint8 rgb numpy image
 	'''
 	np_image = safe_image(input_image)
 	if isfloatimage(np_image):
@@ -111,7 +111,7 @@ def rgb2lab(input_image, debug=True):
 		input_image:	an pil or numpy image
 
 	output:
-		lab_image: 	an uint8 lab numpy image
+		lab_image: 		an uint8 lab numpy image
 	'''
 	np_image = safe_image(input_image)
 	if isfloatimage(np_image):
@@ -132,7 +132,7 @@ def lab2rgb(input_image, debug=True):
 		input_image:	an pil or numpy image
 
 	output:
-		rgb_img: 	an uint8 rgb numpy image
+		rgb_img: 		an uint8 rgb numpy image
 	'''
 	np_image = safe_image(input_image)
 	if isfloatimage(np_image):
@@ -145,15 +145,15 @@ def lab2rgb(input_image, debug=True):
 	rgb_img = cv2.cvtColor(np_image, cv2.COLOR_LAB2RGB)
 	return rgb_img
 
-def image_hist_equalization(input_image, debug=True):
+def image_hist_equalization_hsv(input_image, debug=True):
 	'''
 	do histogram equalization for an image: could be a color image or gray image
 
 	parameters:
-		input_image:	an pil or numpy image
+		input_image:		an pil or numpy image
 
 	output:
-		equalized_image:	an float32 numpy image (rgb or gray)
+		equalized_image:	an uint8 numpy image (rgb or gray)
 	'''
 	np_image = safe_image(input_image)
 	if isuintimage(np_image):
@@ -167,9 +167,39 @@ def image_hist_equalization(input_image, debug=True):
 		input_data = hsv_image[:, :, 2]			# extract the value channel
 		equalized_hsv_image = (hist_equalization(input_data, num_bins=256, debug=debug) * 255.).astype('uint8')
 		hsv_image[:, :, 2] = equalized_hsv_image
-		equalized_image = hsv2rgb(hsv_image, debug=debug).astype('float32') / 255.
+		equalized_image = hsv2rgb(hsv_image, debug=debug)
 	elif isgrayimage(np_image):
-		equalized_image = hist_equalization(np_image, num_bins=256, debug=debug)
+		equalized_image = (hist_equalization(np_image, num_bins=256, debug=debug) * 255.).astype('uint8')
+	else:
+		assert False, 'the input image is neither a color image or a grayscale image'
+
+	return equalized_image
+
+def image_hist_equalization_lab(input_image, debug=True):
+	'''
+	do histogram equalization for an image: could be a color image or gray image
+
+	parameters:
+		input_image:		an pil or numpy image
+
+	output:
+		equalized_image:	an uint8 numpy image (rgb or gray)
+	'''
+	np_image = safe_image(input_image)
+	if isuintimage(np_image):
+		np_image = np_image.astype('float32') / 255.
+
+	if debug:
+		assert isfloatimage(np_image), 'the input image should be a float image'
+
+	if iscolorimage(np_image):
+		hsv_image = rgb2lab(np_image, debug=debug)
+		input_data = hsv_image[:, :, 0]			# extract the value channel
+		equalized_hsv_image = (hist_equalization(input_data, num_bins=256, debug=debug) * 255.).astype('uint8')
+		hsv_image[:, :, 0] = equalized_hsv_image
+		equalized_image = lab2rgb(hsv_image, debug=debug)
+	elif isgrayimage(np_image):
+		equalized_image = (hist_equalization(np_image, num_bins=256, debug=debug) * 255.).astype('uint8')
 	else:
 		assert False, 'the input image is neither a color image or a grayscale image'
 
