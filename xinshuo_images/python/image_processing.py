@@ -15,15 +15,14 @@ def gray2rgb(input_image, with_color=True, cmap='jet', debug=True):
 	convert a grayscale image (1-channel) to a rgb image
 		
 	parameters:
-		input_image:	an pil or numpy image
+		input_image:	a pil or numpy image
 		with_color:		add false colormap
 
-	output:
+	outputs:
 		rgb_image:		an uint8 rgb numpy image
 	'''
 	np_image = safe_image(input_image)
-	if isfloatimage(np_image):
-		np_image = (np_image * 255.).astype('uint8')
+	if isfloatimage(np_image): np_image = (np_image * 255.).astype('uint8')
 
 	if debug:
 		assert isgrayimage(np_image), 'the input numpy image is not correct: {}'.format(np_image.shape)
@@ -43,9 +42,9 @@ def rgb2hsv(input_image, debug=True):
 	convert a rgb image to a hsv image using opencv package
 
 	parameters:
-		input_image:	an pil or numpy image
+		input_image:	a pil or numpy image
 
-	output:
+	outputs:
 		hsv_image: 		an uint8 hsv numpy image
 	'''
 	np_image = safe_image(input_image)
@@ -64,9 +63,9 @@ def rgb2hsv_v2(input_image, debug=True):
 	convert a rgb image to a hsv image, using PIL package, not compatible with opencv package
 
 	parameters:
-		input_image:	an pil or numpy image
+		input_image:	a pil or numpy image
 
-	output:
+	outputs:
 		hsv_image: 		an uint8 hsv numpy image
 	'''
 	np_image = safe_image(input_image)
@@ -87,9 +86,9 @@ def hsv2rgb(input_image, debug=True):
 	convert a hsv image to a rgb image using opencv package
 
 	parameters:
-		input_image:	an pil or numpy image
+		input_image:	a pil or numpy image
 
-	output:
+	outputs:
 		rgb_img: 		an uint8 rgb numpy image
 	'''
 	np_image = safe_image(input_image)
@@ -108,9 +107,9 @@ def rgb2lab(input_image, debug=True):
 	convert a rgb image to a lab image using opencv package
 
 	parameters:
-		input_image:	an pil or numpy image
+		input_image:	a pil or numpy image
 
-	output:
+	outputs:
 		lab_image: 		an uint8 lab numpy image
 	'''
 	np_image = safe_image(input_image)
@@ -129,9 +128,9 @@ def lab2rgb(input_image, debug=True):
 	convert a lab image to a rgb image using opencv package
 
 	parameters:
-		input_image:	an pil or numpy image
+		input_image:	a pil or numpy image
 
-	output:
+	outputs:
 		rgb_img: 		an uint8 rgb numpy image
 	'''
 	np_image = safe_image(input_image)
@@ -145,44 +144,15 @@ def lab2rgb(input_image, debug=True):
 	rgb_img = cv2.cvtColor(np_image, cv2.COLOR_LAB2RGB)
 	return rgb_img
 
-def image_hist_equalization_hsv(input_image, debug=True):
+def image_hist_equalization(input_image, debug=True):
 	'''
 	do histogram equalization for an image: could be a color image or gray image
+	the color space used for histogram equalization is LAB
 
 	parameters:
-		input_image:		an pil or numpy image
+		input_image:		a pil or numpy image
 
-	output:
-		equalized_image:	an uint8 numpy image (rgb or gray)
-	'''
-	np_image = safe_image(input_image)
-	if isuintimage(np_image):
-		np_image = np_image.astype('float32') / 255.
-
-	if debug:
-		assert isfloatimage(np_image), 'the input image should be a float image'
-
-	if iscolorimage(np_image):
-		hsv_image = rgb2hsv(np_image, debug=debug)
-		input_data = hsv_image[:, :, 2]			# extract the value channel
-		equalized_hsv_image = (hist_equalization(input_data, num_bins=256, debug=debug) * 255.).astype('uint8')
-		hsv_image[:, :, 2] = equalized_hsv_image
-		equalized_image = hsv2rgb(hsv_image, debug=debug)
-	elif isgrayimage(np_image):
-		equalized_image = (hist_equalization(np_image, num_bins=256, debug=debug) * 255.).astype('uint8')
-	else:
-		assert False, 'the input image is neither a color image or a grayscale image'
-
-	return equalized_image
-
-def image_hist_equalization_lab(input_image, debug=True):
-	'''
-	do histogram equalization for an image: could be a color image or gray image
-
-	parameters:
-		input_image:		an pil or numpy image
-
-	output:
+	outputs:
 		equalized_image:	an uint8 numpy image (rgb or gray)
 	'''
 	np_image = safe_image(input_image)
@@ -205,106 +175,92 @@ def image_hist_equalization_lab(input_image, debug=True):
 
 	return equalized_image
 
-# # to test, supposed to be equivalent to gray2rgb
-# def mat2im(mat, cmap, limits):
-#   '''
-# % PURPOSE
-# % Uses vectorized code to convert matrix "mat" to an m-by-n-by-3
-# % image matrix which can be handled by the Mathworks image-processing
-# % functions. The the image is created using a specified color-map
-# % and, optionally, a specified maximum value. Note that it discards
-# % negative values!
-# %
-# % INPUTS
-# % mat     - an m-by-n matrix  
-# % cmap    - an m-by-3 color-map matrix. e.g. hot(100). If the colormap has 
-# %           few rows (e.g. less than 20 or so) then the image will appear 
-# %           contour-like.
-# % limits  - by default the image is normalised to it's max and min values
-# %           so as to use the full dynamic range of the
-# %           colormap. Alternatively, it may be normalised to between
-# %           limits(1) and limits(2). Nan values in limits are ignored. So
-# %           to clip the max alone you would do, for example, [nan, 2]
-# %          
-# %
-# % OUTPUTS
-# % im - an m-by-n-by-3 image matrix  
-#   '''
-#   assert len(mat.shape) == 2
-#   if len(limits) == 2:
-#     minVal = limits[0]
-#     tempss = np.zeros(mat.shape) + minVal
-#     mat    = np.maximum(tempss, mat)
-#     maxVal = limits[1]
-#     tempss = np.zeros(mat.shape) + maxVal
-#     mat    = np.minimum(tempss, mat)
-#   else:
-#     minVal = mat.min()
-#     maxVal = mat.max()
-#   L = len(cmap)
-#   if maxVal <= minVal:
-#     mat = mat-minVal
-#   else:
-#     mat = (mat-minVal) / (maxVal-minVal) * (L-1)
-#   mat = mat.astype(np.int32)
-  
-#   image = np.reshape(cmap[ np.reshape(mat, (mat.size)), : ], mat.shape + (3,))
-#   return image
+def image_hist_equalization_hsv(input_image, debug=True):
+	'''
+	do histogram equalization for an image: could be a color image or gray image
+	the color space used for histogram equalization is HSV
+	
+	parameters:
+		input_image:		a pil or numpy image
 
-# def jet(m):
-#   cm_subsection = linspace(0, 1, m)
-#   colors = [ cm.jet(x) for x in cm_subsection ]
-#   J = np.array(colors)
-#   J = J[:, :3]
-#   return J
+	outputs:
+		equalized_image:	an uint8 numpy image (rgb or gray)
+	'''
+	np_image = safe_image(input_image)
+	if isuintimage(np_image):
+		np_image = np_image.astype('float32') / 255.
 
-# def generate_color_from_heatmap(maps, num_of_color=100, index=None):
-#   assert isinstance(maps, np.ndarray)
-#   if len(maps.shape) == 3:
-#     return generate_color_from_heatmaps(maps, num_of_color, index)
-#   elif len(maps.shape) == 2:
-#     return mat2im( maps, jet(num_of_color), [maps.min(), maps.max()] )
-#   else:
-#     assert False, 'generate_color_from_heatmap wrong shape : {}'.format(maps.shape)
+	if debug:
+		assert isfloatimage(np_image), 'the input image should be a float image'
+
+	if iscolorimage(np_image):
+		hsv_image = rgb2hsv(np_image, debug=debug)
+		input_data = hsv_image[:, :, 2]			# extract the value channel
+		equalized_hsv_image = (hist_equalization(input_data, num_bins=256, debug=debug) * 255.).astype('uint8')
+		hsv_image[:, :, 2] = equalized_hsv_image
+		equalized_image = hsv2rgb(hsv_image, debug=debug)
+	elif isgrayimage(np_image):
+		equalized_image = (hist_equalization(np_image, num_bins=256, debug=debug) * 255.).astype('uint8')
+	else:
+		assert False, 'the input image is neither a color image or a grayscale image'
+
+	return equalized_image
 
 ############################################# format transform #################################
-def pil2cv_colorimage(pil_image, debug=True, vis=False):
+def rgb2bgr(input_image, debug=True):
 	'''
-	this function converts a PIL image to a cv2 image, which has RGB and BGR format respectively
+	this function converts a rgb image to a bgr image
+
+	parameters:
+		input_image:	a pil or numpy rgb image
+
+	outputs:
+		np_image:		a numpy bgr image
 	'''
+	np_image = safe_image(input_image)
+
 	if debug:
-		assert ispilimage(pil_image), 'the input image is not a PIL image'
+		assert iscolorimage(np_image), 'the input image is not a color image'
+	
+	np_image = np_image[:, :, ::-1] 			# convert RGB to BGR
+	return np_image
 
-	cv_image = np.array(pil_image)
-	cv_image = cv_image[:, :, ::-1].copy() 			# convert RGB to BGR
-
-	return cv_image
-
-def chw2hwc_npimage(np_image, debug=True):
+def bgr2rgb(input_image, debug=True):
 	'''
-	this function transpose the channels of a numpy image from C x H x W to H x W x C
+	this function converts a bgr image to a rgb image
+
+	parameters:
+		input_image:	a pil or numpy bgr image
+
+	outputs:
+		np_image:		a numpy rgb image
 	'''
+	return rgb2bgr(input_image, debug=debug)
+
+def chw2hwc(input_image, debug=True):
+	'''
+	this function transpose the channels of an image from CHW to HWC
+
+	parameters:
+		input_image:	a pil or numpy CHW image
+
+	outputs:
+		np_image:		a numpy HWC image
+	'''
+	np_image = safe_image(input_image)
+
 	if debug:
-		assert isnparray(np_image), 'the input is not a numpy'
 		assert np_image.ndim == 3 and np_image.shape[0] == 3, 'the input numpy image does not have a good dimension: {}'.format(np_image.shape)
 
 	return np.transpose(np_image, (1, 2, 0)) 
 
-# done
-def	unnormalize_npimage(input_image, img_type='uint8', debug=True):
+def	image_normalize(input_image, img_type='uint8', debug=True):
 	'''
 	un-normalize an image to an uint8 with range of [0, 255]
 	note that: the input might not be an image because the value range might be arbitrary
 	'''
-	if ispilimage(input_image):
-		np_image = np.array(input_image)
-	elif isnparray(input_image):
-		np_image = input_image.copy()
-	else:
-		assert False, 'only pil image and numpy array are supported'
-
+	np_image = safe_image(input_image)
 	if debug:
-		assert isnpimage_dimension(np_image), 'the input numpy image is not correct: {}'.format(np_image.shape)
 		assert img_type in {'uint8'}, 'the image does not contain a good type'
 
 	min_val = float(np.min(np_image))
@@ -323,6 +279,56 @@ def	unnormalize_npimage(input_image, img_type='uint8', debug=True):
 
 	unnormalized_img = np_image.astype(img_type)
 	return unnormalized_img
+
+def unpreprocess_image_caffe(image_datablob, pixel_mean=None, pixel_std=None, bgr2rgb=True, chw2hwc=True, mode='np', debug=True):
+	'''
+	this function unpreprocesses image,
+	including transfer from bgr to rgb, chw to hwc, times std across channels and adds mean across channels
+
+		inputs: NxCxHxW numpy array
+		outputs: a list of HxWxC 
+	'''
+	if debug:
+		# print('debug mode is on during unpreprocessing. Please turn off after debuging')
+		assert isnparray(image_datablob), 'the input image blob is not a numpy'
+		assert mode in ['pil', 'np'], 'the mode is not correct'
+	image_data = image_datablob.copy()
+
+	if image_data.ndim == 2:		# expand 2d gradscale image to 3 channel
+		image_data = np.expand_dims(image_data, axis=0)
+
+	if image_data.ndim == 3:		# expand to 4-d version of batch of 1
+		image_data = np.expand_dims(image_data, axis=0)
+
+	if debug:
+		assert image_data.ndim == 4, 'input is not correct'	
+		assert image_data.shape[1] == 1 or image_data.shape[1] == 3, 'this is not an blob of image, channel is not 1 or 3'
+	
+	if pixel_std is not None:
+		assert pixel_std.shape == (1, 1, 3) or pixel_std.shape == (3, ), 'pixel std is not correct'
+		pixel_std_reshape = np.reshape(pixel_std, (1, 3, 1, 1))
+		image_data *= pixel_std_reshape
+
+	if pixel_mean is not None:
+		assert pixel_mean.shape == (1, 1, 3) or pixel_mean.shape == (3, ), 'pixel mean is not correct'
+		pixel_mean_reshape = np.reshape(pixel_mean, (1, 3, 1, 1))
+		image_data += pixel_mean_reshape
+
+	if chw2hwc:
+		image_data = np.transpose(image_data, (0, 2, 3, 1))         # permute to [batch, height, weight, channel]	
+
+	if image_data.shape[-1] == 3 and bgr2rgb:	# channel dimension
+		image_data = image_data[:, :, :, [2, 1, 0]]             # from bgr to rgb for color image
+	image_data_list = list()
+	for i in xrange(image_data.shape[0]):
+		image_tmp = image_data[i, :, :, :]
+		if mode == 'pil':
+			image_data_list.append(Image.fromarray((image_tmp * 255).astype('uint8')))
+		elif mode == 'np':
+			image_data_list.append(image_tmp)
+		else:
+			assert False, 'the mode %s is not supported' % mode
+	return image_data_list
 
 ############################################# 2D transformation #################################
 def rotate_bound(image, angle):
@@ -584,3 +590,66 @@ def draw_mask(np_image, np_image_mask, alpha=0.3, debug=True):
 	pil_image_out = Image.blend(pil_image, pil_image_mask, alpha=alpha)
 
 	return pil_image_out
+
+
+# # to test, supposed to be equivalent to gray2rgb
+# def mat2im(mat, cmap, limits):
+#   '''
+# % PURPOSE
+# % Uses vectorized code to convert matrix "mat" to an m-by-n-by-3
+# % image matrix which can be handled by the Mathworks image-processing
+# % functions. The the image is created using a specified color-map
+# % and, optionally, a specified maximum value. Note that it discards
+# % negative values!
+# %
+# % INPUTS
+# % mat     - an m-by-n matrix  
+# % cmap    - an m-by-3 color-map matrix. e.g. hot(100). If the colormap has 
+# %           few rows (e.g. less than 20 or so) then the image will appear 
+# %           contour-like.
+# % limits  - by default the image is normalised to it's max and min values
+# %           so as to use the full dynamic range of the
+# %           colormap. Alternatively, it may be normalised to between
+# %           limits(1) and limits(2). Nan values in limits are ignored. So
+# %           to clip the max alone you would do, for example, [nan, 2]
+# %          
+# %
+# % OUTPUTS
+# % im - an m-by-n-by-3 image matrix  
+#   '''
+#   assert len(mat.shape) == 2
+#   if len(limits) == 2:
+#     minVal = limits[0]
+#     tempss = np.zeros(mat.shape) + minVal
+#     mat    = np.maximum(tempss, mat)
+#     maxVal = limits[1]
+#     tempss = np.zeros(mat.shape) + maxVal
+#     mat    = np.minimum(tempss, mat)
+#   else:
+#     minVal = mat.min()
+#     maxVal = mat.max()
+#   L = len(cmap)
+#   if maxVal <= minVal:
+#     mat = mat-minVal
+#   else:
+#     mat = (mat-minVal) / (maxVal-minVal) * (L-1)
+#   mat = mat.astype(np.int32)
+  
+#   image = np.reshape(cmap[ np.reshape(mat, (mat.size)), : ], mat.shape + (3,))
+#   return image
+
+# def jet(m):
+#   cm_subsection = linspace(0, 1, m)
+#   colors = [ cm.jet(x) for x in cm_subsection ]
+#   J = np.array(colors)
+#   J = J[:, :3]
+#   return J
+
+# def generate_color_from_heatmap(maps, num_of_color=100, index=None):
+#   assert isinstance(maps, np.ndarray)
+#   if len(maps.shape) == 3:
+#     return generate_color_from_heatmaps(maps, num_of_color, index)
+#   elif len(maps.shape) == 2:
+#     return mat2im( maps, jet(num_of_color), [maps.min(), maps.max()] )
+#   else:
+#     assert False, 'generate_color_from_heatmap wrong shape : {}'.format(maps.shape)
