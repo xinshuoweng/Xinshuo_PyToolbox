@@ -378,7 +378,7 @@ def visualize_image_with_pts_bbox(image, pts_array, window_size, pts_size=20, la
         assert is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array), 'input points are not correct'
 
     fig, ax = visualize_image_with_pts(image, pts_array, pts_size=pts_size, label=label, label_list=label_list, color_index=color_index, debug=False, save_path=None, closefig=False)
-    bbox = get_centered_bbox(pts_array, window_size, window_size, debug=debug)
+    bbox = get_center_crop_bbox(pts_array, window_size, window_size, debug=debug)
     return visualize_bbox(bbox, fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
 
 def visualize_image_with_pts_bbox_tracking(image, pts_array, valid_index, window_size, pts_anno=None, pts_size=20, vis=False, save_path=None, debug=True, closefig=True):
@@ -411,12 +411,12 @@ def visualize_image_with_pts_bbox_tracking(image, pts_array, valid_index, window
 
     # plot successful predictions
     fig, ax = visualize_image_with_pts(image, pts_succeed, pts_size=pts_size, color_index=color_succeed_index, debug=False, closefig=False)
-    bbox = get_centered_bbox(pts_succeed, window_size, window_size, debug=debug)
+    bbox = get_center_crop_bbox(pts_succeed, window_size, window_size, debug=debug)
     fig, ax = visualize_bbox(bbox, fig=fig, ax=ax, color_index=color_succeed_index, vis=vis, debug=debug, closefig=False)
 
     # plot failed predictions
     fig, ax = visualize_pts_array(pts_failed, fig=fig, ax=ax, color_index=color_failed_index, pts_size=pts_size, debug=debug, closefig=False)
-    bbox = get_centered_bbox(pts_failed, window_size, window_size, debug=debug)
+    bbox = get_center_crop_bbox(pts_failed, window_size, window_size, debug=debug)
     
     if pts_anno is None:
         return visualize_bbox(bbox, fig=fig, ax=ax, color_index=color_failed_index, vis=vis, save_path=save_path, debug=debug, closefig=closefig)    
@@ -425,7 +425,7 @@ def visualize_image_with_pts_bbox_tracking(image, pts_array, valid_index, window
 
         # plot annotations
         fig, ax = visualize_pts_array(pts_anno, fig=fig, ax=ax, color_index=color_anno_index, pts_size=pts_size, debug=debug, closefig=False)
-        bbox = get_centered_bbox(pts_anno, window_size, window_size, debug=debug)
+        bbox = get_center_crop_bbox(pts_anno, window_size, window_size, debug=debug)
         return visualize_bbox(bbox, fig=fig, ax=ax, color_index=color_anno_index, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
 
 def visualize_lines(lines_array, color_index=0, line_width=3, fig=None, ax=None, vis=True, save_path=None, debug=True, closefig=True):
