@@ -32,6 +32,15 @@ def isscalar(scalar_test):
 def isnparray(nparray_test):
     return isinstance(nparray_test, np.ndarray)
 
+def isuintnparray(nparray_test):
+    return isnparray(nparray_test) and nparray_test.dtype == 'uint8'
+
+def isfloatnparray(nparray_test):
+    return isnparray(nparray_test) and nparray_test.dtype == 'float32'
+
+def isnannparray(nparray_test):
+    return isnparray(nparray_test) and np.isnan(nparray_test).any()
+
 def istuple(tuple_test):
     return isinstance(tuple_test, tuple)
 

@@ -4,13 +4,13 @@ import math, cv2
 import numpy as np
 from PIL import Image
 
-from private import safe_image
-from xinshuo_miscellaneous import isfloatimage, iscolorimage, isnparray, isnpimage_dimension, isuintimage, isgrayimage, ispilimage, islist, isinteger, islistofnonnegativeinteger
+from private import safe_image, safe_image_like
+from xinshuo_miscellaneous import isfloatimage, iscolorimage, isnparray, isnpimage_dimension, isuintimage, isgrayimage, ispilimage, islist, isinteger, islistofnonnegativeinteger, isfloatnparray, isuintnparray
 from xinshuo_math import hist_equalization, clip_bboxes_TLWH, get_center_crop_bbox
 from xinshuo_visualization import visualize_image
 
 ############################################# color transform #################################
-def gray2rgb(input_image, with_color=True, cmap='jet', debug=True):
+def gray2rgb(input_image, with_color=True, cmap='jet', warning=True, debug=True):
 	'''
 	convert a grayscale image (1-channel) to a rgb image
 		
@@ -21,7 +21,7 @@ def gray2rgb(input_image, with_color=True, cmap='jet', debug=True):
 	output:
 		rgb_image:		an uint8 rgb numpy image
 	'''
-	np_image = safe_image(input_image)
+	np_image, _ = safe_image(input_image, warning=warning)
 	if isfloatimage(np_image):
 		np_image = (np_image * 255.).astype('uint8')
 
@@ -38,7 +38,7 @@ def gray2rgb(input_image, with_color=True, cmap='jet', debug=True):
 		rgb_image = cv2.cvtColor(np_image, cv2.COLOR_GRAY2RGB)
 	return rgb_image
 
-def rgb2hsv(input_image, debug=True):
+def rgb2hsv(input_image, warning=True, debug=True):
 	'''
 	convert a rgb image to a hsv image using opencv package
 
@@ -48,7 +48,7 @@ def rgb2hsv(input_image, debug=True):
 	output:
 		hsv_image: 		an uint8 hsv numpy image
 	'''
-	np_image = safe_image(input_image)
+	np_image, _ = safe_image(input_image, warning=warning)
 	if isfloatimage(np_image):
 		np_image = (np_image * 255.).astype('uint8')	
 
@@ -59,7 +59,7 @@ def rgb2hsv(input_image, debug=True):
 	hsv_img = cv2.cvtColor(np_image, cv2.COLOR_RGB2HSV)
 	return hsv_img
 
-def rgb2hsv_v2(input_image, debug=True):
+def rgb2hsv_v2(input_image, warning=True, debug=True):
 	'''
 	convert a rgb image to a hsv image, using PIL package, not compatible with opencv package
 
@@ -69,7 +69,7 @@ def rgb2hsv_v2(input_image, debug=True):
 	output:
 		hsv_image: 		an uint8 hsv numpy image
 	'''
-	np_image = safe_image(input_image)
+	np_image, _ = safe_image(input_image, warning=warning)
 	if isfloatimage(np_image):
 		np_image = (np_image * 255.).astype('uint8')	
 
@@ -82,7 +82,7 @@ def rgb2hsv_v2(input_image, debug=True):
 	hsv_img = np.array(pil_hsv_img)
 	return hsv_img
 
-def hsv2rgb(input_image, debug=True):
+def hsv2rgb(input_image, warning=True, debug=True):
 	'''
 	convert a hsv image to a rgb image using opencv package
 
@@ -92,7 +92,7 @@ def hsv2rgb(input_image, debug=True):
 	output:
 		rgb_img: 		an uint8 rgb numpy image
 	'''
-	np_image = safe_image(input_image)
+	np_image, _ = safe_image(input_image, warning=warning)
 	if isfloatimage(np_image):
 		np_image = (np_image * 255.).astype('uint8')	
 
@@ -103,7 +103,7 @@ def hsv2rgb(input_image, debug=True):
 	rgb_img = cv2.cvtColor(np_image, cv2.COLOR_HSV2RGB)
 	return rgb_img
 
-def rgb2lab(input_image, debug=True):
+def rgb2lab(input_image, warning=True, debug=True):
 	'''
 	convert a rgb image to a lab image using opencv package
 
@@ -113,7 +113,7 @@ def rgb2lab(input_image, debug=True):
 	output:
 		lab_image: 		an uint8 lab numpy image
 	'''
-	np_image = safe_image(input_image)
+	np_image, _ = safe_image(input_image, warning=warning)
 	if isfloatimage(np_image):
 		np_image = (np_image * 255.).astype('uint8')	
 
@@ -124,7 +124,7 @@ def rgb2lab(input_image, debug=True):
 	lab_img = cv2.cvtColor(np_image, cv2.COLOR_RGB2LAB)
 	return lab_img
 
-def lab2rgb(input_image, debug=True):
+def lab2rgb(input_image, warning=True, debug=True):
 	'''
 	convert a lab image to a rgb image using opencv package
 
@@ -134,7 +134,7 @@ def lab2rgb(input_image, debug=True):
 	output:
 		rgb_img: 		an uint8 rgb numpy image
 	'''
-	np_image = safe_image(input_image)
+	np_image, _ = safe_image(input_image, warning=warning)
 	if isfloatimage(np_image):
 		np_image = (np_image * 255.).astype('uint8')	
 
@@ -145,7 +145,7 @@ def lab2rgb(input_image, debug=True):
 	rgb_img = cv2.cvtColor(np_image, cv2.COLOR_LAB2RGB)
 	return rgb_img
 
-def image_hist_equalization_hsv(input_image, debug=True):
+def image_hist_equalization_hsv(input_image, warning=True, debug=True):
 	'''
 	do histogram equalization for an image: could be a color image or gray image
 
@@ -155,7 +155,7 @@ def image_hist_equalization_hsv(input_image, debug=True):
 	output:
 		equalized_image:	an uint8 numpy image (rgb or gray)
 	'''
-	np_image = safe_image(input_image)
+	np_image, _ = safe_image(input_image, warning=warning)
 	if isuintimage(np_image):
 		np_image = np_image.astype('float32') / 255.
 
@@ -175,7 +175,7 @@ def image_hist_equalization_hsv(input_image, debug=True):
 
 	return equalized_image
 
-def image_hist_equalization_lab(input_image, debug=True):
+def image_hist_equalization_lab(input_image, warning=True, debug=True):
 	'''
 	do histogram equalization for an image: could be a color image or gray image
 
@@ -185,7 +185,7 @@ def image_hist_equalization_lab(input_image, debug=True):
 	output:
 		equalized_image:	an uint8 numpy image (rgb or gray)
 	'''
-	np_image = safe_image(input_image)
+	np_image, _ = safe_image(input_image, warning=warning)
 	if isuintimage(np_image):
 		np_image = np_image.astype('float32') / 255.
 
@@ -290,39 +290,37 @@ def chw2hwc_npimage(np_image, debug=True):
 
 	return np.transpose(np_image, (1, 2, 0)) 
 
-# done
-def	unnormalize_npimage(input_image, img_type='uint8', debug=True):
+def	image_normalize(input_image, warning=True, debug=True):
 	'''
-	un-normalize an image to an uint8 with range of [0, 255]
+	normalize an image to an uint8 with range of [0, 255]
 	note that: the input might not be an image because the value range might be arbitrary
+
+	parameters:
+		input_image:		pil image or image-like array, color or gray, float or uint
+
+	outputs:
+		np_image:			numpy uint8 image, normalized to [0, 255]
 	'''
-	if ispilimage(input_image):
-		np_image = np.array(input_image)
-	elif isnparray(input_image):
-		np_image = input_image.copy()
+	np_image, isnan = safe_image_like(input_image, warning=warning)
+	if isuintnparray(np_image):
+		np_image = np_image.astype('float32') / 255.		
 	else:
-		assert False, 'only pil image and numpy array are supported'
+		assert isfloatnparray(np_image), 'the input image-like array should be either an uint8 or float32 array' 
 
-	if debug:
-		assert isnpimage_dimension(np_image), 'the input numpy image is not correct: {}'.format(np_image.shape)
-		assert img_type in {'uint8'}, 'the image does not contain a good type'
-
-	min_val = float(np.min(np_image))
-	max_val = float(np.max(np_image))
-	if math.isnan(min_val) or math.isnan(max_val):			# with nan
-		assert False, 'the input image has nan'
+	min_val = np.min(np_image)
+	max_val = np.max(np_image)
+	if isnan: np_image.fill(0)
 	elif min_val == max_val:								# all same
+		if warning:
+			print('the input image has the same value over all the pixels')
 		np_image.fill(0)
 	else:													# normal case
-		np_image = np_image - min_val
-		np_image = np_image / (max_val - min_val)
-		np_image = np_image * 255.
-
+		np_image -= min_val
+		np_image = ((np_image / (max_val - min_val)) * 255.).astype('uint8')
 		if debug:
 			assert np.min(np_image) == 0 and np.max(np_image) == 255, 'the value range is not right [%f, %f]' % (np.min(np_image), np.max(np_image))
 
-	unnormalized_img = np_image.astype(img_type)
-	return unnormalized_img
+	return np_image
 
 ############################################# 2D transformation #################################
 def rotate_bound(image, angle):
@@ -334,7 +332,7 @@ def rotate_bound(image, angle):
         return np.rot90(image)
         # rotate counter-clockwise
 
-def pad_around(input_image, pad_rect, pad_value=0, debug=True):
+def pad_around(input_image, pad_rect, pad_value=0, warning=True, debug=True):
 	'''
 	this function is to pad given value to an image in provided region, all images in this function are floating images
 	
@@ -346,7 +344,7 @@ def pad_around(input_image, pad_rect, pad_value=0, debug=True):
 	outputs:
 		img_padded:		an uint8 numpy image with padding
 	'''
-	np_image = safe_image(input_image)
+	np_image, _ = safe_image(input_image, warning=warning)
 	if isfloatimage(np_image): np_image = (np_image * 255.).astype('uint8')
 	if len(np_image.shape) == 2: np_image = np.expand_dims(np_image, axis=2)		# extend the third channel if the image is grayscale
 
@@ -370,7 +368,7 @@ def pad_around(input_image, pad_rect, pad_value=0, debug=True):
 
 	return img_padded
 
-def crop_center(input_image, center_rect, pad_value=0, debug=True):
+def crop_center(input_image, center_rect, pad_value=0, warning=True, debug=True):
 	'''
 	crop the image around a specific center with padded value around the empty area
 	when the crop width/height are even, the cropped image has 1 additional pixel towards left/up
@@ -384,7 +382,7 @@ def crop_center(input_image, center_rect, pad_value=0, debug=True):
 		crop_bbox:				numpy array with shape of (1, 4), user-attempted cropping bbox, might out of boundary
 		crop_bbox_clipped:		numpy array with shape of (1, 4), clipped bbox within the boundary
 	'''	
-	np_image = safe_image(input_image)
+	np_image, _ = safe_image(input_image, warning=warning)
 	if isfloatimage(np_image): np_image = (np_image * 255.).astype('uint8')
 	if len(np_image.shape) == 2: np_image = np.expand_dims(np_image, axis=2)		# extend the third channel if the image is grayscale
 
