@@ -1,6 +1,6 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
-import numpy as np
+import numpy as np, sys
 
 import init_paths
 from private import safe_bbox
@@ -39,27 +39,32 @@ def test_safe_bbox():
 	bbox = [1, 2, 4]
 	try:
 		good_bbox = safe_bbox(bbox)
+		sys.exit('\nwrong! never should be here\n\n')
 	except AssertionError:
 		print('the length of list should be 4')
 
 	bbox = [[1, 2, 4], [5, 7, 8]]
 	try:
 		good_bbox = safe_bbox(bbox)
+		sys.exit('\nwrong! never should be here\n\n')
 	except AssertionError:
 		print('the length of list should be 4')
 
 	bbox = np.array([1, 2, 4]).reshape(3, )
 	try:
 		good_bbox = safe_bbox(bbox)
+		sys.exit('\nwrong! never should be here\n\n')
 	except AssertionError:
 		print('the numpy array should be columns of 4')
 
 	bbox = np.array([[1, 2, 4], [5, 7, 8]])
 	try:
 		good_bbox = safe_bbox(bbox)
+		sys.exit('\nwrong! never should be here\n\n')
 	except AssertionError:
 		print('the numpy array should be columns of 4')
 
 	print('\n\nDONE! SUCCESSFUL!!\n')
+	
 if __name__ == '__main__':
 	test_safe_bbox()

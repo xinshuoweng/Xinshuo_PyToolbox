@@ -2,13 +2,46 @@
 # email: xinshuo.weng@gmail.com
 
 # this file includes functions of basic geometry in math
-import math, cv2
-import numpy as np
+import math, cv2, numpy as np
 from numpy.testing import assert_almost_equal
 
-from xinshuo_miscellaneous import print_np_shape
+from private import safe_pts
+from xinshuo_miscellaneous import print_np_shape, is2dptsarray, is2dpts, is2dline, is3dpts, islist, isscalar, istuple
+
+# all rotation angle is processes in degree
 
 ################################################################## 2d math ##################################################################
+def pts_euclidean(input_pts1, input_pts2, debug=True):
+    '''
+    calculate the euclidean distance between two sets of points
+
+    parameters:
+        input_pts1:     2 x N or (2, ) numpy array, a list of 2 elements, a listoflist of 2 elements: (x, y)
+        input_pts2:     same as above
+
+    outputs:
+        average euclidean distance
+    '''
+    pts1 = safe_pts(input_pts1, debug=debug)
+    pts2 = safe_pts(input_pts2, debug=debug)
+    if debug:
+        assert pts1.shape == pts2.shape, 'the shape of two points is not equal'
+        assert is2dptsarray(pts1) and is2dptsarray(pts2), 'the input points are not correct'
+
+    # calculate the distance
+    eculidean_list = np.zeros((pts1.shape[1], ), dtype='float32')
+    num_pts = pts1.shape[1]
+    ave_euclidean = 0
+    for pts_index in xrange(num_pts):
+        pts1_tmp = pts1[:, pts_index]
+        pts2_tmp = pts2[:, pts_index]
+        n = float(pts_index + 1)
+        distance_tmp = math.sqrt((pts1_tmp[0] - pts2_tmp[0])**2 + (pts1_tmp[1] - pts2_tmp[1])**2)               # TODO check the start
+        ave_euclidean = (n-1) / n * ave_euclidean + distance_tmp / n
+        eculidean_list[pts_index] = distance_tmp
+
+    return ave_euclidean, eculidean_list.tolist()
+
 # TODO: check
 def get_line(pts, slope, debug=True):
     '''
@@ -68,18 +101,6 @@ def get_intersection(line1, line2, debug=True):
         assert_almost_equal(x*line2[0] + y*line2[1] + 1, 0, err_msg='Intersection point is not on the line')
     return np.array([x, y], dtype=float)
 
-def saferotation_angle(rotation_angle):
-    '''
-    ensure the rotation is in [-180, 180] in degree
-    '''
-    while rotation_angle > 180:
-        rotation_angle -= 360
-
-    while rotation_angle < -180:
-        rotation_angle += 360
-
-    return rotation_angle
-
 def pts_rotate2D(pts_array, rotation_angle, im_height, im_width, debug=True):
     '''
     rotate the point array in 2D plane counter-clockwise
@@ -94,7 +115,7 @@ def pts_rotate2D(pts_array, rotation_angle, im_height, im_width, debug=True):
     if debug:
         assert is2dptsarray(pts_array), 'the input point array does not have a good shape'
 
-    rotation_angle = saferotation_angle(rotation_angle)             # ensure to be in [-180, 180]
+    rotation_angle = safe_angle(rotation_angle, debug=True)             # ensure to be in [-180, 180]
 
     if rotation_angle > 0:
         cols2rotated = im_width
@@ -109,46 +130,6 @@ def pts_rotate2D(pts_array, rotation_angle, im_height, im_width, debug=True):
     pts_rotate[0:2, :] = pts_array         
 
     return np.dot(rotation_matrix, pts_rotate)         # 2 x num_pts
-
-# done
-def pts_euclidean(pts1_src, pts2_src, debug=True):
-    '''
-    calculate the euclidean distance of two sets of points
-
-    parameter:
-        pts1, pts2: 2 x N or (2, ) numpy array, (x, y)
-
-    return
-        average euclidean distance
-    '''
-    if debug:
-        assert pts1_src.shape == pts2_src.shape, 'shape of two points is not equal'
-    
-    # if the shape of input points is (2, ), reshape them to (2, 1)
-    if len(pts1_src.shape) == 1:
-        pts1 = np.reshape(pts1_src.copy(), (2, 1))
-        pts2 = np.reshape(pts2_src.copy(), (2, 1))
-    else:
-        pts1 = pts1_src.copy()
-        pts2 = pts2_src.copy()
-
-    if debug:
-        assert is2dptsarray(pts1) and is2dptsarray(pts2), 'the input points are not correct'
-
-    eculidean_list = np.zeros((pts1.shape[1], ), dtype='float32')
-    # calculate the distance
-    num_pts = pts1.shape[1]
-    ave_euclidean = 0
-    for pts_index in xrange(num_pts):
-        pts1_tmp = pts1[:, pts_index]
-        pts2_tmp = pts2[:, pts_index]
-        n = float(pts_index + 1)
-        distance_tmp = math.sqrt((pts1_tmp[0] - pts2_tmp[0])**2 + (pts1_tmp[1] - pts2_tmp[1])**2)               # TODO check the start
-        ave_euclidean = (n-1) / n * ave_euclidean + distance_tmp / n
-        eculidean_list[pts_index] = distance_tmp
-
-    # ave_euclidean = ave_euclidean / float(num_pts)
-    return ave_euclidean, eculidean_list.tolist()
 
 ################################################################## 3d math ##################################################################
 def generate_sphere(pts_3d, radius, debug=True):

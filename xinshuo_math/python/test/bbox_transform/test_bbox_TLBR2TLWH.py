@@ -25,19 +25,21 @@ def test_bbox_TLBR2TLWH():
 	print(clipped)
 	assert CHECK_EQ_NUMPY(clipped, np.array([10, 30, 0, 0]).reshape((1, 4)))
 
-	print('check x2 < x1')
-	bbox = [10, 30, 9, 29]
-	try:
-		clipped = bbox_TLBR2TLWH(bbox)
-	except AssertionError:
-		print('the bottom right point coordinate should be no less than the top left one')
-
 	print('check multi bboxes')
 	bbox = np.array([[10, 30, 10, 30], [-1, 3, 20, 3]])
 	clipped = bbox_TLBR2TLWH(bbox)
 	print(clipped)
 	assert CHECK_EQ_NUMPY(clipped, np.array([[10, 30, 0, 0], [-1, 3, 21, 0]]).reshape((2, 4)))
 
+	print('check x2 < x1')
+	bbox = [10, 30, 9, 29]
+	try:
+		clipped = bbox_TLBR2TLWH(bbox)
+		sys.exit('\nwrong! never should be here\n\n')
+	except AssertionError:
+		print('the bottom right point coordinate should be no less than the top left one')
+
 	print('\n\nDONE! SUCCESSFUL!!\n')
+
 if __name__ == '__main__':
 	test_bbox_TLBR2TLWH()

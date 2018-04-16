@@ -23,7 +23,6 @@ class eval_meta_tracking_pts():
 		self.pts_anno = dict()					# 2 x num_pts
 		self.image_prev_path = dict()
 		self.image_next_path = dict()
-
 		self.pts_valid_index = dict()			# given key, provide a list of valid index
 		self.key_list = []						# current available keys
 		self.index_dict = dict()				# given key, provide index

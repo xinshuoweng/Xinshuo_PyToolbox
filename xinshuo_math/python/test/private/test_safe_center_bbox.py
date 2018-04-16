@@ -1,6 +1,6 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
-import numpy as np
+import numpy as np, sys
 
 import init_paths
 from private import safe_center_bbox
@@ -66,30 +66,41 @@ def test_safe_center_bbox():
 	assert CHECK_EQ_NUMPY(good_bbox, bbox)
 
 	######################################## test failure cases
+	print('test list of list of 3 elements')
 	bbox = [[1, 2, 4], [5, 7, 8]]
 	try:
 		good_bbox = safe_center_bbox(bbox)
+		sys.exit('\nwrong! never should be here\n\n')
+		assert False, 'never should be here'
 	except AssertionError:
 		print('the length of list should be 4 or 2')
 
+	print('test list of 3 elements')
 	bbox = [1, 2, 4]
 	try:
 		good_bbox = safe_center_bbox(bbox)
+		sys.exit('\nwrong! never should be here\n\n')
+		assert False, 'never should be here'
 	except AssertionError:
 		print('the length of list should be 4 or 2')
 
+	print('test numpy array with columns of 3')
 	bbox = np.array([[1, 2, 4], [5, 7, 8]])
 	try:
 		good_bbox = safe_center_bbox(bbox)
+		sys.exit('\nwrong! never should be here\n\n')
 	except AssertionError:
 		print('the numpy array should be columns of 4 or 2')
 
+	print('test numpy array with 3 elements')
 	bbox = np.array([1, 2, 4]).reshape(3, )
 	try:
 		good_bbox = safe_center_bbox(bbox)
+		sys.exit('\nwrong! never should be here\n\n')
 	except AssertionError:
 		print('the numpy array should be columns of 4 or 2')
 
 	print('\n\nDONE! SUCCESSFUL!!\n')
+	
 if __name__ == '__main__':
 	test_safe_center_bbox()

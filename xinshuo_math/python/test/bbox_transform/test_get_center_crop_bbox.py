@@ -15,5 +15,6 @@ def test_get_center_crop_bbox():
 	assert CHECK_EQ_NUMPY(crop_bbox, np.array([-4, -4, 10, 10]).reshape((1, 4)))
 	
 	print('\n\nDONE! SUCCESSFUL!!\n')
+	
 if __name__ == '__main__':
 	test_get_center_crop_bbox()
