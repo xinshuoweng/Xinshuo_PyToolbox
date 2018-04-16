@@ -145,7 +145,7 @@ def lab2rgb(input_image, warning=True, debug=True):
 	rgb_img = cv2.cvtColor(np_image, cv2.COLOR_LAB2RGB)
 	return rgb_img
 
-def image_hist_equalization(input_image, debug=True):
+def image_hist_equalization(input_image, warning=True, debug=True):
 	'''
 	do histogram equalization for an image: could be a color image or gray image
 	the color space used for histogram equalization is LAB
@@ -164,11 +164,11 @@ def image_hist_equalization(input_image, debug=True):
 		assert isfloatimage(np_image), 'the input image should be a float image'
 
 	if iscolorimage(np_image):
-		hsv_image = rgb2lab(np_image, debug=debug)
+		hsv_image = rgb2lab(np_image, warning=warning, debug=debug)
 		input_data = hsv_image[:, :, 0]			# extract the value channel
 		equalized_hsv_image = (hist_equalization(input_data, num_bins=256, debug=debug) * 255.).astype('uint8')
 		hsv_image[:, :, 0] = equalized_hsv_image
-		equalized_image = lab2rgb(hsv_image, debug=debug)
+		equalized_image = lab2rgb(hsv_image, warning=warning, debug=debug)
 	elif isgrayimage(np_image):
 		equalized_image = (hist_equalization(np_image, num_bins=256, debug=debug) * 255.).astype('uint8')
 	else:
@@ -195,11 +195,11 @@ def image_hist_equalization_hsv(input_image, debug=True):
 		assert isfloatimage(np_image), 'the input image should be a float image'
 
 	if iscolorimage(np_image):
-		hsv_image = rgb2hsv(np_image, debug=debug)
+		hsv_image = rgb2hsv(np_image, warning=warning, debug=debug)
 		input_data = hsv_image[:, :, 2]			# extract the value channel
 		equalized_hsv_image = (hist_equalization(input_data, num_bins=256, debug=debug) * 255.).astype('uint8')
 		hsv_image[:, :, 2] = equalized_hsv_image
-		equalized_image = hsv2rgb(hsv_image, debug=debug)
+		equalized_image = hsv2rgb(hsv_image, warning=warning, debug=debug)
 	elif isgrayimage(np_image):
 		equalized_image = (hist_equalization(np_image, num_bins=256, debug=debug) * 255.).astype('uint8')
 	else:
@@ -208,7 +208,7 @@ def image_hist_equalization_hsv(input_image, debug=True):
 	return equalized_image
 
 ############################################# format transform #################################
-def rgb2bgr(input_image, debug=True):
+def rgb2bgr(input_image, warning=True, debug=True):
 	'''
 	this function converts a rgb image to a bgr image
 
@@ -218,7 +218,7 @@ def rgb2bgr(input_image, debug=True):
 	outputs:
 		np_image:		a numpy bgr image
 	'''
-	np_image = safe_image(input_image)
+	np_image, _ = safe_image(input_image, warning=warning)
 
 	if debug:
 		assert iscolorimage(np_image), 'the input image is not a color image'
@@ -226,7 +226,7 @@ def rgb2bgr(input_image, debug=True):
 	np_image = np_image[:, :, ::-1] 			# convert RGB to BGR
 	return np_image
 
-def bgr2rgb(input_image, debug=True):
+def bgr2rgb(input_image, warning=True, debug=True):
 	'''
 	this function converts a bgr image to a rgb image
 
@@ -236,9 +236,9 @@ def bgr2rgb(input_image, debug=True):
 	outputs:
 		np_image:		a numpy rgb image
 	'''
-	return rgb2bgr(input_image, debug=debug)
+	return rgb2bgr(input_image, warning=warning, debug=debug)
 
-def chw2hwc(input_image, debug=True):
+def chw2hwc(input_image, warning=True, debug=True):
 	'''
 	this function transpose the channels of an image from CHW to HWC
 
@@ -248,14 +248,14 @@ def chw2hwc(input_image, debug=True):
 	outputs:
 		np_image:		a numpy HWC image
 	'''
-	np_image = safe_image(input_image)
+	np_image, _ = safe_image(input_image, warning=warning)
 
 	if debug:
 		assert np_image.ndim == 3 and np_image.shape[0] == 3, 'the input numpy image does not have a good dimension: {}'.format(np_image.shape)
 
 	return np.transpose(np_image, (1, 2, 0)) 
 
-def	image_normalize(input_image, img_type='uint8', debug=True):
+def	image_normalize(input_image, warning=True, debug=True):
 	'''
 	normalize an image to an uint8 with range of [0, 255]
 	note that: the input might not be an image because the value range might be arbitrary
@@ -285,8 +285,8 @@ def	image_normalize(input_image, img_type='uint8', debug=True):
 		if debug:
 			assert np.min(np_image) == 0 and np.max(np_image) == 255, 'the value range is not right [%f, %f]' % (np.min(np_image), np.max(np_image))
 
-	return np_image
-	
+	return np_image.astype('uint8')
+
 def unpreprocess_image_caffe(image_datablob, pixel_mean=None, pixel_std=None, bgr2rgb=True, chw2hwc=True, mode='np', debug=True):
 	'''
 	this function unpreprocesses image,
@@ -347,7 +347,7 @@ def rotate_bound(image, angle):
         return np.rot90(image)
         # rotate counter-clockwise
 
-def pad_around(input_image, pad_rect, pad_value=0, debug=True):
+def pad_around(input_image, pad_rect, pad_value=0, warning=True, debug=True):
 	'''
 	this function is to pad given value to an image in provided region, all images in this function are floating images
 	
@@ -383,7 +383,7 @@ def pad_around(input_image, pad_rect, pad_value=0, debug=True):
 
 	return img_padded
 
-def crop_center(input_image, center_rect, pad_value=0, debug=True):
+def crop_center(input_image, center_rect, pad_value=0, warning=True, debug=True):
 	'''
 	crop the image around a specific center with padded value around the empty area
 	when the crop width/height are even, the cropped image has 1 additional pixel towards left/up
