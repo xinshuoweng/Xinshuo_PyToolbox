@@ -3,7 +3,7 @@
 
 # this file includes private functions for internal use only
 import numpy as np
-from xinshuo_miscellaneous import ispilimage, isnpimage, isnparray, isnpimage_dimension, isnannparray
+from xinshuo_miscellaneous import ispilimage, isnpimage, isnparray, isnpimage_dimension, isnannparray, iscolorimage
 
 def safe_image(input_image, warning=True, debug=True):
 	'''

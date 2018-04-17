@@ -4,7 +4,7 @@ import math, cv2
 import numpy as np
 from PIL import Image
 
-from private import safe_image, safe_image_like, safe_batch_deep_image
+from private import safe_image, safe_image_like, safe_batch_deep_image, safe_batch_image
 from xinshuo_miscellaneous import isfloatimage, iscolorimage, isnparray, isnpimage_dimension, isuintimage, isgrayimage, ispilimage, islist, isinteger, islistofnonnegativeinteger, isfloatnparray, isuintnparray
 from xinshuo_math import hist_equalization, clip_bboxes_TLWH, get_center_crop_bbox
 from xinshuo_visualization import visualize_image
@@ -32,8 +32,7 @@ def gray2rgb(input_image, with_color=True, cmap='jet', warning=True, debug=True)
 	if with_color:
 		if cmap == 'jet':
 			rgb_image = cv2.applyColorMap(np_image, cv2.COLORMAP_JET)
-		else:
-			assert False, 'cmap %s is not supported' % cmap
+		else: assert False, 'cmap %s is not supported' % cmap
 	else:
 		rgb_image = cv2.cvtColor(np_image, cv2.COLOR_GRAY2RGB)
 	return rgb_image
@@ -160,8 +159,7 @@ def image_hist_equalization(input_image, warning=True, debug=True):
 	if isuintimage(np_image):
 		np_image = np_image.astype('float32') / 255.
 
-	if debug:
-		assert isfloatimage(np_image), 'the input image should be a float image'
+	if debug: assert isfloatimage(np_image), 'the input image should be a float image'
 
 	if iscolorimage(np_image):
 		hsv_image = rgb2lab(np_image, warning=warning, debug=debug)
@@ -171,8 +169,7 @@ def image_hist_equalization(input_image, warning=True, debug=True):
 		equalized_image = lab2rgb(hsv_image, warning=warning, debug=debug)
 	elif isgrayimage(np_image):
 		equalized_image = (hist_equalization(np_image, num_bins=256, debug=debug) * 255.).astype('uint8')
-	else:
-		assert False, 'the input image is neither a color image or a grayscale image'
+	else: assert False, 'the input image is neither a color image or a grayscale image'
 
 	return equalized_image
 
@@ -191,8 +188,7 @@ def image_hist_equalization_hsv(input_image, debug=True):
 	if isuintimage(np_image):
 		np_image = np_image.astype('float32') / 255.
 
-	if debug:
-		assert isfloatimage(np_image), 'the input image should be a float image'
+	if debug: assert isfloatimage(np_image), 'the input image should be a float image'
 
 	if iscolorimage(np_image):
 		hsv_image = rgb2hsv(np_image, warning=warning, debug=debug)
@@ -202,8 +198,7 @@ def image_hist_equalization_hsv(input_image, debug=True):
 		equalized_image = hsv2rgb(hsv_image, warning=warning, debug=debug)
 	elif isgrayimage(np_image):
 		equalized_image = (hist_equalization(np_image, num_bins=256, debug=debug) * 255.).astype('uint8')
-	else:
-		assert False, 'the input image is neither a color image or a grayscale image'
+	else: assert False, 'the input image is neither a color image or a grayscale image'
 
 	return equalized_image
 
@@ -249,9 +244,7 @@ def rgb2bgr(input_image, warning=True, debug=True):
 		np_image:		a numpy bgr image
 	'''
 	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
-
-	if debug:
-		assert iscolorimage(np_image), 'the input image is not a color image'
+	if debug: assert iscolorimage(np_image), 'the input image is not a color image'
 	
 	np_image = np_image[:, :, ::-1] 			# convert RGB to BGR
 	return np_image
@@ -279,8 +272,7 @@ def hwc2chw(input_image, warning=True, debug=True):
 		np_image:		a numpy CHW image
 	'''
 	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
-	if debug:
-		assert np_image.ndim == 3 and np_image.shape[2] == 3, 'the input numpy image does not have a good dimension: {}'.format(np_image.shape)
+	if debug: assert np_image.ndim == 3 and np_image.shape[2] == 3, 'the input numpy image does not have a good dimension: {}'.format(np_image.shape)
 
 	return np.transpose(np_image, (2, 0, 1)) 
 
@@ -297,12 +289,11 @@ def chw2hwc(input_image, warning=True, debug=True):
 
 	if debug: isnparray(input_image), 'the input image is not a numpy'
 	np_image = input_image.copy()
-	if debug:
-		assert np_image.ndim == 3 and np_image.shape[0] == 3, 'the input numpy image does not have a good dimension: {}'.format(np_image.shape)
+	if debug: assert np_image.ndim == 3 and np_image.shape[0] == 3, 'the input numpy image does not have a good dimension: {}'.format(np_image.shape)
 
 	return np.transpose(np_image, (1, 2, 0)) 
 
-def preprocess_batch_deep_image(input_image, pixel_mean=None, pixel_std=None, rgb2bgr=False, warning=True, debug=True):
+def preprocess_batch_deep_image(input_image, pixel_mean=None, pixel_std=None, rgb2bgr=True, warning=True, debug=True):
 	'''
 	this function preprocesses batch of images to a deep image, convert (N)HWC to NCHW, from rgb to bgr
 	normalize the batch image based on mean and std
@@ -319,11 +310,11 @@ def preprocess_batch_deep_image(input_image, pixel_mean=None, pixel_std=None, rg
 	np_image, isnan = safe_batch_image(input_image, warning=warning, debug=debug)
 	if isuintnparray(np_image):
 		np_image = np_image.astype('float32') / 255.		
-	else:
-		assert isfloatnparray(np_image), 'the input image-like array should be either an uint8 or float32 array' 
+	else: assert isfloatnparray(np_image), 'the input image-like array should be either an uint8 or float32 array' 
 
 	# normalize the numpy image data
 	if pixel_mean is not None:
+		pixel_mean = safe_npdata(pixel_mean)
 		if debug: 
 			assert pixel_mean.shape == (1, 1, 3) or pixel_mean.shape == (3, ), 'pixel mean is not correct'
 			assert all(pixel_mean <= 1.0 and pixel_mean >= 0.0), 'mean value should be in range [0, 1].'
@@ -338,7 +329,7 @@ def preprocess_batch_deep_image(input_image, pixel_mean=None, pixel_std=None, rg
 		np_image /= pixel_std_reshape
 
 	if rgb2bgr: np_image = np_image[:, :, :, [2, 1, 0]]                 	# from rgb to bgr, currently NHWC
-	np_image = np.transpose(np_image, (0, 3, 1, 2))         # NHWC to NCHW
+	np_image = np.transpose(np_image, (0, 3, 1, 2))         				# NHWC to NCHW
 
 	return np_image
 
@@ -357,8 +348,7 @@ def unpreprocess_batch_deep_image(input_image, pixel_mean=None, pixel_std=None, 
 		image_data_list: 		a list of HWC uint8 numpy image
 	'''
 	np_image, isnan = safe_batch_deep_image(input_image, warning=warning, debug=debug)
-	if debug:
-		assert isfloatnparray(np_image), 'the input image-like array should be either an uint8 or float32 array' 
+	if debug: assert isfloatnparray(np_image), 'the input image-like array should be either an uint8 or float32 array' 
 
 	if pixel_std is not None:
 		if debug: 
@@ -411,8 +401,7 @@ def	image_normalize(input_image, warning=True, debug=True):
 	else:													# normal case
 		np_image -= min_val
 		np_image = ((np_image / (max_val - min_val)) * 255.).astype('uint8')
-		if debug:
-			assert np.min(np_image) == 0 and np.max(np_image) == 255, 'the value range is not right [%f, %f]' % (np.min(np_image), np.max(np_image))
+		if debug: assert np.min(np_image) == 0 and np.max(np_image) == 255, 'the value range is not right [%f, %f]' % (np.min(np_image), np.max(np_image))
 
 	return np_image.astype('uint8')
 
