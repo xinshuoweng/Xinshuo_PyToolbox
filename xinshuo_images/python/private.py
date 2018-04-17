@@ -21,12 +21,41 @@ def safe_image(input_image, warning=True, debug=True):
 		np_image = np.array(input_image)
 	elif isnpimage(input_image):
 		np_image = input_image.copy()
-	else:
-		assert False, 'only pil and numpy images are supported, might be the case the image is float but has range of [0, 255], or might because the data is float64'
+	else: assert False, 'only pil and numpy images are supported, might be the case the image is float but has range of [0, 255], or might because the data is float64'
 
 	isnan = isnannparray(np_image)
-	if warning and isnan:
-		print('nan exists in the image data')
+	if warning and isnan: print('nan exists in the image data')
+
+	return np_image, isnan
+
+def safe_batch_image(input_image, warning=True, debug=True):
+	'''
+	return a numpy image no matter what format the input is
+	make sure the output numpy image is a copy of the input image
+
+	parameters:
+		input_image:		a numpy image, NHW3, float or uint
+
+	outputs:
+		np_image:			NHW3 numpy image, with the same datatype as the input
+		isnan:				return True if any nan value exists
+	'''
+	if debug:
+		assert isnparray(input_image), 'the input image should be a numpy array'
+	np_image = input_image.copy()
+
+	if np_image.ndim == 3:		# expand HWC to NHWC batch images with batch of 1
+		if debug: assert iscolorimage(np_image), 'the image should be a color image'
+		np_image = np.expand_dims(np_image, axis=0)
+	elif np_image.ndim == 4:
+		if debug: 
+			assert np_image.shape[-1] == 3, 'the image shape is not good'
+			for image_index in range(np_image.shape[0]):
+				assert iscolorimage(np_image[image_index]), 'each individual image should be a color image'
+	else: assert False, 'only color images are supported'
+
+	isnan = isnannparray(np_image)
+	if warning and isnan: print('nan exists in the image data')
 
 	return np_image, isnan
 
@@ -50,12 +79,10 @@ def safe_image_like(input_image, warning=True, debug=True):
 	elif isnparray(input_image):
 		np_image = input_image.copy()
 		assert isnpimage_dimension(np_image), 'the input is not an image-like numpy array'
-	else:
-		assert False, 'only pil and numpy image-like data are supported'
+	else: assert False, 'only pil and numpy image-like data are supported'
 
 	isnan = isnannparray(np_image)
-	if warning and isnan:
-		print('nan exists in the image data')
+	if warning and isnan: print('nan exists in the image data')
 
 	return np_image, isnan
 
@@ -82,17 +109,13 @@ def safe_batch_deep_image(input_image, warning=True, debug=True):
 	# if np_image.ndim == 2:		# expand HW gradscale image to CHW image with one channel
 		# np_image = np.expand_dims(np_image, axis=0)
 	if np_image.ndim == 3:		# expand CHW to NCHW batch images with batch of 1
-		if debug:
-			assert np_image.shape[0] == 3, 'the image should be a color image'
+		if debug: assert np_image.shape[0] == 3, 'the image should be a color image'
 		np_image = np.expand_dims(np_image, axis=0)
 	elif np_image.ndim == 4:
-		if debug:
-			assert np_image.shape[1] == 3, 'the image should be a color image'
-	else:
-		assert False, 'only color images are supported'
+		if debug: assert np_image.shape[1] == 3, 'the image should be a color image'
+	else: assert False, 'only color images are supported'
 
 	isnan = isnannparray(np_image)
-	if warning and isnan:
-		print('nan exists in the image data')
+	if warning and isnan: print('nan exists in the image data')
 
 	return np_image, isnan

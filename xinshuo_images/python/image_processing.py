@@ -268,54 +268,95 @@ def bgr2rgb(input_image, warning=True, debug=True):
 	'''
 	return rgb2bgr(input_image, warning=warning, debug=debug)
 
+def hwc2chw(input_image, warning=True, debug=True):
+	'''
+	this function transpose the channels of an image from HWC to CHW
+
+	parameters:
+		input_image:	a pil or numpy HWC image
+
+	outputs:
+		np_image:		a numpy CHW image
+	'''
+	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
+	if debug:
+		assert np_image.ndim == 3 and np_image.shape[2] == 3, 'the input numpy image does not have a good dimension: {}'.format(np_image.shape)
+
+	return np.transpose(np_image, (2, 0, 1)) 
+
 def chw2hwc(input_image, warning=True, debug=True):
 	'''
 	this function transpose the channels of an image from CHW to HWC
 
 	parameters:
-		input_image:	a pil or numpy CHW image
+		input_image:	a numpy CHW image
 
 	outputs:
 		np_image:		a numpy HWC image
 	'''
-	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
 
+	if debug: isnparray(input_image), 'the input image is not a numpy'
+	np_image = input_image.copy()
 	if debug:
 		assert np_image.ndim == 3 and np_image.shape[0] == 3, 'the input numpy image does not have a good dimension: {}'.format(np_image.shape)
 
 	return np.transpose(np_image, (1, 2, 0)) 
 
-def	image_normalize(input_image, warning=True, debug=True):
+def preprocess_image_caffe(img, mean_value, debug_mode=True):
+    # input is h w c
+    # output is c h w
+    if debug_mode:
+        img = check_imageorPath(img);
+        assert isIntegerImage(img), 'image should be in integer format.'
+        assert length(mean_value) == 1 or length(mean_value) or 3, 'mean value should be length 1 or 3!'
+        assert all(mean_value <= 1.0 and mean_value >= 0.0), 'mean value should be in range [0, 1].'
+
+    img_out = img/255.0
+    img_out = img_out - mean_value
+    #img_out = np.transpose(img_out, [1,0,2])    # permute to width x height x channel
+    img_out = np.transpose(img_out, [2,0,1])    # permute to channel x height x width
+    
+    if img_out.shape[0] == 1:
+        img_out[1, :, :] = img_out[0, :, :]    # broadcast to color image
+        img_out[2, :, :] = img_out[0, :, :]   
+    
+    # python + opencv is BGR itself
+    img_out = img_out[[2,1,0], :, :]       # swap channel to bgr
+    return img_out
+
+# todo mean value
+def preprocess_batch_deep_image(input_image, rgb2bgr=False, warning=True, debug=True):
 	'''
-	normalize an image to an uint8 with range of [0, 255]
-	note that: the input might not be an image because the value range might be arbitrary
+	this function preprocesses image for caffe only,
+	including transfer from rgb to bgr
+	from HxWxC to NxCxHxW
 
 	parameters:
-		input_image:		pil image or image-like array, color or gray, float or uint
-
-	outputs:
-		np_image:			numpy uint8 image, normalized to [0, 255]
+		input_image:		NHWC numpy color image, where C is 3
 	'''
-	np_image, isnan = safe_image_like(input_image, warning=warning, debug=debug)
+	np_image, isnan = safe_batch_image(input_image, warning=warning, debug=debug)
 	if isuintnparray(np_image):
 		np_image = np_image.astype('float32') / 255.		
 	else:
 		assert isfloatnparray(np_image), 'the input image-like array should be either an uint8 or float32 array' 
 
-	min_val = np.min(np_image)
-	max_val = np.max(np_image)
-	if isnan: np_image.fill(0)
-	elif min_val == max_val:								# all same
-		if warning:
-			print('the input image has the same value over all the pixels')
-		np_image.fill(0)
-	else:													# normal case
-		np_image -= min_val
-		np_image = ((np_image / (max_val - min_val)) * 255.).astype('uint8')
-		if debug:
-			assert np.min(np_image) == 0 and np.max(np_image) == 255, 'the value range is not right [%f, %f]' % (np.min(np_image), np.max(np_image))
-
-	return np_image.astype('uint8')
+	batch_size = np_image.shape[0]
+	if rgb2bgr:
+		np_image = np_image[:, :, :, [2, 1, 0]]                 # from rgb to bgr, currently NHWC
+	
+	if debug:
+		# if vis:																# visualize swapped channel
+			# print('visualization in debug mode is on during preprocessing. Please turn off after confirmation')
+			# for index in xrange(caffe_input_data.shape[0]):
+				# image_tmp_swapped = caffe_input_data[index]
+				# print('\n\nPlease make sure the image is not RGB after swapping channel')
+				# visualize_image(image_tmp_swapped, debug=debug)
+		assert caffe_input_data.shape[-1] == 3 or caffe_input_data.shape[-1] == 1, 'channel is not correct'
+	caffe_input_data = np.transpose(caffe_input_data, (0, 3, 1, 2))         # permute to [batch, channel, height, weight]
+	
+	if debug:
+		assert caffe_input_data.shape[1] == 3 or caffe_input_data.shape[1] == 1, 'channel is not correct'
+	return caffe_input_data
 
 def unpreprocess_batch_deep_image(input_image, pixel_mean=None, pixel_std=None, bgr2rgb=True, warning=True, debug=True):
 	'''
@@ -355,16 +396,39 @@ def unpreprocess_batch_deep_image(input_image, pixel_mean=None, pixel_std=None, 
 
 	return image_data_list
 
-############################################# 2D transformation #################################
-def rotate_bound(image, angle):
-    # angle is counter_clockwise
-    if angle == -90:
-        # rotate clockwise
-        return np.rot90(image, 3)
-    else:
-        return np.rot90(image)
-        # rotate counter-clockwise
+def	image_normalize(input_image, warning=True, debug=True):
+	'''
+	normalize an image to an uint8 with range of [0, 255]
+	note that: the input might not be an image because the value range might be arbitrary
 
+	parameters:
+		input_image:		pil image or image-like array, color or gray, float or uint
+
+	outputs:
+		np_image:			numpy uint8 image, normalized to [0, 255]
+	'''
+	np_image, isnan = safe_image_like(input_image, warning=warning, debug=debug)
+	if isuintnparray(np_image):
+		np_image = np_image.astype('float32') / 255.		
+	else:
+		assert isfloatnparray(np_image), 'the input image-like array should be either an uint8 or float32 array' 
+
+	min_val = np.min(np_image)
+	max_val = np.max(np_image)
+	if isnan: np_image.fill(0)
+	elif min_val == max_val:								# all same
+		if warning:
+			print('the input image has the same value over all the pixels')
+		np_image.fill(0)
+	else:													# normal case
+		np_image -= min_val
+		np_image = ((np_image / (max_val - min_val)) * 255.).astype('uint8')
+		if debug:
+			assert np.min(np_image) == 0 and np.max(np_image) == 255, 'the value range is not right [%f, %f]' % (np.min(np_image), np.max(np_image))
+
+	return np_image.astype('uint8')
+
+############################################# 2D transformation #################################
 def pad_around(input_image, pad_rect, pad_value=0, warning=True, debug=True):
 	'''
 	this function is to pad given value to an image in provided region, all images in this function are floating images
@@ -443,7 +507,7 @@ def crop_center(input_image, center_rect, pad_value=0, warning=True, debug=True)
 
 	return img_cropped, crop_bbox, crop_bbox_clipped
 
-def imresize(img, portion, interp='bicubic', debug=True):
+def image_resize(img, portion, interp='bicubic', debug=True):
 	if debug:
 		assert interp == 'bicubic' or interp == 'bilinear', 'the interpolation method is not correct'
 		assert isnparray(img), 'the input image is not correct'
@@ -457,6 +521,15 @@ def imresize(img, portion, interp='bicubic', debug=True):
 		assert False, 'interpolation is wrong'
 
 	return img_
+
+def image_rotate(image, angle):
+    # angle is counter_clockwise
+    if angle == -90:
+        # rotate clockwise
+        return np.rot90(image, 3)
+    else:
+        return np.rot90(image)
+        # rotate counter-clockwise
 
 def image_concatenate(image_list, im_size=[1600, 2560], grid_size=None, edge_factor=0.99, debug=True):
 	'''
@@ -533,8 +606,7 @@ def vstack_images( images, gap ):
 	hstack = np.vstack( imagelist )
 	return Image.fromarray( hstack )
 
-# done
-def draw_mask(np_image, np_image_mask, alpha=0.3, debug=True):
+def image_draw_mask(np_image, np_image_mask, alpha=0.3, debug=True):
 	'''
 	draw a mask on top of an image with certain transparency
 	'''
@@ -547,66 +619,3 @@ def draw_mask(np_image, np_image_mask, alpha=0.3, debug=True):
 	pil_image_out = Image.blend(pil_image, pil_image_mask, alpha=alpha)
 
 	return pil_image_out
-
-
-# # to test, supposed to be equivalent to gray2rgb
-# def mat2im(mat, cmap, limits):
-#   '''
-# % PURPOSE
-# % Uses vectorized code to convert matrix "mat" to an m-by-n-by-3
-# % image matrix which can be handled by the Mathworks image-processing
-# % functions. The the image is created using a specified color-map
-# % and, optionally, a specified maximum value. Note that it discards
-# % negative values!
-# %
-# % INPUTS
-# % mat     - an m-by-n matrix  
-# % cmap    - an m-by-3 color-map matrix. e.g. hot(100). If the colormap has 
-# %           few rows (e.g. less than 20 or so) then the image will appear 
-# %           contour-like.
-# % limits  - by default the image is normalised to it's max and min values
-# %           so as to use the full dynamic range of the
-# %           colormap. Alternatively, it may be normalised to between
-# %           limits(1) and limits(2). Nan values in limits are ignored. So
-# %           to clip the max alone you would do, for example, [nan, 2]
-# %          
-# %
-# % OUTPUTS
-# % im - an m-by-n-by-3 image matrix  
-#   '''
-#   assert len(mat.shape) == 2
-#   if len(limits) == 2:
-#     minVal = limits[0]
-#     tempss = np.zeros(mat.shape) + minVal
-#     mat    = np.maximum(tempss, mat)
-#     maxVal = limits[1]
-#     tempss = np.zeros(mat.shape) + maxVal
-#     mat    = np.minimum(tempss, mat)
-#   else:
-#     minVal = mat.min()
-#     maxVal = mat.max()
-#   L = len(cmap)
-#   if maxVal <= minVal:
-#     mat = mat-minVal
-#   else:
-#     mat = (mat-minVal) / (maxVal-minVal) * (L-1)
-#   mat = mat.astype(np.int32)
-  
-#   image = np.reshape(cmap[ np.reshape(mat, (mat.size)), : ], mat.shape + (3,))
-#   return image
-
-# def jet(m):
-#   cm_subsection = linspace(0, 1, m)
-#   colors = [ cm.jet(x) for x in cm_subsection ]
-#   J = np.array(colors)
-#   J = J[:, :3]
-#   return J
-
-# def generate_color_from_heatmap(maps, num_of_color=100, index=None):
-#   assert isinstance(maps, np.ndarray)
-#   if len(maps.shape) == 3:
-#     return generate_color_from_heatmaps(maps, num_of_color, index)
-#   elif len(maps.shape) == 2:
-#     return mat2im( maps, jet(num_of_color), [maps.min(), maps.max()] )
-#   else:
-#     assert False, 'generate_color_from_heatmap wrong shape : {}'.format(maps.shape)
