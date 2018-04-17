@@ -5,6 +5,7 @@ import numpy as np
 from PIL import Image
 
 from private import safe_image, safe_image_like, safe_batch_deep_image, safe_batch_image
+from xinshuo_math.python.private import safe_npdata
 from xinshuo_miscellaneous import isfloatimage, iscolorimage, isnparray, isnpimage_dimension, isuintimage, isgrayimage, ispilimage, islist, isinteger, islistofnonnegativeinteger, isfloatnparray, isuintnparray
 from xinshuo_math import hist_equalization, clip_bboxes_TLWH, get_center_crop_bbox
 from xinshuo_visualization import visualize_image
@@ -295,8 +296,10 @@ def chw2hwc(input_image, warning=True, debug=True):
 
 def preprocess_batch_deep_image(input_image, pixel_mean=None, pixel_std=None, rgb2bgr=True, warning=True, debug=True):
 	'''
-	this function preprocesses batch of images to a deep image, convert (N)HWC to NCHW, from rgb to bgr
-	normalize the batch image based on mean and std
+	this function preprocesses batch of images to a deep image, 
+	1: from rgb to bgr
+	2: normalize the batch image based on mean and std
+	3: convert (N)HWC to NCHW
 
 	parameters:
 		input_image:			NHWC numpy color image, where C is 3, uint8 or float32
@@ -311,24 +314,25 @@ def preprocess_batch_deep_image(input_image, pixel_mean=None, pixel_std=None, rg
 	if isuintnparray(np_image):
 		np_image = np_image.astype('float32') / 255.		
 	else: assert isfloatnparray(np_image), 'the input image-like array should be either an uint8 or float32 array' 
+	if rgb2bgr: np_image = np_image[:, :, :, [2, 1, 0]]                 	# from rgb to bgr, currently NHWC
 
 	# normalize the numpy image data
 	if pixel_mean is not None:
-		pixel_mean = safe_npdata(pixel_mean)
+		pixel_mean = safe_npdata(pixel_mean, warning=warning, debug=debug)
 		if debug: 
-			assert pixel_mean.shape == (1, 1, 3) or pixel_mean.shape == (3, ), 'pixel mean is not correct'
-			assert all(pixel_mean <= 1.0 and pixel_mean >= 0.0), 'mean value should be in range [0, 1].'
+			assert pixel_mean.shape == (3, ), 'pixel mean is not correct'
+			assert (pixel_mean <= 1.0).all() and (pixel_mean >= 0.0).all(), 'mean value should be in range [0, 1].'
 		pixel_mean_reshape = np.reshape(pixel_mean, (1, 1, 1, 3))
 		np_image -= pixel_mean_reshape
 
 	if pixel_std is not None:
+		pixel_std = safe_npdata(pixel_std, warning=warning, debug=debug)
 		if debug: 
-			assert pixel_std.shape == (1, 1, 3) or pixel_std.shape == (3, ), 'pixel std is not correct'
-			assert all(pixel_std <= 1.0 and pixel_std >= 0.0), 'std value should be in range [0, 1].'
+			assert pixel_std.shape == (3, ), 'pixel std is not correct'
+			assert (pixel_std <= 1.0).all() and (pixel_std >= 0.0).all(), 'std value should be in range [0, 1].'
 		pixel_std_reshape = np.reshape(pixel_std, (1, 1, 1, 3))
 		np_image /= pixel_std_reshape
 
-	if rgb2bgr: np_image = np_image[:, :, :, [2, 1, 0]]                 	# from rgb to bgr, currently NHWC
 	np_image = np.transpose(np_image, (0, 3, 1, 2))         				# NHWC to NCHW
 
 	return np_image
@@ -336,7 +340,9 @@ def preprocess_batch_deep_image(input_image, pixel_mean=None, pixel_std=None, rg
 def unpreprocess_batch_deep_image(input_image, pixel_mean=None, pixel_std=None, bgr2rgb=True, warning=True, debug=True):
 	'''
 	this function unpreprocesses batch of deep images, which uses chw format instead of hwc format in general
-	including transfer from chw to hwc, times std across channels and adds mean across channels, (convert bgr to rgb)
+	1: un-normalize the batch image based on mean and std
+	2: convert NCHW to NHWC
+	3. from bgr to rgb
 
 	parameters:
 		input_image:			NCHW / CHW float32 numpy array, where C is 3
@@ -345,34 +351,32 @@ def unpreprocess_batch_deep_image(input_image, pixel_mean=None, pixel_std=None, 
 		bgr2rgb:				true if the input image is bgr format, such that the output is rgb image
 
 	outputs:
-		image_data_list: 		a list of HWC uint8 numpy image
+		np_image: 				NHWC uint8 color numpy image, rgb format
 	'''
 	np_image, isnan = safe_batch_deep_image(input_image, warning=warning, debug=debug)
 	if debug: assert isfloatnparray(np_image), 'the input image-like array should be either an uint8 or float32 array' 
 
 	if pixel_std is not None:
+		pixel_std = safe_npdata(pixel_std, warning=warning, debug=debug)
 		if debug: 
-			assert pixel_std.shape == (1, 1, 3) or pixel_std.shape == (3, ), 'pixel std is not correct'
-			assert all(pixel_std <= 1.0 and pixel_std >= 0.0), 'std value should be in range [0, 1].'
+			assert pixel_std.shape == (3, ), 'pixel std is not correct'
+			assert (pixel_std <= 1.0).all() and (pixel_std >= 0.0).all(), 'std value should be in range [0, 1].'
 		pixel_std_reshape = np.reshape(pixel_std, (1, 3, 1, 1))
 		np_image *= pixel_std_reshape
 
 	if pixel_mean is not None:
+		pixel_mean = safe_npdata(pixel_mean, warning=warning, debug=debug)
 		if debug: 
-			assert pixel_mean.shape == (1, 1, 3) or pixel_mean.shape == (3, ), 'pixel mean is not correct'
-			assert all(pixel_mean <= 1.0 and pixel_mean >= 0.0), 'mean value should be in range [0, 1].'
+			assert pixel_mean.shape == (3, ), 'pixel mean is not correct'
+			assert (pixel_mean <= 1.0).all() and (pixel_mean >= 0.0).all(), 'mean value should be in range [0, 1].'
 		pixel_mean_reshape = np.reshape(pixel_mean, (1, 3, 1, 1))
 		np_image += pixel_mean_reshape
 
 	np_image = np.transpose(np_image, (0, 2, 3, 1))         			# permute to [batch, height, weight, channel]	
 	if bgr2rgb:	np_image = np_image[:, :, :, [2, 1, 0]]             	# from bgr to rgb for color image
-	
-	image_data_list = list()
-	for i in xrange(np_image.shape[0]):
-		image_tmp = np_image[i, :, :, :]	
-		image_data_list.append((image_tmp * 255.).astype('uint8'))
+	np_image = (np_image * 255.).astype('uint8')
 
-	return image_data_list
+	return np_image
 
 def	image_normalize(input_image, warning=True, debug=True):
 	'''
