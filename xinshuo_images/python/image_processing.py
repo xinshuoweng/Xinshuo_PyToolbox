@@ -4,7 +4,7 @@ import math, cv2
 import numpy as np
 from PIL import Image
 
-from private import safe_image, safe_image_like
+from private import safe_image, safe_image_like, safe_batch_deep_image
 from xinshuo_miscellaneous import isfloatimage, iscolorimage, isnparray, isnpimage_dimension, isuintimage, isgrayimage, ispilimage, islist, isinteger, islistofnonnegativeinteger, isfloatnparray, isuintnparray
 from xinshuo_math import hist_equalization, clip_bboxes_TLWH, get_center_crop_bbox
 from xinshuo_visualization import visualize_image
@@ -21,7 +21,7 @@ def gray2rgb(input_image, with_color=True, cmap='jet', warning=True, debug=True)
 	output:
 		rgb_image:		an uint8 rgb numpy image
 	'''
-	np_image, _ = safe_image(input_image, warning=warning)
+	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
 	if isfloatimage(np_image):
 		np_image = (np_image * 255.).astype('uint8')
 
@@ -48,7 +48,7 @@ def rgb2hsv(input_image, warning=True, debug=True):
 	output:
 		hsv_image: 		an uint8 hsv numpy image
 	'''
-	np_image, _ = safe_image(input_image, warning=warning)
+	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
 	if isfloatimage(np_image):
 		np_image = (np_image * 255.).astype('uint8')	
 
@@ -69,7 +69,7 @@ def rgb2hsv_v2(input_image, warning=True, debug=True):
 	output:
 		hsv_image: 		an uint8 hsv numpy image
 	'''
-	np_image, _ = safe_image(input_image, warning=warning)
+	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
 	if isfloatimage(np_image):
 		np_image = (np_image * 255.).astype('uint8')	
 
@@ -92,7 +92,7 @@ def hsv2rgb(input_image, warning=True, debug=True):
 	output:
 		rgb_img: 		an uint8 rgb numpy image
 	'''
-	np_image, _ = safe_image(input_image, warning=warning)
+	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
 	if isfloatimage(np_image):
 		np_image = (np_image * 255.).astype('uint8')	
 
@@ -113,7 +113,7 @@ def rgb2lab(input_image, warning=True, debug=True):
 	output:
 		lab_image: 		an uint8 lab numpy image
 	'''
-	np_image, _ = safe_image(input_image, warning=warning)
+	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
 	if isfloatimage(np_image):
 		np_image = (np_image * 255.).astype('uint8')	
 
@@ -134,7 +134,7 @@ def lab2rgb(input_image, warning=True, debug=True):
 	output:
 		rgb_img: 		an uint8 rgb numpy image
 	'''
-	np_image, _ = safe_image(input_image, warning=warning)
+	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
 	if isfloatimage(np_image):
 		np_image = (np_image * 255.).astype('uint8')	
 
@@ -156,7 +156,7 @@ def image_hist_equalization(input_image, warning=True, debug=True):
 	outputs:
 		equalized_image:	an uint8 numpy image (rgb or gray)
 	'''
-	np_image, _ = safe_image(input_image, warning=warning)
+	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
 	if isuintimage(np_image):
 		np_image = np_image.astype('float32') / 255.
 
@@ -187,7 +187,7 @@ def image_hist_equalization_hsv(input_image, debug=True):
 	outputs:
 		equalized_image:	an uint8 numpy image (rgb or gray)
 	'''
-	np_image, _ = safe_image(input_image, warning=warning)
+	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
 	if isuintimage(np_image):
 		np_image = np_image.astype('float32') / 255.
 
@@ -207,6 +207,36 @@ def image_hist_equalization_hsv(input_image, debug=True):
 
 	return equalized_image
 
+def image_mean(images_dir, save_path, debug=True, vis=False):
+	'''
+	this function generates the mean image over all images. It assume the image has the same size
+
+	parameters:
+		images_dir: 		path to all images
+	'''
+	if debug:
+		assert is_path_exists(images_dir), 'the image path is not existing at %s' % images_dir
+		assert is_path_exists_or_creable(save_path), 'the path for saving is not correct: %s' % save_path
+
+	print('loading image data from %s' % images_dir)
+	imagelist, num_images = load_list_from_folders(images_dir, ext_filter=['png', 'jpg', 'jpeg'], depth=None)
+	print('{} images loaded'.format(num_images))
+
+	# load the first image to see the image size
+	img = Image.open(imagelist[0]).convert('L')
+	width, height = img.size
+
+	image_blob = np.zeros((height, width, num_images), dtype='float32')
+	count = 0
+	for image_path in imagelist:
+		print('generating sharpness: processing %d/%d' % (count+1, num_images))
+		img = Image.open(image_path).convert('L')	
+		image_blob[:, :, count] = np.asarray(img, dtype='float32') / 255
+		count += 1
+
+	mean_im = np.mean(image_blob, axis=2)
+	visualize_image(mean_im, debug=debug, vis=vis, save=True, save_path=save_path)
+
 ############################################# format transform #################################
 def rgb2bgr(input_image, warning=True, debug=True):
 	'''
@@ -218,7 +248,7 @@ def rgb2bgr(input_image, warning=True, debug=True):
 	outputs:
 		np_image:		a numpy bgr image
 	'''
-	np_image, _ = safe_image(input_image, warning=warning)
+	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
 
 	if debug:
 		assert iscolorimage(np_image), 'the input image is not a color image'
@@ -248,7 +278,7 @@ def chw2hwc(input_image, warning=True, debug=True):
 	outputs:
 		np_image:		a numpy HWC image
 	'''
-	np_image, _ = safe_image(input_image, warning=warning)
+	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
 
 	if debug:
 		assert np_image.ndim == 3 and np_image.shape[0] == 3, 'the input numpy image does not have a good dimension: {}'.format(np_image.shape)
@@ -266,7 +296,7 @@ def	image_normalize(input_image, warning=True, debug=True):
 	outputs:
 		np_image:			numpy uint8 image, normalized to [0, 255]
 	'''
-	np_image, isnan = safe_image_like(input_image, warning=warning)
+	np_image, isnan = safe_image_like(input_image, warning=warning, debug=debug)
 	if isuintnparray(np_image):
 		np_image = np_image.astype('float32') / 255.		
 	else:
@@ -287,54 +317,42 @@ def	image_normalize(input_image, warning=True, debug=True):
 
 	return np_image.astype('uint8')
 
-def unpreprocess_image_caffe(image_datablob, pixel_mean=None, pixel_std=None, bgr2rgb=True, chw2hwc=True, mode='np', debug=True):
+def unpreprocess_batch_deep_image(input_image, pixel_mean=None, pixel_std=None, bgr2rgb=True, warning=True, debug=True):
 	'''
-	this function unpreprocesses image,
-	including transfer from bgr to rgb, chw to hwc, times std across channels and adds mean across channels
+	this function unpreprocesses batch of deep images, which uses chw format instead of hwc format in general
+	including transfer from chw to hwc, times std across channels and adds mean across channels, (convert bgr to rgb)
 
-		inputs: NxCxHxW numpy array
-		outputs: a list of HxWxC 
+	parameters:
+		input_image:			NCHW / CHW float32 numpy array, where C is 3
+		pixel_mean:				a float32 numpy array mean over 3 channels with shape of (3, ) or (1, 1, 3)
+		pixel_std:				a float32 numpy array std over 3 channels with shape of (3, ) or (1, 1, 3)
+		bgr2rgb:				
+
+	outputs:
+		image_data_list: 		a list of HxWxC uint8 numpy image
 	'''
+	np_image, isnan = safe_batch_deep_image(input_image, warning=warning, debug=debug)
 	if debug:
-		# print('debug mode is on during unpreprocessing. Please turn off after debuging')
-		assert isnparray(image_datablob), 'the input image blob is not a numpy'
-		assert mode in ['pil', 'np'], 'the mode is not correct'
-	image_data = image_datablob.copy()
+		assert isfloatnparray(np_image), 'the input image-like array should be either an uint8 or float32 array' 
 
-	if image_data.ndim == 2:		# expand 2d gradscale image to 3 channel
-		image_data = np.expand_dims(image_data, axis=0)
-
-	if image_data.ndim == 3:		# expand to 4-d version of batch of 1
-		image_data = np.expand_dims(image_data, axis=0)
-
-	if debug:
-		assert image_data.ndim == 4, 'input is not correct'	
-		assert image_data.shape[1] == 1 or image_data.shape[1] == 3, 'this is not an blob of image, channel is not 1 or 3'
-	
 	if pixel_std is not None:
-		assert pixel_std.shape == (1, 1, 3) or pixel_std.shape == (3, ), 'pixel std is not correct'
+		if debug: assert pixel_std.shape == (1, 1, 3) or pixel_std.shape == (3, ), 'pixel std is not correct'
 		pixel_std_reshape = np.reshape(pixel_std, (1, 3, 1, 1))
-		image_data *= pixel_std_reshape
+		np_image *= pixel_std_reshape
 
 	if pixel_mean is not None:
-		assert pixel_mean.shape == (1, 1, 3) or pixel_mean.shape == (3, ), 'pixel mean is not correct'
+		if debug: assert pixel_mean.shape == (1, 1, 3) or pixel_mean.shape == (3, ), 'pixel mean is not correct'
 		pixel_mean_reshape = np.reshape(pixel_mean, (1, 3, 1, 1))
-		image_data += pixel_mean_reshape
+		np_image += pixel_mean_reshape
 
-	if chw2hwc:
-		image_data = np.transpose(image_data, (0, 2, 3, 1))         # permute to [batch, height, weight, channel]	
-
-	if image_data.shape[-1] == 3 and bgr2rgb:	# channel dimension
-		image_data = image_data[:, :, :, [2, 1, 0]]             # from bgr to rgb for color image
+	np_image = np.transpose(np_image, (0, 2, 3, 1))         			# permute to [batch, height, weight, channel]	
+	if bgr2rgb:	np_image = np_image[:, :, :, [2, 1, 0]]             	# from bgr to rgb for color image
+	
 	image_data_list = list()
-	for i in xrange(image_data.shape[0]):
-		image_tmp = image_data[i, :, :, :]
-		if mode == 'pil':
-			image_data_list.append(Image.fromarray((image_tmp * 255).astype('uint8')))
-		elif mode == 'np':
-			image_data_list.append(image_tmp)
-		else:
-			assert False, 'the mode %s is not supported' % mode
+	for i in xrange(np_image.shape[0]):
+		image_tmp = np_image[i, :, :, :]	
+		image_data_list.append((image_tmp * 255.).astype('uint8'))
+
 	return image_data_list
 
 ############################################# 2D transformation #################################
@@ -440,38 +458,7 @@ def imresize(img, portion, interp='bicubic', debug=True):
 
 	return img_
 
-############################################# batch processing #################################
-def generate_mean_image(images_dir, save_path, debug=True, vis=False):
-	'''
-	this function generates the mean image over all images. It assume the image has the same size
-
-	parameters:
-		images_dir: 		path to all images
-	'''
-	if debug:
-		assert is_path_exists(images_dir), 'the image path is not existing at %s' % images_dir
-		assert is_path_exists_or_creable(save_path), 'the path for saving is not correct: %s' % save_path
-
-	print('loading image data from %s' % images_dir)
-	imagelist, num_images = load_list_from_folders(images_dir, ext_filter=['png', 'jpg', 'jpeg'], depth=None)
-	print('{} images loaded'.format(num_images))
-
-	# load the first image to see the image size
-	img = Image.open(imagelist[0]).convert('L')
-	width, height = img.size
-
-	image_blob = np.zeros((height, width, num_images), dtype='float32')
-	count = 0
-	for image_path in imagelist:
-		print('generating sharpness: processing %d/%d' % (count+1, num_images))
-		img = Image.open(image_path).convert('L')	
-		image_blob[:, :, count] = np.asarray(img, dtype='float32') / 255
-		count += 1
-
-	mean_im = np.mean(image_blob, axis=2)
-	visualize_image(mean_im, debug=debug, vis=vis, save=True, save_path=save_path)
-
-def concatenate_grid(image_list, im_size=[1600, 2560], grid_size=None, edge_factor=0.99, debug=True):
+def image_concatenate(image_list, im_size=[1600, 2560], grid_size=None, edge_factor=0.99, debug=True):
 	'''
 	concatenate a list of images automatically
 
@@ -545,43 +532,6 @@ def vstack_images( images, gap ):
 	imagelist = imagelist[:-1]
 	hstack = np.vstack( imagelist )
 	return Image.fromarray( hstack )
-
-# TODO
-def find_peaks(heatmap, thre):
-    #filter = fspecial('gaussian', [3 3], 2)
-    #map_smooth = conv2(map, filter, 'same')
-    
-    # variable initialization    
-
-    map_smooth = np.array(heatmap)
-    map_smooth[map_smooth < thre] = 0.0
-
-
-    map_aug = np.zeros([map_smooth.shape[0]+2, map_smooth.shape[1]+2])
-    map_aug1 = np.zeros([map_smooth.shape[0]+2, map_smooth.shape[1]+2])
-    map_aug2 = np.zeros([map_smooth.shape[0]+2, map_smooth.shape[1]+2])
-    map_aug3 = np.zeros([map_smooth.shape[0]+2, map_smooth.shape[1]+2])
-    map_aug4 = np.zeros([map_smooth.shape[0]+2, map_smooth.shape[1]+2])
-    
-    # shift in different directions to find peak, only works for convex blob
-    map_aug[1:-1, 1:-1] = map_smooth
-    map_aug1[1:-1, 0:-2] = map_smooth
-    map_aug2[1:-1, 2:] = map_smooth
-    map_aug3[0:-2, 1:-1] = map_smooth
-    map_aug4[2:, 2:] = map_smooth
-
-    peakMap = np.multiply(np.multiply(np.multiply((map_aug > map_aug1),(map_aug > map_aug2)),(map_aug > map_aug3)),(map_aug > map_aug4))
-    peakMap = peakMap[1:-1, 1:-1]
-
-    idx_tuple = np.nonzero(peakMap)     # find 1
-    Y = idx_tuple[0]
-    X = idx_tuple[1]
-
-    score = np.zeros([len(Y),1])
-    for i in range(len(Y)):
-        score[i] = heatmap[Y[i], X[i]]
-
-    return X, Y, score
 
 # done
 def draw_mask(np_image, np_image_mask, alpha=0.3, debug=True):

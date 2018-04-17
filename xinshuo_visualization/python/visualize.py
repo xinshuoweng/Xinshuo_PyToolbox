@@ -240,7 +240,7 @@ def visualize_pts_array(pts_array, covariance=False, color_index=0, fig=None, ax
         if type_3row == 'occu':
             pts_visible_index   = np.where(pts_array[2, :] == 1)[0].tolist()              # plot visible points in red color
             pts_invisible_index = np.where(pts_array[2, :] == 0)[0].tolist()              # plot invisible points in blue color
-            pts_ignore_index    = np.where(pts_array[2, :] == -1)[0].tolist()             # do not plot points with annotation
+            pts_ignore_index    = np.where(pts_array[2, :] == -1)[0].tolist()             # do not plot points with annotation, usually visible, but not annotated
         else:
             pts_visible_index   = np.where(pts_array[2, :] > vis_threshold)[0].tolist()
             pts_ignore_index    = np.where(pts_array[2, :] <= vis_threshold)[0].tolist()

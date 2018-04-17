@@ -71,7 +71,6 @@ def test_safe_center_bbox():
 	try:
 		good_bbox = safe_center_bbox(bbox)
 		sys.exit('\nwrong! never should be here\n\n')
-		assert False, 'never should be here'
 	except AssertionError:
 		print('the length of list should be 4 or 2')
 
@@ -80,7 +79,6 @@ def test_safe_center_bbox():
 	try:
 		good_bbox = safe_center_bbox(bbox)
 		sys.exit('\nwrong! never should be here\n\n')
-		assert False, 'never should be here'
 	except AssertionError:
 		print('the length of list should be 4 or 2')
 

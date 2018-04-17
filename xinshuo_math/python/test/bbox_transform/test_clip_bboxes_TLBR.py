@@ -83,6 +83,7 @@ def test_clip_bboxes_TLBR():
 	bbox = [-10, 30, 5, 5]
 	try:
 		clipped = clip_bboxes_TLBR(bbox, 5, 5)
+		sys.exit('\nwrong! never should be here\n\n')
 	except AssertionError:
 		print('the bottom right point coordinate should be larger than bottom left one')
 
