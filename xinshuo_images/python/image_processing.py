@@ -708,14 +708,14 @@ def find_peaks(heatmap, thre):
     return X, Y, score
 
 
-def generate_label_map_gaussian(pts, height, width, sigma, downsample, visiable=None):
-  if isinstance(pts, numbers.Number):
+def generate_gaussian_heatmap(input_pts, image_size, sigma, downsample, visiable=None):
+  if isinstance(input_pts, numbers.Number):
     # this image does not provide the annotation, pts is a int number representing the number of points
-    return np.zeros((height,width,pts+1), dtype='float32'), np.ones((1,1,1+pts), dtype='float32')
+    return np.zeros((height,width,input_pts+1), dtype='float32'), np.ones((1,1,1+pts), dtype='float32')
 
-  assert isinstance(pts, np.ndarray) and len(pts.shape) == 2 and pts.shape[0] == 3, 'The shape of points : {}'.format(pts.shape)
+  assert isinstance(input_pts, np.ndarray) and len(pts.shape) == 2 and pts.shape[0] == 3, 'The shape of points : {}'.format(pts.shape)
   if isinstance(sigma, numbers.Number):
-    sigma = np.zeros((pts.shape[1])) + sigma
+    sigma = np.zeros((input_pts.shape[1])) + sigma
   assert isinstance(sigma, np.ndarray) and len(sigma.shape) == 1 and sigma.shape[0] == pts.shape[1], 'The shape of sigma : {}'.format(sigma.shape)
 
   offset = downsample / 2.0 - 0.5

@@ -39,7 +39,7 @@ def anno_parser(anno_path, num_pts=None, anno_version=None, debug=True):
     '''
     parse the annotation for LS3D-W dataset, which has a fixed format for .pts file
     return:
-        pts: 3 x num_pts (x, y, oculusion)          
+        pts_array: 3 x num_pts (x, y, oculusion)          
     '''
     data, num_lines = load_txt_file(anno_path, debug=debug)
     if debug:
@@ -59,19 +59,19 @@ def anno_parser(anno_path, num_pts=None, anno_version=None, debug=True):
             assert num_pts == n_points, 'number of points is not correct: %d vs %d' % (num_pts, n_points)
 
     # read points coordinate
-    pts = np.zeros((3, n_points), dtype='float32')
+    pts_array = np.zeros((3, n_points), dtype='float32')
     line_offset = 3     # first point starts at fourth line
     for point_index in xrange(n_points):
         try:
             pts_list = data[point_index + line_offset].split(' ')           # x y format
             if len(pts_list) > 2 and pts_list[2] == '':     # handle edge case where additional whitespace exists after point coordinates
                 pts_list = remove_empty_item_from_list(pts_list)
-            pts[0, point_index] = float(pts_list[0])
-            pts[1, point_index] = float(pts_list[1])
+            pts_array[0, point_index] = float(pts_list[0])
+            pts_array[1, point_index] = float(pts_list[1])
             if len(pts_list) == 3:
-                pts[2, point_index] = float(pts_list[2])
+                pts_array[2, point_index] = float(pts_list[2])
             else:
-                pts[2, point_index] = float(1)          # oculusion flag, 0: oculuded, 1: visible. We use 1 for all points since no visibility is provided by LS3D-W
+                pts_array[2, point_index] = float(1)          # oculusion flag, 0: oculuded, 1: visible. We use 1 for all points since no visibility is provided by LS3D-W
         except ValueError:
             print('error in loading points in %s' % anno_path)
-    return pts
+    return pts_array
