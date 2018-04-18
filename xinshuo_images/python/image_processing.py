@@ -222,26 +222,28 @@ def image_mean(input_image, warning=True, debug=True):
 
 	return mean_image
 
-def image_draw_mask(input_image, input_image_mask, alpha=0.3, warning=True, debug=True):
+def image_draw_mask(input_image, input_image_mask, transparency=0.3, warning=True, debug=True):
 	'''
 	draw a mask on top of an image with certain transparency
 
 	parameters: 
 		input_image:			a pil or numpy image
 		input_image_mask:		a pil or numpy image
-		alpha:					transparency factor
+		transparency:			transparency factor
 
 	outputs:
 		masked_image:			uint8 numpy image
 	'''
 	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
 	np_image_mask, _ = safe_image(input_image_mask, warning=warning, debug=debug)
-	if debug: assert np_image.shape == np_image_mask.shape, 'the shape of mask should be equal to the shape of input image'
+	if debug: 
+		assert isscalar(transparency), 'the transparency should be a scalar'
+		assert np_image.shape == np_image_mask.shape, 'the shape of mask should be equal to the shape of input image'
 	if isfloatimage(np_image): np_image = (np_image * 255.).astype('uint8')
 	if isfloatimage(np_image_mask): np_image_mask = (np_image_mask * 255.).astype('uint8')
 
 	pil_image, pil_image_mask = Image.fromarray(np_image), Image.fromarray(np_image_mask)
-	masked_image = np.array(Image.blend(pil_image, pil_image_mask, alpha=alpha))
+	masked_image = np.array(Image.blend(pil_image, pil_image_mask, alpha=transparency))
 
 	return masked_image
 
