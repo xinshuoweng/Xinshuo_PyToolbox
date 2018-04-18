@@ -1,0 +1,8 @@
+[
+  "test_check.py::test_is_path_valid", 
+  "test_check.py::test_is_path_creatable", 
+  "test_check.py::test_is_path_exists", 
+  "test_check.py::test_is_path_exists_or_creatable", 
+  "test_check.py::test_isuintimage", 
+  "test_check.py::test_isfloatimage"
+]

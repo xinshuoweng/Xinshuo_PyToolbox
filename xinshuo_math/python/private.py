@@ -136,6 +136,35 @@ def safe_pts(input_pts, warning=True, debug=True):
 
 	return np_pts	
 
+def safe_pts_occlusion(input_pts, warning=True, debug=True):
+	'''
+	make sure to copy the pts array without modifying it and make the dimension to N x 4
+
+	parameters:
+		input_pts: 	a list of 2 elements, a listoflist of 2 elements: e.g., [[1,2], [5,6]],
+						a numpy array with shape or (N, 2) or (2, )
+
+	outputs:
+		np_pts:		N X 2 numpy array
+	'''
+	if islist(input_pts):
+		if islistoflist(input_pts):
+			if debug: assert all(len(list_tmp) == 3 for list_tmp in input_pts), 'all sub-lists should have length of 3'
+			np_pts = np.array(input_pts).transpose()
+		else:
+			if debug: assert len(input_pts) == 3, 'the input pts list does not have a good shape'
+			np_pts = np.array(input_pts).reshape((3, 1))
+	elif isnparray(input_pts):
+		input_pts = input_pts.copy()
+		if input_pts.shape == (3, ):
+			np_pts = input_pts.reshape((3, 1))
+		else:
+			if debug: assert is2dptsarray_occlusion(input_pts), 'the input pts array does not have a good shape'
+			np_pts = input_pts
+	else: assert False, 'only list and numpy array for pts are supported'
+
+	return np_pts	
+
 ################################################################## sanity check ##################################################################
 def bboxcheck_TLBR(input_bbox, debug=True):
     '''

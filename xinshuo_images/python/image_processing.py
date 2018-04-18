@@ -545,7 +545,7 @@ def image_resize(input_image, resize_factor=None, target_size=None, interp='bicu
 
 	return resized_image
 
-def image_rotate(image, angle):
+def image_rotate(input_image, angle):
     # angle is counter_clockwise
     if angle == -90:
         # rotate clockwise
@@ -709,43 +709,39 @@ def find_peaks(heatmap, thre):
 
     return X, Y, score
 
-
 def generate_gaussian_heatmap(input_pts, image_size, sigma, downsample, visiable=None):
-  if isinstance(input_pts, numbers.Number):
-    # this image does not provide the annotation, pts is a int number representing the number of points
-    return np.zeros((height,width,input_pts+1), dtype='float32'), np.ones((1,1,1+pts), dtype='float32')
 
-  assert isinstance(input_pts, np.ndarray) and len(pts.shape) == 2 and pts.shape[0] == 3, 'The shape of points : {}'.format(pts.shape)
-  if isinstance(sigma, numbers.Number):
-    sigma = np.zeros((input_pts.shape[1])) + sigma
-  assert isinstance(sigma, np.ndarray) and len(sigma.shape) == 1 and sigma.shape[0] == pts.shape[1], 'The shape of sigma : {}'.format(sigma.shape)
+	assert isinstance(input_pts, np.ndarray) and len(pts.shape) == 2 and pts.shape[0] == 3, 'The shape of points : {}'.format(pts.shape)
+	if isinstance(sigma, numbers.Number):
+	sigma = np.zeros((input_pts.shape[1])) + sigma
+	assert isinstance(sigma, np.ndarray) and len(sigma.shape) == 1 and sigma.shape[0] == pts.shape[1], 'The shape of sigma : {}'.format(sigma.shape)
 
-  offset = downsample / 2.0 - 0.5
-  num_points, threshold = pts.shape[1], 0.01
+	offset = downsample / 2.0 - 0.5
+	num_points, threshold = pts.shape[1], 0.01
 
-  if visiable is None: visiable = pts[2, :].astype('bool')
-  assert visiable.shape[0] == num_points
+	if visiable is None: visiable = pts[2, :].astype('bool')
+	assert visiable.shape[0] == num_points
 
-  transformed_label = np.fromfunction( lambda y, x, pid : ((offset + x*downsample - pts[0,pid])**2 \
-                                                        + (offset + y*downsample - pts[1,pid])**2) \
-                                                          / -2.0 / sigma[pid] / sigma[pid],
-                                                          (height, width, num_points), dtype=int)
+	transformed_label = np.fromfunction( lambda y, x, pid : ((offset + x*downsample - pts[0,pid])**2 \
+	                                                    + (offset + y*downsample - pts[1,pid])**2) \
+	                                                      / -2.0 / sigma[pid] / sigma[pid],
+	                                                      (height, width, num_points), dtype=int)
 
-  mask_heatmap      = np.ones((1, 1, num_points+1), dtype='float32')
-  mask_heatmap[0, 0, :num_points] = visiable
-  mask_heatmap[0, 0, num_points]  = 1
-  
-  transformed_label = np.exp(transformed_label)
-  transformed_label[ transformed_label < threshold ] = 0
-  transformed_label[ transformed_label >         1 ] = 1
-  transformed_label = transformed_label * mask_heatmap[:, :, :num_points]
+	mask_heatmap      = np.ones((1, 1, num_points+1), dtype='float32')
+	mask_heatmap[0, 0, :num_points] = visiable
+	mask_heatmap[0, 0, num_points]  = 1
 
-  background_label  = 1 - np.amax(transformed_label, axis=2)
-  background_label[ background_label < 0 ] = 0
-  heatmap           = np.concatenate((transformed_label, np.expand_dims(background_label, axis=2)), axis=2).astype('float32')
-  
-  return heatmap*mask_heatmap, mask_heatmap
-  
+	transformed_label = np.exp(transformed_label)
+	transformed_label[ transformed_label < threshold ] = 0
+	transformed_label[ transformed_label >         1 ] = 1
+	transformed_label = transformed_label * mask_heatmap[:, :, :num_points]
+
+	background_label  = 1 - np.amax(transformed_label, axis=2)
+	background_label[ background_label < 0 ] = 0
+	heatmap           = np.concatenate((transformed_label, np.expand_dims(background_label, axis=2)), axis=2).astype('float32')
+
+	return heatmap*mask_heatmap, mask_heatmap
+
 # def find_tensor_peak(heatmap, radius, downsample):
 #   assert heatmap.dim() == 2, 'The dimension of the heatmap is wrong : {}'.format(heatmap.dim())
 #   assert radius > 0 and isinstance(radius, numbers.Number), 'The radius is not ok : {}'.format(radius)

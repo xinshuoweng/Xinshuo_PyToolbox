@@ -4,24 +4,18 @@ import os, sys
 import numpy as np
 from PIL import Image
 
-############################################################# basic
+############################################################# basic and customized datatype
 def isstring(string_test):
 	return isinstance(string_test, basestring)
 
 def isinteger(integer_test):
 	return isinstance(integer_test, int) or int(integer_test) == integer_test
 
-def ispositiveinteger(integer_test):
-    return isinteger(integer_test) and integer_test > 0
-
-def isnonnegativeinteger(integer_test):
-    return isinteger(integer_test) and integer_test >= 0
-
 def isfloat(float_test):
     return isinstance(float_test, float)
 
 def islist(list_test):
-	return isinstance(list_test, list)
+    return isinstance(list_test, list)
 
 def islogical(logical_test):
     return isinstance(logical_test, bool)
@@ -31,15 +25,6 @@ def isscalar(scalar_test):
 
 def isnparray(nparray_test):
     return isinstance(nparray_test, np.ndarray)
-
-def isuintnparray(nparray_test):
-    return isnparray(nparray_test) and nparray_test.dtype == 'uint8'
-
-def isfloatnparray(nparray_test):
-    return isnparray(nparray_test) and nparray_test.dtype == 'float32'
-
-def isnannparray(nparray_test):
-    return isnparray(nparray_test) and np.isnan(nparray_test).any()
 
 def istuple(tuple_test):
     return isinstance(tuple_test, tuple)
@@ -59,8 +44,23 @@ def isbbox(bbox_test):
 def iscenterbbox(bbox_test):
     return isnparray(bbox_test) and len(bbox_test.shape) == 2 and bbox_test.shape[0] > 0 and (bbox_test.shape[1] == 4 or bbox_test.shape[1] == 2)
 
-############################################################# list-related
+############################################################# value-related
+def ispositiveinteger(integer_test):
+    return isinteger(integer_test) and integer_test > 0
 
+def isnonnegativeinteger(integer_test):
+    return isinteger(integer_test) and integer_test >= 0
+
+def isuintnparray(nparray_test):
+    return isnparray(nparray_test) and nparray_test.dtype == 'uint8'
+
+def isfloatnparray(nparray_test):
+    return isnparray(nparray_test) and nparray_test.dtype == 'float32'
+
+def isnannparray(nparray_test):
+    return isnparray(nparray_test) and np.isnan(nparray_test).any()
+
+############################################################# list-related
 def islistoflist(list_test):
     if not islist(list_test):
         return False
@@ -102,13 +102,6 @@ def islistofnonnegativeinteger(list_test):
         return False  
 
 ############################################################# geometry-related
-
-def is2dline(line_test):
-    '''
-    numpy array or list or tuple with 3 elements
-    '''
-    return (isnparray(line_test) or islist(line_test) or istuple(line_test)) and np.array(line_test).size == 3
-
 def is2dpts(pts_test):
     '''
     numpy array or list or tuple with 2 elements
@@ -122,7 +115,19 @@ def is2dptsarray(pts_test):
     return isnparray(pts_test) and pts_test.shape[0] == 2 and len(pts_test.shape) == 2 and pts_test.shape[1] >= 0
 
 def is2dptsarray_occlusion(pts_test):
+    return is2dptsarray_occlusion(pts_test) and (np.logical_or(np.logical_or(pts_test[2, :] == 0, pts_test[2, :] == 1)), pts_test[2, :] == -1).all()
+
+def is2dptsarray_confidence(pts_test):
+    return is2dptsarray_occlusion(pts_test) and (pts_test[2, :] >= 0).all() and (pts_test[2, :] <= 1).all()
+
+def is3dptsarray(pts_test):
     return isnparray(pts_test) and pts_test.shape[0] == 3 and len(pts_test.shape) == 2 and pts_test.shape[1] >= 0                   # 3 x N
+
+def is2dline(line_test):
+    '''
+    numpy array or list or tuple with 3 elements
+    '''
+    return (isnparray(line_test) or islist(line_test) or istuple(line_test)) and np.array(line_test).size == 3
 
 def is3dpts(pts_test):
     '''
@@ -134,7 +139,6 @@ def islinesarray(line_test):
     return isnparray(line_test) and line_test.shape[0] == 4 and len(line_test.shape) == 2 and line_test.shape[1] >= 0               # 4 x N
 
 ############################################################# image_related
-
 def isimsize(size_test):
     return is2dpts(size_test)
 
