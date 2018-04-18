@@ -203,35 +203,24 @@ def image_hist_equalization_hsv(input_image, debug=True):
 
 	return equalized_image
 
-def image_mean(images_dir, save_path, debug=True, vis=False):
+def image_mean(input_image, warning=True, debug=True):
 	'''
-	this function generates the mean image over all images. It assume the image has the same size
+	this function computes the mean image over batch of images
 
 	parameters:
-		images_dir: 		path to all images
+		input_image: 		NHWC numpy image, uint8 or float32
+
+	outputs:
+		mean_img:			HWC numpy image, uint8	
 	'''
-	if debug:
-		assert is_path_exists(images_dir), 'the image path is not existing at %s' % images_dir
-		assert is_path_exists_or_creable(save_path), 'the path for saving is not correct: %s' % save_path
+	np_image, isnan = safe_batch_image(input_image, warning=warning, debug=debug)
+	if isuintnparray(np_image):
+		np_image = np_image.astype('float32') / 255.		
+	else: assert isfloatnparray(np_image), 'the input image-like array should be either an uint8 or float32 array' 
 
-	print('loading image data from %s' % images_dir)
-	imagelist, num_images = load_list_from_folders(images_dir, ext_filter=['png', 'jpg', 'jpeg'], depth=None)
-	print('{} images loaded'.format(num_images))
+	mean_img = (np.mean(np_image, axis=0) * 255.).astype('uint8')
 
-	# load the first image to see the image size
-	img = Image.open(imagelist[0]).convert('L')
-	width, height = img.size
-
-	image_blob = np.zeros((height, width, num_images), dtype='float32')
-	count = 0
-	for image_path in imagelist:
-		print('generating sharpness: processing %d/%d' % (count+1, num_images))
-		img = Image.open(image_path).convert('L')	
-		image_blob[:, :, count] = np.asarray(img, dtype='float32') / 255
-		count += 1
-
-	mean_im = np.mean(image_blob, axis=2)
-	visualize_image(mean_im, debug=debug, vis=vis, save=True, save_path=save_path)
+	return mean_img
 
 ############################################# format transform #################################
 def rgb2bgr(input_image, warning=True, debug=True):
@@ -311,6 +300,7 @@ def preprocess_batch_deep_image(input_image, pixel_mean=None, pixel_std=None, rg
 		np_image: 				NCHW float32 color numpy image, bgr format
 	'''
 	np_image, isnan = safe_batch_image(input_image, warning=warning, debug=debug)
+	if debug: assert np_image.shape[-1] == 3, 'the input image should be a color image'
 	if isuintnparray(np_image):
 		np_image = np_image.astype('float32') / 255.		
 	else: assert isfloatnparray(np_image), 'the input image-like array should be either an uint8 or float32 array' 

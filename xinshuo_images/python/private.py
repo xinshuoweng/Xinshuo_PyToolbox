@@ -34,10 +34,10 @@ def safe_batch_image(input_image, warning=True, debug=True):
 	make sure the output numpy image is a copy of the input image
 
 	parameters:
-		input_image:		a numpy image, NHW3, float or uint
+		input_image:		a numpy image, NHWC, float or uint
 
 	outputs:
-		np_image:			NHW3 numpy image, with the same datatype as the input
+		np_image:			NHWC numpy image, with the same datatype as the input
 		isnan:				return True if any nan value exists
 	'''
 	if debug:
@@ -45,13 +45,13 @@ def safe_batch_image(input_image, warning=True, debug=True):
 	np_image = input_image.copy()
 
 	if np_image.ndim == 3:		# expand HWC to NHWC batch images with batch of 1
-		if debug: assert iscolorimage(np_image), 'the image should be a color image'
+		if debug: assert isnpimage(np_image), 'the image should be a numpy image'
 		np_image = np.expand_dims(np_image, axis=0)
 	elif np_image.ndim == 4:
 		if debug: 
-			assert np_image.shape[-1] == 3, 'the image shape is not good'
+			assert np_image.shape[-1] == 3 or np_image.shape[-1] == 1, 'the image shape is not good'
 			for image_index in range(np_image.shape[0]):
-				assert iscolorimage(np_image[image_index]), 'each individual image should be a color image'
+				assert isnpimage(np_image[image_index]), 'each individual image should be a numpy image'
 	else: assert False, 'only color images are supported'
 
 	isnan = isnannparray(np_image)
