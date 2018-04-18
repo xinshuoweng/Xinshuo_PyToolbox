@@ -211,16 +211,38 @@ def image_mean(input_image, warning=True, debug=True):
 		input_image: 		NHWC numpy image, uint8 or float32
 
 	outputs:
-		mean_img:			HWC numpy image, uint8	
+		mean_image:			HWC numpy image, uint8	
 	'''
 	np_image, isnan = safe_batch_image(input_image, warning=warning, debug=debug)
 	if isuintnparray(np_image):
 		np_image = np_image.astype('float32') / 255.		
 	else: assert isfloatnparray(np_image), 'the input image-like array should be either an uint8 or float32 array' 
 
-	mean_img = (np.mean(np_image, axis=0) * 255.).astype('uint8')
+	mean_image = (np.mean(np_image, axis=0) * 255.).astype('uint8')
 
-	return mean_img
+	return mean_image
+
+def image_draw_mask(input_image, input_image_mask, alpha=0.3, warning=True, debug=True):
+	'''
+	draw a mask on top of an image with certain transparency
+
+	parameters: 
+		input_image:			a pil or numpy image
+		input_image_mask:		a pil or numpy image
+		alpha:					transparency factor
+
+	outputs:
+		masked_image:			uint8 numpy image
+	'''
+	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
+	np_image_mask, _ = safe_image(input_image_mask, warning=warning, debug=debug)
+	if isfloatimage(np_image): np_image = (np_image * 255.).astype('uint8')
+	if isfloatimage(np_image_mask): np_image_mask = (np_image_mask * 255.).astype('uint8')
+
+	pil_image, pil_image_mask = Image.fromarray(np_image), Image.fromarray(np_image_mask)
+	masked_image = np.array(Image.blend(pil_image, pil_image_mask, alpha=alpha))
+
+	return masked_image
 
 ############################################# format transform #################################
 def rgb2bgr(input_image, warning=True, debug=True):
@@ -576,17 +598,3 @@ def vstack_images( images, gap ):
 	imagelist = imagelist[:-1]
 	hstack = np.vstack( imagelist )
 	return Image.fromarray( hstack )
-
-def image_draw_mask(np_image, np_image_mask, alpha=0.3, debug=True):
-	'''
-	draw a mask on top of an image with certain transparency
-	'''
-	if debug:
-		assert isnpimage_dimension(np_image), 'the input image is not correct: {}'.format(np_image.shape)
-		assert isnpimage_dimension(np_image_mask), 'the input mask image is not correct: {}'.format(np_image_mask.shape)
-
-	pil_image = Image.fromarray(np_image.copy())
-	pil_image_mask = Image.fromarray(np_image_mask.copy())
-	pil_image_out = Image.blend(pil_image, pil_image_mask, alpha=alpha)
-
-	return pil_image_out
