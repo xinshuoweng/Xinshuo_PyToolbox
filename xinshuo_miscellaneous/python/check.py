@@ -135,7 +135,7 @@ def islinesarray(line_test):
 
 ############################################################# image_related
 
-def issize(size_test):
+def isimsize(size_test):
     return is2dpts(size_test)
 
 def isnpimage_dimension(image_test):

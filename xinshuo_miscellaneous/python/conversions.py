@@ -226,14 +226,16 @@ def remove_list_from_list(list_all_src, list_to_remove, warning=True, debug=True
 		assert islist(list_all_src), 'input list is not a list'
 		assert islist(list_to_remove), 'remove list is not a list'
 		
-	list_all = copy.copy(list_all_src)
+	list_remain = copy.copy(list_all_src)
+	list_removed = []
 	for item in list_to_remove:
 		try:
-			list_all.remove(item)
+			list_remain.remove(item)
+			list_removed.append(item)
 		except ValueError:
 			if warning: print('Warning!!!!!! Item to remove is not in the list. Remove operation is not done.')
 
-	return list_all
+	return list_remain, list_removed
 
 def remove_list_from_list_index(list_all_src, list_index_to_remove, debug=True):
 	'''

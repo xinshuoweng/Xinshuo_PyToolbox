@@ -6,7 +6,7 @@ from PIL import Image
 
 from private import safe_image, safe_image_like, safe_batch_deep_image, safe_batch_image
 from xinshuo_math.python.private import safe_npdata
-from xinshuo_miscellaneous import isfloatimage, iscolorimage, isnparray, isnpimage_dimension, isuintimage, isgrayimage, ispilimage, islist, isinteger, islistofnonnegativeinteger, isfloatnparray, isuintnparray
+from xinshuo_miscellaneous import isfloatimage, iscolorimage, isnparray, isnpimage_dimension, isuintimage, isgrayimage, ispilimage, islist, isinteger, islistofnonnegativeinteger, isfloatnparray, isuintnparray, isimsize, isscalar
 from xinshuo_math import hist_equalization, clip_bboxes_TLWH, get_center_crop_bbox
 from xinshuo_visualization import visualize_image
 
@@ -236,6 +236,7 @@ def image_draw_mask(input_image, input_image_mask, alpha=0.3, warning=True, debu
 	'''
 	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
 	np_image_mask, _ = safe_image(input_image_mask, warning=warning, debug=debug)
+	if debug: assert np_image.shape == np_image_mask.shape, 'the shape of mask should be equal to the shape of input image'
 	if isfloatimage(np_image): np_image = (np_image * 255.).astype('uint8')
 	if isfloatimage(np_image_mask): np_image_mask = (np_image_mask * 255.).astype('uint8')
 
@@ -243,6 +244,37 @@ def image_draw_mask(input_image, input_image_mask, alpha=0.3, warning=True, debu
 	masked_image = np.array(Image.blend(pil_image, pil_image_mask, alpha=alpha))
 
 	return masked_image
+
+def	image_normalize(input_image, warning=True, debug=True):
+	'''
+	normalize an image to an uint8 with range of [0, 255]
+	note that: the input might not be an image because the value range might be arbitrary
+
+	parameters:
+		input_image:		pil image or image-like array, color or gray, float or uint
+
+	outputs:
+		np_image:			numpy uint8 image, normalized to [0, 255]
+	'''
+	np_image, isnan = safe_image_like(input_image, warning=warning, debug=debug)
+	if isuintnparray(np_image):
+		np_image = np_image.astype('float32') / 255.		
+	else:
+		assert isfloatnparray(np_image), 'the input image-like array should be either an uint8 or float32 array' 
+
+	min_val = np.min(np_image)
+	max_val = np.max(np_image)
+	if isnan: np_image.fill(0)
+	elif min_val == max_val:								# all same
+		if warning:
+			print('the input image has the same value over all the pixels')
+		np_image.fill(0)
+	else:													# normal case
+		np_image -= min_val
+		np_image = ((np_image / (max_val - min_val)) * 255.).astype('uint8')
+		if debug: assert np.min(np_image) == 0 and np.max(np_image) == 255, 'the value range is not right [%f, %f]' % (np.min(np_image), np.max(np_image))
+
+	return np_image.astype('uint8')
 
 ############################################# format transform #################################
 def rgb2bgr(input_image, warning=True, debug=True):
@@ -390,37 +422,6 @@ def unpreprocess_batch_deep_image(input_image, pixel_mean=None, pixel_std=None, 
 
 	return np_image
 
-def	image_normalize(input_image, warning=True, debug=True):
-	'''
-	normalize an image to an uint8 with range of [0, 255]
-	note that: the input might not be an image because the value range might be arbitrary
-
-	parameters:
-		input_image:		pil image or image-like array, color or gray, float or uint
-
-	outputs:
-		np_image:			numpy uint8 image, normalized to [0, 255]
-	'''
-	np_image, isnan = safe_image_like(input_image, warning=warning, debug=debug)
-	if isuintnparray(np_image):
-		np_image = np_image.astype('float32') / 255.		
-	else:
-		assert isfloatnparray(np_image), 'the input image-like array should be either an uint8 or float32 array' 
-
-	min_val = np.min(np_image)
-	max_val = np.max(np_image)
-	if isnan: np_image.fill(0)
-	elif min_val == max_val:								# all same
-		if warning:
-			print('the input image has the same value over all the pixels')
-		np_image.fill(0)
-	else:													# normal case
-		np_image -= min_val
-		np_image = ((np_image / (max_val - min_val)) * 255.).astype('uint8')
-		if debug: assert np.min(np_image) == 0 and np.max(np_image) == 255, 'the value range is not right [%f, %f]' % (np.min(np_image), np.max(np_image))
-
-	return np_image.astype('uint8')
-
 ############################################# 2D transformation #################################
 def pad_around(input_image, pad_rect, pad_value=0, warning=True, debug=True):
 	'''
@@ -434,7 +435,7 @@ def pad_around(input_image, pad_rect, pad_value=0, warning=True, debug=True):
 	outputs:
 		img_padded:		an uint8 numpy image with padding
 	'''
-	np_image, _ = safe_image(input_image, warning=warning)
+	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
 	if isfloatimage(np_image): np_image = (np_image * 255.).astype('uint8')
 	if len(np_image.shape) == 2: np_image = np.expand_dims(np_image, axis=2)		# extend the third channel if the image is grayscale
 
@@ -472,7 +473,7 @@ def crop_center(input_image, center_rect, pad_value=0, warning=True, debug=True)
 		crop_bbox:				numpy array with shape of (1, 4), user-attempted cropping bbox, might out of boundary
 		crop_bbox_clipped:		numpy array with shape of (1, 4), clipped bbox within the boundary
 	'''	
-	np_image, _ = safe_image(input_image, warning=warning)
+	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
 	if isfloatimage(np_image): np_image = (np_image * 255.).astype('uint8')
 	if len(np_image.shape) == 2: np_image = np.expand_dims(np_image, axis=2)		# extend the third channel if the image is grayscale
 
@@ -500,20 +501,47 @@ def crop_center(input_image, center_rect, pad_value=0, warning=True, debug=True)
 
 	return img_cropped, crop_bbox, crop_bbox_clipped
 
-def image_resize(img, portion, interp='bicubic', debug=True):
+def image_resize(input_image, resize_factor=None, target_size=None, interp='bicubic', warning=True, debug=True):
+	'''
+	resize the image given a resize factor (e.g., 0.25), or given a target size (height, width)
+	e.g., the input image has 600 x 800:
+		1. given a resize factor of 0.25 -> results in an image with 150 x 200
+		2. given a target size of (300, 400) -> results in an image with 300 x 400
+	note that:
+		resize_factor and target_size cannot exist at the same time
+
+	parameters:
+		input_image:		an pil or numpy image
+		resize_factor:		a scalar
+		target_size:		a list of tuple or numpy array with 2 elements, representing height and width
+		interp:				interpolation methods: bicubic or bilinear
+
+	outputs:
+		resized_image:		a numpy uint8 image
+	'''	
+	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
+	if isfloatimage(np_image): np_image = (np_image * 255.).astype('uint8')
+
 	if debug:
-		assert interp == 'bicubic' or interp == 'bilinear', 'the interpolation method is not correct'
-		assert isnparray(img), 'the input image is not correct'
+		assert interp in ['bicubic', 'bilinear'], 'the interpolation method is not correct'
+		assert (resize_factor is not None and target_size is None) or (resize_factor is None and target_size is not None), 'resize_factor and target_size cannot co-exist'
 
-	height, width = img.shape[:2]
+	if target_size is not None:
+		if debug: assert isimsize(target_size), 'the input target size is not correct'
+		target_width, target_height = int(round(target_size[1])), int(round(target_size[0]))
+	elif resize_factor is not None:
+		if debug: assert isscalar(resize_factor), 'the resize factor is not a scalar'
+		height, width = np_image.shape[:2]
+		target_width, target_height = int(round(resize_factor * width)), int(round(resize_factor * height))
+	else: assert False, 'the target_size and resize_factor do not exist'
+
 	if interp == 'bicubic':
-	    img_ = cv2.resize(img, (int(portion*width), int(portion*height)), interpolation = cv2.INTER_CUBIC)
+	    resized_image = cv2.resize(np_image, (target_width, target_height), interpolation = cv2.INTER_CUBIC)
 	elif interp == 'bilinear':
-		img_ = cv2.resize(img, (int(portion*width), int(portion*height)), interpolation = cv2.INTER_LINEAR)
-	else:
-		assert False, 'interpolation is wrong'
+		resized_image = cv2.resize(np_image, (target_width, target_height), interpolation = cv2.INTER_LINEAR)
+	else: assert False, 'interpolation is wrong'
 
-	return img_
+	return resized_image
 
 def image_rotate(image, angle):
     # angle is counter_clockwise
@@ -598,3 +626,168 @@ def vstack_images( images, gap ):
 	imagelist = imagelist[:-1]
 	hstack = np.vstack( imagelist )
 	return Image.fromarray( hstack )
+
+
+# centroid
+# def find_tensor_peak_batch(heatmap, radius, downsample, threshold = 0.000001):
+#   assert heatmap.dim() == 3, 'The dimension of the heatmap is wrong : {}'.format(heatmap.size())
+#   assert radius > 0 and isinstance(radius, numbers.Number), 'The radius is not ok : {}'.format(radius)
+#   num_pts, H, W = heatmap.size(0), heatmap.size(1), heatmap.size(2)
+#   # find the approximate location:
+#   score, index = torch.max(heatmap.view(num_pts, -1), 1)
+#   index_w = (index % W).float()
+#   index_h = (index / W).float()
+  
+#   def normalize(x, L):
+#     return -1. + 2. * x.data / (L-1)
+#   boxes = [index_w - radius, index_h - radius, index_w + radius, index_h + radius]
+#   boxes[0] = normalize(boxes[0], W)
+#   boxes[1] = normalize(boxes[1], H)
+#   boxes[2] = normalize(boxes[2], W)
+#   boxes[3] = normalize(boxes[3], H)
+#   affine_parameter = torch.zeros((num_pts, 2, 3))
+#   affine_parameter[:,0,0] = (boxes[2]-boxes[0])/2
+#   affine_parameter[:,0,2] = (boxes[2]+boxes[0])/2
+#   affine_parameter[:,1,1] = (boxes[3]-boxes[1])/2
+#   affine_parameter[:,1,2] = (boxes[3]+boxes[1])/2
+  
+#   # extract the sub-region heatmap
+#   theta = MU.np2variable(affine_parameter,heatmap.is_cuda,False)
+#   grid_size = torch.Size([num_pts, 1, radius*2+1, radius*2+1])
+#   grid = F.affine_grid(theta, grid_size)
+#   sub_feature = F.grid_sample(heatmap.unsqueeze(1), grid).squeeze(1)
+#   sub_feature = F.threshold(sub_feature, threshold, np.finfo(float).eps)
+
+#   # slow for speed improvement
+#   X = MU.np2variable(torch.arange(-radius, radius+1),heatmap.is_cuda,False).view(1, 1, radius*2+1)
+#   Y = MU.np2variable(torch.arange(-radius, radius+1),heatmap.is_cuda,False).view(1, radius*2+1, 1)
+  
+#   sum_region = torch.sum(sub_feature.view(num_pts,-1),1)
+#   x = torch.sum((sub_feature*X).view(num_pts,-1),1) / sum_region + index_w
+#   y = torch.sum((sub_feature*Y).view(num_pts,-1),1) / sum_region + index_h
+     
+#   x = x * downsample + downsample / 2.0 - 0.5
+#   y = y * downsample + downsample / 2.0 - 0.5
+#   return torch.stack([x, y],1), score
+
+# TODO
+def find_peaks(heatmap, thre):
+    #filter = fspecial('gaussian', [3 3], 2)
+    #map_smooth = conv2(map, filter, 'same')
+    
+    # variable initialization    
+
+    map_smooth = np.array(heatmap)
+    map_smooth[map_smooth < thre] = 0.0
+
+
+    map_aug = np.zeros([map_smooth.shape[0]+2, map_smooth.shape[1]+2])
+    map_aug1 = np.zeros([map_smooth.shape[0]+2, map_smooth.shape[1]+2])
+    map_aug2 = np.zeros([map_smooth.shape[0]+2, map_smooth.shape[1]+2])
+    map_aug3 = np.zeros([map_smooth.shape[0]+2, map_smooth.shape[1]+2])
+    map_aug4 = np.zeros([map_smooth.shape[0]+2, map_smooth.shape[1]+2])
+    
+    # shift in different directions to find peak, only works for convex blob
+    map_aug[1:-1, 1:-1] = map_smooth
+    map_aug1[1:-1, 0:-2] = map_smooth
+    map_aug2[1:-1, 2:] = map_smooth
+    map_aug3[0:-2, 1:-1] = map_smooth
+    map_aug4[2:, 2:] = map_smooth
+
+    peakMap = np.multiply(np.multiply(np.multiply((map_aug > map_aug1),(map_aug > map_aug2)),(map_aug > map_aug3)),(map_aug > map_aug4))
+    peakMap = peakMap[1:-1, 1:-1]
+
+    idx_tuple = np.nonzero(peakMap)     # find 1
+    Y = idx_tuple[0]
+    X = idx_tuple[1]
+
+    score = np.zeros([len(Y),1])
+    for i in range(len(Y)):
+        score[i] = heatmap[Y[i], X[i]]
+
+    return X, Y, score
+
+
+def generate_label_map_gaussian(pts, height, width, sigma, downsample, visiable=None):
+  if isinstance(pts, numbers.Number):
+    # this image does not provide the annotation, pts is a int number representing the number of points
+    return np.zeros((height,width,pts+1), dtype='float32'), np.ones((1,1,1+pts), dtype='float32')
+
+  assert isinstance(pts, np.ndarray) and len(pts.shape) == 2 and pts.shape[0] == 3, 'The shape of points : {}'.format(pts.shape)
+  if isinstance(sigma, numbers.Number):
+    sigma = np.zeros((pts.shape[1])) + sigma
+  assert isinstance(sigma, np.ndarray) and len(sigma.shape) == 1 and sigma.shape[0] == pts.shape[1], 'The shape of sigma : {}'.format(sigma.shape)
+
+  offset = downsample / 2.0 - 0.5
+  num_points, threshold = pts.shape[1], 0.01
+
+  if visiable is None: visiable = pts[2, :].astype('bool')
+  assert visiable.shape[0] == num_points
+
+  transformed_label = np.fromfunction( lambda y, x, pid : ((offset + x*downsample - pts[0,pid])**2 \
+                                                        + (offset + y*downsample - pts[1,pid])**2) \
+                                                          / -2.0 / sigma[pid] / sigma[pid],
+                                                          (height, width, num_points), dtype=int)
+
+  mask_heatmap      = np.ones((1, 1, num_points+1), dtype='float32')
+  mask_heatmap[0, 0, :num_points] = visiable
+  mask_heatmap[0, 0, num_points]  = 1
+  
+  transformed_label = np.exp(transformed_label)
+  transformed_label[ transformed_label < threshold ] = 0
+  transformed_label[ transformed_label >         1 ] = 1
+  transformed_label = transformed_label * mask_heatmap[:, :, :num_points]
+
+  background_label  = 1 - np.amax(transformed_label, axis=2)
+  background_label[ background_label < 0 ] = 0
+  heatmap           = np.concatenate((transformed_label, np.expand_dims(background_label, axis=2)), axis=2).astype('float32')
+  
+  return heatmap*mask_heatmap, mask_heatmap
+  
+# def find_tensor_peak(heatmap, radius, downsample):
+#   assert heatmap.dim() == 2, 'The dimension of the heatmap is wrong : {}'.format(heatmap.dim())
+#   assert radius > 0 and isinstance(radius, numbers.Number), 'The radius is not ok : {}'.format(radius)
+#   H, W = heatmap.size(0), heatmap.size(1)
+#   # find the approximate location:
+#   score, index = torch.max(heatmap.view(-1), 0)
+#   index = int(MU.variable2np(index))
+#   index_h, index_w = np.unravel_index(index, (H,W))
+
+#   sw, sh = int(index_w - radius),     int(index_h - radius)
+#   ew, eh = int(index_w + radius + 1), int(index_h + radius + 1)
+#   sw, sh = max(0, sw), max(0, sh)
+#   ew, eh = min(W, ew), min(H, eh)
+  
+#   subregion = heatmap[sh:eh, sw:ew]
+#   threshold = 0.000001
+#   eps = np.finfo(float).eps
+
+#   with torch.cuda.device_of(subregion):
+#     X = MU.np2variable(torch.arange(sw, ew).unsqueeze(0))
+#     Y = MU.np2variable(torch.arange(sh, eh).unsqueeze(1))
+
+#   indicator = (subregion > threshold).type( type(subregion.data) )
+#   eps = (subregion <= threshold).type( type(subregion.data) ) * eps
+#   subregion = subregion * indicator + eps
+  
+#   x = torch.sum( subregion * X ) / torch.sum( subregion )
+#   y = torch.sum( subregion * Y ) / torch.sum( subregion )
+     
+#   ## calculate the score
+#   np_x, np_y = MU.variable2np(x), MU.variable2np(y)
+#   x2, y2 = min(W-1, int(np.ceil(np_x))), min(H-1, int(np.ceil(np_y)))
+#   x1, y1 = max(0, x2-1), max(0, y2-1)
+#   ## Bilinear interpolation
+#   if x1 == x2: 
+#     R1, R2 = heatmap[y1, x1], heatmap[y1, x2]
+#   else:
+#     R1 = (x2-x)/(x2-x1)*heatmap[y1, x1] + (x-x1)/(x2-x1)*heatmap[y1, x2]
+#     R2 = (x2-x)/(x2-x1)*heatmap[y2, x1] + (x-x1)/(x2-x1)*heatmap[y2, x2]
+#   if y1 == y2:
+#     score = R1
+#   else:
+#     score = (y2-y)/(y2-y1)*R1 + (y-y1)/(y2-y1)*R2
+     
+#   x = x * downsample + downsample / 2.0 - 0.5
+#   y = y * downsample + downsample / 2.0 - 0.5
+#   return torch.cat([x, y]), score
