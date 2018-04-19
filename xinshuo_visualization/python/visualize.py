@@ -18,7 +18,7 @@ from collections import Counter
 
 # this file define a set of functions related to matplotlib
 from xinshuo_io import mkdir_if_missing, fileparts
-from xinshuo_miscellaneous import print_np_shape, list2tuple, list_reorder, remove_list_from_list, scalar_list2str_list, istuple, isdict, islistoflist, islist, isnparray, isstring, ispilimage, iscolorimage, isgrayimage, isfloatimage, isuintimage, is2dptsarray, is2dptsarray_occlusion, islogical, is_path_exists_or_creatable, isfile
+from xinshuo_miscellaneous import print_np_shape, list2tuple, list_reorder, remove_list_from_list, scalar_list2str_list, istuple, isdict, islistoflist, islist, isnparray, isstring, ispilimage, iscolorimage, isgrayimage, isfloatimage, isuintimage, is2dptsarray, is2dptsarray_occlusion, islogical, is_path_exists_or_creatable, isfile, is2dptsarray_confidence
 from xinshuo_math import pts_euclidean, calculate_truncated_mse, bbox_TLBR2TLWH, bboxcheck_TLBR, get_center_crop_bbox
 
 dpi = 80
@@ -314,9 +314,9 @@ def visualize_image_with_pts(image_path, pts, pts_size=20, label=False, label_li
             for pts_tmp in pts.values():
                 if islist(pts_tmp):
                     pts_tmp = np.asarray(pts_tmp)
-                assert is2dptsarray(pts_tmp) or is2dptsarray_occlusion(pts_tmp), 'input points within dictionary are not correct: (2 (3), num_pts) vs %s' % print_np_shape(pts_tmp)
+                assert is2dptsarray(pts_tmp) or is2dptsarray_occlusion(pts_tmp) or is2dptsarray_confidence(pts_tmp), 'input points within dictionary are not correct: (2 (3), num_pts) vs %s' % print_np_shape(pts_tmp)
         else:
-            assert is2dptsarray(pts) or is2dptsarray_occlusion(pts), 'input points are not correct'
+            assert is2dptsarray(pts) or is2dptsarray_occlusion(pts) or is2dptsarray_confidence(pts), 'input points are not correct'
         assert islogical(label), 'label flag is not correct'
         if label:
             assert islist(label_list) and all(isstring(label_tmp) for label_tmp in label_list), 'labels are not correct'

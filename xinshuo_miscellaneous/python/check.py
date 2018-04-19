@@ -21,7 +21,10 @@ def islogical(logical_test):
     return isinstance(logical_test, bool)
 
 def isscalar(scalar_test):
-    return isinteger(scalar_test) or isfloat(scalar_test)
+    try:
+        return isinteger(scalar_test) or isfloat(scalar_test)
+    except TypeError:
+        return False
 
 def isnparray(nparray_test):
     return isinstance(nparray_test, np.ndarray)
@@ -134,9 +137,9 @@ def is2dptsarray_occlusion(pts_test):
 
 def is2dptsarray_confidence(pts_test):
     '''
-    numpy array with [3, N], N >= 0, the third row represents confidence, which contains a floating value bwtween [0, 1]
+    numpy array with [3, N], N >= 0, the third row represents confidence, which contains a floating value bwtween [-1, 2] (as sometimes is 1.01 or -0.01)
     '''
-    return is3dptsarray(pts_test) and (pts_test[2, :] >= 0).all() and (pts_test[2, :] <= 1).all()
+    return is3dptsarray(pts_test) and (pts_test[2, :] >= -1).all() and (pts_test[2, :] <= 2).all()
 
 ############################################################# line-related
 def is2dline(line_test):
