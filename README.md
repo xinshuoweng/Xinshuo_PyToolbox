@@ -1,5 +1,5 @@
 # Xinshuo's Toolbox
-A structured toolbox for mostly (learning-based and geometry-based) **computer vision** and **machine learning** (**deep learning**) related algorithm. For convenience, it also contains some basic **algorithm**, **file io**, **image & video processing** and some help function for debuging in python, matlab, c++ and lua.
+A fully tested toolbox for **computer vision** and **machine learning** (**deep learning**) related algorithm. For convenience, it also contains **I/O stream**, **image & video processing**, **visualization**, **evaluation**, **geometry and algebra**  and lots of function for debugging in python, matlab, c++ and lua.
 
 #### Usage:
 
@@ -13,3 +13,5 @@ git clone --recursive https://github.com/xinshuoweng/xinshuo_toolbox
 cd xinshuo_toolbox
 pip install -r requirements.txt
 ~~~
+
+The index to the available functions will be coming soon.
