@@ -14,4 +14,4 @@ cd xinshuo_toolbox
 pip install -r requirements.txt
 ~~~
 
-*3. The index to the available functions will be coming soon.
+*3. The index to the available functions will be coming soon.*
