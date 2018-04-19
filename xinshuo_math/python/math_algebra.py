@@ -1,3 +1,75 @@
+# Author: Xinshuo Weng
+# email: xinshuo.weng@gmail.com
+
+# this file includes functions of basic algebra in math
+import math, cv2, numpy as np
+
+from private import safe_ptsarray, safe_angle
+from xinshuo_miscellaneous import is2dptsarray, islist, isscalar, isnparray, istuple
+
+# all rotation angle is processes in degree
+
+def pts_euclidean(input_pts1, input_pts2, warning=True, debug=True):
+    '''
+    calculate the euclidean distance between two sets of points
+
+    parameters:
+        input_pts1:     2 x N or (2, ) numpy array, a list of 2 elements, a listoflist of 2 elements: (x, y)
+        input_pts2:     same as above
+
+    outputs:
+        ave_euclidean:      averaged euclidean distance
+        eculidean_list:     a list of the euclidean distance for all data points
+    '''
+    pts1 = safe_ptsarray(input_pts1, warning=warning, debug=debug)
+    pts2 = safe_ptsarray(input_pts2, warning=warning, debug=debug)
+    if debug:
+        assert pts1.shape == pts2.shape, 'the shape of two points is not equal'
+        assert is2dptsarray(pts1) and is2dptsarray(pts2), 'the input points are not correct'
+
+    # calculate the distance
+    eculidean_list = np.zeros((pts1.shape[1], ), dtype='float32')
+    num_pts = pts1.shape[1]
+    ave_euclidean = 0
+    for pts_index in xrange(num_pts):
+        pts1_tmp = pts1[:, pts_index]
+        pts2_tmp = pts2[:, pts_index]
+        n = float(pts_index + 1)
+        distance_tmp = math.sqrt((pts1_tmp[0] - pts2_tmp[0])**2 + (pts1_tmp[1] - pts2_tmp[1])**2)               # TODO check the start
+        ave_euclidean = (n - 1) / n * ave_euclidean + distance_tmp / n
+        eculidean_list[pts_index] = distance_tmp
+
+    return ave_euclidean, eculidean_list.tolist()
+    
+def pts_rotate2D(pts_array, rotation_angle, im_height, im_width, warning=True, debug=True):
+    '''
+    rotate the point array in 2D plane counter-clockwise
+
+    parameters:
+        pts_array:          2 x num_pts
+        rotation_angle:     e.g. 90
+
+    return
+        pts_array:          2 x num_pts
+    '''
+    if debug:
+        assert is2dptsarray(pts_array), 'the input point array does not have a good shape'
+
+    rotation_angle = safe_angle(rotation_angle, warning=warning, debug=True)             # ensure to be in [-180, 180]
+
+    if rotation_angle > 0:
+        cols2rotated = im_width
+        rows2rotated = im_width
+    else:
+        cols2rotated = im_height
+        rows2rotated = im_height
+    rotation_matrix = cv2.getRotationMatrix2D((cols2rotated/2, rows2rotated/2), rotation_angle, 1)         # 2 x 3
+    
+    num_pts = pts_array.shape[1]
+    pts_rotate = np.ones((3, num_pts), dtype='float32')             # 3 x num_pts
+    pts_rotate[0:2, :] = pts_array         
+
+    return np.dot(rotation_matrix, pts_rotate)         # 2 x num_pts
 
 def calculate_truncated_mse(error_list, truncated_list, debug=True):
     '''
@@ -29,68 +101,6 @@ def calculate_truncated_mse(error_list, truncated_list, debug=True):
         tmse_dict[threshold] = entry
 
     return tmse_dict
-
-def pts_euclidean(input_pts1, input_pts2, debug=True):
-    '''
-    calculate the euclidean distance between two sets of points
-
-    parameters:
-        input_pts1:     2 x N or (2, ) numpy array, a list of 2 elements, a listoflist of 2 elements: (x, y)
-        input_pts2:     same as above
-
-    outputs:
-        ave_euclidean:      averaged euclidean distance
-        eculidean_list:     a list of the euclidean distance for all data points
-    '''
-    pts1 = safe_pts(input_pts1, debug=debug)
-    pts2 = safe_pts(input_pts2, debug=debug)
-    if debug:
-        assert pts1.shape == pts2.shape, 'the shape of two points is not equal'
-        assert is2dptsarray(pts1) and is2dptsarray(pts2), 'the input points are not correct'
-
-    # calculate the distance
-    eculidean_list = np.zeros((pts1.shape[1], ), dtype='float32')
-    num_pts = pts1.shape[1]
-    ave_euclidean = 0
-    for pts_index in xrange(num_pts):
-        pts1_tmp = pts1[:, pts_index]
-        pts2_tmp = pts2[:, pts_index]
-        n = float(pts_index + 1)
-        distance_tmp = math.sqrt((pts1_tmp[0] - pts2_tmp[0])**2 + (pts1_tmp[1] - pts2_tmp[1])**2)               # TODO check the start
-        ave_euclidean = (n - 1) / n * ave_euclidean + distance_tmp / n
-        eculidean_list[pts_index] = distance_tmp
-
-    return ave_euclidean, eculidean_list.tolist()
-    
-def pts_rotate2D(pts_array, rotation_angle, im_height, im_width, debug=True):
-    '''
-    rotate the point array in 2D plane counter-clockwise
-
-    parameters:
-        pts_array:          2 x num_pts
-        rotation_angle:     e.g. 90
-
-    return
-        pts_array:          2 x num_pts
-    '''
-    if debug:
-        assert is2dptsarray(pts_array), 'the input point array does not have a good shape'
-
-    rotation_angle = safe_angle(rotation_angle, debug=True)             # ensure to be in [-180, 180]
-
-    if rotation_angle > 0:
-        cols2rotated = im_width
-        rows2rotated = im_width
-    else:
-        cols2rotated = im_height
-        rows2rotated = im_height
-    rotation_matrix = cv2.getRotationMatrix2D((cols2rotated/2, rows2rotated/2), rotation_angle, 1)         # 2 x 3
-    
-    num_pts = pts_array.shape[1]
-    pts_rotate = np.ones((3, num_pts), dtype='float32')             # 3 x num_pts
-    pts_rotate[0:2, :] = pts_array         
-
-    return np.dot(rotation_matrix, pts_rotate)         # 2 x num_pts
 
 
 ################################################################## coordinates ##################################################################

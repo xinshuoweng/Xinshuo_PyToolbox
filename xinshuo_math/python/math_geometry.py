@@ -5,10 +5,9 @@
 import math, cv2, numpy as np
 from numpy.testing import assert_almost_equal
 
-from private import safe_pts
+from private import safe_ptsarray
 from xinshuo_miscellaneous import print_np_shape, is2dptsarray, is2dpts, is2dline, is3dpts, islist, isscalar, istuple
 
-# all rotation angle is processes in degree
 
 ################################################################## 2d math ##################################################################
 def get_line(pts, slope, debug=True):

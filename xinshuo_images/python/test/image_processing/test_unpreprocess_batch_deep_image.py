@@ -38,9 +38,18 @@ def test_unpreprocess_batch_deep_image():
 
 	print('test HW3, with rgb2bgr, pixel mean and std')
 	img = (np.random.rand(12, 100, 200, 3) * 255.).astype('uint8')
-	# img[img < 0.5] = 0.5
 	pixel_mean = [0.3, 0.4, 0.5]
 	pixel_std = [0.3, 0.5, 0.7]
+	batch_image = preprocess_batch_deep_image(img, pixel_mean=pixel_mean, pixel_std=pixel_std)
+	img_inv = unpreprocess_batch_deep_image(batch_image, pixel_mean=pixel_mean, pixel_std=pixel_std)
+	assert img_inv.shape == (12, 100, 200, 3)
+	img_diff = img_inv - img
+	assert not (np.logical_and(img_diff != 0, np.absolute(img_diff) != 255)).any()
+
+	print('test HW3, with rgb2bgr, single pixel mean and std')
+	img = (np.random.rand(12, 100, 200, 3) * 255.).astype('uint8')
+	pixel_mean = 0.4
+	pixel_std = 0.5
 	batch_image = preprocess_batch_deep_image(img, pixel_mean=pixel_mean, pixel_std=pixel_std)
 	img_inv = unpreprocess_batch_deep_image(batch_image, pixel_mean=pixel_mean, pixel_std=pixel_std)
 	assert img_inv.shape == (12, 100, 200, 3)

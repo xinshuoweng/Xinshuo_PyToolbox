@@ -12,16 +12,15 @@ def safe_npdata(input_data, warning=True, debug=True):
 	copy a list of data or a numpy data to the buffer for use
 
 	parameters:
-		input_data:		a list or numpy data
+		input_data:		a list, a scalar or numpy data
 
 	outputs:
 		np_data:		a copy of numpy data
 	'''
-	if islist(input_data):
-		np_data = np.array(input_data)
-	elif isnparray(input_data):
-		np_data = input_data.copy()
-	else: assert False, 'only list of data and numpy data are supported'
+	if islist(input_data): 		np_data = np.array(input_data)
+	elif isscalar(input_data): 	np_data = np.array(input_data).reshape((1, ))
+	elif isnparray(input_data): np_data = input_data.copy()
+	else: assert False, 'only list of data, scalar or numpy data are supported'
 
 	return np_data
 
@@ -107,16 +106,16 @@ def safe_angle(input_angle, warning=True, debug=True):
 
 	return angle
 	
-def safe_pts(input_pts, warning=True, debug=True):
+def safe_ptsarray(input_pts, warning=True, debug=True):
 	'''
-	make sure to copy the pts array without modifying it and make the dimension to N x 4
+	make sure to copy the pts array without modifying it and make the dimension to 2 x N
 
 	parameters:
 		input_pts: 	a list of 2 elements, a listoflist of 2 elements: e.g., [[1,2], [5,6]],
-						a numpy array with shape or (N, 2) or (2, )
+						a numpy array with shape or (2, N) or (2, )
 
 	outputs:
-		np_pts:		N X 2 numpy array
+		np_pts:		2 X N numpy array
 	'''
 	if islist(input_pts):
 		if islistoflist(input_pts):
@@ -130,22 +129,23 @@ def safe_pts(input_pts, warning=True, debug=True):
 		if input_pts.shape == (2, ):
 			np_pts = input_pts.reshape((2, 1))
 		else:
-			if debug: assert is2dptsarray(input_pts), 'the input pts array does not have a good shape'
 			np_pts = input_pts
 	else: assert False, 'only list and numpy array for pts are supported'
 
-	return np_pts	
+	if debug: assert is2dptsarray(np_pts), 'the input pts array does not have a good shape'
+	return np_pts
 
-def safe_pts_occlusion(input_pts, warning=True, debug=True):
+def safe_ptsarray_occlusion(input_pts, warning=True, debug=True):
 	'''
-	make sure to copy the pts array without modifying it and make the dimension to N x 4
+	make sure to copy the pts array without modifying it and make the dimension to 3 x N
+	the occlusion (3rd) row should contain 0, 1 or -1
 
 	parameters:
-		input_pts: 	a list of 2 elements, a listoflist of 2 elements: e.g., [[1,2], [5,6]],
-						a numpy array with shape or (N, 2) or (2, )
+		input_pts: 	a list of 3 elements, a listoflist of 3 elements: e.g., [[1,2], [5,6], [0, 1]],
+						a numpy array with shape or (3, N) or (3, )
 
 	outputs:
-		np_pts:		N X 2 numpy array
+		np_pts:		3 X N numpy array, with the third row as the occlusion
 	'''
 	if islist(input_pts):
 		if islistoflist(input_pts):
@@ -159,10 +159,10 @@ def safe_pts_occlusion(input_pts, warning=True, debug=True):
 		if input_pts.shape == (3, ):
 			np_pts = input_pts.reshape((3, 1))
 		else:
-			if debug: assert is2dptsarray_occlusion(input_pts), 'the input pts array does not have a good shape'
 			np_pts = input_pts
 	else: assert False, 'only list and numpy array for pts are supported'
 
+	if debug: assert is2dptsarray_occlusion(input_pts), 'the input pts array does not have a good shape'
 	return np_pts	
 
 ################################################################## sanity check ##################################################################

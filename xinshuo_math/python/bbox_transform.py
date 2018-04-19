@@ -20,132 +20,128 @@ from xinshuo_miscellaneous import imagecoor2cartesian, cartesian2imagecoor, isnp
 
 ############################################# format transform #################################
 def bbox_TLBR2TLWH(bboxes_in, debug=True):
-    '''
-    transform the input bounding box with TLBR format to TLWH format
+	'''
+	transform the input bounding box with TLBR format to TLWH format
 
-    parameters:
-        bboxes_in: TLBR format, a list of 4 elements, a listoflist of 4 elements: e.g., [[1,2,3,4], [5,6,7,8]], 
-                    a numpy array with shape or (N, 4) or (4, )
+	parameters:
+	    bboxes_in: TLBR format, a list of 4 elements, a listoflist of 4 elements: e.g., [[1,2,3,4], [5,6,7,8]], 
+	                a numpy array with shape or (N, 4) or (4, )
 
-    outputs: 
-        bbox_TLWH: N X 4 numpy array, TLWH format
-    '''
-    np_bboxes = safe_bbox(bboxes_in, debug=debug)
-    if debug:
-        assert bboxcheck_TLBR(np_bboxes, debug=debug), 'the input bounding box should be TLBR format'
+	outputs: 
+	    bbox_TLWH: N X 4 numpy array, TLWH format
+	'''
+	np_bboxes = safe_bbox(bboxes_in, debug=debug)
+	if debug: assert bboxcheck_TLBR(np_bboxes, debug=debug), 'the input bounding box should be TLBR format'
 
-    bbox_TLWH = np.zeros_like(np_bboxes)
-    bbox_TLWH[:, 0] = np_bboxes[:, 0]
-    bbox_TLWH[:, 1] = np_bboxes[:, 1]
-    bbox_TLWH[:, 2] = np_bboxes[:, 2] - np_bboxes[:, 0]
-    bbox_TLWH[:, 3] = np_bboxes[:, 3] - np_bboxes[:, 1]
-    return bbox_TLWH
+	bbox_TLWH = np.zeros_like(np_bboxes)
+	bbox_TLWH[:, 0] = np_bboxes[:, 0]
+	bbox_TLWH[:, 1] = np_bboxes[:, 1]
+	bbox_TLWH[:, 2] = np_bboxes[:, 2] - np_bboxes[:, 0]
+	bbox_TLWH[:, 3] = np_bboxes[:, 3] - np_bboxes[:, 1]
+	return bbox_TLWH
 
 def bbox_TLWH2TLBR(bboxes_in, debug=True):
-    '''
-    transform the input bounding box with TLWH format to TLBR format
+	'''
+	transform the input bounding box with TLWH format to TLBR format
 
-    parameters:
-        bboxes_in: TLWH format, a list of 4 elements, a listoflist of 4 elements: e.g., [[1,2,3,4], [5,6,7,8]], 
-                    a numpy array with shape or (N, 4) or (4, )
+	parameters:
+	    bboxes_in: TLWH format, a list of 4 elements, a listoflist of 4 elements: e.g., [[1,2,3,4], [5,6,7,8]], 
+	                a numpy array with shape or (N, 4) or (4, )
 
-    outputs: 
-        bbox_TLBR: N X 4 numpy array, TLBR format
-    '''
-    np_bboxes = safe_bbox(bboxes_in, debug=debug)
-    if debug:
-        assert bboxcheck_TLWH(np_bboxes, debug=debug), 'the input bounding box should be TLBR format'
+	outputs: 
+	    bbox_TLBR: N X 4 numpy array, TLBR format
+	'''
+	np_bboxes = safe_bbox(bboxes_in, debug=debug)
+	if debug: assert bboxcheck_TLWH(np_bboxes, debug=debug), 'the input bounding box should be TLBR format'
 
-    bbox_TLBR = np.zeros_like(np_bboxes)
-    bbox_TLBR[:, 0] = np_bboxes[:, 0]
-    bbox_TLBR[:, 1] = np_bboxes[:, 1]
-    bbox_TLBR[:, 2] = np_bboxes[:, 2] + np_bboxes[:, 0]
-    bbox_TLBR[:, 3] = np_bboxes[:, 3] + np_bboxes[:, 1]
-    return bbox_TLBR
+	bbox_TLBR = np.zeros_like(np_bboxes)
+	bbox_TLBR[:, 0] = np_bboxes[:, 0]
+	bbox_TLBR[:, 1] = np_bboxes[:, 1]
+	bbox_TLBR[:, 2] = np_bboxes[:, 2] + np_bboxes[:, 0]
+	bbox_TLBR[:, 3] = np_bboxes[:, 3] + np_bboxes[:, 1]
+	return bbox_TLBR
 
 ############################################# 2D transform #################################
 def clip_bboxes_TLBR(bboxes_in, im_width, im_height, debug=True):
-    '''
-    this function clips bboxes inside the image boundary, the coordinates in the clipped bbox are half-included [x, y)
+	'''
+	this function clips bboxes inside the image boundary, the coordinates in the clipped bbox are half-included [x, y)
 
-    parameters:     
-        bboxes_in:              TLBR format, a list of 4 elements, a listoflist of 4 elements: e.g., [[1,2,3,4], [5,6,7,8]], 
-                                a numpy array with shape or (N, 4) or (4, )
-        im_width/im_height:     scalar
+	parameters:     
+	bboxes_in:              TLBR format, a list of 4 elements, a listoflist of 4 elements: e.g., [[1,2,3,4], [5,6,7,8]], 
+	                        a numpy array with shape or (N, 4) or (4, )
+	im_width/im_height:     scalar
 
-    outputs:        
-        clipped_bboxes_TLWH:    TLBR format, numpy array with shape of (N, 4)
-    '''
-    np_bboxes = safe_bbox(bboxes_in, debug=debug)
-    if debug:
-        assert isinteger(im_width) and isinteger(im_height), 'the image width and height are not correct'   
-        assert bboxcheck_TLBR(np_bboxes), 'the input bboxes are not good'
+	outputs:        
+	clipped_bboxes_TLWH:    TLBR format, numpy array with shape of (N, 4)
+	'''
+	np_bboxes = safe_bbox(bboxes_in, debug=debug)
+	if debug:
+		assert isinteger(im_width) and isinteger(im_height), 'the image width and height are not correct'   
+		assert bboxcheck_TLBR(np_bboxes), 'the input bboxes are not good'
 
-    clipped_bboxes = np.zeros_like(np_bboxes)
-    clipped_bboxes[:, 0] = np.maximum(np.minimum(np_bboxes[:, 0], im_width), 0)      # x1 >= 0 & x1 <= width, included
-    clipped_bboxes[:, 1] = np.maximum(np.minimum(np_bboxes[:, 1], im_height), 0)     # y1 >= 0 & y1 <= height, included
-    clipped_bboxes[:, 2] = np.maximum(np.minimum(np_bboxes[:, 2], im_width), 0)      # x2 >= 0 & x2 <= width, not included
-    clipped_bboxes[:, 3] = np.maximum(np.minimum(np_bboxes[:, 3], im_height), 0)     # y2 >= 0 & y2 <= height, not included
-    return clipped_bboxes
+	clipped_bboxes = np.zeros_like(np_bboxes)
+	clipped_bboxes[:, 0] = np.maximum(np.minimum(np_bboxes[:, 0], im_width), 0)      # x1 >= 0 & x1 <= width, included
+	clipped_bboxes[:, 1] = np.maximum(np.minimum(np_bboxes[:, 1], im_height), 0)     # y1 >= 0 & y1 <= height, included
+	clipped_bboxes[:, 2] = np.maximum(np.minimum(np_bboxes[:, 2], im_width), 0)      # x2 >= 0 & x2 <= width, not included
+	clipped_bboxes[:, 3] = np.maximum(np.minimum(np_bboxes[:, 3], im_height), 0)     # y2 >= 0 & y2 <= height, not included
+	return clipped_bboxes
 
 def clip_bboxes_TLWH(bboxes_in, im_width, im_height, debug=True):
-    '''
-    this function clips bboxes inside the image boundary
+	'''
+	this function clips bboxes inside the image boundary
 
-    parameters:     
-        bboxes_in:              TLWH format, a list of 4 elements, a listoflist of 4 elements: e.g., [[1,2,3,4], [5,6,7,8]], 
-                                a numpy array with shape or (N, 4) or (4, )
-        im_width/im_height:     scalar
+	parameters:     
+	bboxes_in:              TLWH format, a list of 4 elements, a listoflist of 4 elements: e.g., [[1,2,3,4], [5,6,7,8]], 
+	                        a numpy array with shape or (N, 4) or (4, )
+	im_width/im_height:     scalar
 
-    outputs:        
-        clipped_bboxes_TLWH:    TLWH format, numpy array with shape of (N, 4)
-    '''
-    np_bboxes = safe_bbox(bboxes_in, debug=debug)
-    if debug:
-        assert isinteger(im_width) and isinteger(im_height), 'the image width and height are not correct'   
-        assert bboxcheck_TLWH(np_bboxes), 'the input bboxes are not good'
+	outputs:        
+	clipped_bboxes_TLWH:    TLWH format, numpy array with shape of (N, 4)
+	'''
+	np_bboxes = safe_bbox(bboxes_in, debug=debug)
+	if debug:
+		assert isinteger(im_width) and isinteger(im_height), 'the image width and height are not correct'   
+		assert bboxcheck_TLWH(np_bboxes), 'the input bboxes are not good'
 
-    bboxes_TLBR = bbox_TLWH2TLBR(np_bboxes, debug=debug)
-    clipped_bboxes_TLBR = clip_bboxes_TLBR(bboxes_TLBR, im_width, im_height, debug=debug)
-    clipped_bboxes_TLWH = bbox_TLBR2TLWH(clipped_bboxes_TLBR, debug=debug)
-    return clipped_bboxes_TLWH
+	bboxes_TLBR = bbox_TLWH2TLBR(np_bboxes, debug=debug)
+	clipped_bboxes_TLBR = clip_bboxes_TLBR(bboxes_TLBR, im_width, im_height, debug=debug)
+	clipped_bboxes_TLWH = bbox_TLBR2TLWH(clipped_bboxes_TLBR, debug=debug)
+	return clipped_bboxes_TLWH
 
 def get_center_crop_bbox(center_bboxes_in, im_width=None, im_height=None, debug=True):
-    '''
-    obtain a bbox to crop around a center point
+	'''
+	obtain a bbox to crop around a center point
 
-    parameters:
-        center_bboxes_in:   a list of 2 or 4 scalar elements, or (N, 2) / (N, 4) numpy array
-                            2 - > [crop_width, crop_height], the center is the image center
-                            4 - > [center_x, center_y, crop_width, crop_height]
-        im_width/im_height:     scalar
+	parameters:
+	    center_bboxes_in:   a list of 2 or 4 scalar elements, or (N, 2) / (N, 4) numpy array
+	                        2 - > [crop_width, crop_height], the center is the image center
+	                        4 - > [center_x, center_y, crop_width, crop_height]
+	    im_width/im_height:     scalar
 
-    outputs:
-        crop_bboxes:          TLHW format, an int64 numpy array with shape of (N, 4)     
-    '''
-    np_center_bboxes = safe_center_bbox(center_bboxes_in, debug=debug)
-    if debug:
-        assert iscenterbbox(np_center_bboxes), 'the center bbox does not have a good shape'
+	outputs:
+	    crop_bboxes:          TLHW format, an int64 numpy array with shape of (N, 4)     
+	'''
+	np_center_bboxes = safe_center_bbox(center_bboxes_in, debug=debug)
+	if debug: assert iscenterbbox(np_center_bboxes), 'the center bbox does not have a good shape'
 
-    if np_center_bboxes.shape[1] == 4:            # crop around the given center and width and height
-        center_x = np_center_bboxes[:, 0]
-        center_y = np_center_bboxes[:, 1]
-        crop_width = np_center_bboxes[:, 2]
-        crop_height = np_center_bboxes[:, 3]
-    else:                            # crop around the center of the image
-        if debug:
-            assert (im_width is not None) and (im_height is not None), 'the image shape should be known when center is not provided'
-        center_x = np.ceil(im_width / 2)
-        center_y = np.ceil(im_height / 2)   
-        crop_width = np_center_bboxes[:, 0]
-        crop_height = np_center_bboxes[:, 1]
-    
-    xmin = center_x - np.ceil(crop_width / 2)
-    ymin = center_y - np.ceil(crop_height / 2)
-    crop_bboxes = np.hstack((xmin.reshape((-1, 1)), ymin.reshape((-1, 1)), crop_width.reshape((-1, 1)), crop_height.reshape((-1, 1))))
-    crop_bboxes = crop_bboxes.astype('int64')
-    
-    return crop_bboxes
+	if np_center_bboxes.shape[1] == 4:            # crop around the given center and width and height
+		center_x = np_center_bboxes[:, 0]
+		center_y = np_center_bboxes[:, 1]
+		crop_width = np_center_bboxes[:, 2]
+		crop_height = np_center_bboxes[:, 3]
+	else:                            # crop around the center of the image
+		if debug: assert (im_width is not None) and (im_height is not None), 'the image shape should be known when center is not provided'
+		center_x = np.ceil(im_width / 2)
+		center_y = np.ceil(im_height / 2)   
+		crop_width = np_center_bboxes[:, 0]
+		crop_height = np_center_bboxes[:, 1]
+
+	xmin = center_x - np.ceil(crop_width / 2)
+	ymin = center_y - np.ceil(crop_height / 2)
+	crop_bboxes = np.hstack((xmin.reshape((-1, 1)), ymin.reshape((-1, 1)), crop_width.reshape((-1, 1)), crop_height.reshape((-1, 1))))
+	crop_bboxes = crop_bboxes.astype('int64')
+
+	return crop_bboxes
 
 ############################################# pts related transform #################################
 def pts2bbox(pts, debug=True, vis=False):

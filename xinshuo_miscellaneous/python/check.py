@@ -101,7 +101,7 @@ def islistofnonnegativeinteger(list_test):
     else:
         return False  
 
-############################################################# geometry-related
+############################################################# pts-related
 def is2dpts(pts_test):
     '''
     numpy array or list or tuple with 2 elements
@@ -110,30 +110,40 @@ def is2dpts(pts_test):
 
 def is2dptsarray(pts_test):
     '''
-    numpy array with [2, N]
+    numpy array with [2, N], N >= 0
     '''
     return isnparray(pts_test) and pts_test.shape[0] == 2 and len(pts_test.shape) == 2 and pts_test.shape[1] >= 0
 
-def is2dptsarray_occlusion(pts_test):
-    return is2dptsarray_occlusion(pts_test) and (np.logical_or(np.logical_or(pts_test[2, :] == 0, pts_test[2, :] == 1)), pts_test[2, :] == -1).all()
-
-def is2dptsarray_confidence(pts_test):
-    return is2dptsarray_occlusion(pts_test) and (pts_test[2, :] >= 0).all() and (pts_test[2, :] <= 1).all()
+def is3dpts(pts_test):
+    '''
+    numpy array or list or tuple with 3 elements
+    '''
+    return (isnparray(pts_test) or islist(pts_test) or istuple(pts_test)) and np.array(pts_test).size == 3
 
 def is3dptsarray(pts_test):
-    return isnparray(pts_test) and pts_test.shape[0] == 3 and len(pts_test.shape) == 2 and pts_test.shape[1] >= 0                   # 3 x N
+    '''
+    numpy array with [3, N], N >= 0
+    '''
+    return isnparray(pts_test) and pts_test.shape[0] == 3 and len(pts_test.shape) == 2 and pts_test.shape[1] >= 0                   
 
+def is2dptsarray_occlusion(pts_test):
+    '''
+    numpy array with [3, N], N >= 0. The third row represents occlusion, which contains only 1 or 0 or -1
+    '''
+    return is3dptsarray(pts_test) and (np.logical_or(np.logical_or(pts_test[2, :] == 0, pts_test[2, :] == 1), pts_test[2, :] == -1)).all()
+
+def is2dptsarray_confidence(pts_test):
+    '''
+    numpy array with [3, N], N >= 0, the third row represents confidence, which contains a floating value bwtween [0, 1]
+    '''
+    return is3dptsarray(pts_test) and (pts_test[2, :] >= 0).all() and (pts_test[2, :] <= 1).all()
+
+############################################################# line-related
 def is2dline(line_test):
     '''
     numpy array or list or tuple with 3 elements
     '''
     return (isnparray(line_test) or islist(line_test) or istuple(line_test)) and np.array(line_test).size == 3
-
-def is3dpts(pts_test):
-    '''
-    numpy array or list or tuple with 2 elements
-    '''
-    return (isnparray(pts_test) or islist(pts_test) or istuple(pts_test)) and np.array(pts_test).size == 3
 
 def islinesarray(line_test):
     return isnparray(line_test) and line_test.shape[0] == 4 and len(line_test.shape) == 2 and line_test.shape[1] >= 0               # 4 x N

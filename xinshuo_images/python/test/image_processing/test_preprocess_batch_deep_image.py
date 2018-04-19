@@ -45,6 +45,24 @@ def test_preprocess_batch_deep_image():
 	assert batch_image.shape == (1, 3, 2, 4)
 	assert_almost_equal((chw2hwc(batch_image[0])), (bgr2rgb(img) - np.array(pixel_mean)) / np.array(pixel_std), err_msg='the original image should be equal to the copy')
 
+	print('test HW3, with rgb2bgr, single pixel mean')
+	img = np.random.rand(2, 4, 3).astype('float32')
+	img[img < 0.5] = 0.5
+	pixel_mean = 0.5
+	pixel_std = [0.9, 0.99, 0.999]
+	batch_image = preprocess_batch_deep_image(img, pixel_mean=pixel_mean, pixel_std=pixel_std)
+	assert batch_image.shape == (1, 3, 2, 4)
+	assert_almost_equal((chw2hwc(batch_image[0])), (bgr2rgb(img) - np.array(pixel_mean)) / np.array(pixel_std), err_msg='the original image should be equal to the copy')
+
+	print('test HW3, with rgb2bgr, single pixel std')
+	img = np.random.rand(2, 4, 3).astype('float32')
+	img[img < 0.5] = 0.5
+	pixel_mean = 0.5
+	pixel_std = 0.9
+	batch_image = preprocess_batch_deep_image(img, pixel_mean=pixel_mean, pixel_std=pixel_std)
+	assert batch_image.shape == (1, 3, 2, 4)
+	assert_almost_equal((chw2hwc(batch_image[0])), (bgr2rgb(img) - np.array(pixel_mean)) / np.array(pixel_std), err_msg='the original image should be equal to the copy')
+
 	print('\n\nDONE! SUCCESSFUL!!\n')
 	
 if __name__ == '__main__':

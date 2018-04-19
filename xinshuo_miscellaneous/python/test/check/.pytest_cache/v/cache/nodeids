@@ -1,8 +1,8 @@
 [
-  "test_check.py::test_is_path_valid", 
-  "test_check.py::test_is_path_creatable", 
-  "test_check.py::test_is_path_exists", 
-  "test_check.py::test_is_path_exists_or_creatable", 
-  "test_check.py::test_isuintimage", 
-  "test_check.py::test_isfloatimage"
+  "test_check_pts.py::test_is2dpts", 
+  "test_check_pts.py::test_is2dptsarray", 
+  "test_check_pts.py::test_is3dpts", 
+  "test_check_pts.py::test_is3dptsarray", 
+  "test_check_pts.py::test_is2dptsarray_occlusion", 
+  "test_check_pts.py::test_is2dptsarray_confidence"
 ]
