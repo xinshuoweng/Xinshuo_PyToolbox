@@ -560,7 +560,7 @@ def image_crop_center(input_image, center_rect, pad_value=0, warning=True, debug
 		pad_right   = max(xmax - im_width, 0)
 		pad_bottom  = max(ymax - im_height, 0)
 		pad_rect 	= [pad_left, pad_top, pad_right, pad_bottom]
-		img_cropped = pad_around(img_cropped, pad_rect=pad_rect, pad_value=pad_value, debug=debug)
+		img_cropped = image_pad_around(img_cropped, pad_rect=pad_rect, pad_value=pad_value, debug=debug)
 	if len(img_cropped.shape) == 3 and img_cropped.shape[2] == 1: img_cropped = img_cropped[:, :, 0]
 
 	return img_cropped, crop_bbox, crop_bbox_clipped
