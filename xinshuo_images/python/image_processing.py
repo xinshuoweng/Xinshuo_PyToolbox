@@ -332,7 +332,7 @@ def generate_gaussian_heatmap(input_pts, image_size, std, downsample_factor=1.0)
 	return heatmap*mask_heatmap, mask_heatmap
 
 ############################################# format transform #################################
-def rgb2bgr(input_image, warning=True, debug=True):
+def image_rgb2bgr(input_image, warning=True, debug=True):
 	'''
 	this function converts a rgb image to a bgr image
 
@@ -348,7 +348,7 @@ def rgb2bgr(input_image, warning=True, debug=True):
 	np_image = np_image[:, :, ::-1] 			# convert RGB to BGR
 	return np_image
 
-def bgr2rgb(input_image, warning=True, debug=True):
+def image_bgr2rgb(input_image, warning=True, debug=True):
 	'''
 	this function converts a bgr image to a rgb image
 
@@ -360,7 +360,7 @@ def bgr2rgb(input_image, warning=True, debug=True):
 	'''
 	return rgb2bgr(input_image, warning=warning, debug=debug)
 
-def hwc2chw(input_image, warning=True, debug=True):
+def image_hwc2chw(input_image, warning=True, debug=True):
 	'''
 	this function transpose the channels of an image from HWC to CHW
 
@@ -375,7 +375,7 @@ def hwc2chw(input_image, warning=True, debug=True):
 
 	return np.transpose(np_image, (2, 0, 1)) 
 
-def chw2hwc(input_image, warning=True, debug=True):
+def image_chw2hwc(input_image, warning=True, debug=True):
 	'''
 	this function transpose the channels of an image from CHW to HWC
 
@@ -487,7 +487,7 @@ def unpreprocess_batch_deep_image(input_image, pixel_mean=None, pixel_std=None, 
 	return np_image
 
 ############################################# 2D transformation #################################
-def pad_around(input_image, pad_rect, pad_value=0, warning=True, debug=True):
+def image_pad_around(input_image, pad_rect, pad_value=0, warning=True, debug=True):
 	'''
 	this function is to pad given value to an image in provided region, all images in this function are floating images
 	
@@ -523,7 +523,7 @@ def pad_around(input_image, pad_rect, pad_value=0, warning=True, debug=True):
 
 	return img_padded
 
-def crop_center(input_image, center_rect, pad_value=0, warning=True, debug=True):
+def image_crop_center(input_image, center_rect, pad_value=0, warning=True, debug=True):
 	'''
 	crop the image around a specific center with padded value around the empty area
 	when the crop width/height are even, the cropped image has 1 additional pixel towards left/up

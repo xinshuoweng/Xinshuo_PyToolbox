@@ -166,7 +166,7 @@ def safe_ptsarray_occlusion(input_pts, warning=True, debug=True):
 	return np_pts	
 
 ################################################################## sanity check ##################################################################
-def bboxcheck_TLBR(input_bbox, debug=True):
+def bboxcheck_TLBR(input_bbox, warning=True, debug=True):
     '''
     check the input bounding box to be TLBR format
 
@@ -181,7 +181,7 @@ def bboxcheck_TLBR(input_bbox, debug=True):
 
     return (np_bboxes[:, 3] >= np_bboxes[:, 1]).all() and (np_bboxes[:, 2] >= np_bboxes[:, 0]).all()      # coordinate of bottom right point should be larger or equal than top left point
 
-def bboxcheck_TLWH(input_bbox, debug=True):
+def bboxcheck_TLWH(input_bbox, warning=True, debug=True):
 	'''
 	check the input bounding box to be TLBR format
 
