@@ -4,7 +4,7 @@
 # this file includes private functions for internal use only
 import copy, numpy as np
 
-from xinshuo_miscellaneous import islist, isnparray, isbbox, islistoflist, iscenterbbox, isscalar, is2dptsarray
+from xinshuo_miscellaneous import islist, isnparray, isbbox, islistoflist, iscenterbbox, isscalar, is2dptsarray, is2dptsarray_occlusion
 
 ################################################################## conversion ##################################################################
 def safe_npdata(input_data, warning=True, debug=True):
@@ -162,7 +162,7 @@ def safe_ptsarray_occlusion(input_pts, warning=True, debug=True):
 			np_pts = input_pts
 	else: assert False, 'only list and numpy array for pts are supported'
 
-	if debug: assert is2dptsarray_occlusion(input_pts), 'the input pts array does not have a good shape'
+	if debug: assert is2dptsarray_occlusion(np_pts), 'the input pts array does not have a good shape'
 	return np_pts	
 
 ################################################################## sanity check ##################################################################

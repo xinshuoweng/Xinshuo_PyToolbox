@@ -18,7 +18,7 @@ from collections import Counter
 
 # this file define a set of functions related to matplotlib
 from xinshuo_io import mkdir_if_missing, fileparts
-from xinshuo_miscellaneous import print_np_shape, list2tuple, list_reorder, remove_list_from_list, scalar_list2str_list, istuple, isdict, islistoflist, islist, isnparray, isstring, ispilimage, iscolorimage, isgrayimage, isfloatimage, isuintimage, is2dptsarray, is2dptsarray_occlusion, islogical, is_path_exists_or_creatable, isfile, is2dptsarray_confidence
+from xinshuo_miscellaneous import print_np_shape, list2tuple, list_reorder, remove_list_from_list, scalar_list2str_list, istuple, isdict, islistoflist, islist, isnparray, isstring, ispilimage, iscolorimage, isgrayimage, isfloatimage, isuintimage, is2dptsarray, is2dptsarray_occlusion, islogical, is_path_exists_or_creatable, isfile, is2dptsarray_confidence, isimage
 from xinshuo_math import pts_euclidean, calculate_truncated_mse, bbox_TLBR2TLWH, bboxcheck_TLBR, get_center_crop_bbox
 
 dpi = 80

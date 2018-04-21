@@ -7,72 +7,36 @@ import numpy as np
 import init_paths
 from image_processing import generate_gaussian_heatmap
 from xinshuo_visualization import visualize_image
+from xinshuo_math import nparray_resize
 
-def test_generate_gaussian_heatmap):
+def test_generate_gaussian_heatmap():
 	print('test single point')
-
-	input_pts = [200, 200, 1]
-	image_size = [100, 100]
-	downsample = 4
+	input_pts = [300, 400, 1]
+	image_size = [800, 600]
 	std = 10
+	heatmap, mask = generate_gaussian_heatmap(input_pts, image_size=image_size, std=std)
+	assert heatmap.shape == (800, 600, 2)
+	assert mask.shape == (1, 1, 2)
+	visualize_image(heatmap[:, :, -1], vis=True)
 
-	heatmap, mask = generate_gaussian_heatmap(input_pts, image_size=image_size, std=std, downsample_factor=downsample)
-	print(mask)
-	visualize_image(heatmap)
+	print('test two points')
+	input_pts = [[300, 400, 1], [400, 400, 1]]
+	image_size = [800, 600]
+	std = 10
+	heatmap, mask = generate_gaussian_heatmap(input_pts, image_size=image_size, std=std)
+	assert heatmap.shape == (800, 600, 3)
+	assert mask.shape == (1, 1, 3)
+	visualize_image(heatmap[:, :, -1], vis=True)
 
+	print('test two points with invalid one')
+	input_pts = [[300, 400, 1], [400, 400, -1]]
+	image_size = [800, 600]
+	std = 10
+	heatmap, mask = generate_gaussian_heatmap(input_pts, image_size=image_size, std=std)
+	assert heatmap.shape == (800, 600, 3)
+	assert mask.shape == (1, 1, 3)
+	visualize_image(heatmap[:, :, -1], vis=True)
 
-	# img = np.random.rand(100, 200, 3).astype('float32')
-	# img_bak = img.copy()
-	# batch_image = preprocess_batch_deep_image(img, rgb2bgr=False)
-	# assert batch_image.shape == (1, 3, 100, 200)
-	# assert CHECK_EQ_NUMPY(batch_image, np.transpose(img, (2, 0, 1)).reshape((1, 3, 100, 200))), 'the original image should be equal to the copy'
-	# batch_image += 1
-	# assert not CHECK_EQ_NUMPY(batch_image, np.transpose(img, (2, 0, 1)).reshape((1, 3, 100, 200))), 'the original image should be equal to the copy'
-	# assert CHECK_EQ_NUMPY(img_bak, img), 'the original image should be equal to the backup version'
-
-	# print('test NHW3, no rgb2bgr')
-	# img = np.random.rand(12, 100, 100, 3).astype('float32')
-	# img_bak = img.copy()
-	# batch_image = preprocess_batch_deep_image(img, rgb2bgr=False)
-	# assert CHECK_EQ_NUMPY(batch_image, np.transpose(img, (0, 3, 1, 2))), 'the original image should be equal to the copy'
-	# batch_image += 1
-	# assert not CHECK_EQ_NUMPY(batch_image, np.transpose(img, (0, 3, 1, 2))), 'the original image should be equal to the copy'
-	# assert CHECK_EQ_NUMPY(img_bak, img), 'the original image should be equal to the backup version'
-
-	# print('test HW3, with rgb2bgr')
-	# img = np.random.rand(100, 200, 3).astype('float32')
-	# img_bak = img.copy()
-	# batch_image = preprocess_batch_deep_image(img)
-	# assert batch_image.shape == (1, 3, 100, 200)
-	# assert CHECK_EQ_NUMPY(bgr2rgb(chw2hwc(batch_image[0])), img), 'the original image should be equal to the copy'
-	# assert CHECK_EQ_NUMPY(img_bak, img), 'the original image should be equal to the backup version'
-
-	# print('test HW3, with rgb2bgr, pixel mean and std')
-	# img = np.random.rand(2, 4, 3).astype('float32')
-	# img[img < 0.5] = 0.5
-	# pixel_mean = [0.3, 0.4, 0.5]
-	# pixel_std = [0.9, 0.99, 0.999]
-	# batch_image = preprocess_batch_deep_image(img, pixel_mean=pixel_mean, pixel_std=pixel_std)
-	# assert batch_image.shape == (1, 3, 2, 4)
-	# assert_almost_equal((chw2hwc(batch_image[0])), (bgr2rgb(img) - np.array(pixel_mean)) / np.array(pixel_std), err_msg='the original image should be equal to the copy')
-
-	# print('test HW3, with rgb2bgr, single pixel mean')
-	# img = np.random.rand(2, 4, 3).astype('float32')
-	# img[img < 0.5] = 0.5
-	# pixel_mean = 0.5
-	# pixel_std = [0.9, 0.99, 0.999]
-	# batch_image = preprocess_batch_deep_image(img, pixel_mean=pixel_mean, pixel_std=pixel_std)
-	# assert batch_image.shape == (1, 3, 2, 4)
-	# assert_almost_equal((chw2hwc(batch_image[0])), (bgr2rgb(img) - np.array(pixel_mean)) / np.array(pixel_std), err_msg='the original image should be equal to the copy')
-
-	# print('test HW3, with rgb2bgr, single pixel std')
-	# img = np.random.rand(2, 4, 3).astype('float32')
-	# img[img < 0.5] = 0.5
-	# pixel_mean = 0.5
-	# pixel_std = 0.9
-	# batch_image = preprocess_batch_deep_image(img, pixel_mean=pixel_mean, pixel_std=pixel_std)
-	# assert batch_image.shape == (1, 3, 2, 4)
-	# assert_almost_equal((chw2hwc(batch_image[0])), (bgr2rgb(img) - np.array(pixel_mean)) / np.array(pixel_std), err_msg='the original image should be equal to the copy')
 
 	print('\n\nDONE! SUCCESSFUL!!\n')
 	
