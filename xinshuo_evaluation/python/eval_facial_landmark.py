@@ -93,9 +93,9 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 				assert (is2dptsarray(pts_anno) or is2dptsarray_occlusion(pts_anno)) and pts_anno.shape[1] == num_pts, 'shape of annotations is not correct (%d x %d) vs (%d x %d)' % (2, num_pts, pts_anno.shape[0], pts_anno.shape[1])
 
 			# if the annotation has 3 channels (include extra occlusion channel, we keep only the points with annotations)
-			# occlusion: -1 -> not annotated, 0 -> invisible, 1 -> visible, we keep both visible and invisible points
+			# occlusion: -1 -> visible but not annotated, 0 -> invisible and not annotated, 1 -> visible, we keep only visible and annotated points
 			if pts_anno.shape[0] == 3:	
-				pts_keep_index = np.where(np.logical_or(pts_anno[2, :] == 1, pts_anno[2, :] == 0))[0].tolist()
+				pts_keep_index = np.where(pts_anno[2, :] == 1)[0].tolist()
 				if len(pts_keep_index) <= 0:		# if no point is annotated in current image
 					count_skip_num_images += 1
 					continue

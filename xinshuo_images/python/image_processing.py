@@ -203,7 +203,7 @@ def image_hist_equalization_hsv(input_image, warning=True, debug=True):
 
 	return equalized_image
 
-def image_clahe(input_image, warning=True, debug=True):
+def image_clahe(input_image, clip_limit=2.0, grid_size=8, warning=True, debug=True):
 	'''
 	do contrast limited adative histogram equalization for an image: could be a color image or gray image
 	the color space used for histogram equalization is LAB
@@ -212,25 +212,25 @@ def image_clahe(input_image, warning=True, debug=True):
 		input_image:		a pil or numpy image
 
 	outputs:
-		equalized_image:	an uint8 numpy image (rgb or gray)
+		clahe_image:		an uint8 numpy image (rgb or gray)
 	'''
 	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
-	if isuintimage(np_image):
-		np_image = np_image.astype('float32') / 255.
+	if isfloatimage(np_image): np_image = (np_image.astype('float32') * 255.).astype('uint8')
+	if debug: assert isuintimage(np_image), 'the input image should be a uint8 image'
 
-	if debug: assert isfloatimage(np_image), 'the input image should be a float image'
+	clahe = cv2.createCLAHE(clipLimit=clip_limit, tileGridSize=(grid_size, grid_size))
 
 	if iscolorimage(np_image):
-		hsv_image = rgb2lab(np_image, warning=warning, debug=debug)
-		input_data = hsv_image[:, :, 0]			# extract the value channel
-		equalized_hsv_image = (hist_equalization(input_data, num_bins=256, debug=debug) * 255.).astype('uint8')
-		hsv_image[:, :, 0] = equalized_hsv_image
-		equalized_image = lab2rgb(hsv_image, warning=warning, debug=debug)
+		lab_image = rgb2lab(np_image, warning=warning, debug=debug)
+		input_data = lab_image[:, :, 0]			# extract the value channel
+		clahe_lab_image = clahe.apply(input_data)
+		lab_image[:, :, 0] = clahe_lab_image
+		clahe_image = lab2rgb(lab_image, warning=warning, debug=debug)
 	elif isgrayimage(np_image):
-		equalized_image = (hist_equalization(np_image, num_bins=256, debug=debug) * 255.).astype('uint8')
+		clahe_image = clahe.apply(np_image)
 	else: assert False, 'the input image is neither a color image or a grayscale image'
 
-	return equalized_image
+	return clahe_image
 
 def image_mean(input_image, warning=True, debug=True):
 	'''

@@ -23,8 +23,7 @@ def hist_equalization(input_data, num_bins=256, debug=True):
 	'''
 	np_data = safe_npdata(input_data)
 
-	if debug:
-		assert isnparray(np_data), 'the input data is not a numpy data'
+	if debug: assert isnparray(np_data), 'the input data is not a numpy data'
 
 	ori_shape = np_data.shape
 	np_data = np_data.flatten()
