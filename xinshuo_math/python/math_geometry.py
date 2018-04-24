@@ -8,29 +8,38 @@ from numpy.testing import assert_almost_equal
 from private import safe_ptsarray, safe_npdata
 from xinshuo_miscellaneous import print_np_shape, is2dptsarray, is2dpts, is2dline, is3dpts, islist, isscalar, istuple
 
+# instruction
+# 2D line representation:           ax + by + c = 0,            vector representation: (a, b, c)
+# 2D pts representation:            (x, y)
+# 3D line representation:           ax + by + cz + d = 0,       vector representation: (a, b, c, d)
+# 3D pts representation:            (x, y, z)
 
 ################################################################## 2d math ##################################################################
-def get_line(pts, slope, debug=True):
+def get_2Dline_from_pts_slope(input_pts, slope, warning=True, debug=True):
     '''
     # slope is the angle in degree, this function takes a point and a
     '''
+    np_pts = safe_ptsarray(input_pts, warning=warning, debug=debug)
     if debug:
-        print('debug mode is on during get_line function. Please turn off after debuging')
-        assert is2dpts(pts), 'point is not correct'
+        assert is2dpts(np_pts), 'point is not correct'
+        assert isscalar(slope), 'the slope is not correct'
 
     if slope == 90 or -90:
         slope = slope + 0.00001
     slope = math.tan(math.radians(slope))
-    if debug:
-        print('slope is ' + str(slope))
+
     dividor = slope * pts[0] - pts[1]
     if dividor == 0:
         dividor += 0.00001
     b = 1.0 / dividor
     a = -b * slope
-    if debug:
-        assert_almost_equal(pts[0]*a + pts[1]*b + 1, 0, err_msg='Point is not on the line')
+
+    if debug: assert_almost_equal(pts[0] * a + pts[1] * b + 1, 0, err_msg='Point is not on the line')
     return np.array([a, b, 1], dtype=float)
+
+def get_line_from_pts(pts1, pts2, warning=True, debug=True):
+    pass
+
 
 # TODO: check
 def get_slope(pts1, pts2, debug=True):

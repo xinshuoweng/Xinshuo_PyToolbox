@@ -9,7 +9,7 @@ from numpy.testing import assert_almost_equal
 from math import radians as rad
 
 from private import safe_bbox, safe_center_bbox, bboxcheck_TLBR, bboxcheck_TLWH
-from math_geometry import get_line, get_intersection
+from math_geometry import get_2Dline_from_pts_slope, get_intersection
 from xinshuo_miscellaneous import imagecoor2cartesian, cartesian2imagecoor, isnparray, is2dptsarray, is2dptsarray_occlusion, is2dpts, isinteger, isbbox, islist, iscenterbbox
 
 # general format instruction
