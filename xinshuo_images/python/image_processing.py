@@ -320,7 +320,7 @@ def image_find_local_peaks(input_image, percent_threshold=0.5, warning=True, deb
 	outputs:
 		peak_array:		a numpy float32 array, 3 x num_peaks, (x, y, score)
 	'''
-	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
+	np_image, _ = safe_image_like(input_image, warning=warning, debug=debug)
 	if isuintimage(np_image): np_image = np_image.astype('float32') / 255.
 	if debug: 
 		assert isgrayimage(np_image) and isfloatimage(np_image), 'the input image is not a grayscale and float image'
@@ -770,39 +770,6 @@ def vstack_images( images, gap ):
 #   x = x * downsample + downsample / 2.0 - 0.5
 #   y = y * downsample + downsample / 2.0 - 0.5
 #   return torch.stack([x, y],1), score
-
-# TODO
-def find_peaks(heatmap, thre):
-    map_smooth = np.array(heatmap)
-    map_smooth[map_smooth < thre] = 0.0
-
-
-    map_aug = np.zeros([map_smooth.shape[0]+2, map_smooth.shape[1]+2])
-    map_aug1 = np.zeros([map_smooth.shape[0]+2, map_smooth.shape[1]+2])
-    map_aug2 = np.zeros([map_smooth.shape[0]+2, map_smooth.shape[1]+2])
-    map_aug3 = np.zeros([map_smooth.shape[0]+2, map_smooth.shape[1]+2])
-    map_aug4 = np.zeros([map_smooth.shape[0]+2, map_smooth.shape[1]+2])
-    
-    # shift in different directions to find peak, only works for convex blob
-    map_aug[1:-1, 1:-1] = map_smooth
-    map_aug1[1:-1, 0:-2] = map_smooth
-    map_aug2[1:-1, 2:] = map_smooth
-    map_aug3[0:-2, 1:-1] = map_smooth
-    map_aug4[2:, 1:-1] = map_smooth
-
-    peakMap = np.multiply(np.multiply(np.multiply((map_aug > map_aug1),(map_aug > map_aug2)),(map_aug > map_aug3)),(map_aug > map_aug4))
-    peakMap = peakMap[1:-1, 1:-1]
-
-    idx_tuple = np.nonzero(peakMap)     # find 1
-    Y = idx_tuple[0]
-    X = idx_tuple[1]
-
-    score = np.zeros([len(Y),1])
-    for i in range(len(Y)):
-        score[i] = heatmap[Y[i], X[i]]
-
-    return X, Y, score
-
 
 # def find_tensor_peak(heatmap, radius, downsample):
 #   assert heatmap.dim() == 2, 'The dimension of the heatmap is wrong : {}'.format(heatmap.dim())
