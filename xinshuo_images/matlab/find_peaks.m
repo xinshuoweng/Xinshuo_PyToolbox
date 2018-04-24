@@ -32,10 +32,10 @@ function [X, Y, score] = find_peaks(heatmap, thre, debug_mode, vis)
     
     % shift in different directions to find peak, only works for convex blob
     map_aug(2:end-1, 2:end-1) = map_smooth;
-    map_aug1(2:end-1, 1:end-2) = map_smooth;
-    map_aug2(2:end-1, 3:end) = map_smooth;
-    map_aug3(1:end-2, 2:end-1) = map_smooth;
-    map_aug4(3:end, 2:end-1) = map_smooth;
+    map_aug1(2:end-1, 1:end-2) = map_smooth;        % top
+    map_aug2(2:end-1, 3:end) = map_smooth;          % bottom
+    map_aug3(1:end-2, 2:end-1) = map_smooth;        % left
+    map_aug4(3:end, 2:end-1) = map_smooth;          % right
     peakMap = (map_aug > map_aug1) & (map_aug > map_aug2) & (map_aug > map_aug3) & (map_aug > map_aug4);
     peakMap = peakMap(2:end-1, 2:end-1);
     [Y, X] = find(peakMap);     % find 1

@@ -77,7 +77,7 @@ def get_intersection(line1, line2, debug=True):
         assert_almost_equal(x*line2[0] + y*line2[1] + 1, 0, err_msg='Intersection point is not on the line')
     return np.array([x, y], dtype=float)
 
-################################################################## 3d math ##################################################################
+################################################################## 3d geometry ##################################################################
 def generate_sphere(pts_3d, radius, debug=True):
     '''
     generate a boundary of a 3D shpere point cloud
@@ -100,74 +100,3 @@ def generate_sphere(pts_3d, radius, debug=True):
 
     return pts_sphere
 
-def nparray_hwc2chw(input_nparray, warning=True, debug=True):
-    '''
-    this function transpose the channels of an numpy array from HWC to CHW
-
-    parameters:
-        input_nparray:  a numpy HWC array
-
-    outputs:
-        np_array:       a numpy CHW array
-    '''
-    np_array = safe_npdata(input_nparray, warning=warning, debug=debug)
-    if debug: assert np_array.ndim == 3, 'the input numpy array does not have a good dimension: {}'.format(np_image.shape)
-
-    return np.transpose(np_array, (2, 0, 1)) 
-
-def nparray_chw2hwc(input_nparray, warning=True, debug=True):
-    '''
-    this function transpose the channels of an numpy array  from CHW to HWC
-
-    parameters:
-        input_nparray:  a numpy CHW array
-
-    outputs:
-        np_array:       a numpy HWC array
-    '''
-
-    if debug: isnparray(input_nparray), 'the input array is not a numpy'
-    np_array = input_nparray.copy()
-    if debug: assert np_array.ndim == 3, 'the input numpy array does not have a good dimension: {}'.format(np_image.shape)
-
-    return np.transpose(np_array, (1, 2, 0)) 
-
-def nparray_resize(input_nparray, resize_factor=None, target_size=None, interp='bicubic', warning=True, debug=True):
-    '''
-    resize the numpy array given a resize factor (e.g., 0.25), or given a target size (height, width)
-    e.g., the numpy array has 600 x 800:
-        1. given a resize factor of 0.25 -> results in an image with 150 x 200
-        2. given a target size of (300, 400) -> results in an image with 300 x 400
-    note that:
-        resize_factor and target_size cannot exist at the same time
-
-    parameters:
-        input_nparray:      a numpy array
-        resize_factor:      a scalar
-        target_size:        a list of tuple or numpy array with 2 elements, representing height and width
-        interp:             interpolation methods: bicubic or bilinear
-
-    outputs:
-        resized_nparray:    a numpy array
-    ''' 
-    np_array = safe_npdata(input_nparray, warning=warning, debug=debug)
-    if debug:
-        assert interp in ['bicubic', 'bilinear'], 'the interpolation method is not correct'
-        assert (resize_factor is not None and target_size is None) or (resize_factor is None and target_size is not None), 'resize_factor and target_size cannot co-exist'
-
-    if target_size is not None:
-        if debug: assert isimsize(target_size), 'the input target size is not correct'
-        target_width, target_height = int(round(target_size[1])), int(round(target_size[0]))
-    elif resize_factor is not None:
-        if debug: assert isscalar(resize_factor), 'the resize factor is not a scalar'
-        height, width = np_array.shape[:2]
-        target_width, target_height = int(round(resize_factor * width)), int(round(resize_factor * height))
-    else: assert False, 'the target_size and resize_factor do not exist'
-
-    if interp == 'bicubic':
-        resized_nparray = cv2.resize(np_array, (target_width, target_height), interpolation = cv2.INTER_CUBIC)
-    elif interp == 'bilinear':
-        resized_nparray = cv2.resize(np_array, (target_width, target_height), interpolation = cv2.INTER_LINEAR)
-    else: assert False, 'interpolation is wrong'
-
-    return resized_nparray

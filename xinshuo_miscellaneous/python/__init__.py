@@ -5,4 +5,4 @@ from .check import *
 from .configuration import *
 from .counter import *
 from .logger import *
-from .conversions import *
+from .conversion import *
