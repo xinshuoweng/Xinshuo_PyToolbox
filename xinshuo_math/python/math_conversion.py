@@ -33,7 +33,6 @@ def nparray_chw2hwc(input_nparray, warning=True, debug=True):
 	outputs:
 	    np_array:       a numpy HWC array
 	'''
-
 	if debug: isnparray(input_nparray), 'the input array is not a numpy'
 	np_array = input_nparray.copy()
 	if debug: assert np_array.ndim == 3, 'the input numpy array does not have a good dimension: {}'.format(np_image.shape)

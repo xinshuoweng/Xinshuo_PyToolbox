@@ -17,10 +17,8 @@ def safe_image(input_image, warning=True, debug=True):
 		np_image:			numpy image, with the same color and datatype as the input
 		isnan:				return True if any nan value exists
 	'''
-	if ispilimage(input_image):
-		np_image = np.array(input_image)
-	elif isnpimage(input_image):
-		np_image = input_image.copy()
+	if ispilimage(input_image): np_image = np.array(input_image)
+	elif isnpimage(input_image): np_image = input_image.copy()
 	else: assert False, 'only pil and numpy images are supported, might be the case the image is float but has range of [0, 255], or might because the data is float64'
 
 	isnan = isnannparray(np_image)
@@ -40,10 +38,10 @@ def safe_batch_image(input_image, warning=True, debug=True):
 		np_image:			NHWC numpy image, with the same datatype as the input
 		isnan:				return True if any nan value exists
 	'''
-	if debug:
-		assert isnparray(input_image), 'the input image should be a numpy array'
+	if debug: assert isnparray(input_image), 'the input image should be a numpy array'
 	np_image = input_image.copy()
 
+	if np_image.ndim == 2: np_image = np.expand_dims(np_image, axis=0)			# compatible with grayscale image
 	if np_image.ndim == 3:		# expand HWC to NHWC batch images with batch of 1
 		if debug: assert isnpimage(np_image), 'the image should be a numpy image'
 		np_image = np.expand_dims(np_image, axis=0)
@@ -74,8 +72,7 @@ def safe_image_like(input_image, warning=True, debug=True):
 		np_image:			numpy image, with the same color and datatype as the input
 		isnan:				return True if any nan value exists
 	'''
-	if ispilimage(input_image):
-		np_image = np.array(input_image)
+	if ispilimage(input_image): np_image = np.array(input_image)
 	elif isnparray(input_image):
 		np_image = input_image.copy()
 		assert isnpimage_dimension(np_image), 'the input is not an image-like numpy array'
@@ -102,8 +99,7 @@ def safe_batch_deep_image(input_image, warning=True, debug=True):
 		np_image:			N3HW numpy image, with the same datatype as the input
 		isnan:				return True if any nan value exists
 	'''
-	if debug:
-		assert isnparray(input_image), 'the input image should be a numpy array'
+	if debug: assert isnparray(input_image), 'the input image should be a numpy array'
 	np_image = input_image.copy()
 
 	# if np_image.ndim == 2:		# expand HW gradscale image to CHW image with one channel

@@ -8,7 +8,6 @@ from private import safe_image, safe_image_like, safe_batch_deep_image, safe_bat
 from xinshuo_math.python.private import safe_npdata, safe_angle, safe_ptsarray
 from xinshuo_miscellaneous import isfloatimage, iscolorimage, isnparray, isnpimage_dimension, isuintimage, isgrayimage, ispilimage, islist, isinteger, islistofnonnegativeinteger, isfloatnparray, isuintnparray, isimsize, isscalar
 from xinshuo_math import hist_equalization, clip_bboxes_TLWH, get_center_crop_bbox
-from xinshuo_visualization import visualize_image
 
 ############################################# color transform #################################
 def gray2rgb(input_image, with_color=True, cmap='jet', warning=True, debug=True):
@@ -307,9 +306,9 @@ def	image_normalize(input_image, warning=True, debug=True):
 
 	return np_image.astype('uint8')
 
-def image_find_local_peaks(input_image, percent_threshold=0.5, warning=True, debug=True):
+def image_find_peaks(input_image, percent_threshold=0.5, warning=True, debug=True):
 	'''
-	this function find multiple strict local maximum from a grayscale image
+	this function find all strict local peaks and a strict global peak from a grayscale image
 	the strict local maximum means that the pixel value must be larger than all nearby pixel values
 
 	parameters:
@@ -318,7 +317,8 @@ def image_find_local_peaks(input_image, percent_threshold=0.5, warning=True, deb
 								e.g., when 0.4, all pixel values less than 0.4 * np.max(input_image) are smoothed out to be 0
 
 	outputs:
-		peak_array:		a numpy float32 array, 3 x num_peaks, (x, y, score)
+		peak_array:				a numpy float32 array, 3 x num_peaks, (x, y, score)
+		peak_global:			a numpy float32 array, 3 x 1: (x, y, score)
 	'''
 	np_image, _ = safe_image_like(input_image, warning=warning, debug=debug)
 	if isuintimage(np_image): np_image = np_image.astype('float32') / 255.
@@ -349,12 +349,21 @@ def image_find_local_peaks(input_image, percent_threshold=0.5, warning=True, deb
 	peakMap = peakMap[1:-1, 1:-1]
 	peak_location_tuple = np.nonzero(peakMap)     # find true
 	num_peaks = len(peak_location_tuple[0])
+	if num_peaks == 0:
+		if warning: print('No single local peak found')
+		return np.zeros((3, 0), dtype='float32'), np.zeros((3, 0), dtype='float32')
+
+	# convert to a numpy array format
 	peak_array = np.zeros((3, num_peaks), dtype='float32')
 	peak_array[0, :], peak_array[1, :] = peak_location_tuple[1], peak_location_tuple[0]
 	for peak_index in range(num_peaks):
 		peak_array[2, peak_index] = np_image[int(peak_array[1, peak_index]), int(peak_array[0, peak_index])]
 
-	return peak_array
+	# find the global peak from all local peaks
+	global_peak_index = np.argmax(peak_array[2, :])
+	peak_global = peak_array[:, global_peak_index].reshape((3, 1))
+
+	return peak_array, peak_global
 
 ############################################# format transform #################################
 def image_rgb2bgr(input_image, warning=True, debug=True):
@@ -653,168 +662,51 @@ def image_rotate(input_image, input_angle, warning=True, debug=True):
 
 	return rotated_image
 
-def image_concatenate(image_list, im_size=[1600, 2560], grid_size=None, edge_factor=0.99, debug=True):
+def image_concatenate(input_image, target_size=[1600, 2560], grid_size=None, edge_factor=0.99, warning=True, debug=True):
 	'''
 	concatenate a list of images automatically
 
 	parameters:	
-		image_list: 		a list of numpy array
-		im_size:			a tuple or list of numpy array for [H, W]
-		edge_factor:		the margin between images after concatenation, bigger, the edge is smaller, [0, 1]
+		input_image:			NHWC numpy image, uint8 or float32
+		target_size:			a tuple or list or numpy array with 2 elements, for [H, W]
+		grid_size:				a tuple or list or numpy array with 2 elements, for [num_rows, num_cols] 
+		edge_factor:			the margin between images after concatenation, bigger, the edge is smaller, [0, 1]
+
+	outputs:
+		image_merged: 			CHW uint8 numpy image with size of target_size
 	'''
+	np_image, _ = safe_batch_image(input_image, warning=warning, debug=debug)
 	if debug:
-		assert islist(image_list) and all(ispilimage(image_tmp) for image_tmp in image_list), 'the input is not a list of image'
-		assert issize(im_size), 'the input image size is not correct'
-		if grid_size is not None:
-			assert issize(grid_size), 'the input grid size is not correct'
+		assert isimsize(target_size), 'the input image size is not correct'
+		if grid_size is not None: assert isimsize(grid_size), 'the input grid size is not correct'
+		assert isscalar(edge_factor) and edge_factor <= 1 and edge_factor >= 0, 'the edge factor is not correct'
 
-	num_images = len(image_list)
-
+	num_images = np_image.shape[0]
 	if grid_size is None:
 		num_rows = int(np.sqrt(num_images))
 		num_cols = int(np.ceil(num_images * 1.0 / num_rows))
 	else:
-		num_rows = grid_size[0]
-		num_cols = grid_size[1]
+		num_rows, num_cols = np.ceil(grid_size[0]), np.ceil(grid_size[1])
 
-	window_height = im_size[0]
-	window_width = im_size[1]
-	
+	window_height, window_width = target_size[0], target_size[1]
 	grid_height = int(window_height / num_rows)
 	grid_width  = int(window_width  / num_cols)
 	im_height   = int(grid_height   * edge_factor)
 	im_width 	= int(grid_width 	 * edge_factor)
-	im_channel 	= 3
+	im_channel 	= np_image.shape[-1]
 
 	# concatenate
 	image_merged = np.zeros((window_height, window_width, im_channel), dtype='uint8')
 	for image_index in range(num_images):
-		image_tmp = image_list[image_index]
-		image_tmp = image_tmp.resize((im_width, im_height), Image.ANTIALIAS)
-		image_tmp = image_tmp.convert('RGB')
+		image_tmp = np_image[image_index, :, :, :]
+		image_tmp = image_resize(image_tmp, target_size=(im_height, im_width), warning=warning, debug=debug)
 
-		rows_index = int(np.ceil((image_index+1.0) / num_cols))			# 1-indexed
-		cols_index = image_index+1 - (rows_index - 1) * num_cols	# 1-indexed
-		rows_start = 1 + (rows_index - 1) * grid_height				# 1-indexed
-		rows_end   = rows_start + im_height							# 1-indexed
-		cols_start = 1 + (cols_index - 1) * grid_width				# 1-indexed
-		cols_end   = cols_start + im_width							# 1-indexed
-
-		image_merged[rows_start:rows_end, cols_start : cols_end, :] = np.array(image_tmp)
+		rows_index = int(np.ceil((image_index + 1.0) / num_cols))				# 1-indexed
+		cols_index = int(image_index + 1 - (rows_index - 1) * num_cols)			# 1-indexed
+		rows_start = int((rows_index - 1) * grid_height)						# 0-indexed
+		rows_end   = int(rows_start + im_height)								# 0-indexed
+		cols_start = int((cols_index - 1) * grid_width)							# 0-indexed
+		cols_end   = int(cols_start + im_width)									# 0-indexed
+		image_merged[rows_start:rows_end, cols_start:cols_end, :] = image_tmp
 
 	return image_merged
-
-def hstack_images( images, gap ):
-	images = [np.array(image) for image in images]
-	imagelist = []
-	for image in images:
-		gap_shape = list(image.shape)
-		gap_shape[1] = gap
-		imagelist.append(image)
-		imagelist.append(np.zeros(gap_shape).astype('uint8'))
-	imagelist = imagelist[:-1]
-	hstack = np.hstack( imagelist )
-	return Image.fromarray( hstack )
-
-def vstack_images( images, gap ):
-	images = [np.array(image) for image in images]
-	imagelist = []
-	for image in images:
-		gap_shape = list(image.shape)
-		gap_shape[0] = gap
-		imagelist.append(image)
-		imagelist.append(np.zeros(gap_shape).astype('uint8'))
-	imagelist = imagelist[:-1]
-	hstack = np.vstack( imagelist )
-	return Image.fromarray( hstack )
-
-
-# centroid
-# def find_tensor_peak_batch(heatmap, radius, downsample, threshold = 0.000001):
-#   assert heatmap.dim() == 3, 'The dimension of the heatmap is wrong : {}'.format(heatmap.size())
-#   assert radius > 0 and isinstance(radius, numbers.Number), 'The radius is not ok : {}'.format(radius)
-#   num_pts, H, W = heatmap.size(0), heatmap.size(1), heatmap.size(2)
-#   # find the approximate location:
-#   score, index = torch.max(heatmap.view(num_pts, -1), 1)
-#   index_w = (index % W).float()
-#   index_h = (index / W).float()
-  
-#   def normalize(x, L):
-#     return -1. + 2. * x.data / (L-1)
-#   boxes = [index_w - radius, index_h - radius, index_w + radius, index_h + radius]
-#   boxes[0] = normalize(boxes[0], W)
-#   boxes[1] = normalize(boxes[1], H)
-#   boxes[2] = normalize(boxes[2], W)
-#   boxes[3] = normalize(boxes[3], H)
-#   affine_parameter = torch.zeros((num_pts, 2, 3))
-#   affine_parameter[:,0,0] = (boxes[2]-boxes[0])/2
-#   affine_parameter[:,0,2] = (boxes[2]+boxes[0])/2
-#   affine_parameter[:,1,1] = (boxes[3]-boxes[1])/2
-#   affine_parameter[:,1,2] = (boxes[3]+boxes[1])/2
-  
-#   # extract the sub-region heatmap
-#   theta = MU.np2variable(affine_parameter,heatmap.is_cuda,False)
-#   grid_size = torch.Size([num_pts, 1, radius*2+1, radius*2+1])
-#   grid = F.affine_grid(theta, grid_size)
-#   sub_feature = F.grid_sample(heatmap.unsqueeze(1), grid).squeeze(1)
-#   sub_feature = F.threshold(sub_feature, threshold, np.finfo(float).eps)
-
-#   # slow for speed improvement
-#   X = MU.np2variable(torch.arange(-radius, radius+1),heatmap.is_cuda,False).view(1, 1, radius*2+1)
-#   Y = MU.np2variable(torch.arange(-radius, radius+1),heatmap.is_cuda,False).view(1, radius*2+1, 1)
-  
-#   sum_region = torch.sum(sub_feature.view(num_pts,-1),1)
-#   x = torch.sum((sub_feature*X).view(num_pts,-1),1) / sum_region + index_w
-#   y = torch.sum((sub_feature*Y).view(num_pts,-1),1) / sum_region + index_h
-     
-#   x = x * downsample + downsample / 2.0 - 0.5
-#   y = y * downsample + downsample / 2.0 - 0.5
-#   return torch.stack([x, y],1), score
-
-# def find_tensor_peak(heatmap, radius, downsample):
-#   assert heatmap.dim() == 2, 'The dimension of the heatmap is wrong : {}'.format(heatmap.dim())
-#   assert radius > 0 and isinstance(radius, numbers.Number), 'The radius is not ok : {}'.format(radius)
-#   H, W = heatmap.size(0), heatmap.size(1)
-#   # find the approximate location:
-#   score, index = torch.max(heatmap.view(-1), 0)
-#   index = int(MU.variable2np(index))
-#   index_h, index_w = np.unravel_index(index, (H,W))
-
-#   sw, sh = int(index_w - radius),     int(index_h - radius)
-#   ew, eh = int(index_w + radius + 1), int(index_h + radius + 1)
-#   sw, sh = max(0, sw), max(0, sh)
-#   ew, eh = min(W, ew), min(H, eh)
-  
-#   subregion = heatmap[sh:eh, sw:ew]
-#   threshold = 0.000001
-#   eps = np.finfo(float).eps
-
-#   with torch.cuda.device_of(subregion):
-#     X = MU.np2variable(torch.arange(sw, ew).unsqueeze(0))
-#     Y = MU.np2variable(torch.arange(sh, eh).unsqueeze(1))
-
-#   indicator = (subregion > threshold).type( type(subregion.data) )
-#   eps = (subregion <= threshold).type( type(subregion.data) ) * eps
-#   subregion = subregion * indicator + eps
-  
-#   x = torch.sum( subregion * X ) / torch.sum( subregion )
-#   y = torch.sum( subregion * Y ) / torch.sum( subregion )
-     
-#   ## calculate the score
-#   np_x, np_y = MU.variable2np(x), MU.variable2np(y)
-#   x2, y2 = min(W-1, int(np.ceil(np_x))), min(H-1, int(np.ceil(np_y)))
-#   x1, y1 = max(0, x2-1), max(0, y2-1)
-#   ## Bilinear interpolation
-#   if x1 == x2: 
-#     R1, R2 = heatmap[y1, x1], heatmap[y1, x2]
-#   else:
-#     R1 = (x2-x)/(x2-x1)*heatmap[y1, x1] + (x-x1)/(x2-x1)*heatmap[y1, x2]
-#     R2 = (x2-x)/(x2-x1)*heatmap[y2, x1] + (x-x1)/(x2-x1)*heatmap[y2, x2]
-#   if y1 == y2:
-#     score = R1
-#   else:
-#     score = (y2-y)/(y2-y1)*R1 + (y-y1)/(y2-y1)*R2
-     
-#   x = x * downsample + downsample / 2.0 - 0.5
-#   y = y * downsample + downsample / 2.0 - 0.5
-#   return torch.cat([x, y]), score
