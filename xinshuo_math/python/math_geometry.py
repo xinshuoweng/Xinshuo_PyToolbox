@@ -2,7 +2,8 @@
 # email: xinshuo.weng@gmail.com
 
 # this file includes functions of basic geometry in math
-import math, numpy as np
+import math, numpy as np, warnings
+warnings.filterwarnings("error")
 
 from private import safe_2dptsarray, safe_npdata
 from xinshuo_miscellaneous import is2dpts, is2dhomopts, is2dhomoline, is3dpts, isscalar
@@ -15,70 +16,80 @@ from xinshuo_miscellaneous import is2dpts, is2dhomopts, is2dhomoline, is3dpts, i
 
 ################################################################## 2d planar geomemtry ##################################################################
 def get_2dline_from_pts(input_pts1, input_pts2, warning=True, debug=True):
-    '''
-    get the homogeneous line representation from two 2d homogeneous points
+	'''
+	get the homogeneous line representation from two 2d homogeneous points
 
-    parameters:
-        input_pts1:         a homogeneous 2D point, can be a list or tuple or numpy array: (x, y, z)
-        input_pts2:         a homogeneous 2D point, can be a list or tuple or numpy array: (x, y, z)
+	parameters:
+		input_pts1:         a homogeneous 2D point, can be a list or tuple or numpy array: (x, y, z)
+		input_pts2:         a homogeneous 2D point, can be a list or tuple or numpy array: (x, y, z)
 
-    outputs:
-        np_line:            a homogeneous 2D line,  can be a list or tuple or numpy array: 3 x 1, (a, b, c)
-    '''
-    np_pts1 = safe_2dptsarray(input_pts1, homogeneous=True, warning=warning, debug=debug)
-    np_pts2 = safe_2dptsarray(input_pts2, homogeneous=True, warning=warning, debug=debug)
-    if debug: assert is2dhomopts(np_pts1) and is2dhomopts(np_pts2), 'point is not correct'
-    np_line = np.cross(np_pts1.transpose(), np_pts2.transpose()).transpose()
+	outputs:
+		np_line:            a homogeneous 2D line,  can be a list or tuple or numpy array: 3 x 1, (a, b, c)
+	'''
+	np_pts1 = safe_2dptsarray(input_pts1, homogeneous=True, warning=warning, debug=debug)
+	np_pts2 = safe_2dptsarray(input_pts2, homogeneous=True, warning=warning, debug=debug)
+	if debug: assert is2dhomopts(np_pts1) and is2dhomopts(np_pts2), 'point is not correct'
+	np_line = np.cross(np_pts1.transpose(), np_pts2.transpose()).transpose()
 
-    return np_line
+	return np_line
 
 def get_2dpts_from_lines(input_line1, input_line2, warning=True, debug=True):
-    '''
-    get the homogeneous point representation from two 2d homogeneous lines
+	'''
+	get the homogeneous point representation from two 2d homogeneous lines
 
-    parameters:
-        input_line1:         a homogeneous 2D line, can be a list or tuple or numpy array: (a, b, c)
-        input_line2:         a homogeneous 2D line, can be a list or tuple or numpy array: (a, b, c)
+	parameters:
+		input_line1:         a homogeneous 2D line, can be a list or tuple or numpy array: (a, b, c)
+		input_line2:         a homogeneous 2D line, can be a list or tuple or numpy array: (a, b, c)
 
-    outputs:
-        np_pts:              a homogeneous 2D point,  can be a list or tuple or numpy array: 3 x 1, (a, b, c)
-    '''    
-    np_pts = get_2dline_from_pts(input_line1, input_line2, warning=warning, debug=debug)
-    return np_pts
+	outputs:
+		np_pts:              a homogeneous 2D point,  can be a list or tuple or numpy array: 3 x 1, (a, b, c)
+	'''
+	np_pts = get_2dline_from_pts(input_line1, input_line2, warning=warning, debug=debug)
+	return np_pts
 
 def get_2dline_from_pts_slope(input_pts, slope, warning=True, debug=True):
-    '''
-    get the homogeneous line representation from two a homogeneous point and the slope in degree
+	'''
+	get the homogeneous line representation from two a homogeneous point and the slope in degree
 
-    parameters:
-        input_pts1:         a homogeneous 2D point, can be a list or tuple or numpy array: (x, y, z)
-        slope:              a scalar in degree
+	parameters:
+		input_pts1:         a homogeneous 2D point, can be a list or tuple or numpy array: (x, y, z)
+		slope:              a scalar in degree
 
-    outputs:
-        np_line:            a homogeneous 2D line,  can be a list or tuple or numpy array: 3 x 1, (a, b, c)
-    '''
-    np_pts1 = safe_2dptsarray(input_pts, homogeneous=True, warning=warning, debug=debug)
-    if debug:
-        assert is2dhomopts(np_pts1), 'point is not correct'
-        assert isscalar(slope), 'the slope is not correct'
+	outputs:
+		np_line:            a homogeneous 2D line,  can be a list or tuple or numpy array: 3 x 1, (a, b, c)
+	'''
+	np_pts1 = safe_2dptsarray(input_pts, homogeneous=True, warning=warning, debug=debug)
+	if debug:
+		assert is2dhomopts(np_pts1), 'point is not correct'
+		assert isscalar(slope), 'the slope is not correct'
 
-    y = math.sin(math.radians(slope))       # math.tan can handle 90 or -90
-    x = math.cos(math.radians(slope))       # math.tan can handle 90 or -90
-    np_pts2 = np.array([x, y, 0]).reshape((3, 1))       # this equation is obtained from slope
-    np_line = get_2dline_from_pts(np_pts1, np_pts2, warning=warning, debug=debug)
+	y = math.sin(math.radians(slope))       # math.tan can handle 90 or -90
+	x = math.cos(math.radians(slope))       # math.tan can handle 90 or -90
+	np_pts2 = np.array([x, y, 0]).reshape((3, 1))       # this equation is obtained from slope
+	np_line = get_2dline_from_pts(np_pts1, np_pts2, warning=warning, debug=debug)
 
-    return np_line
+	return np_line
 
-def get_slope(pts1, pts2, debug=True):
-    if debug:
-        print('debug mode is on during get_slope function. Please turn off after debuging')
-        assert is2dpts(pts1), 'point is not correct'
-        assert is2dpts(pts2), 'point is not correct'
+def get_slope_from_pts(input_pts1, input_pts2, warning=True, debug=True):
+	'''
+	get the slope in degree from two 2d homogeneous points
 
-    slope = (pts1[1] - pts2[1]) / (pts1[0] - pts2[0])
-    slope = np.arctan(slope)
-    slope = math.degrees(slope)
-    return slope
+	parameters:
+		input_pts1:         a homogeneous 2D point, can be a list or tuple or numpy array: (x, y, z)
+		input_pts2:         a homogeneous 2D point, can be a list or tuple or numpy array: (x, y, z)
+
+	outputs:
+		slope:            	a scalar in degree
+	'''
+	np_line = get_2dline_from_pts(input_pts1, input_pts2, warning=warning, debug=debug)
+
+	try: 
+		slope = - np_line[0] / np_line[1]
+	except ZeroDivisionError: slope = float('inf')
+	except RuntimeWarning: slope = float('inf')
+	slope = math.degrees(np.arctan(slope))
+	
+	return slope
 
 ################################################################## 3d geometry ##################################################################
 def generate_sphere(pts_3d, radius, debug=True):
@@ -105,4 +116,7 @@ def generate_sphere(pts_3d, radius, debug=True):
 
 ################################################################## homogeneous vs euclidean ##################################################################
 def homogeneous2euclidean(homo_input, warning=True, debug=True):
-    pass
+	pass
+
+def euclidean2homogeneous(input, warning=True, debug=True):
+	pass
