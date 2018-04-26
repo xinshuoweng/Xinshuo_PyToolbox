@@ -15,7 +15,7 @@ from xinshuo_miscellaneous import print_np_shape, is2dptsarray, is2dpts, is2dhom
 # 3D pts representation:            (x, y, z),                  vector representation: (x, y, z, t)
 
 ################################################################## 2d planar geomemtry ##################################################################
-def get_2Dline_from_pts(input_pts1, input_pts2, warning=True, debug=True):
+def get_2dline_from_pts(input_pts1, input_pts2, warning=True, debug=True):
     '''
     get the homogenous line representation from two 2d homogenous points
 
@@ -24,14 +24,33 @@ def get_2Dline_from_pts(input_pts1, input_pts2, warning=True, debug=True):
         input_pts2:         a homogenous 2D point, can be a list or tuple or numpy array: (x, y, z)
 
     outputs:
-        np_line:            a homogenous 2D line,  can be a list or tuple or numpy array: 1 x 3, (a, b, c)
+        np_line:            a homogenous 2D line,  can be a list or tuple or numpy array: 3 x 1, (a, b, c)
     '''
     np_pts1 = safe_2dptsarray(input_pts1, homogenous=True, warning=warning, debug=debug)
     np_pts2 = safe_2dptsarray(input_pts2, homogenous=True, warning=warning, debug=debug)
     if debug: assert is2dhomopts(np_pts1) and is2dhomopts(np_pts2), 'point is not correct'
-    np_line = np.cross(np_pts1.transpose(), np_pts2.transpose())
+    np_line = np.cross(np_pts1.transpose(), np_pts2.transpose()).transpose()
 
     return np_line
+
+def get_2dpts_from_lines(input_line1, input_line2, warning=True, debug=True):
+    '''
+    get the homogenous point representation from two 2d homogenous lines
+
+    parameters:
+        input_line1:         a homogenous 2D line, can be a list or tuple or numpy array: (a, b, c)
+        input_line2:         a homogenous 2D line, can be a list or tuple or numpy array: (a, b, c)
+
+    outputs:
+        np_pts:              a homogenous 2D point,  can be a list or tuple or numpy array: 3 x 1, (a, b, c)
+    '''    
+    # np_line1 = safe_2dptsarray(input_line1, homogenous=True, warning=warning, debug=debug)
+    # np_line2 = safe_2dptsarray(input_line2, homogenous=True, warning=warning, debug=debug)
+    # if debug: assert is2dhomoline(np_line1) and is2dhomoline(np_line2), 'lines are not correc'
+    # np_pts = np.cross(np_line1.transpose(), np_line2.transpose()).transpose()
+    np_pts = get_2dline_from_pts(input_line1, input_line2, warning=warning, debug=debug)
+
+    return np_pts
 
 def get_2Dline_from_pts_slope(input_pts, slope, warning=True, debug=True):
     '''
@@ -54,29 +73,6 @@ def get_2Dline_from_pts_slope(input_pts, slope, warning=True, debug=True):
 
     if debug: assert_almost_equal(pts[0] * a + pts[1] * b + 1, 0, err_msg='Point is not on the line')
     return np.array([a, b, 1], dtype=float)
-
-def get_2dpts_from_lines(line1, line2, debug=True):
-    if debug:
-        print('debug mode is on during get_intersection function. Please turn off after debuging')
-        assert is2dhomoline(line1), 'line is not correct'
-        assert is2dhomoline(line2), 'line is not correct'
-    
-    a1 = line1[0]
-    b1 = line1[1]
-    a2 = line2[0]
-    b2 = line2[1]
-    dividor = a2 * b1 - a1 * b2
-    if dividor == 0:
-        dividor += 0.00001
-    y = (a1 - a2) / dividor
-    if a1 == 0:
-        a1 += 0.00001
-    x = (-1.0 - b1 * y) / a1
-
-    if debug:
-        assert_almost_equal(x*line1[0] + y*line1[1] + 1, 0, err_msg='Intersection point is not on the line')
-        assert_almost_equal(x*line2[0] + y*line2[1] + 1, 0, err_msg='Intersection point is not on the line')
-    return np.array([x, y], dtype=float)
 
 # TODO: check
 def get_slope(pts1, pts2, debug=True):
