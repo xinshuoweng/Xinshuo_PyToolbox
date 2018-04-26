@@ -9,7 +9,7 @@ from numpy.testing import assert_almost_equal
 from math import radians as rad
 
 from private import safe_bbox, safe_center_bbox, bboxcheck_TLBR, bboxcheck_TLWH
-from math_geometry import get_2Dline_from_pts_slope, get_intersection
+from math_geometry import get_2dline_from_pts_slope, get_2dpts_from_lines
 from xinshuo_miscellaneous import imagecoor2cartesian, cartesian2imagecoor, isnparray, is2dptsarray, is2dptsarray_occlusion, is2dpts, isinteger, isbbox, islist, iscenterbbox
 
 # general format instruction
@@ -67,12 +67,12 @@ def clip_bboxes_TLBR(bboxes_in, im_width, im_height, debug=True):
 	this function clips bboxes inside the image boundary, the coordinates in the clipped bbox are half-included [x, y)
 
 	parameters:     
-	bboxes_in:              TLBR format, a list of 4 elements, a listoflist of 4 elements: e.g., [[1,2,3,4], [5,6,7,8]], 
-	                        a numpy array with shape or (N, 4) or (4, )
-	im_width/im_height:     scalar
+	   bboxes_in:              TLBR format, a list of 4 elements, a listoflist of 4 elements: e.g., [[1,2,3,4], [5,6,7,8]], 
+	                           a numpy array with shape or (N, 4) or (4, )
+	   im_width/im_height:     scalar
 
 	outputs:        
-	clipped_bboxes_TLWH:    TLBR format, numpy array with shape of (N, 4)
+	   clipped_bboxes_TLWH:    TLBR format, numpy array with shape of (N, 4)
 	'''
 	np_bboxes = safe_bbox(bboxes_in, debug=debug)
 	if debug:
@@ -91,12 +91,12 @@ def clip_bboxes_TLWH(bboxes_in, im_width, im_height, debug=True):
 	this function clips bboxes inside the image boundary
 
 	parameters:     
-	bboxes_in:              TLWH format, a list of 4 elements, a listoflist of 4 elements: e.g., [[1,2,3,4], [5,6,7,8]], 
-	                        a numpy array with shape or (N, 4) or (4, )
-	im_width/im_height:     scalar
+	   bboxes_in:              TLWH format, a list of 4 elements, a listoflist of 4 elements: e.g., [[1,2,3,4], [5,6,7,8]], 
+	                           a numpy array with shape or (N, 4) or (4, )
+	   im_width/im_height:     scalar
 
 	outputs:        
-	clipped_bboxes_TLWH:    TLWH format, numpy array with shape of (N, 4)
+	   clipped_bboxes_TLWH:    TLWH format, numpy array with shape of (N, 4)
 	'''
 	np_bboxes = safe_bbox(bboxes_in, debug=debug)
 	if debug:
@@ -142,6 +142,9 @@ def get_center_crop_bbox(center_bboxes_in, im_width=None, im_height=None, debug=
 	crop_bboxes = crop_bboxes.astype('int64')
 
 	return crop_bboxes
+
+
+# to test
 
 ############################################# pts related transform #################################
 def pts2bbox(pts, debug=True, vis=False):
@@ -279,12 +282,6 @@ def bbox_transform_inv(boxes, deltas, debug=True):
     dw = deltas[:, 2::4]
     dh = deltas[:, 3::4]
 
-    if debug:
-        print(deltas[0, 0:4])
-        print(deltas[0, 1::4])
-        print(deltas[0, 2::4])
-        print(deltas[0, 3::4])
-
     pred_ctr_x = dx * widths[:, np.newaxis] + ctr_x[:, np.newaxis]
     pred_ctr_y = dy * heights[:, np.newaxis] + ctr_y[:, np.newaxis]
     pred_w = np.exp(dw) * widths[:, np.newaxis]
@@ -338,10 +335,10 @@ def bbox_rotatedtight2rotatedloose(bbox_in, angle_in_degree, debug=True):
 
     pts_tl = np.array([bbox_in[0], bbox_in[1]])
     pts_br = np.array([bbox_in[2], bbox_in[3]])
-    line1 = get_line(imagecoor2cartesian(pts_tl), angle_in_degree + 90.00)
-    line2 = get_line(imagecoor2cartesian(pts_br), angle_in_degree)
-    pts_bl = cartesian2imagecoor(get_intersection(line1, line2))
-    pts_tr = cartesian2imagecoor(get_intersection(get_line(imagecoor2cartesian(pts_tl), angle_in_degree), get_line(imagecoor2cartesian(pts_br), angle_in_degree + 90.00)))
+    line1 = get_2Dline_from_pts_slope(imagecoor2cartesian(pts_tl), angle_in_degree + 90.00)
+    line2 = get_2Dline_from_pts_slope(imagecoor2cartesian(pts_br), angle_in_degree)
+    pts_bl = cartesian2imagecoor(get_2dpts_from_lines(line1, line2))
+    pts_tr = cartesian2imagecoor(get_2dpts_from_lines(get_2Dline_from_pts_slope(imagecoor2cartesian(pts_tl), angle_in_degree), get_2Dline_from_pts_slope(imagecoor2cartesian(pts_br), angle_in_degree + 90.00)))
     # assert_almost_equal(np.dot(pts_bl - pts_br, pts_bl - pts_tl), 0, err_msg='The intersection points are wrong')
     # assert_almost_equal(np.dot(pts_tr - pts_br, pts_tr - pts_tl), 0, err_msg='The intersection points are wrong')
 
@@ -392,10 +389,10 @@ def apply_rotation_tight(bbox_in, angle_in_degree, im_shape, debug=True):
     pts_total = np.zeros((4, 2), dtype=np.int)
     pts_tl = np.array([bbox_tight[0], bbox_tight[1]])
     pts_br = np.array([bbox_tight[2], bbox_tight[3]])
-    line1 = get_line(imagecoor2cartesian(pts_tl, debug=debug), angle_in_degree + 90.00, debug=debug)
-    line2 = get_line(imagecoor2cartesian(pts_br, debug=debug), angle_in_degree, debug=debug)
-    pts_bl = cartesian2imagecoor(get_intersection(line1, line2, debug=debug), debug=debug)
-    pts_tr = cartesian2imagecoor(get_intersection(get_line(imagecoor2cartesian(pts_tl, debug=debug), angle_in_degree, debug=debug), get_line(imagecoor2cartesian(pts_br, debug=debug), angle_in_degree + 90.00, debug=debug), debug=debug), debug=debug)
+    line1 = get_2dline_from_pts_slope(imagecoor2cartesian(pts_tl, debug=debug), angle_in_degree + 90.00, debug=debug)
+    line2 = get_2dline_from_pts_slope(imagecoor2cartesian(pts_br, debug=debug), angle_in_degree, debug=debug)
+    pts_bl = cartesian2imagecoor(get_2dpts_from_lines(line1, line2, debug=debug), debug=debug)
+    pts_tr = cartesian2imagecoor(get_2dpts_from_lines(get_2dline_from_pts_slope(imagecoor2cartesian(pts_tl, debug=debug), angle_in_degree, debug=debug), get_2dline_from_pts_slope(imagecoor2cartesian(pts_br, debug=debug), angle_in_degree + 90.00, debug=debug), debug=debug), debug=debug)
 
     # print np.reshape(pts_tl, (1, 2)).shape
     # print pts_total[0, :].shape

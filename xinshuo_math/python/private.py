@@ -4,7 +4,7 @@
 # this file includes private functions for internal use only
 import copy, numpy as np
 
-from xinshuo_miscellaneous import islist, isnparray, isbbox, islistoflist, iscenterbbox, isscalar, is2dptsarray, is2dptsarray_occlusion, is2dhomoptsarray
+from xinshuo_miscellaneous import islist, isnparray, isbbox, islistoflist, iscenterbbox, isscalar, is2dptsarray, is2dptsarray_occlusion, is2dptsarray_homogeneous
 
 ################################################################## conversion ##################################################################
 def safe_npdata(input_data, warning=True, debug=True):
@@ -106,19 +106,19 @@ def safe_angle(input_angle, warning=True, debug=True):
 
 	return angle
 	
-def safe_2dptsarray(input_pts, homogenous=False, warning=True, debug=True):
+def safe_2dptsarray(input_pts, homogeneous=False, warning=True, debug=True):
 	'''
 	make sure to copy the pts array without modifying it and make the dimension to 2(3 if homogenous) x N
 
 	parameters:
 		input_pts: 		a list of 2(3 if homogenous) elements, a listoflist of 2 elements: 
 						e.g., [[1,2], [5,6]], a numpy array with shape or (2, N) or (2, )
-		homogenous:		the input points are in the homogenous coordinate
+		homogeneous:		the input points are in the homogenous coordinate
 	
 	outputs:
 		np_pts:			2 (3 if homogenous) X N numpy array
 	'''
-	if homogenous: dimension = 3
+	if homogeneous: dimension = 3
 	else: dimension = 2
 
 	if islist(input_pts):
@@ -137,7 +137,7 @@ def safe_2dptsarray(input_pts, homogenous=False, warning=True, debug=True):
 	else: assert False, 'only list and numpy array for pts are supported'
 
 	if debug: 
-		if homogenous: assert is2dhomoptsarray(np_pts), 'the input pts array does not have a good shape'
+		if homogeneous: assert is2dptsarray_homogeneous(np_pts), 'the input pts array does not have a good shape'
 		else: assert is2dptsarray(np_pts), 'the input pts array does not have a good shape'
 
 	return np_pts

@@ -114,7 +114,7 @@ def is2dpts(pts_test):
 
 def is2dhomopts(pts_test):
     '''
-    2d homogenous point coordinate
+    2d homogeneous point coordinate
     numpy array or list or tuple with 3 elements
     '''
     return is3dpts(pts_test)
@@ -137,7 +137,7 @@ def is2dptsarray_confidence(pts_test):
     '''
     return is3dptsarray(pts_test) and (pts_test[2, :] >= -1).all() and (pts_test[2, :] <= 2).all()
 
-def is2dhomoptsarray(pts_test):
+def is2dptsarray_homogeneous(pts_test):
     '''
     numpy array with [2, N], N >= 0
     '''
