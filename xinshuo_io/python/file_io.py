@@ -45,7 +45,6 @@ def save_struct(struct_save, save_path, debug_mode):
     return
 
 ######################################################### txt related #########################################################
-
 def load_txt_file(file_path, debug=True):
     '''
     load data or string from text file

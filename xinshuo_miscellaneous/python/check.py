@@ -297,11 +297,11 @@ def isscaledimage(image_test):
         assert False, 'Unknown error'
 
 ############################################################# path related
-def safepath(pathname):
+def safepath(pathname, debug=True):
     '''
     convert path to a normal representation
     '''
-    assert is_path_valid(pathname), 'path is not valid: %s' % pathname
+    if debug: assert is_path_valid(pathname), 'path is not valid: %s' % pathname
     return os.path.normpath(pathname)
 
 def is_path_valid(pathname):
@@ -327,17 +327,14 @@ def is_path_creatable(pathname):
     For folder, it needs the previous level of folder existing
     for file, it needs the folder existing
     '''
-    if is_path_valid(pathname) is False:
-        return False
-    
+    if not is_path_valid(pathname): return False
     pathname = safepath(pathname)
     pathname = os.path.dirname(os.path.abspath(pathname))
     
     # recursively to find the root existing
     while not is_path_exists(pathname):     
         pathname_new = os.path.dirname(os.path.abspath(pathname))
-        if pathname_new == pathname:
-            return False
+        if pathname_new == pathname: return False
         pathname = pathname_new
     return os.access(pathname, os.W_OK)
 
