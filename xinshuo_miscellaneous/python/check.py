@@ -107,27 +107,23 @@ def islistofnonnegativeinteger(list_test):
 ############################################################# pts-related
 def is2dpts(pts_test):
     '''
+    2d point coordinate
     numpy array or list or tuple with 2 elements
     '''
     return (isnparray(pts_test) or islist(pts_test) or istuple(pts_test)) and np.array(pts_test).size == 2
+
+def is2dhomopts(pts_test):
+    '''
+    2d homogenous point coordinate
+    numpy array or list or tuple with 3 elements
+    '''
+    return is3dpts(pts_test)
 
 def is2dptsarray(pts_test):
     '''
     numpy array with [2, N], N >= 0
     '''
     return isnparray(pts_test) and pts_test.shape[0] == 2 and len(pts_test.shape) == 2 and pts_test.shape[1] >= 0
-
-def is3dpts(pts_test):
-    '''
-    numpy array or list or tuple with 3 elements
-    '''
-    return (isnparray(pts_test) or islist(pts_test) or istuple(pts_test)) and np.array(pts_test).size == 3
-
-def is3dptsarray(pts_test):
-    '''
-    numpy array with [3, N], N >= 0
-    '''
-    return isnparray(pts_test) and pts_test.shape[0] == 3 and len(pts_test.shape) == 2 and pts_test.shape[1] >= 0                   
 
 def is2dptsarray_occlusion(pts_test):
     '''
@@ -141,12 +137,35 @@ def is2dptsarray_confidence(pts_test):
     '''
     return is3dptsarray(pts_test) and (pts_test[2, :] >= -1).all() and (pts_test[2, :] <= 2).all()
 
-############################################################# line-related
-def is2dline(line_test):
+def is2dhomoptsarray(pts_test):
+    '''
+    numpy array with [2, N], N >= 0
+    '''
+    return is3dptsarray(pts_test)
+
+def is3dpts(pts_test):
     '''
     numpy array or list or tuple with 3 elements
     '''
-    return (isnparray(line_test) or islist(line_test) or istuple(line_test)) and np.array(line_test).size == 3
+    return (isnparray(pts_test) or islist(pts_test) or istuple(pts_test)) and np.array(pts_test).size == 3
+
+def is3dhomopts(pts_test):
+    '''
+    numpy array or list or tuple with 3 elements
+    '''
+    return (isnparray(pts_test) or islist(pts_test) or istuple(pts_test)) and np.array(pts_test).size == 4
+
+def is3dptsarray(pts_test):
+    '''
+    numpy array with [3, N], N >= 0
+    '''
+    return isnparray(pts_test) and pts_test.shape[0] == 3 and len(pts_test.shape) == 2 and pts_test.shape[1] >= 0                   
+############################################################# line-related
+def is2dhomoline(line_test):
+    '''
+    numpy array or list or tuple with 3 elements
+    '''
+    return is2dhomopts(line_test)
 
 def islinesarray(line_test):
     return isnparray(line_test) and line_test.shape[0] == 4 and len(line_test.shape) == 2 and line_test.shape[1] >= 0               # 4 x N
