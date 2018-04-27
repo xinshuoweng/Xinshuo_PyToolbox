@@ -4,7 +4,7 @@
 # this file includes functions of basic algebra in math
 import math, cv2, numpy as np
 
-from private import safe_ptsarray, safe_angle
+from private import safe_2dptsarray, safe_angle
 from xinshuo_miscellaneous import is2dptsarray, islist, isscalar, isnparray, istuple
 
 # all rotation angle is processes in degree
@@ -21,8 +21,8 @@ def pts_euclidean(input_pts1, input_pts2, warning=True, debug=True):
         ave_euclidean:      averaged euclidean distance
         eculidean_list:     a list of the euclidean distance for all data points
     '''
-    pts1 = safe_ptsarray(input_pts1, warning=warning, debug=debug)
-    pts2 = safe_ptsarray(input_pts2, warning=warning, debug=debug)
+    pts1 = safe_2dptsarray(input_pts1, warning=warning, debug=debug)
+    pts2 = safe_2dptsarray(input_pts2, warning=warning, debug=debug)
     if debug:
         assert pts1.shape == pts2.shape, 'the shape of two points is not equal'
         assert is2dptsarray(pts1) and is2dptsarray(pts2), 'the input points are not correct'

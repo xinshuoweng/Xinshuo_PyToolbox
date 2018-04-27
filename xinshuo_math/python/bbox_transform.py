@@ -2,10 +2,7 @@
 # email: xinshuo.weng@gmail.com
 
 # this file includes functions about transforming the bounding box
-import numpy as np
-import math, time, copy
-import matplotlib.pyplot as plt
-from numpy.testing import assert_almost_equal
+import numpy as np, math, time, copy
 from math import radians as rad
 
 from private import safe_bbox, safe_center_bbox, bboxcheck_TLBR, bboxcheck_TLWH
@@ -167,14 +164,14 @@ def pts2bbox(pts, debug=True, vis=False):
     bbox[0, 2] = np.max(pts[0, :])          # x coordinate of bottom right point
     bbox[0, 3] = np.max(pts[1, :])          # y coordinate of bottom right point
     
-    if vis:
-        fig = plt.figure()
-        pts = imagecoor2cartesian(pts)
-        plt.scatter(pts[0, :], pts[1, :], color='r')
-        plt.scatter(bbox[0, 0], -bbox[0, 1], color='b')         # -1 is to convert the coordinate from image to cartesian
-        plt.scatter(bbox[0, 2], -bbox[0, 3], color='b')
-        plt.show()
-        plt.close(fig)
+    # if vis:
+    #     fig = plt.figure()
+    #     pts = imagecoor2cartesian(pts)
+    #     plt.scatter(pts[0, :], pts[1, :], color='r')
+    #     plt.scatter(bbox[0, 0], -bbox[0, 1], color='b')         # -1 is to convert the coordinate from image to cartesian
+    #     plt.scatter(bbox[0, 2], -bbox[0, 3], color='b')
+    #     plt.show()
+    #     plt.close(fig)
     return bbox
 
 def bbox2center(bboxes_in, debug=True, vis=False):
@@ -196,14 +193,14 @@ def bbox2center(bboxes_in, debug=True, vis=False):
     center[:, 0] = (np_bboxes[:, 0] + np_bboxes[:, 2]) / 2.
     center[:, 1] = (np_bboxes[:, 1] + np_bboxes[:, 3]) / 2.
 
-    if vis:
-        fig = plt.figure()
-        plt.scatter(np_bboxes[0, 0], -np_bboxes[0, 1], color='b')         # -1 is to convert the coordinate from image to cartesian
-        plt.scatter(np_bboxes[0, 2], -np_bboxes[0, 3], color='b')
-        center_show = imagecoor2cartesian(center)
-        plt.scatter(center_show[0], center_show[1], color='r')        
-        plt.show()
-        plt.close(fig)
+    # if vis:
+    #     fig = plt.figure()
+    #     plt.scatter(np_bboxes[0, 0], -np_bboxes[0, 1], color='b')         # -1 is to convert the coordinate from image to cartesian
+    #     plt.scatter(np_bboxes[0, 2], -np_bboxes[0, 3], color='b')
+    #     center_show = imagecoor2cartesian(center)
+    #     plt.scatter(center_show[0], center_show[1], color='r')        
+    #     plt.show()
+    #     plt.close(fig)
     return np.transpose(center)
 
 def pts_conversion_bbox(pts_array, bboxes_in, debug=True):

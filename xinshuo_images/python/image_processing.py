@@ -5,7 +5,7 @@ import numpy as np
 from PIL import Image
 
 from private import safe_image, safe_image_like, safe_batch_deep_image, safe_batch_image
-from xinshuo_math.python.private import safe_npdata, safe_angle, safe_ptsarray
+from xinshuo_math.python.private import safe_npdata, safe_angle
 from xinshuo_miscellaneous import isfloatimage, iscolorimage, isnparray, isnpimage_dimension, isuintimage, isgrayimage, ispilimage, islist, isinteger, islistofnonnegativeinteger, isfloatnparray, isuintnparray, isimsize, isscalar
 from xinshuo_math import hist_equalization, clip_bboxes_TLWH, get_center_crop_bbox
 
