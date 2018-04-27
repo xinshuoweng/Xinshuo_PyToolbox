@@ -130,6 +130,14 @@ def str2num(string, debug=True):
 	except ValueError:
 		return float(string)
 
+def path2str(path, debug=True):
+	'''
+	convert a string of path to a string
+	'''
+	if debug: isstring(path), 'the path is wrong'
+
+	return '_'.join(path.split('/'))
+
 ######################################################### time related #########################################################
 def convert_secs2time(seconds):
     '''

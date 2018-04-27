@@ -47,6 +47,9 @@ def isbbox(bbox_test):
 def iscenterbbox(bbox_test):
     return isnparray(bbox_test) and len(bbox_test.shape) == 2 and bbox_test.shape[0] > 0 and (bbox_test.shape[1] == 4 or bbox_test.shape[1] == 2)
 
+def isrange(range_test):
+    return is2dpts(range_test)
+
 ############################################################# value-related
 def ispositiveinteger(integer_test):
     return isinteger(integer_test) and integer_test > 0

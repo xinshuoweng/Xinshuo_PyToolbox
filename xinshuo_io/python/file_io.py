@@ -89,7 +89,7 @@ def load_list_from_file(file_path, debug=True):
     _, _, extension = fileparts(file_path)
 
     if debug:
-        assert extension == '.txt', 'File doesn''t have valid extension.'
+        assert extension == '.txt' or '.lst', 'File doesn''t have valid extension.'
     file = open(file_path, 'r')
     if debug:
         assert file != -1, 'datalist not found'
@@ -105,19 +105,20 @@ def load_list_from_folder(folder_path, ext_filter=None, depth=1, recursive=False
     '''
     load a list of files or folders from a system path
 
-    parameter:
-        folder_path: root to search 
-        ext_filter: a string to represent the extension of files interested
-        depth: maximum depth of folder to search, when it's None, all levels of folders will be searched
-        recursive: 
-            False: only return current level
-            True: return all levels till to the input depth
+    parameters:
+        folder_path:    root to search 
+        ext_filter:     a string to represent the extension of files interested
+        depth:          maximum depth of folder to search, when it's None, all levels of folders will be searched
+        recursive:      False: only return current level
+                        True: return all levels till to the input depth
+
+    outputs:
+        fulllist:       a list of elements
+        num_elem:       number of the elements
     '''
     folder_path = safepath(folder_path)
-    if debug:
-        assert isfolder(folder_path), 'input folder path is not correct: %s' % folder_path
-    if not is_path_exists(folder_path):
-        return [], 0
+    if debug: assert isfolder(folder_path), 'input folder path is not correct: %s' % folder_path
+    if not is_path_exists(folder_path): return [], 0
 
     if debug:
         assert islogical(recursive), 'recursive should be a logical variable: {}'.format(recursive)

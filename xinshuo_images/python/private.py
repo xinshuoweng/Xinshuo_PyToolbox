@@ -3,7 +3,7 @@
 
 # this file includes private functions for internal use only
 import numpy as np
-from xinshuo_miscellaneous import ispilimage, isnpimage, isnparray, isnpimage_dimension, isnannparray, iscolorimage
+from xinshuo_miscellaneous import ispilimage, isnpimage, isnparray, isnpimage_dimension, isnannparray
 
 def safe_image(input_image, warning=True, debug=True):
 	'''
@@ -59,7 +59,7 @@ def safe_batch_image(input_image, warning=True, debug=True):
 
 def safe_image_like(input_image, warning=True, debug=True):
 	'''
-	return an image-like numpy no matter what format the input is
+	return an image-like numpy no matter what format the input is, the numpy has the image shape, but value may not be in [0, 1] for float image
 	make sure the output numpy image is a copy of the input image
 
 	note:
