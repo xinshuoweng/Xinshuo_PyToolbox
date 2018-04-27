@@ -54,11 +54,11 @@ def load_image(src_path, resize_factor=1.0, rotate=0, mode='numpy', debug=True):
 
     return img
 
-def save_image_from_data(save_path, data, debug=True, vis=False):
+def save_image(input_image, save_path, debug=True, vis=False):
     save_path = safepath(save_path)
     if debug:
-        assert isimage(data), 'input data is not image format'
+        assert isimage(input_image), 'input data is not image format'
         assert is_path_exists_or_creatable(save_path), 'save path is not correct'
     
     mkdir_if_missing(save_path)
-    imsave(save_path, data)
+    imsave(save_path, input_image)
