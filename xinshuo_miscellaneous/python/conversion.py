@@ -415,7 +415,6 @@ def number2onehot(number, ranges, debug=True):
 	onehot = np.zeros([num_integers, ], dtype='float32')
 	onehot[index] = 1
 
-
 ######################################################### images related #########################################################
 def imagecoor2cartesian(pts, debug=True):
 	'''

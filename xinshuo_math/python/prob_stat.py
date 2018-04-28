@@ -73,7 +73,7 @@ def data_unnormalize(data, data_range, debug=True):
 	if debug: 
 		assert isnparray(np_data), 'the input data is not a numpy data'
 		assert isrange(data_range), 'data range is not correct'
-		
+
 	max_value = data_range[1]
 	min_value = data_range[0]
 	unnormalized = np_data * (max_value - min_value) + min_value

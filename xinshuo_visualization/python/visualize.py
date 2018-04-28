@@ -1,15 +1,21 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
 
-import time, shutil, colorsys, cv2
+import time, shutil, colorsys, cv2, numpy as np
 import matplotlib as mpl
 # mpl.use('Agg')
+import warnings
+warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
+from warnings import catch_warnings, simplefilter
+with catch_warnings(record=True):
+    simplefilter('ignore', FutureWarning)
+    
 import matplotlib.pyplot as plt
 import matplotlib.collections as plycollections
 from matplotlib.patches import Ellipse
-import numpy as np
-import seaborn as sns
-from pandas import DataFrame
+# import seaborn as sns
+# from pandas import DataFrame
 from sklearn.neighbors import NearestNeighbors
 from scipy.misc import imread
 from scipy.stats import norm, chi2
