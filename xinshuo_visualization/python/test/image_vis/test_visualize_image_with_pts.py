@@ -14,6 +14,12 @@ def test_visualize_image_with_pts():
 	pts_array = [[200, 300, 1], [400, 400, 1]]
 	visualize_image_with_pts(img, pts_array, vis=True)	
 
+	print('testing for grayscale pil image.')
+	img = Image.open(image_path).convert('L')
+	pts_array = [[200, 300], [400, 400]]
+	visualize_image_with_pts(img, pts_array, vis=True)	
+
+
 	# print('testing for color pil image.')
 	# img = Image.open(image_path).convert('RGB')
 	# visualize_image_with_pts(img, vis=True)	

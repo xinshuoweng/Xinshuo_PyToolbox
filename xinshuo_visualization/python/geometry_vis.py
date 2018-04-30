@@ -17,80 +17,57 @@ hatch_set = [None, 'o', '/', '\\', '|', '-', '+', '*', 'x', 'O', '.']
 linestyle_set = ['-', '--', '-.', ':', None, ' ', 'solid', 'dashed']
 dpi = 80
 
-def visualize_pts_array(input_pts, covariance=False, color_index=0, pts_size=20, label=False, label_list=None, label_size=2, occlusion=True, vis_threshold=-10000, 
+def visualize_pts_array(input_pts, covariance=False, color_index=0, pts_size=20, label=False, label_list=None, label_size=2, plot_occlusion=True, vis_threshold=-10000, 
     xlim=None, ylim=None, fig=None, ax=None, save_path=None, vis=False, warning=True, debug=True, closefig=True):
     '''
-    plot keypoints
+    plot keypoints with covariance ellipse
 
     parameters:
-        pts_array:      2 or 3 x num_pts, the third channel could be confidence or occlusion
+        pts_array:      2(3) x num_pts numpy array, the third channel could be confidence or occlusion
     '''
-    pts_array = safe_2dptsarray(input_pts, homogeneous=True, warning=warning, debug=debug)
-    if debug:           # checking for input_pts is done inside the visualize_pts_array
-        # if isdict(input_pts):
-            # for pts_tmp in input_pts.values():
-                # if islist(pts_tmp): pts_tmp = np.array(pts_tmp)
-                # assert is2dptsarray(pts_tmp) or is2dptsarray_occlusion(pts_tmp) or is2dptsarray_confidence(pts_tmp), 'input points within dictionary are not correct: (2 (3), num_pts) vs %s' % print_np_shape(pts_tmp)
-        # else:
-            # assert is2dptsarray(input_pts) or is2dptsarray_occlusion(input_pts) or is2dptsarray_confidence(input_pts), 'input points are not correct'
-        assert islogical(label), 'label flag is not correct'
-        if label: assert islist(label_list) and all(isstring(label_tmp) for label_tmp in label_list), 'labels are not correct'
-
-    fig, ax = get_fig_ax_helper(fig=fig, ax=ax)
-    std, conf = None, 0.95
-
-    # obtain a label list if required but not provided
-    if label and (label_list is None):
-        if not isdict(pts_array): num_pts = pts_array.shape[1]
-        else:
-            pts_tmp = pts_array.values()[0]
-            num_pts = np.array(pts_tmp).shape[1] if islist(pts_tmp) else pts_tmp.shape[1]
-        label_list = [str(i+1) for i in xrange(num_pts)]
-
-    if islist(color_index):
-        if debug:
-            assert not occlusion, 'the occlusion is not compatible with plotting different colors during scattering'
-            assert not covariance, 'the covariance is not compatible with plotting different colors during scattering'
-        color_tmp = [color_set_big[index_tmp] for index_tmp in color_index]
-    else:
-        color_tmp = color_set_big[color_index % len(color_set_big)]
+    # obtain the points
+    try: pts_array = safe_2dptsarray(input_pts, homogeneous=True, warning=warning, debug=debug)
+    except AssertionError: pts_array = safe_2dptsarray(input_pts, homogeneous=False, warning=warning, debug=debug)
+    if debug: assert is2dptsarray(input_pts) or is2dptsarray_occlusion(input_pts) or is2dptsarray_confidence(input_pts), 'input points are not correct'
     num_pts = pts_array.shape[1]
 
-    if is2dptsarray(pts_array):    
-        ax.scatter(pts_array[0, :], pts_array[1, :], color=color_tmp, s=pts_size)
+    # obtain a label list if required but not provided
+    if debug: assert islogical(label), 'label flag is not correct'
+    if label and (label_list is None): label_list = [str(i+1) for i in xrange(num_pts)]
+    if debug: assert islist(label_list) and all(isstring(label_tmp) for label_tmp in label_list), 'labels are not correct'
 
-        if debug and islist(color_tmp): assert len(color_tmp) == pts_array.shape[1], 'number of points to plot is not equal to number of colors provided'
+    # obtain the color index
+    if islist(color_index):
+        if debug: assert not (plot_occlusion or covariance) , 'the occlusion or covariance are not compatible with plotting different colors during scattering'
+        color_tmp = [color_set_big[index_tmp] for index_tmp in color_index]
+    else: color_tmp = color_set_big[color_index % len(color_set_big)]
+    
+    fig, ax = get_fig_ax_helper(fig=fig, ax=ax)
+    std, conf = None, 0.95
+    if is2dptsarray(pts_array):             # only 2d points without third rows
+        if debug and islist(color_tmp): assert len(color_tmp) == num_pts, 'number of points to plot is not equal to number of colors provided'
+        ax.scatter(pts_array[0, :], pts_array[1, :], color=color_tmp, s=pts_size)
         pts_visible_index = range(pts_array.shape[1])
         pts_ignore_index = []
         pts_invisible_index = []
     else:
         num_float_elements = np.where(np.logical_and(pts_array[2, :] > 0, pts_array[2, :] < 1))[0].tolist()
-        if len(num_float_elements) > 0:
-            type_3row = 'conf'
-            if warning: print('third row is confidence')
-        else:
-            type_3row = 'occu'
-            if warning: print('third row is occlusion')
+        if len(num_float_elements) > 0: type_3row = 'conf'
+        else: type_3row = 'occu'
 
         if type_3row == 'occu':
             pts_visible_index   = np.where(pts_array[2, :] == 1)[0].tolist()              # plot visible points in red color
-            pts_invisible_index = np.where(pts_array[2, :] == 0)[0].tolist()              # plot invisible points in blue color
             pts_ignore_index    = np.where(pts_array[2, :] == -1)[0].tolist()             # do not plot points with annotation, usually visible, but not annotated
+            pts_invisible_index = np.where(pts_array[2, :] == 0)[0].tolist()              # plot invisible points in blue color
         else:
             pts_visible_index   = np.where(pts_array[2, :] > vis_threshold)[0].tolist()
             pts_ignore_index    = np.where(pts_array[2, :] <= vis_threshold)[0].tolist()
             pts_invisible_index = []
 
-        if debug and islist(color_tmp):
-            assert len(color_tmp) == len(pts_visible_index), 'number of points to plot is not equal to number of colors provided'
-
+        if debug and islist(color_tmp): assert len(color_tmp) == len(pts_visible_index), 'number of points to plot is not equal to number of colors provided'
         ax.scatter(pts_array[0, pts_visible_index], pts_array[1, pts_visible_index], color=color_tmp, s=pts_size)
-        if occlusion:
-            ax.scatter(pts_array[0, pts_invisible_index], pts_array[1, pts_invisible_index], color=color_set_big[(color_index+1) % len(color_set_big)], s=pts_size)
-        # else:
-            # ax.scatter(pts_array[0, pts_invisible_index], pts_array[1, pts_invisible_index], color=color_tmp, s=pts_size)
-        if covariance:
-            visualize_pts_covariance(pts_array[0:2, :], std=std, conf=conf, fig=fig, ax=ax, debug=False, color=color_tmp)
+        if plot_occlusion: ax.scatter(pts_array[0, pts_invisible_index], pts_array[1, pts_invisible_index], color=color_set_big[(color_index+1) % len(color_set_big)], s=pts_size)
+        if covariance: visualize_pts_covariance(pts_array[0:2, :], std=std, conf=conf, fig=fig, ax=ax, debug=debug, color=color_tmp)
 
     if label:
         for pts_index in xrange(num_pts):
@@ -98,17 +75,13 @@ def visualize_pts_array(input_pts, covariance=False, color_index=0, pts_size=20,
             if pts_index in pts_ignore_index: continue
             else:
                 # note that the annotation is based on the coordinate instead of the order of plotting the points, so the orider in pts_index does not matter
-                if islist(color_index):
-                    plt.annotate(label_tmp, xy=(pts_array[0, pts_index], pts_array[1, pts_index]), xytext=(-1, 1), color=color_set_big[(color_index[pts_index]+5) % len(color_set_big)], textcoords='offset points', ha='right', va='bottom', fontsize=label_size)
-                else:
-                    plt.annotate(label_tmp, xy=(pts_array[0, pts_index], pts_array[1, pts_index]), xytext=(-1, 1), color=color_set_big[(color_index+5) % len(color_set_big)], textcoords='offset points', ha='right', va='bottom', fontsize=label_size)
-                # bbox=dict(boxstyle='round,pad=0.5', fc='yellow', alpha=0.5),
-                # arrowprops=dict(arrowstyle = '->', connectionstyle='arc3,rad=0'))
+                if islist(color_index): plt.annotate(label_tmp, xy=(pts_array[0, pts_index], pts_array[1, pts_index]), xytext=(-1, 1), color=color_set_big[(color_index[pts_index]+5) % len(color_set_big)], textcoords='offset points', ha='right', va='bottom', fontsize=label_size)
+                else: plt.annotate(label_tmp, xy=(pts_array[0, pts_index], pts_array[1, pts_index]), xytext=(-1, 1), color=color_set_big[(color_index+5) % len(color_set_big)], textcoords='offset points', ha='right', va='bottom', fontsize=label_size)
     
+    # set axis
     if xlim is not None:
         if debug: assert islist(xlim) and len(xlim) == 2, 'the x lim is not correct'
         plt.xlim(xlim[0], xlim[1])
-
     if ylim is not None:    
         if debug: assert islist(ylim) and len(ylim) == 2, 'the y lim is not correct'
         plt.ylim(ylim[0], ylim[1])
