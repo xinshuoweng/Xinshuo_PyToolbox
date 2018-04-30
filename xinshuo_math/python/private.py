@@ -123,7 +123,7 @@ def safe_2dptsarray(input_pts, homogeneous=False, warning=True, debug=True):
 
 	if islist(input_pts):
 		if islistoflist(input_pts):
-			if debug: assert all(len(list_tmp) == dimension for list_tmp in input_pts), 'all sub-lists should have length of 2'
+			if debug: assert all(len(list_tmp) == dimension for list_tmp in input_pts), 'all sub-lists should have length of %d' % dimension
 			np_pts = np.array(input_pts).transpose()
 		else:
 			if debug: assert len(input_pts) == dimension, 'the input pts list does not have a good shape'
@@ -142,7 +142,7 @@ def safe_2dptsarray(input_pts, homogeneous=False, warning=True, debug=True):
 
 	return np_pts
 
-def safe_ptsarray_occlusion(input_pts, warning=True, debug=True):
+def safe_2dptsarray_occlusion(input_pts, warning=True, debug=True):
 	'''
 	make sure to copy the pts array without modifying it and make the dimension to 3 x N
 	the occlusion (3rd) row should contain 0, 1 or -1
@@ -154,21 +154,7 @@ def safe_ptsarray_occlusion(input_pts, warning=True, debug=True):
 	outputs:
 		np_pts:		3 X N numpy array, with the third row as the occlusion
 	'''
-	if islist(input_pts):
-		if islistoflist(input_pts):
-			if debug: assert all(len(list_tmp) == 3 for list_tmp in input_pts), 'all sub-lists should have length of 3'
-			np_pts = np.array(input_pts).transpose()
-		else:
-			if debug: assert len(input_pts) == 3, 'the input pts list does not have a good shape'
-			np_pts = np.array(input_pts).reshape((3, 1))
-	elif isnparray(input_pts):
-		input_pts = input_pts.copy()
-		if input_pts.shape == (3, ):
-			np_pts = input_pts.reshape((3, 1))
-		else:
-			np_pts = input_pts
-	else: assert False, 'only list and numpy array for pts are supported'
-
+	np_pts = safe_2dptsarray(input_pts, homogeneous=True, warning=warning, debug=debug)
 	if debug: assert is2dptsarray_occlusion(np_pts), 'the input pts array does not have a good shape'
 	return np_pts	
 

@@ -3,11 +3,13 @@
 
 # this file includes classes of linear filters ready applied on the images
 import numpy as np
-from scipy import ndimage
+# from scipy import ndimage
 
 from private import safe_image
 from xinshuo_miscellaneous import isimsize, iscolorimage_dimension, isgrayimage_dimension, isuintimage, isfloatimage
 from xinshuo_math import data_normalize
+
+# problems with convolving laplacian and sobel filter with color images
 
 class linear_filter(object):
 	def __init__(self, filter_size=None, warning=True, debug=True):

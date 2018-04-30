@@ -4,7 +4,7 @@
 # this file includes basic functions to convert the format of numpy array for further computation
 import cv2, numpy as np
 
-from private import safe_ptsarray_occlusion, safe_npdata
+from private import safe_2dptsarray_occlusion, safe_npdata
 from xinshuo_miscellaneous import isscalar, isimsize, isnparray
 
 ############################################# format conversion #################################
@@ -58,7 +58,7 @@ def generate_gaussian_heatmap(input_pts, image_size, std, warning=True, debug=Tr
 	    mask_valid:             numpy float32 multichannel numpy array, (1, 1, num_pts + 1)
 	    mask_visible:           numpy float32 multichannel numpy array, (1, 1, num_pts + 1)
 	'''
-	pts_array = safe_ptsarray_occlusion(input_pts, warning=warning, debug=debug)
+	pts_array = safe_2dptsarray_occlusion(input_pts, warning=warning, debug=debug)
 	if debug:
 		assert isscalar(std), 'the standard deviation should be a scalar'
 		assert isimsize(image_size), 'the image size is not correct'
