@@ -183,6 +183,9 @@ def isnpimage_dimension(image_test):
 def ispilimage(image_test):
     return isinstance(image_test, Image.Image)
 
+def iscolorimage_dimension(image_test):
+    return isnparray(image_test) and image_test.ndim == 3 and image_test.shape[2] == 3
+
 def iscolorimage(image_test, debug=False):
     if debug:
         print 'is numpy array when testing color image? ', 
@@ -205,6 +208,9 @@ def iscolorimage(image_test, debug=False):
         if debug:
             print 'No'
         return False
+
+def isgrayimage_dimension(image_test):
+    return isnparray(image_test) and (image_test.ndim == 2 or (image_test.ndim == 3 and image_test.shape[2] == 1))
 
 def isgrayimage(image_test, debug=False):
     if debug:

@@ -3,7 +3,7 @@
 
 # this file includes functions about images I/O
 import numpy as np
-from scipy.misc import imsave
+# from scipy.misc import imsave
 from PIL import Image
 
 from file_io import mkdir_if_missing
@@ -55,10 +55,11 @@ def load_image(src_path, resize_factor=1.0, rotate=0, mode='numpy', debug=True):
     return img
 
 def save_image(input_image, save_path, debug=True, vis=False):
-    save_path = safepath(save_path)
+    save_path = safepath(save_path); mkdir_if_missing(save_path)
     if debug:
         assert isimage(input_image), 'input data is not image format'
         assert is_path_exists_or_creatable(save_path), 'save path is not correct'
     
-    mkdir_if_missing(save_path)
-    imsave(save_path, input_image)
+    pil_image = Image.fromarray(input_image)
+    # imsave(save_path, input_image)
+    pil_image.save(save_path)

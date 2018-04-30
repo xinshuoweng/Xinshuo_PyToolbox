@@ -22,8 +22,7 @@ def gray2rgb(input_image, with_color=True, cmap='jet', warning=True, debug=True)
 		rgb_image:		an uint8 rgb numpy image
 	'''
 	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
-	if isfloatimage(np_image):
-		np_image = (np_image * 255.).astype('uint8')
+	if isfloatimage(np_image): np_image = (np_image * 255.).astype('uint8')
 
 	if debug:
 		assert isgrayimage(np_image), 'the input numpy image is not correct: {}'.format(np_image.shape)
@@ -48,8 +47,7 @@ def rgb2hsv(input_image, warning=True, debug=True):
 		hsv_image: 		an uint8 hsv numpy image
 	'''
 	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
-	if isfloatimage(np_image):
-		np_image = (np_image * 255.).astype('uint8')	
+	if isfloatimage(np_image): np_image = (np_image * 255.).astype('uint8')	
 
 	if debug:
 		assert iscolorimage(np_image), 'the input image should be a rgb image'
@@ -69,8 +67,7 @@ def rgb2hsv_v2(input_image, warning=True, debug=True):
 		hsv_image: 		an uint8 hsv numpy image
 	'''
 	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
-	if isfloatimage(np_image):
-		np_image = (np_image * 255.).astype('uint8')	
+	if isfloatimage(np_image): np_image = (np_image * 255.).astype('uint8')	
 
 	if debug:
 		assert iscolorimage(np_image), 'the input image should be a rgb image'
@@ -92,8 +89,7 @@ def hsv2rgb(input_image, warning=True, debug=True):
 		rgb_img: 		an uint8 rgb numpy image
 	'''
 	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
-	if isfloatimage(np_image):
-		np_image = (np_image * 255.).astype('uint8')	
+	if isfloatimage(np_image): np_image = (np_image * 255.).astype('uint8')	
 
 	if debug:
 		assert iscolorimage(np_image), 'the input image should be a rgb image'
@@ -113,8 +109,7 @@ def rgb2lab(input_image, warning=True, debug=True):
 		lab_image: 		an uint8 lab numpy image
 	'''
 	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
-	if isfloatimage(np_image):
-		np_image = (np_image * 255.).astype('uint8')	
+	if isfloatimage(np_image): np_image = (np_image * 255.).astype('uint8')	
 
 	if debug:
 		assert iscolorimage(np_image), 'the input image should be a rgb image'
@@ -134,8 +129,7 @@ def lab2rgb(input_image, warning=True, debug=True):
 		rgb_img: 		an uint8 rgb numpy image
 	'''
 	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
-	if isfloatimage(np_image):
-		np_image = (np_image * 255.).astype('uint8')	
+	if isfloatimage(np_image): np_image = (np_image * 255.).astype('uint8')	
 
 	if debug:
 		assert iscolorimage(np_image), 'the input image should be a rgb image'
@@ -156,9 +150,7 @@ def image_hist_equalization(input_image, warning=True, debug=True):
 		equalized_image:	an uint8 numpy image (rgb or gray)
 	'''
 	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
-	if isuintimage(np_image):
-		np_image = np_image.astype('float32') / 255.
-
+	if isuintimage(np_image): np_image = np_image.astype('float32') / 255.
 	if debug: assert isfloatimage(np_image), 'the input image should be a float image'
 
 	if iscolorimage(np_image):
@@ -185,9 +177,7 @@ def image_hist_equalization_hsv(input_image, warning=True, debug=True):
 		equalized_image:	an uint8 numpy image (rgb or gray)
 	'''
 	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
-	if isuintimage(np_image):
-		np_image = np_image.astype('float32') / 255.
-
+	if isuintimage(np_image): np_image = np_image.astype('float32') / 255.
 	if debug: assert isfloatimage(np_image), 'the input image should be a float image'
 
 	if iscolorimage(np_image):
@@ -242,8 +232,7 @@ def image_mean(input_image, warning=True, debug=True):
 		mean_image:			HWC numpy image, uint8	
 	'''
 	np_image, isnan = safe_batch_image(input_image, warning=warning, debug=debug)
-	if isuintnparray(np_image):
-		np_image = np_image.astype('float32') / 255.		
+	if isuintnparray(np_image): np_image = np_image.astype('float32') / 255.		
 	else: assert isfloatnparray(np_image), 'the input image-like array should be either an uint8 or float32 array' 
 
 	mean_image = (np.mean(np_image, axis=0) * 255.).astype('uint8')
@@ -287,10 +276,8 @@ def	image_normalize(input_image, warning=True, debug=True):
 		np_image:			numpy uint8 image, normalized to [0, 255]
 	'''
 	np_image, isnan = safe_image_like(input_image, warning=warning, debug=debug)
-	if isuintnparray(np_image):
-		np_image = np_image.astype('float32') / 255.		
-	else:
-		assert isfloatnparray(np_image), 'the input image-like array should be either an uint8 or float32 array' 
+	if isuintnparray(np_image): np_image = np_image.astype('float32') / 255.		
+	else: assert isfloatnparray(np_image), 'the input image-like array should be either an uint8 or float32 array' 
 
 	min_val = np.min(np_image)
 	max_val = np.max(np_image)
@@ -575,8 +562,7 @@ def image_crop_center(input_image, center_rect, pad_value=0, warning=True, debug
 	if len(np_image.shape) == 2: np_image = np.expand_dims(np_image, axis=2)		# extend the third channel if the image is grayscale
 
 	# center_rect and pad_value are checked in get_crop_bbox and pad_around functions
-	if debug:
-		assert isuintimage(np_image), 'the input image is not an uint8 image'
+	if debug: assert isuintimage(np_image), 'the input image is not an uint8 image'
 	im_height, im_width = np_image.shape[0], np_image.shape[1]
 	
 	# calculate crop rectangles
