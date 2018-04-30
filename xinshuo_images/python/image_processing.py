@@ -502,7 +502,7 @@ def unpreprocess_batch_deep_image(input_image, pixel_mean=None, pixel_std=None, 
 
 	np_image = np.transpose(np_image, (0, 2, 3, 1))         			# permute to [batch, height, weight, channel]	
 	if bgr2rgb:	np_image = np_image[:, :, :, [2, 1, 0]]             	# from bgr to rgb for color image
-	np_image = (np_image * 255.).astype('uint8')
+	np_image = (np.clip(np_image, 0.0, 1.0) * 255.).astype('uint8')
 
 	return np_image
 
