@@ -6,28 +6,29 @@ import os, sys, time, glob, glob2, numpy as np
 
 from xinshuo_miscellaneous import safepath, string2ext_filter, remove_empty_item_from_list, str2num, is_path_exists_or_creatable, is_path_exists, isfolder, isnparray, is2dptsarray, is2dptsarray_occlusion, islogical, isinteger, islist, isstring
 
-def fileparts(pathname):
+def fileparts(pathname, warning=True, debug=True):
 	'''
 	this function return a tuple, which contains (directory, filename, extension)
 	if the file has multiple extension, only last one will be displayed
+
+    parameters:
+        pathname:       a string path
 	'''
-	pathname = safepath(pathname)
-	if len(pathname) == 0:
-		return ('', '', '')
+	pathname = safepath(pathname, debug=debug)
+	if len(pathname) == 0: return ('', '', '')
 	if pathname[-1] == '/':
-		if len(pathname) > 1:
-			return (pathname[:-1], '', '')	# ignore the final '/'
-		else:
-			return (pathname, '', '')	# ignore the final '/'
+		if len(pathname) > 1: return (pathname[:-1], '', '')	# ignore the final '/'
+		else: return (pathname, '', '')	# ignore the final '/'
+	
 	directory = os.path.dirname(os.path.abspath(pathname))
 	filename = os.path.splitext(os.path.basename(pathname))[0]
 	ext = os.path.splitext(pathname)[1]
+	
 	return (directory, filename, ext)
 
-def mkdir_if_missing(pathname, debug=True):
-    pathname = safepath(pathname)
-    if debug:
-        assert is_path_exists_or_creatable(pathname), 'input path is not valid or creatable: %s' % pathname
+def mkdir_if_missing(pathname, warning=True, debug=True):
+    pathname = safepath(pathname, debug=debug)
+    if debug: assert is_path_exists_or_creatable(pathname), 'input path is not valid or creatable: %s' % pathname
     dirname, _, _ = fileparts(pathname)
 
     if not is_path_exists(dirname):

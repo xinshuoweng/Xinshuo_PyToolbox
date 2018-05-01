@@ -1,7 +1,8 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
-import math, cv2
-import numpy as np
+
+# this file includes image processing functions, including format, color, and transformation processing
+import math, cv2, numpy as np
 from PIL import Image
 
 from private import safe_image, safe_image_like, safe_batch_deep_image, safe_batch_image

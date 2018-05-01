@@ -72,10 +72,10 @@ def visualize_image_with_pts(input_image, input_pts, color_index=0, pts_size=20,
     if isdict(input_pts):
         for pts_id, pts_array_tmp in input_pts.items():
             visualize_pts_array(pts_array_tmp, fig=fig, ax=ax, color_index=color_index, pts_size=pts_size, label=label, label_list=label_list, label_size=label_size, 
-                occlusion=True, vis_threshold=vis_threshold, debug=debug, closefig=False)
+                plot_occl=True, vis_threshold=vis_threshold, debug=debug, closefig=False)
             color_index += 1
     else: visualize_pts_array(input_pts, fig=fig, ax=ax, color_index=color_index, pts_size=pts_size, label=label, label_list=label_list, label_size=label_size, 
-        occlusion=True, vis_threshold=vis_threshold, debug=debug, closefig=False)
+        plot_occl=True, vis_threshold=vis_threshold, debug=debug, closefig=False)
 
     return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
 

@@ -17,7 +17,7 @@ hatch_set = [None, 'o', '/', '\\', '|', '-', '+', '*', 'x', 'O', '.']
 linestyle_set = ['-', '--', '-.', ':', None, ' ', 'solid', 'dashed']
 dpi = 80
 
-def visualize_pts_array(input_pts, covariance=False, color_index=0, pts_size=20, label=False, label_list=None, label_size=2, plot_occlusion=True, vis_threshold=-10000, 
+def visualize_pts_array(input_pts, covariance=False, color_index=0, pts_size=20, label=False, label_list=None, label_size=2, plot_occl=True, vis_threshold=-10000, 
     xlim=None, ylim=None, fig=None, ax=None, save_path=None, vis=False, warning=True, debug=True, closefig=True):
     '''
     plot keypoints with covariance ellipse
@@ -38,7 +38,7 @@ def visualize_pts_array(input_pts, covariance=False, color_index=0, pts_size=20,
 
     # obtain the color index
     if islist(color_index):
-        if debug: assert not (plot_occlusion or covariance) , 'the occlusion or covariance are not compatible with plotting different colors during scattering'
+        if debug: assert not (plot_occl or covariance) , 'the occlusion or covariance are not compatible with plotting different colors during scattering'
         color_tmp = [color_set_big[index_tmp] for index_tmp in color_index]
     else: color_tmp = color_set_big[color_index % len(color_set_big)]
     
@@ -66,7 +66,7 @@ def visualize_pts_array(input_pts, covariance=False, color_index=0, pts_size=20,
 
         if debug and islist(color_tmp): assert len(color_tmp) == len(pts_visible_index), 'number of points to plot is not equal to number of colors provided'
         ax.scatter(pts_array[0, pts_visible_index], pts_array[1, pts_visible_index], color=color_tmp, s=pts_size)
-        if plot_occlusion: ax.scatter(pts_array[0, pts_invisible_index], pts_array[1, pts_invisible_index], color=color_set_big[(color_index+1) % len(color_set_big)], s=pts_size)
+        if plot_occl: ax.scatter(pts_array[0, pts_invisible_index], pts_array[1, pts_invisible_index], color=color_set_big[(color_index+1) % len(color_set_big)], s=pts_size)
         if covariance: visualize_pts_covariance(pts_array[0:2, :], std=std, conf=conf, fig=fig, ax=ax, debug=debug, color=color_tmp)
 
     if label:

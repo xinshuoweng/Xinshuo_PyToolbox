@@ -1,30 +1,22 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
-import os, sys
-import numpy as np
+
+# this file includes functions checking the datatype and equality of input variables
+import os, numpy as np
 from PIL import Image
 
 ############################################################# basic and customized datatype
+# note:
+#       the tuple with length of 1 is equivalent to just the single element, it is not a tuple anymore
+#       the boolean value True and False are the scalar value 1 and 0 respectively
 def isstring(string_test):
 	return isinstance(string_test, basestring)
-
-def isinteger(integer_test):
-	return isinstance(integer_test, int) or int(integer_test) == integer_test
-
-def isfloat(float_test):
-    return isinstance(float_test, float)
 
 def islist(list_test):
     return isinstance(list_test, list)
 
 def islogical(logical_test):
     return isinstance(logical_test, bool)
-
-def isscalar(scalar_test):
-    try:
-        return isinteger(scalar_test) or isfloat(scalar_test)
-    except TypeError:
-        return False
 
 def isnparray(nparray_test):
     return isinstance(nparray_test, np.ndarray)
@@ -39,18 +31,31 @@ def isdict(dict_test):
     return isinstance(dict_test, dict)
 
 def isext(ext_test):
-    return isstring(ext_test) and ext_test[0] == '.'
-
-def isbbox(bbox_test):
-    return isnparray(bbox_test) and len(bbox_test.shape) == 2 and bbox_test.shape[0] > 0 and bbox_test.shape[1] == 4
-
-def iscenterbbox(bbox_test):
-    return isnparray(bbox_test) and len(bbox_test.shape) == 2 and bbox_test.shape[0] > 0 and (bbox_test.shape[1] == 4 or bbox_test.shape[1] == 2)
+    '''
+    check if it is an extension
+    '''
+    return isstring(ext_test) and ext_test[0] == '.' and len(ext_test) > 1 and ext_test.count('.') == 1
 
 def isrange(range_test):
+    '''
+    check if it is a data range
+    '''
     return is2dpts(range_test)
 
-############################################################# value-related
+def isscalar(scalar_test):
+    try: return isinteger(scalar_test) or isfloat(scalar_test)
+    except TypeError: return False
+
+############################################################# value
+def isinteger(integer_test):
+    if isnparray(integer_test): return False
+    try: return isinstance(integer_test, int) or int(integer_test) == integer_test
+    except ValueError: return False
+    except TypeError: return False
+
+def isfloat(float_test):
+    return isinstance(float_test, float)
+
 def ispositiveinteger(integer_test):
     return isinteger(integer_test) and integer_test > 0
 
@@ -66,48 +71,33 @@ def isfloatnparray(nparray_test):
 def isnannparray(nparray_test):
     return isnparray(nparray_test) and np.isnan(nparray_test).any()
 
-############################################################# list-related
+############################################################# list
 def islistoflist(list_test):
-    if not islist(list_test):
-        return False
-    if all(islist(tmp) for tmp in list_test):
-        return True
-    else:
-        return False
+    if not islist(list_test): return False
+    if all(islist(tmp) for tmp in list_test): return True
+    else: return False
 
 def islistofdict(list_test):
-    if not islist(list_test):
-        return False
-    if all(isdict(tmp) for tmp in list_test):
-        return True
-    else:
-        return False  
+    if not islist(list_test): return False
+    if all(isdict(tmp) for tmp in list_test): return True
+    else: return False  
 
 def islistofscalar(list_test):
-    if not islist(list_test):
-        return False
-    if all(isscalar(tmp) for tmp in list_test):
-        return True
-    else:
-        return False  
+    if not islist(list_test): return False
+    if all(isscalar(tmp) for tmp in list_test): return True
+    else: return False  
 
 def islistofpositiveinteger(list_test):
-    if not islist(list_test):
-        return False
-    if all(ispositiveinteger(tmp) for tmp in list_test):
-        return True
-    else:
-        return False  
+    if not islist(list_test): return False
+    if all(ispositiveinteger(tmp) for tmp in list_test): return True
+    else: return False  
 
 def islistofnonnegativeinteger(list_test):
-    if not islist(list_test):
-        return False
-    if all(isnonnegativeinteger(tmp) for tmp in list_test):
-        return True
-    else:
-        return False  
+    if not islist(list_test): return False
+    if all(isnonnegativeinteger(tmp) for tmp in list_test): return True
+    else: return False  
 
-############################################################# pts-related
+############################################################# geometry
 def is2dpts(pts_test):
     '''
     2d point coordinate
@@ -163,7 +153,7 @@ def is3dptsarray(pts_test):
     numpy array with [3, N], N >= 0
     '''
     return isnparray(pts_test) and pts_test.shape[0] == 3 and len(pts_test.shape) == 2 and pts_test.shape[1] >= 0                   
-############################################################# line-related
+
 def is2dhomoline(line_test):
     '''
     numpy array or list or tuple with 3 elements
@@ -173,7 +163,13 @@ def is2dhomoline(line_test):
 def islinesarray(line_test):
     return isnparray(line_test) and line_test.shape[0] == 4 and len(line_test.shape) == 2 and line_test.shape[1] >= 0               # 4 x N
 
-############################################################# image_related
+def isbbox(bbox_test):
+    return isnparray(bbox_test) and len(bbox_test.shape) == 2 and bbox_test.shape[0] > 0 and bbox_test.shape[1] == 4
+
+def iscenterbbox(bbox_test):
+    return isnparray(bbox_test) and len(bbox_test.shape) == 2 and bbox_test.shape[0] > 0 and (bbox_test.shape[1] == 4 or bbox_test.shape[1] == 2)
+
+############################################################# image
 def isimsize(size_test):
     return is2dpts(size_test)
 
@@ -260,32 +256,20 @@ def isuintimage(image_test, debug=False):
         # print 'is value inside array correct when testing uint8 image? ', 
     item_check_le = (image_test <= 255)
     item_check_se = (image_test >= 0)
-    if item_check_le.all() and item_check_se.all():
-        # if debug:        
-            # print 'Yes'
-        return True
-    else:
-        # if debug:
-            # print 'No'
-        return False
+    if item_check_le.all() and item_check_se.all(): return True
+    else: return False
 
 def isfloatimage(image_test, debug=False):
     # if debug:
         # print 'is shape correct when testing float32 image? ', 
-    if not (isgrayimage(image_test, debug=debug) or iscolorimage(image_test, debug=debug)):
-        # if debug:        
-            # print 'No, shape is not correct'
-        return False
+    if not (isgrayimage(image_test, debug=debug) or iscolorimage(image_test, debug=debug)): return False
     # else:
         # if debug:
             # print 'Yes, shape is correct'
 
     # if debug:
         # print 'is type correct when testing float32 image? ', 
-    if not image_test.dtype == 'float32':
-        # if debug:        
-            # print 'No'
-        return False
+    if not image_test.dtype == 'float32': return False
     # else:
         # if debug:
             # print 'Yes'
@@ -294,14 +278,8 @@ def isfloatimage(image_test, debug=False):
         # print 'is value inside array correct ([0, 1]) when testing float32 image? ', 
     item_check_le = (image_test <= 1.0)
     item_check_se = (image_test >= 0.0)
-    if item_check_le.all() and item_check_se.all():
-        # if debug:
-            # print 'Yes'
-        return True
-    else:
-        # if debug:
-            # print 'No'
-        return False
+    if item_check_le.all() and item_check_se.all(): return True
+    else: return False
 
 def isnpimage(image_test, debug=False):
     return isfloatimage(image_test, debug=debug) or isuintimage(image_test, debug=debug)
@@ -310,8 +288,7 @@ def isimage(image_test, debug=False):
     return isnpimage(image_test, debug=debug) or ispilimage(image_test)
 
 def isscaledimage(image_test):
-    if not isimage(image_test):
-        return False
+    if not isimage(image_test): return False
     max_value = np.max(image_test)
     min_value = np.min(image_test)
     assert min_value >= 0, 'image value is not correct'
@@ -319,12 +296,10 @@ def isscaledimage(image_test):
     if max_value > 1 and max_value < 255:
         print('input image is raw image in [0, 255]')
         return False
-    elif max_value <= 1:
-        return True
-    else:
-        assert False, 'Unknown error'
+    elif max_value <= 1: return True
+    else: assert False, 'Unknown error'
 
-############################################################# path related
+############################################################# path 
 def safepath(pathname, debug=True):
     '''
     convert path to a normal representation
@@ -339,13 +314,10 @@ def is_path_valid(pathname):
     '''
     # If this pathname is either not a string or is but is empty, this pathname
     # is invalid.
-    try:
-        if not isstring(pathname) or not pathname:
-            return False
-    except TypeError:
-        return False
-    else:
-        return True
+    try: 
+        if not isstring(pathname) or not pathname: return False
+    except TypeError: return False
+    else: return True
 
 def is_path_creatable(pathname):
     '''
@@ -370,19 +342,15 @@ def is_path_exists_or_creatable(pathname):
     '''
     this function is to justify is given path existing or creatable
     '''
-    try:
-        return is_path_valid(pathname) and (os.path.exists(pathname) or is_path_creatable(pathname))
-    except OSError:
-        return False
+    try: return is_path_valid(pathname) and (os.path.exists(pathname) or is_path_creatable(pathname))
+    except OSError: return False
 
 def is_path_exists(pathname):
     '''
     this function is to justify is given path existing or not
     '''
-    try:
-        return is_path_valid(pathname) and os.path.exists(pathname)
-    except OSError:
-        return False
+    try: return is_path_valid(pathname) and os.path.exists(pathname)
+    except OSError: return False
 
 def isfile(pathname):
     if is_path_valid(pathname):
@@ -390,27 +358,23 @@ def isfile(pathname):
         name = os.path.splitext(os.path.basename(pathname))[0]
         ext = os.path.splitext(pathname)[1]
         return len(name) > 0 and len(ext) > 0
-    else:
-        return False;
+    else: return False;
 
 def isfolder(pathname):
     if is_path_valid(pathname):
         pathname = safepath(pathname)
-        if pathname == './':
-            return True
+        if pathname == './': return True
         name = os.path.splitext(os.path.basename(pathname))[0]
         ext = os.path.splitext(pathname)[1]
         return len(name) > 0 and len(ext) == 0
-    else:
-        return False
+    else: return False
 
 ############################################################# equality check
 def CHECK_EQ_LIST_SELF(input_list, debug=True):
 	'''
 	check all elements in a list are equal
 	'''
-	if debug:
-		assert islist(input_list), 'input is not a list'
+	if debug: assert islist(input_list), 'input is not a list'
 	return input_list[1:] == input_list[:-1]
 
 def CHECK_EQ_DICT(input_dict1, input_dict2, debug=True):
@@ -424,26 +388,21 @@ def CHECK_EQ_DICT(input_dict1, input_dict2, debug=True):
     for key, value in input_dict1.items():
         if input_dict2.has_key(key) and input_dict2[key] == value:
             continue
-        else:
-            return False
+        else: return False
     return True
 
 def CHECK_EQ_LIST_ORDERED(input_list1, input_list2, debug=True):
     '''
     check two lists are equal in ordered way
     '''
-    if debug:
-        assert islist(input_list1) and islist(input_list2), 'input lists are not correct'
-
+    if debug: assert islist(input_list1) and islist(input_list2), 'input lists are not correct'
     return input_list1 == input_list2
 
 def CHECK_EQ_LIST_UNORDERED(input_list1, input_list2, debug=True):
     '''
     check two lists are equal in ordered way
     '''
-    if debug:
-        assert islist(input_list1) and islist(input_list2), 'input lists are not correct'
-
+    if debug: assert islist(input_list1) and islist(input_list2), 'input lists are not correct'
     return set(input_list1) == set(input_list2)
 
 def CHECK_EQ_NUMPY(np_data1, np_data2, debug=True):

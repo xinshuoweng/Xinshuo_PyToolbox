@@ -1,8 +1,12 @@
 [
-  "test_check_pts.py::test_is2dpts", 
-  "test_check_pts.py::test_is2dptsarray", 
-  "test_check_pts.py::test_is3dpts", 
-  "test_check_pts.py::test_is3dptsarray", 
-  "test_check_pts.py::test_is2dptsarray_occlusion", 
-  "test_check_pts.py::test_is2dptsarray_confidence"
+  "test_check_datatype.py::test_isstring", 
+  "test_check_datatype.py::test_islist", 
+  "test_check_datatype.py::test_islogical", 
+  "test_check_datatype.py::test_isnparray", 
+  "test_check_datatype.py::test_istuple", 
+  "test_check_datatype.py::test_isfunction", 
+  "test_check_datatype.py::test_isdict", 
+  "test_check_datatype.py::test_isext", 
+  "test_check_datatype.py::test_isrange", 
+  "test_check_datatype.py::test_isscalar"
 ]
