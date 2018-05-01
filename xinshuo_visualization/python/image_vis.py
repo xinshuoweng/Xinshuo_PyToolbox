@@ -14,7 +14,7 @@ import time, shutil, colorsys, cv2, numpy as np, matplotlib.pyplot as plt
 from private import save_vis_close_helper
 from geometry_vis import visualize_pts_array
 from xinshuo_images.python.private import safe_image
-from xinshuo_miscellaneous import  remove_list_from_list, isdict, islist, iscolorimage, isgrayimage
+from xinshuo_miscellaneous import  remove_list_from_list, isdict, islist, iscolorimage_dimension, isgrayimage_dimension
 dpi = 80
 
 def visualize_image(input_image, bgr2rgb=False, save_path=None, vis=False, warning=True, debug=True, closefig=True):
@@ -38,10 +38,10 @@ def visualize_image(input_image, bgr2rgb=False, save_path=None, vis=False, warni
     ax.axis('off')
     
     # display image
-    if iscolorimage(np_image, debug=debug):
+    if iscolorimage_dimension(np_image):
         if bgr2rgb: image_bgr2rgb(np_image)
         ax.imshow(np_image, interpolation='nearest')
-    elif isgrayimage(np_image, debug=debug):
+    elif isgrayimage_dimension(np_image):
         np_image = np_image.reshape(np_image.shape[0], np_image.shape[1])
         ax.imshow(np_image, interpolation='nearest', cmap='gray')
     else:

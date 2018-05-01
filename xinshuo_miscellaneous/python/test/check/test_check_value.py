@@ -1,6 +1,6 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
-import os, sys, numpy as np, pytest
+import numpy as np, pytest
 
 import init_paths
 from check import isinteger, isfloat

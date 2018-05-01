@@ -1,12 +1,11 @@
 [
-  "test_check_datatype.py::test_isstring", 
-  "test_check_datatype.py::test_islist", 
-  "test_check_datatype.py::test_islogical", 
-  "test_check_datatype.py::test_isnparray", 
-  "test_check_datatype.py::test_istuple", 
-  "test_check_datatype.py::test_isfunction", 
-  "test_check_datatype.py::test_isdict", 
-  "test_check_datatype.py::test_isext", 
-  "test_check_datatype.py::test_isrange", 
-  "test_check_datatype.py::test_isscalar"
+  "test_check_image.py::test_isimsize", 
+  "test_check_image.py::test_ispilimage", 
+  "test_check_image.py::test_iscolorimage_dimension", 
+  "test_check_image.py::test_isgrayimage_dimension", 
+  "test_check_image.py::test_isimage_dimension", 
+  "test_check_image.py::test_isuintimage", 
+  "test_check_image.py::test_isfloatimage", 
+  "test_check_image.py::test_isnpimage", 
+  "test_check_image.py::test_isimage"
 ]

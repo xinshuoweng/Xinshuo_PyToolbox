@@ -3,7 +3,7 @@
 
 # this file includes private functions for internal use only
 import numpy as np
-from xinshuo_miscellaneous import ispilimage, isnpimage, isnparray, isnpimage_dimension, isnannparray
+from xinshuo_miscellaneous import ispilimage, isnpimage, isnparray, isimage_dimension, isnannparray
 
 def safe_image(input_image, warning=True, debug=True):
 	'''
@@ -75,7 +75,7 @@ def safe_image_like(input_image, warning=True, debug=True):
 	if ispilimage(input_image): np_image = np.array(input_image)
 	elif isnparray(input_image):
 		np_image = input_image.copy()
-		assert isnpimage_dimension(np_image), 'the input is not an image-like numpy array'
+		assert isimage_dimension(np_image), 'the input is not an image-like numpy array'
 	else: assert False, 'only pil and numpy image-like data are supported'
 
 	isnan = isnannparray(np_image)

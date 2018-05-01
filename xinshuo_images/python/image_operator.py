@@ -26,7 +26,7 @@ class linear_filter(object):
 		broadcast the current 2D filter to 3D
 
 		outputs:
-			weights:	float64 numpy array with shape of filter_size x filter_size x 1
+			weights:	float32 numpy array with shape of filter_size x filter_size x 1
 		'''
 		if self.debug: 
 			assert self.weights is not None, 'please set up a kernel/filter first'
@@ -66,13 +66,13 @@ class linear_filter(object):
 		generate Gaussian filter 5 x 5
 
 		outputs:
-			weights:	float64 numpy array with gaussian weights
+			weights:	float32 numpy array with gaussian weights
 		'''
 		gaussian = np.array([[1, 4, 6, 4, 1],
 							 [4, 16, 24, 16, 4],
 							 [6, 24, 36, 24, 6],
 							 [4, 16, 24, 16, 4],
-							 [1, 4, 6, 4, 1]], dtype='float64')
+							 [1, 4, 6, 4, 1]], dtype='float32')
 		
 		self.weights = 1. / 256 * gaussian
 		return self.weights
@@ -82,11 +82,11 @@ class linear_filter(object):
 		generate Laplacian of Gaussian filter 3 x 3, edge detection
 
 		outputs:
-			weights:	float64 numpy array with laplacian weights
+			weights:	float32 numpy array with laplacian weights
 		'''
 		laplacian = np.array([[-1, -1, -1],
 							  [-1,  8, -1],
-							  [-1, -1, -1]], dtype='float64')
+							  [-1, -1, -1]], dtype='float32')
 		
 		self.weights = laplacian
 		return self.weights
@@ -99,12 +99,12 @@ class linear_filter(object):
 			axis:		x or y, define the orientation of sobel filter
 
 		outputs:
-			weights:	float64 numpy array with sobel weights
+			weights:	float32 numpy array with sobel weights
 		'''
 		if self.debug: assert axis in ['x', 'y'], 'the axis for sobel filter is not correct'
 
-		if axis == 'x': sobel = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype='float64')
-		elif axis == 'y': sobel = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]], dtype='float64')
+		if axis == 'x': sobel = np.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype='float32')
+		elif axis == 'y': sobel = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]], dtype='float32')
 		
 		self.weights = 1. / 8 * sobel
 		return self.weights

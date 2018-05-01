@@ -45,9 +45,9 @@ def data_normalize(input_data, method='max', data_range=None, sum=1, warning=Tru
 		sum:				a scalar
 
 	outputs:
-		normalized_data:	a float64 numpy array with same shape as the input data
+		normalized_data:	a float32 numpy array with same shape as the input data
 	'''
-	np_data = safe_npdata(input_data, warning=warning, debug=debug).astype('float64')
+	np_data = safe_npdata(input_data, warning=warning, debug=debug).astype('float32')
 	if debug: 
 		assert isnparray(np_data), 'the input data is not a numpy data'
 		assert method in ['max', 'sum'], 'the method for normalization is not correct'
@@ -69,7 +69,7 @@ def data_unnormalize(data, data_range, debug=True):
 	'''
 	this function unnormalizes 1-d label to normal scale based on range of data
 	'''
-	np_data = safe_npdata(input_data, warning=warning, debug=debug).astype('float64')
+	np_data = safe_npdata(input_data, warning=warning, debug=debug).astype('float32')
 	if debug: 
 		assert isnparray(np_data), 'the input data is not a numpy data'
 		assert isrange(data_range), 'data range is not correct'

@@ -265,9 +265,9 @@ def visualize_nearest_neighbor(featuremap_dict, num_neighbor=5, top_number=5, vi
                 if debug:
                     print('loading image from %s'%img_path)
                 img = imread(img_path)
-                if isgrayimage(img, debug=debug):
+                if isgrayimage_dimension(img):
                     axarray[index, nearest_index].imshow(img, cmap='gray')
-                elif iscolorimage(img, debug=debug):
+                elif iscolorimage_dimension(img):
                     axarray[index, nearest_index].imshow(img)
                 else:
                     assert False, 'unknown error'

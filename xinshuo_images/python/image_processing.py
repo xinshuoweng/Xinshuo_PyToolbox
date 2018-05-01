@@ -7,7 +7,7 @@ from PIL import Image
 
 from private import safe_image, safe_image_like, safe_batch_deep_image, safe_batch_image
 from xinshuo_math.python.private import safe_npdata, safe_angle
-from xinshuo_miscellaneous import isfloatimage, iscolorimage, isnparray, isnpimage_dimension, isuintimage, isgrayimage, ispilimage, islist, isinteger, islistofnonnegativeinteger, isfloatnparray, isuintnparray, isimsize, isscalar
+from xinshuo_miscellaneous import isfloatimage, isuintimage, isnparray, iscolorimage_dimension, isgrayimage_dimension, isinteger, islistofnonnegativeinteger, isfloatnparray, isuintnparray, isimsize, isscalar
 from xinshuo_math import hist_equalization, clip_bboxes_TLWH, get_center_crop_bbox
 
 ############################################# color transform #################################
@@ -26,7 +26,7 @@ def gray2rgb(input_image, with_color=True, cmap='jet', warning=True, debug=True)
 	if isfloatimage(np_image): np_image = (np_image * 255.).astype('uint8')
 
 	if debug:
-		assert isgrayimage(np_image), 'the input numpy image is not correct: {}'.format(np_image.shape)
+		assert isgrayimage_dimension(np_image), 'the input numpy image is not correct: {}'.format(np_image.shape)
 		assert isuintimage(np_image), 'the input numpy image should be uint8 image in order to use opencv'
 
 	if with_color:
@@ -51,7 +51,7 @@ def rgb2hsv(input_image, warning=True, debug=True):
 	if isfloatimage(np_image): np_image = (np_image * 255.).astype('uint8')	
 
 	if debug:
-		assert iscolorimage(np_image), 'the input image should be a rgb image'
+		assert iscolorimage_dimension(np_image), 'the input image should be a rgb image'
 		assert isuintimage(np_image), 'the input numpy image should be uint8 image in order to use opencv'
 
 	hsv_img = cv2.cvtColor(np_image, cv2.COLOR_RGB2HSV)
@@ -71,7 +71,7 @@ def rgb2hsv_v2(input_image, warning=True, debug=True):
 	if isfloatimage(np_image): np_image = (np_image * 255.).astype('uint8')	
 
 	if debug:
-		assert iscolorimage(np_image), 'the input image should be a rgb image'
+		assert iscolorimage_dimension(np_image), 'the input image should be a rgb image'
 		assert isuintimage(np_image), 'the input numpy image should be uint8 image in order to use PIL'
 
 	pil_rgb_img = Image.fromarray(np_image)
@@ -93,7 +93,7 @@ def hsv2rgb(input_image, warning=True, debug=True):
 	if isfloatimage(np_image): np_image = (np_image * 255.).astype('uint8')	
 
 	if debug:
-		assert iscolorimage(np_image), 'the input image should be a rgb image'
+		assert iscolorimage_dimension(np_image), 'the input image should be a rgb image'
 		assert isuintimage(np_image), 'the input numpy image should be uint8 image in order to use opencv'
 
 	rgb_img = cv2.cvtColor(np_image, cv2.COLOR_HSV2RGB)
@@ -113,7 +113,7 @@ def rgb2lab(input_image, warning=True, debug=True):
 	if isfloatimage(np_image): np_image = (np_image * 255.).astype('uint8')	
 
 	if debug:
-		assert iscolorimage(np_image), 'the input image should be a rgb image'
+		assert iscolorimage_dimension(np_image), 'the input image should be a rgb image'
 		assert isuintimage(np_image), 'the input numpy image should be uint8 image in order to use opencv'
 
 	lab_img = cv2.cvtColor(np_image, cv2.COLOR_RGB2LAB)
@@ -133,7 +133,7 @@ def lab2rgb(input_image, warning=True, debug=True):
 	if isfloatimage(np_image): np_image = (np_image * 255.).astype('uint8')	
 
 	if debug:
-		assert iscolorimage(np_image), 'the input image should be a rgb image'
+		assert iscolorimage_dimension(np_image), 'the input image should be a rgb image'
 		assert isuintimage(np_image), 'the input numpy image should be uint8 image in order to use opencv'
 
 	rgb_img = cv2.cvtColor(np_image, cv2.COLOR_LAB2RGB)
@@ -154,13 +154,13 @@ def image_hist_equalization(input_image, warning=True, debug=True):
 	if isuintimage(np_image): np_image = np_image.astype('float32') / 255.
 	if debug: assert isfloatimage(np_image), 'the input image should be a float image'
 
-	if iscolorimage(np_image):
+	if iscolorimage_dimension(np_image):
 		lab_image = rgb2lab(np_image, warning=warning, debug=debug)
 		input_data = lab_image[:, :, 0]			# extract the value channel
 		equalized_lab_image = (hist_equalization(input_data, num_bins=256, debug=debug) * 255.).astype('uint8')
 		lab_image[:, :, 0] = equalized_lab_image
 		equalized_image = lab2rgb(lab_image, warning=warning, debug=debug)
-	elif isgrayimage(np_image):
+	elif isgrayimage_dimension(np_image):
 		equalized_image = (hist_equalization(np_image, num_bins=256, debug=debug) * 255.).astype('uint8')
 	else: assert False, 'the input image is neither a color image or a grayscale image'
 
@@ -181,13 +181,13 @@ def image_hist_equalization_hsv(input_image, warning=True, debug=True):
 	if isuintimage(np_image): np_image = np_image.astype('float32') / 255.
 	if debug: assert isfloatimage(np_image), 'the input image should be a float image'
 
-	if iscolorimage(np_image):
+	if iscolorimage_dimension(np_image):
 		hsv_image = rgb2hsv(np_image, warning=warning, debug=debug)
 		input_data = hsv_image[:, :, 2]			# extract the value channel
 		equalized_hsv_image = (hist_equalization(input_data, num_bins=256, debug=debug) * 255.).astype('uint8')
 		hsv_image[:, :, 2] = equalized_hsv_image
 		equalized_image = hsv2rgb(hsv_image, warning=warning, debug=debug)
-	elif isgrayimage(np_image):
+	elif isgrayimage_dimension(np_image):
 		equalized_image = (hist_equalization(np_image, num_bins=256, debug=debug) * 255.).astype('uint8')
 	else: assert False, 'the input image is neither a color image or a grayscale image'
 
@@ -209,14 +209,13 @@ def image_clahe(input_image, clip_limit=2.0, grid_size=8, warning=True, debug=Tr
 	if debug: assert isuintimage(np_image), 'the input image should be a uint8 image'
 
 	clahe = cv2.createCLAHE(clipLimit=clip_limit, tileGridSize=(grid_size, grid_size))
-
-	if iscolorimage(np_image):
+	if iscolorimage_dimension(np_image):
 		lab_image = rgb2lab(np_image, warning=warning, debug=debug)
 		input_data = lab_image[:, :, 0]			# extract the value channel
 		clahe_lab_image = clahe.apply(input_data)
 		lab_image[:, :, 0] = clahe_lab_image
 		clahe_image = lab2rgb(lab_image, warning=warning, debug=debug)
-	elif isgrayimage(np_image):
+	elif isgrayimage_dimension(np_image):
 		clahe_image = clahe.apply(np_image)
 	else: assert False, 'the input image is neither a color image or a grayscale image'
 
@@ -237,7 +236,6 @@ def image_mean(input_image, warning=True, debug=True):
 	else: assert isfloatnparray(np_image), 'the input image-like array should be either an uint8 or float32 array' 
 
 	mean_image = (np.mean(np_image, axis=0) * 255.).astype('uint8')
-
 	return mean_image
 
 def image_draw_mask(input_image, input_image_mask, transparency=0.3, warning=True, debug=True):
@@ -262,7 +260,6 @@ def image_draw_mask(input_image, input_image_mask, transparency=0.3, warning=Tru
 
 	pil_image, pil_image_mask = Image.fromarray(np_image), Image.fromarray(np_image_mask)
 	masked_image = np.array(Image.blend(pil_image, pil_image_mask, alpha=transparency))
-
 	return masked_image
 
 def	image_normalize(input_image, warning=True, debug=True):
@@ -311,7 +308,7 @@ def image_find_peaks(input_image, percent_threshold=0.5, warning=True, debug=Tru
 	np_image, _ = safe_image_like(input_image, warning=warning, debug=debug)
 	if isuintimage(np_image): np_image = np_image.astype('float32') / 255.
 	if debug: 
-		assert isgrayimage(np_image) and isfloatimage(np_image), 'the input image is not a grayscale and float image'
+		assert isgrayimage_dimension(np_image) and isfloatimage(np_image), 'the input image is not a grayscale and float image'
 		assert isscalar(percent_threshold) and percent_threshold >= 0 and percent_threshold <= 1, 'the percent_threshold is not correct'
 
 	max_value = np.max(np_image)
@@ -365,7 +362,7 @@ def image_rgb2bgr(input_image, warning=True, debug=True):
 		np_image:		a numpy bgr image
 	'''
 	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
-	if debug: assert iscolorimage(np_image), 'the input image is not a color image'
+	if debug: assert iscolorimage_dimension(np_image), 'the input image is not a color image'
 	
 	np_image = np_image[:, :, ::-1] 			# convert RGB to BGR
 	return np_image

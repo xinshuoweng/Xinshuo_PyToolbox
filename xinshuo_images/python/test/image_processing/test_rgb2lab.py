@@ -5,7 +5,6 @@ import numpy as np
 
 import init_paths
 from image_processing import rgb2lab
-from xinshuo_miscellaneous import isgrayimage
 from xinshuo_visualization import visualize_image
 
 def test_rgb2lab():

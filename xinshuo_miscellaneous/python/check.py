@@ -13,38 +13,38 @@ def isstring(string_test):
 	return isinstance(string_test, basestring)
 
 def islist(list_test):
-    return isinstance(list_test, list)
+	return isinstance(list_test, list)
 
 def islogical(logical_test):
-    return isinstance(logical_test, bool)
+	return isinstance(logical_test, bool)
 
 def isnparray(nparray_test):
-    return isinstance(nparray_test, np.ndarray)
+	return isinstance(nparray_test, np.ndarray)
 
 def istuple(tuple_test):
-    return isinstance(tuple_test, tuple)
+	return isinstance(tuple_test, tuple)
 
 def isfunction(func_test):
-    return callable(func_test)
+	return callable(func_test)
 
 def isdict(dict_test):
-    return isinstance(dict_test, dict)
+	return isinstance(dict_test, dict)
 
 def isext(ext_test):
-    '''
-    check if it is an extension
-    '''
-    return isstring(ext_test) and ext_test[0] == '.' and len(ext_test) > 1 and ext_test.count('.') == 1
+	'''
+	check if it is an extension
+	'''
+	return isstring(ext_test) and ext_test[0] == '.' and len(ext_test) > 1 and ext_test.count('.') == 1
 
 def isrange(range_test):
-    '''
-    check if it is a data range
-    '''
-    return is2dpts(range_test)
+	'''
+	check if it is a data range: such as [0, 1], (0, 1), array([0, 1])
+	'''
+	return is2dpts(range_test)
 
 def isscalar(scalar_test):
-    try: return isinteger(scalar_test) or isfloat(scalar_test)
-    except TypeError: return False
+	try: return isinteger(scalar_test) or isfloat(scalar_test)
+	except TypeError: return False
 
 ############################################################# value
 def isinteger(integer_test):
@@ -169,135 +169,61 @@ def isbbox(bbox_test):
 def iscenterbbox(bbox_test):
     return isnparray(bbox_test) and len(bbox_test.shape) == 2 and bbox_test.shape[0] > 0 and (bbox_test.shape[1] == 4 or bbox_test.shape[1] == 2)
 
-############################################################# image
+############################################################# images
 def isimsize(size_test):
-    return is2dpts(size_test)
-
-def isnpimage_dimension(image_test):
-    return isnparray(image_test) and ((image_test.ndim == 3 and (image_test.shape[2] == 3 or image_test.shape[2] == 1)) or image_test.ndim == 2)
+	'''
+	shape check for images
+	'''
+	return is2dpts(size_test)
 
 def ispilimage(image_test):
-    return isinstance(image_test, Image.Image)
+	return isinstance(image_test, Image.Image)
 
 def iscolorimage_dimension(image_test):
-    return isnparray(image_test) and image_test.ndim == 3 and image_test.shape[2] == 3
-
-def iscolorimage(image_test, debug=False):
-    # if debug:
-        # print 'is numpy array when testing color image? ', 
-    if not isnparray(image_test):
-        # if debug:
-            # print 'No'
-        return False
-    # else:
-        # if debug:
-            # print 'Yes'
-
-    # if debug:
-        # print 'is dimension correct when testing color image? ', 
-    shape_check = (image_test.ndim == 3 and (image_test.shape[2] == 3 or image_test.shape[2] == 4))     # rgb or rgba
-    if shape_check:
-        # if debug:
-            # print 'Yes'
-        return True 
-    else:
-        # if debug:
-            # print 'No'
-        return False
+	'''
+	dimension check for RGB color images (or RGBA)
+	'''
+	if ispilimage(image_test): image_test = np.array(image_test)
+	return isnparray(image_test) and image_test.ndim == 3 and (image_test.shape[2] == 3 or image_test.shape[2] == 4)
 
 def isgrayimage_dimension(image_test):
-    return isnparray(image_test) and (image_test.ndim == 2 or (image_test.ndim == 3 and image_test.shape[2] == 1))
+	'''
+	dimension check for gray images
+	'''
+	if ispilimage(image_test): image_test = np.array(image_test)
+	return isnparray(image_test) and (image_test.ndim == 2 or (image_test.ndim == 3 and image_test.shape[2] == 1))
 
-def isgrayimage(image_test, debug=False):
-    # if debug:
-        # print 'is numpy array when testing grayscale image? ', 
-    if not isnparray(image_test):
-        # if debug:
-            # print 'No'
-        return False
-    # else:
-        # if debug:
-            # print 'Yes'
+def isimage_dimension(image_test):
+	'''
+	dimension check for images
+	'''
+	return iscolorimage_dimension(image_test) or isgrayimage_dimension(image_test)
 
-    # if debug:
-        # print 'is dimension correct when testing grayscale image? ', 
-    shape_check = (image_test.ndim == 2 or (image_test.ndim == 3 and image_test.shape[2] == 1))
-    if shape_check:
-        # if debug:
-            # print 'Yes'
-        return True 
-    else:
-        # if debug:
-            # print 'No'
-        return False
+def isuintimage(image_test):
+	'''
+	value check for uint8 images
+	'''
+	if ispilimage(image_test): image_test = np.array(image_test)
+	if not isimage_dimension(image_test): return False
+	return image_test.dtype == 'uint8'		# if uint8, must in [0, 255]
 
-def isuintimage(image_test, debug=False):
-    # if debug:
-        # print 'is shape correct when testing uint8 image? ', 
-    if not (isgrayimage(image_test, debug=debug) or iscolorimage(image_test, debug=debug)):
-        # if debug:
-            # print 'No, shape is not correct'
-        return False
-    # else:
-        # if debug:
-            # print 'Yes, shape is correct'
+def isfloatimage(image_test):
+	'''
+	value check for float32 images
+	'''
+	if ispilimage(image_test): image_test = np.array(image_test)
+	if not isimage_dimension(image_test): return False
+	if not image_test.dtype == 'float32': return False
 
-    # if debug:
-        # print 'is type correct when testing uint8 image? ', 
-    if not image_test.dtype == 'uint8':
-        # if debug:    
-            # print 'No'
-        return False
-    # else:
-        # if debug:
-            # print 'Yes'
+	item_check_le = (image_test <= 1.0)
+	item_check_se = (image_test >= 0.0)
+	return bool(item_check_le.all()) and bool(item_check_se.all())
 
-    # if debug:
-        # print 'is value inside array correct when testing uint8 image? ', 
-    item_check_le = (image_test <= 255)
-    item_check_se = (image_test >= 0)
-    if item_check_le.all() and item_check_se.all(): return True
-    else: return False
+def isnpimage(image_test):
+	return isnparray(image_test) and (isfloatimage(image_test) or isuintimage(image_test))
 
-def isfloatimage(image_test, debug=False):
-    # if debug:
-        # print 'is shape correct when testing float32 image? ', 
-    if not (isgrayimage(image_test, debug=debug) or iscolorimage(image_test, debug=debug)): return False
-    # else:
-        # if debug:
-            # print 'Yes, shape is correct'
-
-    # if debug:
-        # print 'is type correct when testing float32 image? ', 
-    if not image_test.dtype == 'float32': return False
-    # else:
-        # if debug:
-            # print 'Yes'
-
-    # if debug:
-        # print 'is value inside array correct ([0, 1]) when testing float32 image? ', 
-    item_check_le = (image_test <= 1.0)
-    item_check_se = (image_test >= 0.0)
-    if item_check_le.all() and item_check_se.all(): return True
-    else: return False
-
-def isnpimage(image_test, debug=False):
-    return isfloatimage(image_test, debug=debug) or isuintimage(image_test, debug=debug)
-
-def isimage(image_test, debug=False):
-    return isnpimage(image_test, debug=debug) or ispilimage(image_test)
-
-def isscaledimage(image_test):
-    if not isimage(image_test): return False
-    max_value = np.max(image_test)
-    min_value = np.min(image_test)
-    assert min_value >= 0, 'image value is not correct'
-    assert max_value >= 0, 'image value is not correct' 
-    if max_value > 1 and max_value < 255:
-        print('input image is raw image in [0, 255]')
-        return False
-    elif max_value <= 1: return True
-    else: assert False, 'Unknown error'
+def isimage(image_test):
+	return isnpimage(image_test) or ispilimage(image_test)
 
 ############################################################# path 
 def safepath(pathname, debug=True):

@@ -28,7 +28,7 @@ def test_sobel_filter():
 	visualize_image(filtered_img, vis=True)
 
 	print('testing for color image with sobel along X axis')
-	img = np.array(Image.open(image_path).convert('RGB')).astype('float64') / 255.
+	img = np.array(Image.open(image_path).convert('RGB')).astype('float32') / 255.
 	filter = linear_filter()
 	sobel_kernel = filter.sobel(axis='y')
 	sobel_kernel = filter.expand_3d()
