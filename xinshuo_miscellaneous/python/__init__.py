@@ -1,7 +1,8 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
 
-from .check import *
+from .type_check import *
+from .numerical_check import *
 from .configuration import *
 from .counter import *
 from .logger import *
