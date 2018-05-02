@@ -1,5 +1,5 @@
 # Xinshuo's Toolbox
-A fully tested toolbox for **computer vision** and **machine learning** (**deep learning**) related algorithm. For convenience, it also contains **I/O stream**, **image & video processing**, **visualization**, **evaluation**, **geometry and algebra**  and lots of functions for debugging in python, matlab, and c++. 
+A fully tested toolbox for **computer vision** and **machine learning** (**deep learning**) algorithms. For convenience, it contains functions of **I/O stream**, **image & video processing**, **visualization**, **evaluation**, **geometry and algebra** in python, matlab, and c++. 
 
 #### Usage:
 
