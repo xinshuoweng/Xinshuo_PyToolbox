@@ -127,3 +127,134 @@ def nparray_resize(input_nparray, resize_factor=None, target_size=None, interp='
     else: assert False, 'interpolation is wrong'
 
     return resized_nparray
+
+################################################################## coordinate system ##################################################################
+def cart2pol_2d_degree(pts, debug=True):
+    '''
+    input a 2d point and convert to polar coordinate
+
+    return for degree: [0, 360)
+    '''
+    if debug:
+        assert istuple(pts) or islist(pts) or isnparray(pts), 'input point is not correct'
+        assert np.array(pts).size == 2, 'input point is not 2d points'
+
+    x = pts[0]
+    y = pts[1]
+    rho = np.sqrt(x**2 + y**2)
+    phi = math.degrees(np.arctan2(y, x))
+    while phi < 0:
+        phi += 360
+    while phi >= 360.:
+        phi -= 360
+        
+    return (rho, phi)
+
+def pol2cart_2d_degree(pts, debug=True):
+    '''
+    input point: (rho, phi)
+
+    phi is in degree
+    '''
+    if debug:
+        assert istuple(pts) or islist(pts) or isnparray(pts), 'input point is not correct'
+        assert np.array(pts).size == 2, 'input point is not 2d points'
+
+    rho = pts[0]
+    phi = math.radians(pts[1])
+    x = rho * np.cos(phi)
+    y = rho * np.sin(phi)
+    return (x, y)
+
+def imagecoor2cartesian(pts, debug=True):
+    '''
+    change the coordinate system from image coordinate system to normal cartesian system, basically reverse the y coordinate
+
+    parameter: 
+        pts:    a single point (list, tuple, numpy array) or a 2 x N numpy array representing a set of points
+
+    return:
+        pts:    a tuple if only single point comes in or a 2 x N numpy array
+    '''
+    return cartesian2imagecoor(pts, debug=debug)
+
+def cartesian2imagecoor(pts, debug=True):
+    '''
+    change the coordinate system from normal cartesian system back to image coordinate system, basically reverse the y coordinate
+    
+    parameter: 
+        pts:    a single point (list, tuple, numpy array) or a 2 x N numpy array representing a set of points
+
+    return:
+        pts:    a tuple if only single point comes in or a 2 x N numpy array
+    '''
+    if debug:
+        assert is2dpts(pts) or (isnparray(pts) and pts.shape[0] == 2 and pts.shape[1] > 0), 'point is not correct'
+    
+    if is2dpts(pts):
+        if isnparray(pts): pts = np.reshape(pts, (2, ))
+        return (pts[0], -pts[1])
+    else:
+        pts[1, :] = -pts[1, :]
+        return pts
+
+def imagecoor2cartesian_center(image_shape, debug=True):
+    '''
+    given an image shape, return 2 functions which change the original image coordinate to centered cartesian coordinate system
+    basically the origin is in the center of the image
+    
+    for example:
+        if the image shape is (480, 640) and the top left point is (0, 0), after passing throught forward_map function, it returns (-320, 240)
+        for the bottom right point (639, 479), it returns (319, -239)
+    '''
+    if debug: isimsize(image_shape), 'input image shape is not correct'
+
+    width, height = image_shape[1], image_shape[0]
+    def forward_map(pts, debug=True):
+        if debug:
+            assert is2dpts(pts), 'input 2d point is not correct'
+            assert pts[0] >= 0 and pts[0] < width and isinteger(pts[0]), 'x coordinate is out of range %d should in [%d, %d)' % (pts[0], 0, width)
+            assert pts[1] >= 0 and pts[1] < height and isinteger(pts[1]), 'y coordinate is out of range %d shoud in [%d, %d)' % (pts[1], 0, height)
+
+        car_pts = imagecoor2cartesian(pts, debug=debug)
+        car_pts = np.array(car_pts)
+        car_pts[0] += -width/2      # shift x axis half length of width to the right
+        car_pts[1] += height/2      # shigt y axis hald length of height downside
+        return (car_pts[0], car_pts[1])
+
+    def backward_map(pts, debug=True):
+        if debug:
+            assert is2dpts(pts), 'input 2d point is not correct'
+            assert is2dpts(pts), 'input 2d point is not correct'
+            assert pts[0] >= -width/2 and pts[0] < width/2 and isinteger(pts[0]), 'x coordinate is out of range %d should in [%d, %d)' % (pts[0], -width/2, width/2)
+            assert pts[1] > -height/2 and pts[1] <= height/2 and isinteger(pts[1]), 'y coordinate is out of range %d shoud in (%d, %d]' % (pts[1], -height/2, height/2)
+
+        pts = np.array(pts)
+        pts[0] += width/2       
+        pts[1] += -height/2     
+        img_pts = cartesian2imagecoor(pts, debug=debug)
+        return img_pts
+        
+    return forward_map, backward_map
+
+def degree2radian(degree, debug=True):
+    '''
+    this function return degree given radians, difference from default math.degrees is that this function normalize the output in range [0, 2*pi)
+    '''
+    if debug: assert isscalar(degree), 'input degree number is not correct'
+    radian = math.radians(degree)
+    while radian < 0: radian += 2*math.pi
+    while radian >= 2*math.pi: radian -= 2*math.pi
+
+    return radian
+
+def radian2degree(radian, debug=True):
+    '''
+    this function return radian given degree, difference from default math.degrees is that this function normalize the output in range [0, 360)
+    '''
+    if debug: assert isscalar(degree), 'input radian number is not correct'
+    degree = math.degrees(radian)
+    while degree < 0: degree += 360.0
+    while degree >= 360.0: degree -= 360.0
+
+    return degree

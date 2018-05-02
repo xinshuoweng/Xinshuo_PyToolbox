@@ -7,7 +7,8 @@ from math import radians as rad
 
 from private import safe_bbox, safe_center_bbox, bboxcheck_TLBR, bboxcheck_TLWH
 from math_geometry import get_2dline_from_pts_slope, get_2dpts_from_lines
-from xinshuo_miscellaneous import imagecoor2cartesian, cartesian2imagecoor, isnparray, is2dptsarray, is2dptsarray_occlusion, is2dpts, isinteger, isbbox, islist, iscenterbbox
+from math_conversion import imagecoor2cartesian, cartesian2imagecoor
+from xinshuo_miscellaneous import isnparray, is2dptsarray, is2dptsarray_occlusion, is2dpts, isinteger, isbbox, islist, iscenterbbox
 
 # general format instruction
 # TLBR:     top left bottom right, stands for two corner points, the top left point is included, the bottom right point is not included

@@ -3,7 +3,6 @@
 
 # this file includes private functions for internal use only
 import copy, numpy as np
-
 from xinshuo_miscellaneous import islist, isnparray, isbbox, islistoflist, iscenterbbox, isscalar, is2dptsarray, is2dptsarray_occlusion, is2dptsarray_homogeneous
 
 ################################################################## conversion ##################################################################

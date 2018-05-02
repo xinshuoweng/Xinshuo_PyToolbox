@@ -4,6 +4,8 @@
 # this file includes functions checking the datatype and equality of input variables
 import numpy as np
 
+from type_check import islist, isdict, isnparray
+
 ############################################################# equality check
 def CHECK_EQ_LIST_SELF(input_list, debug=True):
 	'''
@@ -21,8 +23,7 @@ def CHECK_EQ_DICT(input_dict1, input_dict2, debug=True):
         assert len(input_dict1) == len(input_dict2), 'length of input dictionary is not equal'
 
     for key, value in input_dict1.items():
-        if input_dict2.has_key(key) and input_dict2[key] == value:
-            continue
+        if input_dict2.has_key(key) and input_dict2[key] == value: continue
         else: return False
     return True
 

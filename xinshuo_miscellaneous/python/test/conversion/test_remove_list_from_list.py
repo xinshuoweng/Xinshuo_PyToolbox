@@ -3,7 +3,7 @@
 import numpy as np
 
 import init_paths
-from conversions import remove_list_from_list
+from conversion import remove_list_from_list
 from xinshuo_miscellaneous import CHECK_EQ_LIST_ORDERED
 
 def test_remove_list_from_list():

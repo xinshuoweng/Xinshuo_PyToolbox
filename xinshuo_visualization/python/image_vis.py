@@ -2,7 +2,7 @@
 # email: xinshuo.weng@gmail.com
 
 # this file includes functions for visualizing images 
-import time, shutil, colorsys, cv2, numpy as np, matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 # import matplotlib as mpl; mpl.use('Agg')
 # import warnings
 # warnings.filterwarnings("ignore", message="numpy.dtype size changed")

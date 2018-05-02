@@ -1,6 +1,6 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
-import numpy as np, matplotlib.pyplot as plt
+import numpy as np, matplotlib.pyplot as plt, colorsys
 import matplotlib.collections as plycollections
 from matplotlib.patches import Ellipse
 

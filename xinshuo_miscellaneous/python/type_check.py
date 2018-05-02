@@ -32,15 +32,15 @@ def isdict(dict_test):
 
 def isext(ext_test):
 	'''
-	check if it is an extension
+	check if it is an extension, only '.something' is an extension, multiple extension is not a valid extension
 	'''
 	return isstring(ext_test) and ext_test[0] == '.' and len(ext_test) > 1 and ext_test.count('.') == 1
 
 def isrange(range_test):
 	'''
-	check if it is a data range: such as [0, 1], (0, 1), array([0, 1])
+	check if it is a data range: such as [0, 1], (0, 1), array([0, 1]), the min must not bigger than the max
 	'''
-	return is2dpts(range_test)
+	return is2dpts(range_test) and range_test[0] <= range_test[1]
 
 def isscalar(scalar_test):
 	try: return isinteger(scalar_test) or isfloat(scalar_test)
@@ -220,6 +220,9 @@ def isfloatimage(image_test):
 	return bool(item_check_le.all()) and bool(item_check_se.all())
 
 def isnpimage(image_test):
+	'''
+	check if it is an uint8 or float32 numpy valid image
+	'''
 	return isnparray(image_test) and (isfloatimage(image_test) or isuintimage(image_test))
 
 def isimage(image_test):
