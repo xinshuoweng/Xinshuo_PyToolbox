@@ -28,5 +28,23 @@ def test_isinteger():
 	input_test = np.array([1]).astype('bool')
 	assert isinteger(input_test) is False
 
+def test_isfloat():
+	pass
+
+def test_ispositiveinteger():
+	pass
+
+def test_isnonnegativeinteger():
+	pass
+
+def test_isuintnparray():
+	pass
+
+def test_isfloatnparray():
+	pass
+
+def test_isnannparray():
+	pass
+
 if __name__ == '__main__':
 	pytest.main([__file__])

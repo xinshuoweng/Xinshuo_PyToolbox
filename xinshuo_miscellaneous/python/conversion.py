@@ -9,12 +9,12 @@ from private import safe_list
 from type_check import isstring, isinteger, isnparray, islist, isext, islistoflist, isrange, isscalar
 
 ######################################################### list related #########################################################
-def remove_list_from_list(list_src, list_toremove_src, warning=True, debug=True):
+def remove_list_from_list(input_list, list_toremove_src, warning=True, debug=True):
 	'''
 	remove a list "list_toremove_src" from a list "list_src" if found, skip if not found
 
 	parameteters:
-		list_src:				a list to be removed from
+		input_list:				a list to be removed from
 		list_toremove_src:		a list to be removed
 
 	outputs:
@@ -22,7 +22,7 @@ def remove_list_from_list(list_src, list_toremove_src, warning=True, debug=True)
 		list_removed:			a list of elements to be successfully removed 
 								(as some elements in list_toremove_src may not found in list_src, where the removal fails)
 	'''
-	list_remained = safe_list(list_src, warning=warning, debug=debug)
+	list_remained = safe_list(input_list, warning=warning, debug=debug)
 	list_toremove = safe_list(list_toremove_src, warning=warning, debug=debug)
 	list_removed = []
 	for item in list_toremove:
@@ -34,20 +34,59 @@ def remove_list_from_list(list_src, list_toremove_src, warning=True, debug=True)
 
 	return list_remained, list_removed
 
-def find_unique_common_from_lists(list_src1, list_src2, warning=True, debug=True):
+def remove_unique_item_from_list(input_list, item, warning=True, debug=True):
+	'''
+	remove all instances of a single item from a list
+
+	parameters:
+		input_list:				a list to be removed from
+
+	outputs:
+		list_remained:			a list of remaining elements after removal
+		count_removal:			number of times the requested item to be removed
+	'''
+	list_remained = safe_list(input_list, warning=warning, debug=debug)
+	count_removal = 0
+	while 1:
+		try: 
+			list_remained.remove(item)
+			count_removal += 1
+		except ValueError:
+			if warning: print('Warning!!!!!! Item to remove is not in the list. Remove operation is not done.')
+			break
+
+	return list_remained, count_removal
+
+def find_unique_common_from_lists(input_list1, input_list2, warning=True, debug=True):
 	'''
 	find common items from 2 lists, the returned elements are unique. repetitive items will be ignored
 	if the common items in two elements are not in the same order, the outputs follows the order in the first list
 
 	parameters:
-		list_src1, list_src2:		two input lists
+		input_list1, input_list2:		two input lists
 
 	outputs:
 		list_common:	a list of elements existing both in list_src1 and list_src2	
 	'''
-	if debug: assert islist(list_src1) and islist(list_src2), 'inputs are not a list'
-	common_list = list(set(list_src1).intersection(list_src2))
+	input_list1 = safe_list(input_list1, warning=warning, debug=debug)
+	input_list2 = safe_list(input_list2, warning=warning, debug=debug)
+
+	common_list = list(set(input_list1).intersection(input_list2))
 	return common_list
+
+def reverse_list(input_list, warning=True, debug=True):
+	'''
+	reverse the order of a list
+
+	parameters:
+		input_list:		a list
+
+	outputs:
+		reversed_list:	the list in a reverse order
+	'''
+	input_list = safe_list(input_list, warning=warning, debug=debug)
+	reversed_list = input_list[::-1]
+	return reversed_list
 
 def list_reorder(input_list, order_index, debug=True):
 	'''
@@ -59,13 +98,6 @@ def list_reorder(input_list, order_index, debug=True):
 		assert all(isscalar(index_tmp) for index_tmp in order_index), 'the list of order is not correct'
 
 	return [ordered for whatever, ordered in sorted(zip(order_index, input_list))]
-
-def reverse_list(input_list, debug=True):
-	'''
-	reverse a list
-	'''
-	if debug: assert islist(input_list), 'input is not a list'
-	return input_list[::-1]
 
 def merge_listoflist(listoflist, debug=True):
 	'''

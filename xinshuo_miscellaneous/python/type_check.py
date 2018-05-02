@@ -48,54 +48,167 @@ def isscalar(scalar_test):
 
 ############################################################# value
 def isinteger(integer_test):
-    if isnparray(integer_test): return False
-    try: return isinstance(integer_test, int) or int(integer_test) == integer_test
-    except ValueError: return False
-    except TypeError: return False
+	if isnparray(integer_test): return False
+	try: return isinstance(integer_test, int) or int(integer_test) == integer_test
+	except ValueError: return False
+	except TypeError: return False
 
 def isfloat(float_test):
-    return isinstance(float_test, float)
+	return isinstance(float_test, float)
 
 def ispositiveinteger(integer_test):
-    return isinteger(integer_test) and integer_test > 0
+	return isinteger(integer_test) and integer_test > 0
 
 def isnonnegativeinteger(integer_test):
-    return isinteger(integer_test) and integer_test >= 0
+	return isinteger(integer_test) and integer_test >= 0
 
 def isuintnparray(nparray_test):
-    return isnparray(nparray_test) and nparray_test.dtype == 'uint8'
+	return isnparray(nparray_test) and nparray_test.dtype == 'uint8'
 
 def isfloatnparray(nparray_test):
-    return isnparray(nparray_test) and nparray_test.dtype == 'float32'
+	return isnparray(nparray_test) and nparray_test.dtype == 'float32'
 
 def isnannparray(nparray_test):
-    return isnparray(nparray_test) and np.isnan(nparray_test).any()
+	return isnparray(nparray_test) and np.isnan(nparray_test).any()
 
 ############################################################# list
 def islistoflist(list_test):
-    if not islist(list_test): return False
-    if all(islist(tmp) for tmp in list_test): return True
-    else: return False
+	if not islist(list_test): return False
+	return all(islist(tmp) for tmp in list_test)
 
 def islistofdict(list_test):
-    if not islist(list_test): return False
-    if all(isdict(tmp) for tmp in list_test): return True
-    else: return False  
+	if not islist(list_test): return False
+	return all(isdict(tmp) for tmp in list_test)
 
 def islistofscalar(list_test):
-    if not islist(list_test): return False
-    if all(isscalar(tmp) for tmp in list_test): return True
-    else: return False  
+	if not islist(list_test): return False
+	return all(isscalar(tmp) for tmp in list_test)
 
 def islistofpositiveinteger(list_test):
-    if not islist(list_test): return False
-    if all(ispositiveinteger(tmp) for tmp in list_test): return True
-    else: return False  
+	if not islist(list_test): return False
+	return all(ispositiveinteger(tmp) for tmp in list_test)
 
 def islistofnonnegativeinteger(list_test):
-    if not islist(list_test): return False
-    if all(isnonnegativeinteger(tmp) for tmp in list_test): return True
-    else: return False  
+	if not islist(list_test): return False
+	return all(isnonnegativeinteger(tmp) for tmp in list_test)
+
+############################################################# path 
+# note:
+#		empty path is not valid, a path of whitespace ' ' is valid
+def is_path_valid(pathname):
+	try:  
+		if not isstring(pathname) or not pathname: return False
+	except TypeError: return False
+	else: return True
+
+def is_path_creatable(pathname):
+    '''
+    `True` if the current user has sufficient permissions to create the passed
+    pathname; `False` otherwise.
+
+    For folder, it needs the previous level of folder existing
+    for file, it needs the folder existing
+    '''
+    if not is_path_valid(pathname): return False
+    pathname = safepath(pathname)
+    pathname = os.path.dirname(os.path.abspath(pathname))
+    
+    # recursively to find the root existing
+    while not is_path_exists(pathname):     
+        pathname_new = os.path.dirname(os.path.abspath(pathname))
+        if pathname_new == pathname: return False
+        pathname = pathname_new
+    return os.access(pathname, os.W_OK)
+
+def is_path_exists_or_creatable(pathname):
+    '''
+    this function is to justify is given path existing or creatable
+    '''
+    try: return is_path_valid(pathname) and (os.path.exists(pathname) or is_path_creatable(pathname))
+    except OSError: return False
+
+def is_path_exists(pathname):
+    '''
+    this function is to justify is given path existing or not
+    '''
+    try: return is_path_valid(pathname) and os.path.exists(pathname)
+    except OSError: return False
+
+def isfile(pathname):
+    if is_path_valid(pathname):
+        pathname = safepath(pathname)
+        name = os.path.splitext(os.path.basename(pathname))[0]
+        ext = os.path.splitext(pathname)[1]
+        return len(name) > 0 and len(ext) > 0
+    else: return False;
+
+def isfolder(pathname):
+    if is_path_valid(pathname):
+        pathname = safepath(pathname)
+        if pathname == './': return True
+        name = os.path.splitext(os.path.basename(pathname))[0]
+        ext = os.path.splitext(pathname)[1]
+        return len(name) > 0 and len(ext) == 0
+    else: return False
+
+############################################################# images
+def isimsize(size_test):
+	'''
+	shape check for images
+	'''
+	return is2dpts(size_test)
+
+def ispilimage(image_test):
+	return isinstance(image_test, Image.Image)
+
+def iscolorimage_dimension(image_test):
+	'''
+	dimension check for RGB color images (or RGBA)
+	'''
+	if ispilimage(image_test): image_test = np.array(image_test)
+	return isnparray(image_test) and image_test.ndim == 3 and (image_test.shape[2] == 3 or image_test.shape[2] == 4)
+
+def isgrayimage_dimension(image_test):
+	'''
+	dimension check for gray images
+	'''
+	if ispilimage(image_test): image_test = np.array(image_test)
+	return isnparray(image_test) and (image_test.ndim == 2 or (image_test.ndim == 3 and image_test.shape[2] == 1))
+
+def isimage_dimension(image_test):
+	'''
+	dimension check for images
+	'''
+	return iscolorimage_dimension(image_test) or isgrayimage_dimension(image_test)
+
+def isuintimage(image_test):
+	'''
+	value check for uint8 images
+	'''
+	if ispilimage(image_test): image_test = np.array(image_test)
+	if not isimage_dimension(image_test): return False
+	return image_test.dtype == 'uint8'		# if uint8, must in [0, 255]
+
+def isfloatimage(image_test):
+	'''
+	value check for float32 images
+	'''
+	if ispilimage(image_test): image_test = np.array(image_test)
+	if not isimage_dimension(image_test): return False
+	if not image_test.dtype == 'float32': return False
+
+	item_check_le = (image_test <= 1.0)
+	item_check_se = (image_test >= 0.0)
+	return bool(item_check_le.all()) and bool(item_check_se.all())
+
+def isnpimage(image_test):
+	'''
+	check if it is an uint8 or float32 numpy valid image
+	'''
+	return isnparray(image_test) and (isfloatimage(image_test) or isuintimage(image_test))
+
+def isimage(image_test):
+	return isnpimage(image_test) or ispilimage(image_test)
 
 ############################################################# geometry
 def is2dpts(pts_test):
@@ -168,132 +281,3 @@ def isbbox(bbox_test):
 
 def iscenterbbox(bbox_test):
     return isnparray(bbox_test) and len(bbox_test.shape) == 2 and bbox_test.shape[0] > 0 and (bbox_test.shape[1] == 4 or bbox_test.shape[1] == 2)
-
-############################################################# images
-def isimsize(size_test):
-	'''
-	shape check for images
-	'''
-	return is2dpts(size_test)
-
-def ispilimage(image_test):
-	return isinstance(image_test, Image.Image)
-
-def iscolorimage_dimension(image_test):
-	'''
-	dimension check for RGB color images (or RGBA)
-	'''
-	if ispilimage(image_test): image_test = np.array(image_test)
-	return isnparray(image_test) and image_test.ndim == 3 and (image_test.shape[2] == 3 or image_test.shape[2] == 4)
-
-def isgrayimage_dimension(image_test):
-	'''
-	dimension check for gray images
-	'''
-	if ispilimage(image_test): image_test = np.array(image_test)
-	return isnparray(image_test) and (image_test.ndim == 2 or (image_test.ndim == 3 and image_test.shape[2] == 1))
-
-def isimage_dimension(image_test):
-	'''
-	dimension check for images
-	'''
-	return iscolorimage_dimension(image_test) or isgrayimage_dimension(image_test)
-
-def isuintimage(image_test):
-	'''
-	value check for uint8 images
-	'''
-	if ispilimage(image_test): image_test = np.array(image_test)
-	if not isimage_dimension(image_test): return False
-	return image_test.dtype == 'uint8'		# if uint8, must in [0, 255]
-
-def isfloatimage(image_test):
-	'''
-	value check for float32 images
-	'''
-	if ispilimage(image_test): image_test = np.array(image_test)
-	if not isimage_dimension(image_test): return False
-	if not image_test.dtype == 'float32': return False
-
-	item_check_le = (image_test <= 1.0)
-	item_check_se = (image_test >= 0.0)
-	return bool(item_check_le.all()) and bool(item_check_se.all())
-
-def isnpimage(image_test):
-	'''
-	check if it is an uint8 or float32 numpy valid image
-	'''
-	return isnparray(image_test) and (isfloatimage(image_test) or isuintimage(image_test))
-
-def isimage(image_test):
-	return isnpimage(image_test) or ispilimage(image_test)
-
-############################################################# path 
-def safepath(pathname, debug=True):
-    '''
-    convert path to a normal representation
-    '''
-    if debug: assert is_path_valid(pathname), 'path is not valid: %s' % pathname
-    return os.path.normpath(pathname)
-
-def is_path_valid(pathname):
-    '''
-    `True` if the passed pathname is a valid pathname for the current OS;
-    `False` otherwise.
-    '''
-    # If this pathname is either not a string or is but is empty, this pathname
-    # is invalid.
-    try: 
-        if not isstring(pathname) or not pathname: return False
-    except TypeError: return False
-    else: return True
-
-def is_path_creatable(pathname):
-    '''
-    `True` if the current user has sufficient permissions to create the passed
-    pathname; `False` otherwise.
-
-    For folder, it needs the previous level of folder existing
-    for file, it needs the folder existing
-    '''
-    if not is_path_valid(pathname): return False
-    pathname = safepath(pathname)
-    pathname = os.path.dirname(os.path.abspath(pathname))
-    
-    # recursively to find the root existing
-    while not is_path_exists(pathname):     
-        pathname_new = os.path.dirname(os.path.abspath(pathname))
-        if pathname_new == pathname: return False
-        pathname = pathname_new
-    return os.access(pathname, os.W_OK)
-
-def is_path_exists_or_creatable(pathname):
-    '''
-    this function is to justify is given path existing or creatable
-    '''
-    try: return is_path_valid(pathname) and (os.path.exists(pathname) or is_path_creatable(pathname))
-    except OSError: return False
-
-def is_path_exists(pathname):
-    '''
-    this function is to justify is given path existing or not
-    '''
-    try: return is_path_valid(pathname) and os.path.exists(pathname)
-    except OSError: return False
-
-def isfile(pathname):
-    if is_path_valid(pathname):
-        pathname = safepath(pathname)
-        name = os.path.splitext(os.path.basename(pathname))[0]
-        ext = os.path.splitext(pathname)[1]
-        return len(name) > 0 and len(ext) > 0
-    else: return False;
-
-def isfolder(pathname):
-    if is_path_valid(pathname):
-        pathname = safepath(pathname)
-        if pathname == './': return True
-        name = os.path.splitext(os.path.basename(pathname))[0]
-        ext = os.path.splitext(pathname)[1]
-        return len(name) > 0 and len(ext) == 0
-    else: return False
