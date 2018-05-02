@@ -74,23 +74,23 @@ def isnannparray(nparray_test):
 ############################################################# list
 def islistoflist(list_test):
 	if not islist(list_test): return False
-	return all(islist(tmp) for tmp in list_test)
+	return all(islist(tmp) for tmp in list_test) and len(list_test) > 0
 
 def islistofdict(list_test):
 	if not islist(list_test): return False
-	return all(isdict(tmp) for tmp in list_test)
+	return all(isdict(tmp) for tmp in list_test) and len(list_test) > 0
 
 def islistofscalar(list_test):
 	if not islist(list_test): return False
-	return all(isscalar(tmp) for tmp in list_test)
+	return all(isscalar(tmp) for tmp in list_test) and len(list_test) > 0
 
 def islistofpositiveinteger(list_test):
 	if not islist(list_test): return False
-	return all(ispositiveinteger(tmp) for tmp in list_test)
+	return all(ispositiveinteger(tmp) for tmp in list_test) and len(list_test) > 0
 
 def islistofnonnegativeinteger(list_test):
 	if not islist(list_test): return False
-	return all(isnonnegativeinteger(tmp) for tmp in list_test)
+	return all(isnonnegativeinteger(tmp) for tmp in list_test) and len(list_test) > 0
 
 ############################################################# path 
 # note:

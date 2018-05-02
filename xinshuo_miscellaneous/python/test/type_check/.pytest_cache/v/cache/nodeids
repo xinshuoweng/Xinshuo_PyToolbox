@@ -1,12 +1,7 @@
 [
-  "test_check_datatype.py::test_isstring", 
-  "test_check_datatype.py::test_islist", 
-  "test_check_datatype.py::test_islogical", 
-  "test_check_datatype.py::test_isnparray", 
-  "test_check_datatype.py::test_istuple", 
-  "test_check_datatype.py::test_isfunction", 
-  "test_check_datatype.py::test_isdict", 
-  "test_check_datatype.py::test_isext", 
-  "test_check_datatype.py::test_isrange", 
-  "test_check_datatype.py::test_isscalar"
+  "test_check_list.py::test_islistoflist", 
+  "test_check_list.py::test_islistofdict", 
+  "test_check_list.py::test_islistofscalar", 
+  "test_check_list.py::test_islistofpositiveinteger", 
+  "test_check_list.py::test_islistofnonnegativeinteger"
 ]
