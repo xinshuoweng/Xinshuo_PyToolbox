@@ -52,7 +52,7 @@ def remove_unique_item_from_list(input_list, item, warning=True, debug=True):
 			list_remained.remove(item)
 			count_removal += 1
 		except ValueError:
-			if warning: print('Warning!!!!!! Item to remove is not in the list. Remove operation is not done.')
+			if warning and count_removal == 0: print('Warning!!!!!! Item to remove is not in the list. Remove operation is not done.')
 			break
 
 	return list_remained, count_removal
