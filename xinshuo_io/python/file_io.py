@@ -4,7 +4,8 @@
 # this file contains a set of function for manipulating file io in python
 import os, sys, time, glob, glob2, numpy as np
 
-from xinshuo_miscellaneous import safepath, string2ext_filter, remove_empty_item_from_list, str2num, is_path_exists_or_creatable, is_path_exists, isfolder, isnparray, is2dptsarray, is2dptsarray_occlusion, islogical, isinteger, islist, isstring
+from xinshuo_miscellaneous.python.private import safe_path
+from xinshuo_miscellaneous import string2ext_filter, remove_empty_item_from_list, str2num, is_path_exists_or_creatable, is_path_exists, isfolder, isnparray, is2dptsarray, is2dptsarray_occlusion, islogical, isinteger, islist, isstring
 
 def fileparts(pathname, warning=True, debug=True):
 	'''
@@ -14,7 +15,7 @@ def fileparts(pathname, warning=True, debug=True):
     parameters:
         pathname:       a string path
 	'''
-	pathname = safepath(pathname, debug=debug)
+	pathname = safe_path(pathname, debug=debug)
 	if len(pathname) == 0: return ('', '', '')
 	if pathname[-1] == '/':
 		if len(pathname) > 1: return (pathname[:-1], '', '')	# ignore the final '/'
@@ -27,7 +28,7 @@ def fileparts(pathname, warning=True, debug=True):
 	return (directory, filename, ext)
 
 def mkdir_if_missing(pathname, warning=True, debug=True):
-    pathname = safepath(pathname, debug=debug)
+    pathname = safe_path(pathname, debug=debug)
     if debug: assert is_path_exists_or_creatable(pathname), 'input path is not valid or creatable: %s' % pathname
     dirname, _, _ = fileparts(pathname)
 
@@ -50,7 +51,7 @@ def load_txt_file(file_path, debug=True):
     '''
     load data or string from text file
     '''
-    file_path = safepath(file_path)
+    file_path = safe_path(file_path)
     if debug:
         assert is_path_exists(file_path), 'text file is not existing at path: %s!' % file_path
 
@@ -65,7 +66,7 @@ def save_txt_file(data_list, save_path, debug=True):
     '''
     save a list of string to a file
     '''
-    save_path = safepath(save_path)
+    save_path = safe_path(save_path)
     if debug:
         assert is_path_exists_or_creatable(save_path), 'text file is not able to be created at path: %s!' % save_path
 
@@ -86,7 +87,7 @@ def load_list_from_file(file_path, debug=True):
     '''
     this function reads list from a txt file
     '''
-    file_path = safepath(file_path)
+    file_path = safe_path(file_path)
     _, _, extension = fileparts(file_path)
 
     if debug:
@@ -117,7 +118,7 @@ def load_list_from_folder(folder_path, ext_filter=None, depth=1, recursive=False
         fulllist:       a list of elements
         num_elem:       number of the elements
     '''
-    folder_path = safepath(folder_path)
+    folder_path = safe_path(folder_path)
     if debug: assert isfolder(folder_path), 'input folder path is not correct: %s' % folder_path
     if not is_path_exists(folder_path): return [], 0
 
@@ -200,7 +201,7 @@ def load_list_from_folders(folder_path_list, ext_filter=None, depth=1, recursive
 
     # save list to a path
     if save_path is not None:
-        save_path = safepath(save_path)
+        save_path = safe_path(save_path)
         if debug:
             assert is_path_exists_or_creatable(save_path), 'the file cannot be created'
         with open(save_path, 'w') as file:
@@ -217,7 +218,7 @@ def generate_list_from_data(save_path, src_data, debug=True):
     parameter:
         src_data:   a list of 1 element data, or a 1-d numpy array data
     '''
-    save_path = safepath(save_path)
+    save_path = safe_path(save_path)
 
     if debug:
         if isnparray(src_data):
@@ -239,7 +240,7 @@ def generate_list_from_data(save_path, src_data, debug=True):
 
 ######################################################### matrix related #########################################################
 def save_2dmatrix_to_file(data, save_path, formatting='%.1f', debug=True):
-    save_path = safepath(save_path)
+    save_path = safe_path(save_path)
     if debug:
         assert isnparray(data) and len(data.shape) == 2, 'input data is not 2d numpy array'
         assert is_path_exists_or_creatable(save_path), 'save path is not correct'
@@ -249,7 +250,7 @@ def save_2dmatrix_to_file(data, save_path, formatting='%.1f', debug=True):
     np.savetxt(save_path, data, delimiter=' ', fmt=formatting)
 
 def load_2dmatrix_from_file(src_path, delimiter=' ', dtype='float32', debug=True):
-    src_path = safepath(src_path)
+    src_path = safe_path(src_path)
     if debug:
         assert is_path_exists(src_path), 'txt path is not correct at %s' % src_path
 

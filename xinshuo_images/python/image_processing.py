@@ -691,6 +691,6 @@ def image_concatenate(input_image, target_size=[1600, 2560], grid_size=None, edg
 		rows_end   = int(rows_start + im_height)								# 0-indexed
 		cols_start = int((cols_index - 1) * grid_width)							# 0-indexed
 		cols_end   = int(cols_start + im_width)									# 0-indexed
-		image_merged[rows_start:rows_end, cols_start:cols_end, :] = image_tmp
+		image_merged[rows_start:rows_end, cols_start:cols_end, :] = image_tmp.reshape((im_height, im_width, im_channel))
 
 	return image_merged

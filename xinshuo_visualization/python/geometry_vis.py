@@ -361,7 +361,6 @@ def visualize_bbox(bbox, fig=None, ax=None, linewidth=0.5, color_index=20, vis=T
 
     return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
 
-
 def visualize_pts_covariance(pts_array, conf=None, std=None, fig=None, ax=None, debug=True, **kwargs):
     """
     Plots an `nstd` sigma ellipse based on the mean and covariance of a point

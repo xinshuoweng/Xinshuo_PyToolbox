@@ -6,8 +6,9 @@ import numpy as np
 # from scipy.misc import imsave
 from PIL import Image
 
+from xinshuo_miscellaneous.python.private import safe_path
 from file_io import mkdir_if_missing
-from xinshuo_miscellaneous import is_path_exists_or_creatable, isimage, isscalar, is_path_exists, safepath
+from xinshuo_miscellaneous import is_path_exists_or_creatable, isimage, isscalar, is_path_exists
 ######################################################### image related #########################################################
 def load_image(src_path, resize_factor=1.0, rotate=0, mode='numpy', debug=True):
     '''
@@ -23,7 +24,7 @@ def load_image(src_path, resize_factor=1.0, rotate=0, mode='numpy', debug=True):
     '''
 
     # open path as file to avoid ResourceWarning (https://github.com/python-pillow/Pillow/issues/835)
-    src_path = safepath(src_path)
+    src_path = safe_path(src_path)
 
     if debug:
         assert is_path_exists(src_path), 'txt path is not correct at %s' % src_path
@@ -55,7 +56,7 @@ def load_image(src_path, resize_factor=1.0, rotate=0, mode='numpy', debug=True):
     return img
 
 def save_image(input_image, save_path, debug=True, vis=False):
-    save_path = safepath(save_path); mkdir_if_missing(save_path)
+    save_path = safe_path(save_path); mkdir_if_missing(save_path)
     if debug:
         assert isimage(input_image), 'input data is not image format'
         assert is_path_exists_or_creatable(save_path), 'save path is not correct'
