@@ -202,24 +202,34 @@ def isimage(image_test):
 
 ############################################################# geometry
 def is2dpts(pts_test):
-    '''
-    2d point coordinate
-    numpy array or list or tuple with 2 elements
-    '''
-    return (isnparray(pts_test) or islist(pts_test) or istuple(pts_test)) and np.array(pts_test).size == 2
+	'''
+	2d point coordinate, numpy array or list or tuple with 2 elements
+	'''
+	return (isnparray(pts_test) or islist(pts_test) or istuple(pts_test)) and np.array(pts_test).size == 2
+
+def is3dpts(pts_test):
+	'''
+	numpy array or list or tuple with 3 elements
+	'''
+	return (isnparray(pts_test) or islist(pts_test) or istuple(pts_test)) and np.array(pts_test).size == 3
 
 def is2dhomopts(pts_test):
-    '''
-    2d homogeneous point coordinate
-    numpy array or list or tuple with 3 elements
-    '''
-    return is3dpts(pts_test)
+	'''
+	2d homogeneous point coordinate, numpy array or list or tuple with 3 elements
+	'''
+	return is3dpts(pts_test)
 
 def is2dptsarray(pts_test):
     '''
     numpy array with [2, N], N >= 0
     '''
     return isnparray(pts_test) and pts_test.shape[0] == 2 and len(pts_test.shape) == 2 and pts_test.shape[1] >= 0
+
+def is3dptsarray(pts_test):
+    '''
+    numpy array with [3, N], N >= 0
+    '''
+    return isnparray(pts_test) and pts_test.shape[0] == 3 and len(pts_test.shape) == 2 and pts_test.shape[1] >= 0                   
 
 def is2dptsarray_occlusion(pts_test):
     '''
@@ -235,27 +245,21 @@ def is2dptsarray_confidence(pts_test):
 
 def is2dptsarray_homogeneous(pts_test):
     '''
-    numpy array with [2, N], N >= 0
+    numpy array with [3, N], N >= 0
     '''
     return is3dptsarray(pts_test)
 
-def is3dpts(pts_test):
+def is3dptsarray_homogeneous(pts_test):
     '''
-    numpy array or list or tuple with 3 elements
+    numpy array with [4, N], N >= 0
     '''
-    return (isnparray(pts_test) or islist(pts_test) or istuple(pts_test)) and np.array(pts_test).size == 3
+    return isnparray(pts_test) and pts_test.shape[0] == 4 and len(pts_test.shape) == 2 and pts_test.shape[1] >= 0                   
 
 def is3dhomopts(pts_test):
     '''
     numpy array or list or tuple with 3 elements
     '''
     return (isnparray(pts_test) or islist(pts_test) or istuple(pts_test)) and np.array(pts_test).size == 4
-
-def is3dptsarray(pts_test):
-    '''
-    numpy array with [3, N], N >= 0
-    '''
-    return isnparray(pts_test) and pts_test.shape[0] == 3 and len(pts_test.shape) == 2 and pts_test.shape[1] >= 0                   
 
 def is2dhomoline(line_test):
     '''
@@ -264,10 +268,10 @@ def is2dhomoline(line_test):
     return is2dhomopts(line_test)
 
 def islinesarray(line_test):
-    return isnparray(line_test) and line_test.shape[0] == 4 and len(line_test.shape) == 2 and line_test.shape[1] >= 0               # 4 x N
+    return is3dptsarray_homogeneous(line_test)
 
 def isbbox(bbox_test):
-    return isnparray(bbox_test) and len(bbox_test.shape) == 2 and bbox_test.shape[0] > 0 and bbox_test.shape[1] == 4
+    return isnparray(bbox_test) and islinesarray(bbox_test.transpose())			# N x 4
 
 def iscenterbbox(bbox_test):
-    return isnparray(bbox_test) and len(bbox_test.shape) == 2 and bbox_test.shape[0] > 0 and (bbox_test.shape[1] == 4 or bbox_test.shape[1] == 2)
+    return isnparray(bbox_test) and (islinesarray(bbox_test.transpose()) or is2dptsarray(bbox_test.transpose()))		# N x 2(4)
