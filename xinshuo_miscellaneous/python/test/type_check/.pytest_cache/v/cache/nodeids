@@ -1,9 +1,12 @@
 [
-  "test_check_value.py::test_isinteger", 
-  "test_check_value.py::test_isfloat", 
-  "test_check_value.py::test_ispositiveinteger", 
-  "test_check_value.py::test_isnonnegativeinteger", 
-  "test_check_value.py::test_isuintnparray", 
-  "test_check_value.py::test_isfloatnparray", 
-  "test_check_value.py::test_isnannparray"
+  "test_check_datatype.py::test_isstring", 
+  "test_check_datatype.py::test_islist", 
+  "test_check_datatype.py::test_islogical", 
+  "test_check_datatype.py::test_isnparray", 
+  "test_check_datatype.py::test_istuple", 
+  "test_check_datatype.py::test_isfunction", 
+  "test_check_datatype.py::test_isdict", 
+  "test_check_datatype.py::test_isext", 
+  "test_check_datatype.py::test_isrange", 
+  "test_check_datatype.py::test_isscalar"
 ]

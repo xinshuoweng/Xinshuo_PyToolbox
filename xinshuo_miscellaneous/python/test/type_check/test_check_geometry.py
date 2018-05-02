@@ -3,7 +3,7 @@
 import os, sys, numpy as np, pytest
 
 import init_paths
-from check import is2dpts, is3dpts, is2dptsarray, is3dptsarray, is2dptsarray_occlusion, is2dptsarray_confidence
+from type_check import is2dpts, is3dpts, is2dptsarray, is3dptsarray, is2dptsarray_occlusion, is2dptsarray_confidence
 
 def test_is2dpts():
 	pts = [1, 3]

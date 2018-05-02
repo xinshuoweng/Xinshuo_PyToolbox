@@ -102,41 +102,31 @@ def is_path_valid(pathname):
 	else: return True
 
 def is_path_creatable(pathname):
-    '''
-    `True` if the current user has sufficient permissions to create the passed
-    pathname; `False` otherwise.
+	'''
+	if any previous level of parent folder exists, returns true
+	'''
+	if not is_path_valid(pathname): return False
+	pathname = os.path.normpath(pathname)
+	pathname = os.path.dirname(os.path.abspath(pathname))
 
-    For folder, it needs the previous level of folder existing
-    for file, it needs the folder existing
-    '''
-    if not is_path_valid(pathname): return False
-    pathname = safepath(pathname)
-    pathname = os.path.dirname(os.path.abspath(pathname))
-    
-    # recursively to find the root existing
-    while not is_path_exists(pathname):     
-        pathname_new = os.path.dirname(os.path.abspath(pathname))
-        if pathname_new == pathname: return False
-        pathname = pathname_new
-    return os.access(pathname, os.W_OK)
-
-def is_path_exists_or_creatable(pathname):
-    '''
-    this function is to justify is given path existing or creatable
-    '''
-    try: return is_path_valid(pathname) and (os.path.exists(pathname) or is_path_creatable(pathname))
-    except OSError: return False
+	# recursively to find the previous level of parent folder existing
+	while not is_path_exists(pathname):     
+		pathname_new = os.path.dirname(os.path.abspath(pathname))
+		if pathname_new == pathname: return False
+		pathname = pathname_new
+	return os.access(pathname, os.W_OK)
 
 def is_path_exists(pathname):
-    '''
-    this function is to justify is given path existing or not
-    '''
-    try: return is_path_valid(pathname) and os.path.exists(pathname)
+	try: return is_path_valid(pathname) and os.path.exists(pathname)
+	except OSError: return False
+
+def is_path_exists_or_creatable(pathname):
+    try: return is_path_exists(pathname) or is_path_creatable(pathname)
     except OSError: return False
 
 def isfile(pathname):
     if is_path_valid(pathname):
-        pathname = safepath(pathname)
+        pathname = os.path.normpath(pathname)
         name = os.path.splitext(os.path.basename(pathname))[0]
         ext = os.path.splitext(pathname)[1]
         return len(name) > 0 and len(ext) > 0
@@ -144,7 +134,7 @@ def isfile(pathname):
 
 def isfolder(pathname):
     if is_path_valid(pathname):
-        pathname = safepath(pathname)
+        pathname = os.path.normpath(pathname)
         if pathname == './': return True
         name = os.path.splitext(os.path.basename(pathname))[0]
         ext = os.path.splitext(pathname)[1]
@@ -235,13 +225,13 @@ def is2dptsarray_occlusion(pts_test):
     '''
     numpy array with [3, N], N >= 0. The third row represents occlusion, which contains only 1 or 0 or -1
     '''
-    return is3dptsarray(pts_test) and (np.logical_or(np.logical_or(pts_test[2, :] == 0, pts_test[2, :] == 1), pts_test[2, :] == -1)).all()
+    return is3dptsarray(pts_test) and bool((np.logical_or(np.logical_or(pts_test[2, :] == 0, pts_test[2, :] == 1), pts_test[2, :] == -1)).all())
 
 def is2dptsarray_confidence(pts_test):
     '''
     numpy array with [3, N], N >= 0, the third row represents confidence, which contains a floating value bwtween [-1, 2] (as sometimes is 1.01 or -0.01)
     '''
-    return is3dptsarray(pts_test) and (pts_test[2, :] >= -1).all() and (pts_test[2, :] <= 2).all()
+    return is3dptsarray(pts_test) and bool((pts_test[2, :] >= -1).all()) and bool((pts_test[2, :] <= 2).all())
 
 def is2dptsarray_homogeneous(pts_test):
     '''

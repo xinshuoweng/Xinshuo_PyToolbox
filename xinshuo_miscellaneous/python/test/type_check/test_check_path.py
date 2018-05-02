@@ -2,7 +2,7 @@
 # email: xinshuo.weng@gmail.com
 import init_paths, pytest
 
-from type_check import is_path_exists, is_path_valid, is_path_creatable, is_path_exists_or_creatable
+from type_check import is_path_exists, is_path_valid, is_path_creatable, is_path_exists_or_creatable, isfolder, isfile
 
 def test_is_path_valid():
 	path = './'
@@ -23,6 +23,10 @@ def test_is_path_creatable():
 	path = 'test'
 	assert is_path_creatable(path)
 	path = 'test.txt'
+	assert is_path_creatable(path)
+	path = '/home/xinshuo/aaa.txt'
+	assert is_path_creatable(path)
+	path = '/home/xinshuo/aaa/aaa'
 	assert is_path_creatable(path)
 
 	path = 123
@@ -69,6 +73,48 @@ def test_is_path_exists_or_creatable():
 	assert is_path_exists_or_creatable(path) is False
 	path = 123
 	assert is_path_exists_or_creatable(path) is False
+
+def test_isfolder():
+	path = './'
+	assert isfolder(path)
+	path = 'test/'
+	assert isfolder(path)
+	path = 'test'
+	assert isfolder(path)
+	path = '/home/xinshuo/test'
+	assert isfolder(path)
+	path = '.'
+	assert isfolder(path)
+
+	path = ''
+	assert isfolder(path) is False
+	path = 123
+	assert isfolder(path) is False
+	path = 'test.txt'
+	assert isfolder(path) is False
+	path = '/home/xinshuo/test.txt'
+	assert isfolder(path) is False
+
+def test_isfile():
+	path = 'test.txt'
+	assert isfile(path)
+	path = '/home/xinshuo/test.txt'
+	assert isfile(path)
+
+	path = ''
+	assert isfile(path) is False
+	path = 123
+	assert isfile(path) is False
+	path = './'
+	assert isfile(path) is False
+	path = 'test/'
+	assert isfile(path) is False
+	path = 'test'
+	assert isfile(path) is False
+	path = '/home/xinshuo/test'
+	assert isfile(path) is False
+	path = '.'
+	assert isfile(path) is False
 
 if __name__ == '__main__':
 	pytest.main([__file__])

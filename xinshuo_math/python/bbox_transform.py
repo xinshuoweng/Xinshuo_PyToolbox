@@ -140,8 +140,6 @@ def get_center_crop_bbox(center_bboxes_in, im_width=None, im_height=None, debug=
 	crop_bboxes = crop_bboxes.astype('int64')
 
 	return crop_bboxes
-
-
 # to test
 
 ############################################# pts related transform #################################

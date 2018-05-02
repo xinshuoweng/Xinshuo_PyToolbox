@@ -3,7 +3,7 @@
 import os, sys, numpy as np, pytest
 
 import init_paths
-from check import isstring, islist, islogical, isscalar, isnparray, istuple, isfunction, isdict, isext, isrange
+from type_check import isstring, islist, islogical, isscalar, isnparray, istuple, isfunction, isdict, isext, isrange
 
 def test_isstring():
 	input_test = ''

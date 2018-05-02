@@ -4,7 +4,7 @@
 # this file includes private functions for internal use only
 import copy
 
-from type_check import islist
+from type_check import islist, isstring
 
 ################################################################## conversion ##################################################################
 def safe_list(input_data, warning=True, debug=True):
