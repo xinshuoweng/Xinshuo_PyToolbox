@@ -69,7 +69,7 @@ def isfloatnparray(nparray_test):
 	return isnparray(nparray_test) and nparray_test.dtype == 'float32'
 
 def isnannparray(nparray_test):
-	return isnparray(nparray_test) and np.isnan(nparray_test).any()
+	return isnparray(nparray_test) and bool(np.isnan(nparray_test).any())
 
 ############################################################# list
 def islistoflist(list_test):

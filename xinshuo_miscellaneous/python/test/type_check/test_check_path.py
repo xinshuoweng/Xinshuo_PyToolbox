@@ -2,7 +2,7 @@
 # email: xinshuo.weng@gmail.com
 import init_paths, pytest
 
-from check import is_path_exists, is_path_valid, is_path_creatable, is_path_exists_or_creatable
+from type_check import is_path_exists, is_path_valid, is_path_creatable, is_path_exists_or_creatable
 
 def test_is_path_valid():
 	path = './'

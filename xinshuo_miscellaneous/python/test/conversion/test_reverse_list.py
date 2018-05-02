@@ -6,7 +6,7 @@ import init_paths
 from conversion import reverse_list
 from xinshuo_miscellaneous import CHECK_EQ_LIST_ORDERED
 
-def test_remove_list_from_list():
+def test_reverse_list():
 	print('check basic')
 	list1 = [1, 2, 3, 4]
 	reversed_list = reverse_list(list1)
@@ -25,4 +25,4 @@ def test_remove_list_from_list():
 	print('\n\nDONE! SUCCESSFUL!!\n')
 
 if __name__ == '__main__':
-	test_remove_list_from_list()
+	test_reverse_list()

@@ -97,7 +97,8 @@ def list_reorder(input_list, order_index, debug=True):
 		assert len(input_list) == len(order_index), 'length of input lists is not equal'
 		assert all(isscalar(index_tmp) for index_tmp in order_index), 'the list of order is not correct'
 
-	return [ordered for whatever, ordered in sorted(zip(order_index, input_list))]
+	reordered_list = [ordered for whatever, ordered in sorted(zip(order_index, input_list))]
+	return reordered_list
 
 def merge_listoflist(listoflist, debug=True):
 	'''

@@ -4,7 +4,7 @@ import os, sys, numpy as np, pytest
 from PIL import Image
 
 import init_paths
-from check import isimsize, isimage_dimension, iscolorimage_dimension, isgrayimage_dimension, isuintimage, isfloatimage, isnpimage, ispilimage, isimage
+from type_check import isimsize, isimage_dimension, iscolorimage_dimension, isgrayimage_dimension, isuintimage, isfloatimage, isnpimage, ispilimage, isimage
 
 def test_isimsize():
 	input_test = np.zeros((100, 100), dtype='uint8')
