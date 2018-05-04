@@ -12,7 +12,7 @@ from file_io import mkdir_if_missing
 from xinshuo_miscellaneous import is_path_exists_or_creatable, isimage, isscalar, is_path_exists
 from xinshuo_images import image_rotate, image_resize
 ######################################################### image related #########################################################
-def load_image(src_path, resize_factor=1.0, target_size=None, input_angle=0, warning=True, debug=True):
+def load_image(src_path, resize_factor=None, target_size=None, input_angle=0, warning=True, debug=True):
     '''
     load an image from given path, with preprocessing of resizing and rotating
 
@@ -22,16 +22,17 @@ def load_image(src_path, resize_factor=1.0, target_size=None, input_angle=0, war
         input_angle:        a scalar, counterclockwise rotation in degree
 
     output:
-        img:                an uint8 rgb numpy image
+        np_image:                an uint8 rgb numpy image
     '''
     src_path = safe_path(src_path, warning=warning, debug=debug)
     if debug: assert is_path_exists(src_path), 'txt path is not correct at %s' % src_path
+    if resize_factor is None and target_size is None: resize_factor = 1.0
 
     with open(src_path, 'rb') as f:
         with Image.open(f) as img:
             img = img.convert('RGB')
-            img = image_rotate(img, input_angle=input_angle, warning=warning, debug=debug)
-            img = image_resize(img, resize_factor=resize_factor, target_size=target_size, warning=warning, debug=debug)
+            np_image = image_rotate(img, input_angle=input_angle, warning=warning, debug=debug)
+            np_image = image_resize(np_image, resize_factor=resize_factor, target_size=target_size, warning=warning, debug=debug)
             # scaling
             # if isscalar(resize_factor):
                 # width, height = img.size
@@ -42,7 +43,7 @@ def load_image(src_path, resize_factor=1.0, target_size=None, input_angle=0, war
             # else: assert False, 'the resize factor is neither a scalar nor a (width, height)'
             
             # if mode == 'numpy': img = np.array(img)
-    return img
+    return np_image
 
 def save_image(input_image, save_path, warning=True, debug=True):
     save_path = safe_path(save_path, warning=warning, debug=debug); mkdir_if_missing(save_path)

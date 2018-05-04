@@ -641,7 +641,7 @@ def image_rotate(input_image, input_angle, warning=True, debug=True):
 	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
 	if isfloatimage(np_image): np_image = (np_image * 255.).astype('uint8')
 	pil_image = Image.fromarray(np_image)
-	pil_image = pil_image.rotate(rotation_angle, expand=True)
+	if rotation_angle != 0: pil_image = pil_image.rotate(rotation_angle, expand=True)
 	rotated_image = np.array(pil_image).astype('uint8')
 
 	return rotated_image
