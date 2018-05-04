@@ -2,7 +2,7 @@
 # email: xinshuo.weng@gmail.com
 
 # this file includes private functions for internal use only
-import copy
+import copy, os
 
 from type_check import islist, isstring
 

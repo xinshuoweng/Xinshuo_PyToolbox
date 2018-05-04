@@ -173,7 +173,7 @@ def load_list_from_folder(folder_path, ext_filter=None, depth=1, recursive=False
 
     # save list to a path
     if save_path is not None:
-        save_path = safepath(save_path)
+        save_path = safe_path(save_path)
         if debug:
             assert is_path_exists_or_creatable(save_path), 'the file cannot be created'
         with open(save_path, 'w') as file:
