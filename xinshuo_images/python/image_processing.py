@@ -11,6 +11,26 @@ from xinshuo_miscellaneous import isfloatimage, isuintimage, isnparray, iscolori
 from xinshuo_math import hist_equalization, clip_bboxes_TLWH, get_center_crop_bbox
 
 ############################################# color transform #################################
+def rgb2gray(input_image, warning=True, debug=True):
+	'''
+	convert a color image to a grayscale image (1-channel)
+		
+	parameters:
+		input_image:	an pil or numpy image
+
+	output:
+		gray_image:		an uint8 HW gray numpy image
+	'''
+	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
+	if isfloatimage(np_image): np_image = (np_image * 255.).astype('uint8')
+
+	if debug:
+		assert iscolorimage_dimension(np_image), 'the input numpy image is not correct: {}'.format(np_image.shape)
+		assert isuintimage(np_image), 'the input numpy image should be uint8 image in order to use opencv'
+
+	gray_image = cv2.cvtColor(np_image, cv2.COLOR_RGB2GRAY)
+	return gray_image
+
 def gray2rgb(input_image, with_color=True, cmap='jet', warning=True, debug=True):
 	'''
 	convert a grayscale image (1-channel) to a rgb image

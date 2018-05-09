@@ -5,7 +5,7 @@
 import numpy as np
 
 from file_io import load_txt_file
-from xinshuo_miscellaneous import is_path_exists_or_creatable, is2dptsarray_occlusion, is2dptsarray, remove_empty_item_from_list, str2num
+from xinshuo_miscellaneous import is_path_exists_or_creatable, is2dptsarray_occlusion, is2dptsarray_confidence, is2dptsarray, remove_empty_item_from_list, str2num
 
 # note that, the top left point is (1, 1) in 300-W instead of zero-indexed
 def anno_writer(pts_array, pts_savepath, num_pts=68, anno_version=1, debug=True):
@@ -17,7 +17,7 @@ def anno_writer(pts_array, pts_savepath, num_pts=68, anno_version=1, debug=True)
     '''
     if debug:
         assert is_path_exists_or_creatable(pts_savepath), 'the save path is not correct'
-        assert (is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array)) and pts_array.shape[1] == num_pts, 'the input point is not correct'
+        assert (is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array) or is2dptsarray_confidence(pts_array)) and pts_array.shape[1] == num_pts, 'the input point is not correct'
 
     with open(pts_savepath, 'w') as file:
         file.write('version: %d\n' % anno_version)
@@ -41,8 +41,9 @@ def anno_parser(anno_path, num_pts=None, anno_version=None, warning=True, debug=
         pts_array: 3 x num_pts (x, y, oculusion)          
     '''
     data, num_lines = load_txt_file(anno_path, debug=debug)
+    # print(data)
     if debug:
-        assert data[0].find('version: ') == 0, 'version is not correct'
+        assert data[0].find('version: ') == 0, 'version is not correct: %s' % anno_path
         assert data[1].find('n_points: ') == 0, 'number of points in second line is not correct'
         assert data[2] == '{' and data[-1] == '}', 'starting and end symbol is not correct'
     version = str2num(data[0][len('version: '):])

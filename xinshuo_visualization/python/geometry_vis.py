@@ -34,7 +34,7 @@ def visualize_pts_array(input_pts, covariance=False, color_index=0, pts_size=20,
     # obtain a label list if required but not provided
     if debug: assert islogical(label), 'label flag is not correct'
     if label and (label_list is None): label_list = [str(i+1) for i in xrange(num_pts)]
-    if debug: assert islist(label_list) and all(isstring(label_tmp) for label_tmp in label_list), 'labels are not correct'
+    if label and debug: assert islist(label_list) and all(isstring(label_tmp) for label_tmp in label_list), 'labels are not correct'
 
     # obtain the color index
     if islist(color_index):
@@ -96,9 +96,7 @@ def visualize_lines(lines_array, color_index=0, line_width=3, fig=None, ax=None,
         lines_array:            4 x num_lines, each column denotes (x1, y1, x2, y2)
     '''
 
-    if debug:    
-        assert islinesarray(lines_array), 'input array of lines are not correct'
-
+    if debug: assert islinesarray(lines_array), 'input array of lines are not correct'
     fig, ax = get_fig_ax_helper(fig=fig, ax=ax)
 
     # plot lines
@@ -128,7 +126,7 @@ def visualize_pts_line(pts_array, line_index_list, method=2, threshold=None, pts
     '''
 
     if debug:
-        assert is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array), 'input points are not correct'
+        assert is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array) or is2dptsarray_confidence(pts_array), 'input points are not correct'
         assert islist(line_index_list), 'the list of index is not correct'
         assert method == 2 or method == 1, 'the plot method is not correct'
 
