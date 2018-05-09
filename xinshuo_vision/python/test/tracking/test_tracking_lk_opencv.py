@@ -14,10 +14,6 @@ def test_tracking_lk_opencv():
 	input_pts = np.random.rand(2, 40)
 	input_pts *= 260
 	pts_forward, pts_bacward, backward_err = tracking_lk_opencv(image_prev, image_next, input_pts, backward=True)
-	# print(pts_forward)
-	# print(pts_bacward)
-	# print(backward_err)
-	# visualize_image(img, vis=True)
 
 	print('\n\nDONE! SUCCESSFUL!!\n')
 	
