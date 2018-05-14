@@ -1,13 +1,20 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
 
-
+import matplotlib.pyplot as plt, numpy as np
 # import seaborn as sns
 # from pandas import DataFrame
 # from sklearn.neighbors import NearestNeighbors
-# from scipy.stats import norm, chi2
 from terminaltables import AsciiTable
 from collections import Counter
+
+from private import save_vis_close_helper
+from xinshuo_miscellaneous import isdict, islogical, is_path_exists, isscalar, islist, is_path_exists_or_creatable, CHECK_EQ_LIST_UNORDERED, isnparray, isinteger, isstring, scalarlist2strlist, islistoflist, iscolorimage_dimension, isgrayimage_dimension
+from xinshuo_math import calculate_truncated_mse
+
+color_set = ['r', 'b', 'g', 'c', 'm', 'y', 'k', 'w', 'lime', 'cyan', 'aqua']
+linestyle_set = ['-', '--', '-.', ':', None, ' ', 'solid', 'dashed']
+dpi = 80
 
 def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, truncated_list=None, display2terminal=True, display_list=None, title=None, fig=None, ax=None, debug=True, vis=True, pck_savepath=None, table_savepath=None, closefig=True):
     '''
@@ -371,7 +378,7 @@ def visualize_bar(data, bin_size=2.0, title='Bar Graph of Key-Value Pair', xlabe
         index_list = range(len(data))
         frequencies = data
 
-    index_str_list = scalar_list2str_list(index_list, debug=debug)
+    index_str_list = scalarlist2strlist(index_list, debug=debug)
     index_list = np.array(index_list)
     fig, ax = get_fig_ax_helper(fig=None, ax=None)
     # ax.set_xticks(index_list)

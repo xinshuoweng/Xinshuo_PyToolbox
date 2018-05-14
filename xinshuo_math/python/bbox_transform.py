@@ -8,7 +8,7 @@ from math import radians as rad
 from private import safe_bbox, safe_center_bbox, bboxcheck_TLBR, bboxcheck_TLWH
 from math_geometry import get_2dline_from_pts_slope, get_2dpts_from_lines
 from math_conversion import imagecoor2cartesian, cartesian2imagecoor
-from xinshuo_miscellaneous import isnparray, is2dptsarray, is2dptsarray_occlusion, is2dpts, isinteger, isbbox, islist, iscenterbbox
+from xinshuo_miscellaneous import isnparray, is2dptsarray, is2dptsarray_occlusion, is2dptsarray_confidence, is2dpts, isinteger, isbbox, islist, iscenterbbox
 
 # general format instruction
 # TLBR:     top left bottom right, stands for two corner points, the top left point is included, the bottom right point is not included
@@ -212,7 +212,7 @@ def pts_conversion_bbox(pts_array, bboxes_in, debug=True):
     '''
     np_bboxes = safe_bbox(bboxes_in, debug=debug)
     if debug:
-        assert is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array), 'the input points should have shape: 2 or 3 x num_pts vs %d x %s' % (pts_array.shape[0], pts_array.shape[1])
+        assert is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array) or is2dptsarray_confidence(pts_array), 'the input points should have shape: 2 or 3 x num_pts vs %d x %s' % (pts_array.shape[0], pts_array.shape[1])
         assert isbbox(np_bboxes), 'the input bounding box is not correct'
 
     pts_out = pts_array.copy()
@@ -231,7 +231,7 @@ def pts_conversion_back_bbox(pts_array, bboxes_in, debug=True):
     '''
     np_bboxes = safe_bbox(bboxes_in, debug=debug)
     if debug:
-        assert is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array), 'the input points should have shape: 2 or 3 x num_pts vs %d x %s' % (pts_array.shape[0], pts_array.shape[1])
+        assert is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array) or is2dptsarray_confidence(pts_array), 'the input points should have shape: 2 or 3 x num_pts vs %d x %s' % (pts_array.shape[0], pts_array.shape[1])
         assert isbbox(np_bboxes), 'the input bounding box is not correct'
 
     pts_out = pts_array.copy()

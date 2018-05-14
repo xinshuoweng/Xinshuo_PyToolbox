@@ -144,7 +144,7 @@ def scalarlist2strlist(scalar_list, debug=True):
 	for item in scalar_list: str_list.append(str(item))
 	return str_list
 
-def scalarlist2floa_list(scalar_list, debug=True):
+def scalarlist2floatlist(scalar_list, debug=True):
 	'''
 	convert a list of scalar to a list of floating number
 	'''

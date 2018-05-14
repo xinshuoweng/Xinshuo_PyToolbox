@@ -3,12 +3,13 @@
 import numpy as np, matplotlib.pyplot as plt, colorsys
 import matplotlib.collections as plycollections
 from matplotlib.patches import Ellipse
+# from scipy.stats import norm, chi2
 
 from private import save_vis_close_helper, get_fig_ax_helper
 from xinshuo_math.python.private import safe_2dptsarray
 
 from xinshuo_math import pts_euclidean, bbox_TLBR2TLWH, bboxcheck_TLBR
-from xinshuo_miscellaneous import islogical, islist, isstring, is2dptsarray_confidence, is2dptsarray_occlusion, is2dptsarray, isdict
+from xinshuo_miscellaneous import islogical, islist, isstring, is2dptsarray_confidence, is2dptsarray_occlusion, is2dptsarray, isdict, list_reorder, list2tuple
 
 color_set = ['r', 'b', 'g', 'c', 'm', 'y', 'k', 'w', 'lime', 'cyan', 'aqua']
 color_set_big = ['aqua', 'azure', 'red', 'black', 'blue', 'brown', 'cyan', 'darkblue', 'fuchsia', 'gold', 'green', 'grey', 'indigo', 'magenta', 'lime', 'yellow', 'white', 'tomato', 'salmon']
