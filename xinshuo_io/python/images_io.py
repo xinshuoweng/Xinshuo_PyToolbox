@@ -35,8 +35,24 @@ def load_image(src_path, resize_factor=None, target_size=None, input_angle=0, wa
             np_image = image_resize(np_image, resize_factor=resize_factor, target_size=target_size, warning=warning, debug=debug)
     return np_image
 
-def save_image(input_image, save_path, warning=True, debug=True):
+def save_image(input_image, save_path, resize_factor=None, target_size=None, input_angle=0, warning=True, debug=True):
+    '''
+    load an image to a given path, with preprocessing of resizing and rotating
+
+    parameters:
+        resize_factor:      a scalar
+        target_size:        a list of tuple or numpy array with 2 elements, representing height and width
+        input_angle:        a scalar, counterclockwise rotation in degree
+    '''
     save_path = safe_path(save_path, warning=warning, debug=debug); mkdir_if_missing(save_path)
+    if debug: is_path_exists_or_creatable(save_path), 'the path is not good to save'
     np_image, _ = safe_image(input_image, warning=warning, debug=debug)
+    if resize_factor is None and target_size is None: resize_factor = 1.0           # default not to have resizing
+
+    # preprocessing the image before saving
+    np_image = image_rotate(np_image, input_angle=input_angle, warning=warning, debug=debug)
+    np_image = image_resize(np_image, resize_factor=resize_factor, target_size=target_size, warning=warning, debug=debug)
+
+    # saving
     pil_image = Image.fromarray(np_image)
     pil_image.save(save_path)
