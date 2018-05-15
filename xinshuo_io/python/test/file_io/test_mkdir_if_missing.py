@@ -6,8 +6,6 @@ import init_paths
 from file_io import mkdir_if_missing
 
 def test_mkdir_if_missing():
-	image_path = '../lena.png'
-
 	print('test repetitive')
 	path = './'
 	mkdir_if_missing(path)
@@ -31,7 +29,7 @@ def test_mkdir_if_missing():
 		sys.exit('\nwrong! never should be here\n\n')
 	except AssertionError:
 		print('the input should be a string')
-		
+
 	print('\n\nDONE! SUCCESSFUL!!\n')
 	
 if __name__ == '__main__':

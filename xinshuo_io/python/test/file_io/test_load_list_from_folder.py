@@ -6,8 +6,6 @@ import init_paths
 from file_io import load_list_from_folder
 
 def test_load_list_from_folder():
-	image_path = '../lena.png'
-
 	print('basic')
     path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../test')
     datalist, num_elem = load_list_from_folder(folder_path=path, ext_filter='txt')   
