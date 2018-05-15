@@ -21,7 +21,7 @@ def safe_list(input_data, warning=True, debug=True):
 	safe_data = copy.copy(input_data)
 	return safe_data
 
-def safe_path(input_data, warning=True, debug=True):
+def safe_path(input_path, warning=True, debug=True):
     '''
     convert path to a valid OS format, e.g., empty string '' to '.', remove redundant '/' at the end from 'aa/' to 'aa'
 
@@ -31,7 +31,7 @@ def safe_path(input_data, warning=True, debug=True):
     outputs:
     	safe_data:		a valid path in OS format
     '''
-    if debug: assert isstring(input_data), 'path is not a string: %s' % input_data
-    safe_data = copy.copy(input_data)
+    if debug: assert isstring(input_path), 'path is not a string: %s' % input_path
+    safe_data = copy.copy(input_path)
     safe_data = os.path.normpath(safe_data)
     return safe_data
