@@ -3,13 +3,11 @@
 
 # this file includes classes of linear filters ready applied on the images
 import numpy as np
-# from scipy import ndimage
+from scipy import ndimage
 
 from private import safe_image
 from xinshuo_miscellaneous import isimsize, iscolorimage_dimension, isgrayimage_dimension, isuintimage, isfloatimage
 from xinshuo_math import data_normalize
-
-# problems with convolving laplacian and sobel filter with color images
 
 class linear_filter(object):
 	def __init__(self, filter_size=None, warning=True, debug=True):
@@ -21,7 +19,7 @@ class linear_filter(object):
 		self.warning = warning
 		self.weights = None
 
-	def expand_3d(self):
+	def __expand_3d(self):
 		'''
 		broadcast the current 2D filter to 3D
 
@@ -53,10 +51,9 @@ class linear_filter(object):
 			assert isfloatimage(np_image), 'the input image should be a float image'
 			self.weights is not None, 'the kernel is not defined yet'
 
-		if iscolorimage_dimension(np_image):
-			self.weights = self.expand_3d()			# expand the filter to 3D for color image
-		elif isgrayimage_dimension(np_image):
-			np_image = np_image.reshape(np_image.shape[0], np_image.shape[1])		# squeeze the image dimension to 2
+		if iscolorimage_dimension(np_image): self.weights = self.__expand_3d()			# expand the filter to 3D for color image
+		elif isgrayimage_dimension(np_image): np_image = np_image.reshape(np_image.shape[0], np_image.shape[1])		# squeeze the image dimension to 2
+		else: assert False, 'the dimension of the image is not correct'
 
 		filtered_image = ndimage.filters.convolve(np_image, self.weights)
 		return filtered_image
@@ -68,11 +65,11 @@ class linear_filter(object):
 		outputs:
 			weights:	float32 numpy array with gaussian weights
 		'''
-		gaussian = np.array([[1, 4, 6, 4, 1],
+		gaussian = np.array([[1,  4,  6,  4, 1],
 							 [4, 16, 24, 16, 4],
 							 [6, 24, 36, 24, 6],
 							 [4, 16, 24, 16, 4],
-							 [1, 4, 6, 4, 1]], dtype='float32')
+							 [1,  4,  6,  4, 1]], dtype='float32')
 		
 		self.weights = 1. / 256 * gaussian
 		return self.weights
@@ -107,4 +104,21 @@ class linear_filter(object):
 		elif axis == 'y': sobel = np.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]], dtype='float32')
 		
 		self.weights = 1. / 8 * sobel
+		return self.weights.reshape((3, 3))
+
+	def unsharp_mask(self):
+		'''
+		generate the filter of unsharp mask, the filter is composition of minus gaussian blur 
+		plus an original image
+
+		outputs:
+			weights:	float32 numpy array with unsharp masking weights
+		'''
+		unsharp_mask = np.array([[1,  4,   6,   4, 1],
+							 	 [4, 16,  24,  16, 4],
+							 	 [6, 24, -476, 24, 6],
+							 	 [4, 16,  24,  16, 4],
+							 	 [1,  4,   6,   4, 1]], dtype='float32')
+		
+		self.weights = (-1.0) / 256 * unsharp_mask
 		return self.weights

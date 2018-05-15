@@ -6,7 +6,7 @@ import struct, numpy as np
 from itertools import islice
 
 from private import safe_list
-from type_check import isstring, isinteger, isnparray, islist, isext, islistoflist, isrange, isscalar
+from type_check import isstring, isinteger, isnparray, islist, isext, islistoflist, isrange, isscalar, isfloat
 
 ######################################################### list related #########################################################
 def remove_list_from_list(input_list, list_toremove_src, warning=True, debug=True):
@@ -173,7 +173,7 @@ def floatlist2bytes(float_list, debug=True):
 	if debug: assert isfloat(float_list) or (islist(float_list) and all(isfloat(float_tmp) for float_tmp in float_list)), 'input is not a floating number or a list of floating number'
 
 	# convert a single floating number to a list with one item
-	if isfloat(float_list):float_list = [float_list]
+	if isfloat(float_list): float_list = [float_list]
 	try: binary = struct.pack('%sf' % len(float_list), *float_list)
 	except ValueError: print('Warnings!!!! Failed to convert to bytes!!!!!')
 

@@ -1,8 +1,6 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
 from PIL import Image
-from scipy import signal
-from scipy import ndimage
 import numpy as np
 
 import init_paths
