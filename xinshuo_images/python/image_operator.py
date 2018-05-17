@@ -3,7 +3,7 @@
 
 # this file includes classes of linear filters ready applied on the images
 import numpy as np
-from scipy import ndimage
+# from scipy import ndimage
 
 from private import safe_image
 from xinshuo_miscellaneous import isimsize, iscolorimage_dimension, isgrayimage_dimension, isuintimage, isfloatimage

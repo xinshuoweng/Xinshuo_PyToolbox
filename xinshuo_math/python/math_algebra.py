@@ -4,7 +4,8 @@
 # this file includes functions of basic algebra in math
 import math, cv2, numpy as np
 
-from private import safe_2dptsarray, safe_angle
+from private import safe_2dptsarray, safe_angle, safe_npdata
+from xinshuo_miscellaneous.python.private import safe_list
 from xinshuo_miscellaneous import is2dptsarray, islist, isscalar, isnparray, istuple
 
 # all rotation angle is processes in degree
@@ -52,26 +53,19 @@ def pts_rotate2D(pts_array, rotation_angle, im_height, im_width, warning=True, d
     return
         pts_array:          2 x num_pts
     '''
-    if debug:
-        assert is2dptsarray(pts_array), 'the input point array does not have a good shape'
-
+    if debug: assert is2dptsarray(pts_array), 'the input point array does not have a good shape'
     rotation_angle = safe_angle(rotation_angle, warning=warning, debug=True)             # ensure to be in [-180, 180]
 
-    if rotation_angle > 0:
-        cols2rotated = im_width
-        rows2rotated = im_width
-    else:
-        cols2rotated = im_height
-        rows2rotated = im_height
+    if rotation_angle > 0: cols2rotated, rows2rotated = im_width, im_width
+    else: cols2rotated, rows2rotated = im_height, im_height
     rotation_matrix = cv2.getRotationMatrix2D((cols2rotated/2, rows2rotated/2), rotation_angle, 1)         # 2 x 3
-    
     num_pts = pts_array.shape[1]
     pts_rotate = np.ones((3, num_pts), dtype='float32')             # 3 x num_pts
     pts_rotate[0:2, :] = pts_array         
 
     return np.dot(rotation_matrix, pts_rotate)         # 2 x num_pts
 
-def calculate_truncated_mse(error_list, truncated_list, debug=True):
+def calculate_truncated_mse(error_list, truncated_list, warning=True, debug=True):
     '''
     calculate the mse truncated by a set of thresholds, and return the truncated MSE and the percentage of how many points' error is lower than the threshold
 
@@ -82,23 +76,22 @@ def calculate_truncated_mse(error_list, truncated_list, debug=True):
     return
         tmse_dict:          a dictionary where each entry is a dict and has key 'T-MSE' & 'percentage'
     '''
-    if debug:
-        assert islist(error_list) and all(isscalar(error_tmp) for error_tmp in error_list), 'the input error list is not correct'
-        assert islist(truncated_list) and all(isscalar(thres_tmp) for thres_tmp in truncated_list), 'the input truncated list is not correct'
-        assert len(truncated_list) > 0, 'there is not entry in truncated list'
-
+    if debug: assert islistofscalar(error_list) and islistofscalar(truncated_list), 'the input error list and truncated list are not correct'
     tmse_dict = dict()
     num_entry = len(error_list)
-    error_array = np.asarray(error_list)
-    
+    error_array = safe_npdata(error_list, warning=warning, debug=debug)
+    truncated_list = safe_list(truncated_list, warning=warning, debug=debug)
+
     for threshold in truncated_list:
         error_index = np.where(error_array[:] < threshold)[0].tolist()              # plot visible points in red color
         error_interested = error_array[error_index]
-        
         entry = dict()
-        entry['T-MSE'] = np.mean(error_interested)
-        entry['percentage'] = len(error_index) / float(num_entry)
+        if error_interested.size == 0: 
+            entry['T-MSE'] = 0
+            entry['percentage'] = 0
+        else:
+            entry['T-MSE'] = np.mean(error_interested)
+            entry['percentage'] = len(error_index) / float(num_entry)
         tmse_dict[threshold] = entry
 
     return tmse_dict
-
