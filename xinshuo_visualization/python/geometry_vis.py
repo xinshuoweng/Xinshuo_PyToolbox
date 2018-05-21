@@ -227,12 +227,8 @@ def visualize_pts(pts, title=None, fig=None, ax=None, display_range=False, xlim=
             assert xlim[1] > xlim[0] and ylim[1] > ylim[0], 'the input range for x and y is not correct'
 
     # figure setting
-    width = 1024
-    height = 1024
-    figsize = width / float(dpi), height / float(dpi)
-    if fig is None:
-        fig = plt.figure(figsize=figsize)
-
+    width, height = 1024, 1024
+    fig, _ = get_fig_ax_helper(fig=fig, ax=ax, width=width, height=height)
     if ax is None:
         plt.title(title, fontsize=20)
 
@@ -408,10 +404,8 @@ def visualize_covariance_ellipse(covariance, center, conf=None, std=None, fig=No
         A covariance ellipse
     """
     if debug:
-        if conf is not None:
-            assert isscalar(conf) and conf >= 0 and conf <= 1, 'the confidence is not in a good range'
-        if std is not None:
-            assert ispositiveinteger(std), 'the number of standard deviation should be a positive integer'
+        if conf is not None: assert isscalar(conf) and conf >= 0 and conf <= 1, 'the confidence is not in a good range'
+        if std is not None: assert ispositiveinteger(std), 'the number of standard deviation should be a positive integer'
 
     def eigsorted(covariance):
         vals, vecs = np.linalg.eigh(covariance)

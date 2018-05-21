@@ -76,6 +76,14 @@ def islistoflist(list_test):
 	if not islist(list_test): return False
 	return all(islist(tmp) for tmp in list_test) and len(list_test) > 0
 
+def islistofstring(list_test):
+	if not islist(list_test): return False
+	return all(isstring(tmp) for tmp in list_test) and len(list_test) > 0
+
+def islistofimage(list_test):
+	if not islist(list_test): return False
+	return all(isimage(tmp) for tmp in list_test) and len(list_test) > 0
+
 def islistofdict(list_test):
 	if not islist(list_test): return False
 	return all(isdict(tmp) for tmp in list_test) and len(list_test) > 0

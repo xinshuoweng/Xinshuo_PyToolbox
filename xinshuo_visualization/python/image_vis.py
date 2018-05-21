@@ -11,11 +11,10 @@ import matplotlib.pyplot as plt
 # with catch_warnings(record=True):
     # simplefilter('ignore', FutureWarning)
 
-from private import save_vis_close_helper
+from private import save_vis_close_helper, get_fig_ax_helper
 from geometry_vis import visualize_pts_array
 from xinshuo_images.python.private import safe_image
 from xinshuo_miscellaneous import  remove_list_from_list, isdict, islist, iscolorimage_dimension, isgrayimage_dimension
-dpi = 80
 
 def visualize_image(input_image, bgr2rgb=False, save_path=None, vis=False, warning=True, debug=True, closefig=True):
     '''
@@ -32,8 +31,7 @@ def visualize_image(input_image, bgr2rgb=False, save_path=None, vis=False, warni
     '''
     np_image, _ = safe_image(input_image, warning=warning, debug=debug)
     width, height = np_image.shape[1], np_image.shape[0]
-    figsize = width / float(dpi), height / float(dpi)
-    fig = plt.figure(figsize=figsize)
+    fig, _ = get_fig_ax_helper(fig=None, ax=None, width=width, height=height)
     ax = fig.add_axes([0, 0, 1, 1])
     ax.axis('off')
     
@@ -117,14 +115,12 @@ def visualize_image_with_pts_bbox_tracking(image, pts_array, valid_index, window
     '''
     if debug:
         # assert is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array), 'input points are not correct'
-        if pts_anno is not None:
-            assert pts_array.shape == pts_anno.shape, 'the input points from prediction and annotation have to have the same shape'
+        if pts_anno is not None: assert pts_array.shape == pts_anno.shape, 'the input points from prediction and annotation have to have the same shape'
         assert islist(valid_index), 'the valid index is not a list'
 
     num_pts_all = pts_array.shape[1]
     num_pts_succeed = len(valid_index)
-    if debug:
-        assert num_pts_succeed <= num_pts_all, 'the number of points should be less than number of points in total'
+    if debug: assert num_pts_succeed <= num_pts_all, 'the number of points should be less than number of points in total'
 
     color_anno_index = 16                         # cyan
     color_succeed_index = 15                       # yellow
@@ -142,8 +138,7 @@ def visualize_image_with_pts_bbox_tracking(image, pts_array, valid_index, window
     fig, ax = visualize_pts_array(pts_failed, fig=fig, ax=ax, color_index=color_failed_index, pts_size=pts_size, debug=debug, closefig=False)
     bbox = get_center_crop_bbox(pts_failed, window_size, window_size, debug=debug)
     
-    if pts_anno is None:
-        return visualize_bbox(bbox, fig=fig, ax=ax, color_index=color_failed_index, vis=vis, save_path=save_path, debug=debug, closefig=closefig)    
+    if pts_anno is None: return visualize_bbox(bbox, fig=fig, ax=ax, color_index=color_failed_index, vis=vis, save_path=save_path, debug=debug, closefig=closefig)    
     else:
         fig, ax = visualize_bbox(bbox, fig=fig, ax=ax, color_index=color_failed_index, vis=vis, debug=debug, closefig=False)    
 
