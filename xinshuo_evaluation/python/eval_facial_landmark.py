@@ -53,8 +53,7 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 		assert ispositiveinteger(num_pts), 'number of points is not correct'
 		assert isscalar(error_threshold), 'error threshold is not correct'
 		assert islogical(normalization_ced) and islogical(normalization_vec), 'normalization flag is not correct'
-		if display_list is not None:
-			assert len(display_list) == num_methods, 'display list is not correct %d vs %d' % (len(display_list), num_methods)
+		if display_list is not None: assert len(display_list) == num_methods, 'display list is not correct %d vs %d' % (len(display_list), num_methods)
 
 	num_images = len(pred_dict_all.values()[0])
 	if debug:
@@ -85,12 +84,9 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 			pts_keep_index = range(num_pts)
 
 			# to avoid list object type, do conversion here
-			if islist(pts_anno):
-				pts_anno = np.asarray(pts_anno)
-			if islist(pts_prediction):
-				pts_prediction = np.asarray(pts_prediction)
-			if debug:
-				assert (is2dptsarray(pts_anno) or is2dptsarray_occlusion(pts_anno)) and pts_anno.shape[1] == num_pts, 'shape of annotations is not correct (%d x %d) vs (%d x %d)' % (2, num_pts, pts_anno.shape[0], pts_anno.shape[1])
+			if islist(pts_anno): pts_anno = np.asarray(pts_anno)
+			if islist(pts_prediction): pts_prediction = np.asarray(pts_prediction)
+			if debug: assert (is2dptsarray(pts_anno) or is2dptsarray_occlusion(pts_anno)) and pts_anno.shape[1] == num_pts, 'shape of annotations is not correct (%d x %d) vs (%d x %d)' % (2, num_pts, pts_anno.shape[0], pts_anno.shape[1])
 
 			# if the annotation has 3 channels (include extra occlusion channel, we keep only the points with annotations)
 			# occlusion: -1 -> visible but not annotated, 0 -> invisible and not annotated, 1 -> visible, we keep only visible and annotated points
@@ -103,7 +99,7 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 				pts_prediction = pts_prediction[:, pts_keep_index]
 			
 			# to avoid the point location includes the score or occlusion channel, only take the first two channels here	
-			if pts_prediction.shape[0] == 3 or pts_prediction.shape[0] == 4:
+			if pts_prediction.shape[0] == 3 or pts_prediction.shape[0] == 4: 
 				pts_prediction = pts_prediction[0:2, :]
 
 			num_pts_tmp = len(pts_keep_index)
@@ -121,8 +117,7 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 			
 			# calculate normalized error for all points
 			normed_mean_error, _ = pts_euclidean(pts_prediction, pts_anno, debug=debug)	# scalar
-			if normalization_ced:
-				normed_mean_error /= bbox_size
+			if normalization_ced: normed_mean_error /= bbox_size
 			normed_mean_error_total[count] = normed_mean_error
 			mse_error_dict[image_path] = normed_mean_error
 
@@ -134,22 +129,19 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 			for pts_index in xrange(num_pts):
 				if pts_index in pts_keep_index:			# if current point not annotated in current image, just keep 0
 					normed_mean_error_pts_specific_valid[count, pts_index] = True
-				else:
-					continue
+				else: continue
 
 				pts_index_from_keep_list = pts_keep_index.index(pts_index)
 				pts_prediction_tmp = np.reshape(pts_prediction[:, pts_index_from_keep_list], (2, 1))
 				pts_anno_tmp = np.reshape(pts_anno[:, pts_index_from_keep_list], (2, 1))
 				normed_mean_error_pts_specifc_tmp, _ = pts_euclidean(pts_prediction_tmp, pts_anno_tmp, debug=debug)
 
-				if normalization_ced:
-					normed_mean_error_pts_specifc_tmp /= bbox_size
+				if normalization_ced: normed_mean_error_pts_specifc_tmp /= bbox_size
 				normed_mean_error_pts_specific[count, pts_index] = normed_mean_error_pts_specifc_tmp
 
 			# calculate the point error vector
 			error_vector = pts_prediction - pts_anno 			# 2 x num_pts_tmp
-			if normalization_vec:
-				error_vector /= bbox_size
+			if normalization_vec: error_vector /= bbox_size
 			pts_error_vec_pts_specific[count, :, pts_keep_index] = np.transpose(error_vector)
 			pts_error_vec[count, :] = np.sum(error_vector, axis=1) / num_pts_tmp
 
@@ -174,8 +166,7 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 		mse_dict = dict()		# dictionary to record all point-wise MSE for different keypoints
 		for method_name, error_array in normed_mean_error_dict.items():
 			mse_value[method_name] = np.mean(error_array)
-	else:
-		mse_value = None
+	else: mse_value = None
 
 	# save mse error list to file for each method
 	error_list_savedir = os.path.join(save_path, 'error_list')
@@ -215,9 +206,14 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 			error_array_per_pts = error_array[:, pts_index]
 			error_array_per_pts = error_array_per_pts[valid_array_per_pts_per_method]
 			num_image_tmp = len(valid_array_per_pts_per_method)
+			# print(num_image_tmp)
+			if num_image_tmp == 0: continue
+			# aaa
 			normed_mean_error_dict_tmp[method_name] = np.reshape(error_array_per_pts, (num_image_tmp, ))
 		pck_savepath = os.path.join(pck_savedir, 'pck_curve_pts_%d.png' % (pts_index+1))
 		table_savepath = os.path.join(table_savedir, 'detailed_metrics_pts_%d.txt' % (pts_index+1))
+
+		if len(normed_mean_error_dict_tmp) == 0: continue
 		metrics_dict, _ = visualize_ced(normed_mean_error_dict_tmp, error_threshold=error_threshold, normalized=normalization_ced, truncated_list=truncated_list, display2terminal=False, title='2D PCK curve for point %d' % (pts_index+1), display_list=display_list, debug=debug, vis=vis, pck_savepath=pck_savepath, table_savepath=table_savepath)
 		for method_index in range(num_methods):
 			method_name = normed_mean_error_pts_specific_dict.keys()[method_index]
@@ -240,57 +236,57 @@ def facial_landmark_evaluation(pred_dict_all, anno_dict, num_pts, error_threshol
 	print '\nsave point-wise average MSE to %s' % ptswise_savepath
 
 	# visualize the error vector map
-	print('visualizing error vector distribution map....\n')
-	error_vec_save_dir = os.path.join(save_path, 'error_vec')
-	mkdir_if_missing(error_vec_save_dir)
-	savepath_tmp = os.path.join(error_vec_save_dir, 'error_vector_distribution_all.png')
-	visualize_pts(pts_error_vec_dict, title='Point Error Vector Distribution (all %d points)' % num_pts, mse=mse, mse_value=mse_value, display_range=display_range, display_list=display_list, xlim=xlim, ylim=ylim, covariance=covariance, debug=debug, vis=vis, save_path=savepath_tmp)
-	for pts_index in xrange(num_pts):
-		pts_error_vec_pts_specific_dict_tmp = dict()
-		for method_name, error_vec_dict in pts_error_vec_pts_specific_dict.items():
-			pts_error_vec_pts_specific_valid = normed_mean_error_pts_specific_valid_dict[method_name]		# get valid flag
-			valid_image_index_per_pts = np.where(pts_error_vec_pts_specific_valid[:, pts_index] == True)[0].tolist()		# get images where the points with current index are annotated
+	# print('visualizing error vector distribution map....\n')
+	# error_vec_save_dir = os.path.join(save_path, 'error_vec')
+	# mkdir_if_missing(error_vec_save_dir)
+	# savepath_tmp = os.path.join(error_vec_save_dir, 'error_vector_distribution_all.png')
+	# visualize_pts(pts_error_vec_dict, title='Point Error Vector Distribution (all %d points)' % num_pts, mse=mse, mse_value=mse_value, display_range=display_range, display_list=display_list, xlim=xlim, ylim=ylim, covariance=covariance, debug=debug, vis=vis, save_path=savepath_tmp)
+	# for pts_index in xrange(num_pts):
+	# 	pts_error_vec_pts_specific_dict_tmp = dict()
+	# 	for method_name, error_vec_dict in pts_error_vec_pts_specific_dict.items():
+	# 		pts_error_vec_pts_specific_valid = normed_mean_error_pts_specific_valid_dict[method_name]		# get valid flag
+	# 		valid_image_index_per_pts = np.where(pts_error_vec_pts_specific_valid[:, pts_index] == True)[0].tolist()		# get images where the points with current index are annotated
+	# 		print(len(valid_image_index_per_pts))
 
-			pts_error_vec_pts_specific_dict_tmp[method_name] = np.transpose(error_vec_dict[valid_image_index_per_pts, :, pts_index])		# 2 x num_images
-		savepath_tmp = os.path.join(error_vec_save_dir, 'error_vector_distribution_pts_%d.png' % (pts_index+1))
-		if mse:
-			mse_dict_tmp = visualize_pts(pts_error_vec_pts_specific_dict_tmp, title='Point Error Vector Distribution for Point %d' % (pts_index+1), mse=mse, display_range=display_range, display_list=display_list, xlim=xlim, ylim=ylim, covariance=covariance, debug=debug, vis=vis, save_path=savepath_tmp)
-			mse_best = min(mse_dict_tmp.values())
-			mse_single = dict()
-			mse_single['mse'] = mse_best
-			mse_single['num_images'] = len(valid_image_index_per_pts)			# assume number of valid images is equal for all methods
-			mse_dict[pts_index] = mse_single
-		else:
-			visualize_pts(pts_error_vec_pts_specific_dict_tmp, title='Point Error Vector Distribution for Point %d' % (pts_index+1), mse=mse, display_range=display_range, display_list=display_list, xlim=xlim, ylim=ylim, covariance=covariance, debug=debug, vis=vis, save_path=savepath_tmp)
+	# 		pts_error_vec_pts_specific_dict_tmp[method_name] = np.transpose(error_vec_dict[valid_image_index_per_pts, :, pts_index])		# 2 x num_images
+	# 	savepath_tmp = os.path.join(error_vec_save_dir, 'error_vector_distribution_pts_%d.png' % (pts_index+1))
+	# 	if mse:
+	# 		mse_dict_tmp = visualize_pts(pts_error_vec_pts_specific_dict_tmp, title='Point Error Vector Distribution for Point %d' % (pts_index+1), mse=mse, display_range=display_range, display_list=display_list, xlim=xlim, ylim=ylim, covariance=covariance, debug=debug, vis=vis, save_path=savepath_tmp)
+	# 		mse_best = min(mse_dict_tmp.values())
+	# 		mse_single = dict()
+	# 		mse_single['mse'] = mse_best
+	# 		mse_single['num_images'] = len(valid_image_index_per_pts)			# assume number of valid images is equal for all methods
+	# 		mse_dict[pts_index] = mse_single
+	# 	else:
+	# 		visualize_pts(pts_error_vec_pts_specific_dict_tmp, title='Point Error Vector Distribution for Point %d' % (pts_index+1), mse=mse, display_range=display_range, display_list=display_list, xlim=xlim, ylim=ylim, covariance=covariance, debug=debug, vis=vis, save_path=savepath_tmp)
 
 	# save mse to json file for further use
-	if mse:
-		json_path = os.path.join(save_path, 'mse_pts.json')
+	# if mse: 
+	# 	json_path = os.path.join(save_path, 'mse_pts.json')
 
-		# if existing, compare and select the best
-		if is_path_exists(json_path):
-			with open(json_path, 'r') as file:
-				mse_dict_old = json.load(file)
-				file.close()
+	# 	# if existing, compare and select the best
+	# 	if is_path_exists(json_path):
+	# 		with open(json_path, 'r') as file:
+	# 			mse_dict_old = json.load(file)
+	# 			file.close()
 
-			for pts_index, mse_single in mse_dict_old.items():
-				mse_dict_new = mse_dict[int(pts_index)]
-				mse_new = mse_dict_new['mse']
-				if mse_new < mse_single['mse']:
-					mse_single['mse'] = mse_new
-				mse_dict_old[pts_index] = mse_single
+	# 		for pts_index, mse_single in mse_dict_old.items():
+	# 			mse_dict_new = mse_dict[int(pts_index)]
+	# 			mse_new = mse_dict_new['mse']
+	# 			if mse_new < mse_single['mse']:
+	# 				mse_single['mse'] = mse_new
+	# 			mse_dict_old[pts_index] = mse_single
 
-			with open(json_path, 'w') as file:
-				print('overwrite old mse to {}'.format(json_path))
-				json.dump(mse_dict_old, file)
-				file.close()
+	# 		with open(json_path, 'w') as file:
+	# 			print('overwrite old mse to {}'.format(json_path))
+	# 			json.dump(mse_dict_old, file)
+	# 			file.close()
 
-		else:
-			with open(json_path, 'w') as file:
-				print('save mse for all keypoings to {}'.format(json_path))
-				json.dump(mse_dict, file)
-				file.close()
+	# 	else:
+	# 		with open(json_path, 'w') as file:
+	# 			print('save mse for all keypoings to {}'.format(json_path))
+	# 			json.dump(mse_dict, file)
+	# 			file.close()
 
 	print('\ndone!!!!!\n')
-
 	return metrics_all, ptswise_mse_table

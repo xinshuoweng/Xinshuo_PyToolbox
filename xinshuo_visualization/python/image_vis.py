@@ -87,9 +87,7 @@ def visualize_image_with_bbox(image, bbox, ax=None, vis=True, save_path=None, de
         image:          a path to an image / an image
         bbox:           N X 4 numpy array, with TLBR format
     '''
-    if debug:
-        assert not islist(image), 'this function only support to plot points on one image'
-
+    if debug: assert not islist(image), 'this function only support to plot points on one image'
     fig, ax = visualize_image(image, vis=False, debug=debug, closefig=False)
     return visualize_bbox(bbox, fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
 

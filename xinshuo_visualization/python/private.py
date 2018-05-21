@@ -8,31 +8,21 @@ import matplotlib.pyplot as plt
 from xinshuo_io import mkdir_if_missing
 from xinshuo_miscellaneous import is_path_exists_or_creatable, isfile
 
-dpi = 80
 def get_fig_ax_helper(fig=None, ax=None):
-    if fig is None:
-        fig = plt.gcf()
-
-    if ax is None:
-        ax = plt.gca()   
-
+    if fig is None: fig = plt.gcf()
+    if ax is None: ax = plt.gca()   
     return fig, ax
 
 def save_vis_close_helper(fig=None, ax=None, vis=False, save_path=None, debug=True, transparent=True, closefig=True):
     # save and visualization
     if save_path is not None:
-        if debug:
-            assert is_path_exists_or_creatable(save_path) and isfile(save_path), 'save path is not valid: %s' % save_path
-            mkdir_if_missing(save_path)
-        fig.savefig(save_path, dpi=dpi, transparent=transparent)
-    if vis:
-        plt.show()
-
+        if debug: mkdir_if_missing(save_path)
+        fig.savefig(save_path, dpi=80, transparent=transparent)
+    if vis: plt.show()
     if closefig:
         plt.close(fig)
         return None, None
-    else:
-        return fig, ax
+    else: return fig, ax
 
 def autopct_generator(upper_percentage_to_draw):
     '''

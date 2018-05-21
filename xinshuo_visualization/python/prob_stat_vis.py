@@ -16,7 +16,7 @@ color_set = ['r', 'b', 'g', 'c', 'm', 'y', 'k', 'w', 'lime', 'cyan', 'aqua']
 linestyle_set = ['-', '--', '-.', ':', None, ' ', 'solid', 'dashed']
 dpi = 80
 
-def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, truncated_list=None, display2terminal=True, display_list=None, title=None, fig=None, ax=None, debug=True, vis=True, pck_savepath=None, table_savepath=None, closefig=True):
+def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, truncated_list=None, display2terminal=True, display_list=None, title='2D PCK curve', debug=True, vis=False, pck_savepath=None, table_savepath=None, closefig=True):
     '''
     visualize the cumulative error distribution curve (alse called NME curve or pck curve)
     all parameters are represented by percentage
@@ -32,30 +32,22 @@ def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, trun
     if debug:
         assert isdict(normed_mean_error_dict), 'the input normalized mean error dictionary is not correct'
         assert islogical(normalized), 'the normalization flag should be logical'
-        if normalized:
-            assert error_threshold > 0 and error_threshold < 100, 'threshold percentage is not well set'
+        if normalized: assert error_threshold > 0 and error_threshold < 100, 'threshold percentage is not well set'
         if save:
-            assert pck_savepath is not None and is_path_exists_or_creatable(pck_savepath), 'please provide a valid path to save the pck results' 
-            assert table_savepath is not None and is_path_exists_or_creatable(table_savepath), 'please provide a valid path to save the table results' 
-        if title is not None:
-            assert isstring(title), 'title is not correct'
-        else:
-            title = '2D PCK curve'
-        if truncated_list is not None:
-            assert islist(truncated_list) and all(isscalar(thres_tmp) for thres_tmp in truncated_list), 'the input truncated list is not correct'
+            assert is_path_exists_or_creatable(pck_savepath), 'please provide a valid path to save the pck results' 
+            assert is_path_exists_or_creatable(table_savepath), 'please provide a valid path to save the table results' 
+        assert isstring(title), 'title is not correct'
+        if truncated_list is not None: assert islistofscalar(truncated_list), 'the input truncated list is not correct'
         if display_list is not None:
             assert islist(display_list) and len(display_list) == len(normed_mean_error_dict), 'the input display list is not correct'
             assert CHECK_EQ_LIST_UNORDERED(display_list, normed_mean_error_dict.keys(), debug=debug), 'the input display list does not match the error dictionary key list'
-        else:
-            display_list = normed_mean_error_dict.keys()
+        else: display_list = normed_mean_error_dict.keys()
 
     # set display parameters
-    width = 1000
-    height = 800
+    width, height = 1000, 800
     legend_fontsize = 10
     scale_distance = 48.8
-    line_index = 0
-    color_index = 0
+    line_index, color_index = 0, 0
 
     figsize = width / float(dpi), height / float(dpi)
     fig = plt.figure(figsize=figsize)
@@ -78,10 +70,8 @@ def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, trun
     plt.xticks(np.arange(0, error_threshold + interval_x, interval_x))
     plt.grid()
     plt.title(title, fontsize=20)
-    if normalized:
-        plt.xlabel('Normalized error euclidean distance (%)', fontsize=16)
-    else:
-        plt.xlabel('Absolute error euclidean distance', fontsize=16)
+    if normalized: plt.xlabel('Normalized error euclidean distance (%)', fontsize=16)
+    else: plt.xlabel('Absolute error euclidean distance', fontsize=16)
 
     # calculate metrics for each method
     num_methods = len(normed_mean_error_dict)
@@ -133,11 +123,8 @@ def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, trun
 
         # draw 
         label = '%s, AUC: %.2f, MSE: %.1f (%.0f um)' % (method_name, entry['AUC'], entry['MSE'], entry['MSE'] * scale_distance)
-        # print label
-        if normalized:
-            plt.plot(x_axis*100, y_axis*100, color=color_tmp, linestyle=line_tmp, label=label, lw=3)
-        else:
-            plt.plot(x_axis, y_axis*100, color=color_tmp, linestyle=line_tmp, label=label, lw=3)
+        if normalized: plt.plot(x_axis*100, y_axis*100, color=color_tmp, linestyle=line_tmp, label=label, lw=3)
+        else: plt.plot(x_axis, y_axis*100, color=color_tmp, linestyle=line_tmp, label=label, lw=3)
         plt.legend(loc=4, fontsize=legend_fontsize)
         
         color_index += 1
@@ -145,17 +132,9 @@ def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, trun
             line_index += 1
             color_index = color_index % len(color_set)
 
-    plt.grid()
+    # plt.grid()
     plt.ylabel('{} Test Images (%)'.format(num_images), fontsize=16)
-
-    save_vis_close_helper(fig=fig, ax=ax, vis=vis, transparent=False, save_path=pck_savepath, debug=debug, closefig=closefig)
-    # if vis:
-        # plt.show()
-    # if save:
-        # fig.savefig(pck_savepath, dpi=dpi)
-        # if display2terminal:
-            # print 'save PCK curve to %s' % pck_savepath
-    # plt.close(fig)
+    save_vis_close_helper(fig=fig, ax=None, vis=vis, transparent=False, save_path=pck_savepath, debug=debug, closefig=closefig)
 
     # reorder the table
     order_index_list = [display_list.index(method_name_tmp) for method_name_tmp in normed_mean_error_dict.keys()]
@@ -174,8 +153,7 @@ def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, trun
         table_file = open(table_savepath, 'w')
         table_file.write(table.table)
         table_file.close()
-        if display2terminal:
-            print '\nsave detailed metrics to %s' % table_savepath
+        if display2terminal: print '\nsave detailed metrics to %s' % table_savepath
     
     return metrics_dict, metrics_table
 
@@ -299,7 +277,6 @@ def visualize_nearest_neighbor(featuremap_dict, num_neighbor=5, top_number=5, vi
                 shutil.copyfile(file_src, save_path)
 
     return all_sorted_nearest_id, selected_nearest_id
-
 
 def visualize_distribution(data, bin_size=None, vis=False, save_path=None, debug=True, closefig=True):
     '''
