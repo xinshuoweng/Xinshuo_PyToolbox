@@ -10,7 +10,7 @@ from xinshuo_images.python.private import safe_image
 
 from file_io import mkdir_if_missing
 from xinshuo_miscellaneous import is_path_exists_or_creatable, isimage, isscalar, is_path_exists
-from xinshuo_images import image_rotate, image_resize
+from xinshuo_images import image_rotate, image_resize, rgb2gray
 
 def load_image(src_path, resize_factor=None, target_size=None, input_angle=0, warning=True, debug=True):
     '''
@@ -33,6 +33,7 @@ def load_image(src_path, resize_factor=None, target_size=None, input_angle=0, wa
             img = img.convert('RGB')
             np_image = image_rotate(img, input_angle=input_angle, warning=warning, debug=debug)
             np_image = image_resize(np_image, resize_factor=resize_factor, target_size=target_size, warning=warning, debug=debug)
+
     return np_image
 
 def save_image(input_image, save_path, resize_factor=None, target_size=None, input_angle=0, warning=True, debug=True):

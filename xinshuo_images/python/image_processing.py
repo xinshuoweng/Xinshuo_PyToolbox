@@ -23,7 +23,6 @@ def rgb2gray(input_image, warning=True, debug=True):
 	'''
 	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
 	if isfloatimage(np_image): np_image = (np_image * 255.).astype('uint8')
-
 	if debug:
 		assert iscolorimage_dimension(np_image), 'the input numpy image is not correct: {}'.format(np_image.shape)
 		assert isuintimage(np_image), 'the input numpy image should be uint8 image in order to use opencv'
