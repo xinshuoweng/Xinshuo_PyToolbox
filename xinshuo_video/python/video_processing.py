@@ -28,7 +28,7 @@ def extract_images_from_video(video_file, save_dir, debug=True):
 
 	cap.release()
 
-def generate_video_from_list(image_list, save_path, framerate=30, warning=True, debug=True):
+def generate_video_from_list(image_list, save_path, framerate=30, downsample=1, warning=True, debug=True):
 	'''
 	create video from a list of images with a framerate
 	note that: the height and widht of the images should be a multiple of 2
@@ -48,7 +48,7 @@ def generate_video_from_list(image_list, save_path, framerate=30, warning=True, 
 	count = 1
 	for image_path in image_list:
 		print('processing frame %d' % count)
-		image = load_image(image_path, warning=warning, debug=debug)
+		image = load_image(image_path, resize_factor=downsample, warning=warning, debug=debug)
 
 		# make sure the height and width are multiple of 2
 		height, width = image.shape[0], image.shape[1]
@@ -62,7 +62,7 @@ def generate_video_from_list(image_list, save_path, framerate=30, warning=True, 
 
 	video_writer.close()
 
-def generate_video_from_folder(images_dir, save_path, framerate=30, warning=True, debug=True):
+def generate_video_from_folder(images_dir, save_path, framerate=30, downsample=1, warning=True, debug=True):
 	image_list, num_images = load_list_from_folder(images_dir, ext_filter=['.jpg', '.png', '.jpeg'], debug=debug)
 	print('%d images loaded' % num_images)
-	generate_video_from_list(image_list, save_path, framerate=framerate, warning=warning, debug=debug)
+	generate_video_from_list(image_list, save_path, framerate=framerate, downsample=downsample, warning=warning, debug=debug)
