@@ -169,10 +169,12 @@ def visualize_pts_array(input_pts, color_index=0, pts_size=20, label=False, labe
         if plot_occl: ax.scatter(pts_array[0, pts_invisible_index], pts_array[1, pts_invisible_index], color=color_set_big[(color_index+1) % len(color_set_big)], s=pts_size)
         if covariance: visualize_pts_covariance(pts_array[0:2, :], std=std, conf=conf, fig=fig, ax=ax, debug=debug, color=color_tmp)
 
+    if plot_occl: not_plot_index = pts_ignore_index
+    else: not_plot_index = pts_ignore_index + pts_invisible_index
     if label_list is not None:
         for pts_index in xrange(num_pts):
             label_tmp = label_list[pts_index]
-            if pts_index in pts_ignore_index: continue
+            if pts_index in not_plot_index: continue
             else:
                 # note that the annotation is based on the coordinate instead of the order of plotting the points, so the orider in pts_index does not matter
                 if islist(color_index): plt.annotate(label_tmp, xy=(pts_array[0, pts_index], pts_array[1, pts_index]), xytext=(-1, 1), color=color_set_big[(color_index[pts_index]+5) % len(color_set_big)], textcoords='offset points', ha='right', va='bottom', fontsize=label_size)

@@ -19,7 +19,7 @@ def visualize_image(input_image, bgr2rgb=False, save_path=None, vis=False, warni
         closefig:           False if you want to add more elements on the image
 
     outputs:
-        fig, ax
+        fig, ax:            figure handle for future use
     '''
     np_image, _ = safe_image(input_image, warning=warning, debug=debug)
     width, height = np_image.shape[1], np_image.shape[0]
@@ -53,9 +53,11 @@ def visualize_image_with_pts(input_image, input_pts, color_index=0, pts_size=20,
         vis_threshold:  the points with confidence above the threshold will be drawn
         label:          determine to add text label for each point, if label list is None, then an automatic list is created
         label_list:     label string for all points, if label list is not None, the label is True automatically
+                        if the input points is a dictionary, then every point array in the dict follow the same label list
+        bgr2rgb:            true if the image needs to be converted from bgr to rgb
 
     outputs:
-        fig, ax
+        fig, ax:            figure handle for future use
     '''
     fig, ax = visualize_image(input_image, bgr2rgb=bgr2rgb, vis=False, warning=warning, debug=debug, closefig=False)
     if isdict(input_pts):

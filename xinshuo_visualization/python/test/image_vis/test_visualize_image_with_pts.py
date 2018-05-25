@@ -59,6 +59,13 @@ def test_visualize_image_with_pts():
 	pts_array = [[200, 300, 0.4], [400, 400, 0.8]]
 	visualize_image_with_pts(img, pts_array, label_list=['2', '6'], label_size=100, vis=True)	
 
+	print('testing a dict of pts')
+	img = Image.open(image_path).convert('L')
+	pts_array1 = [[200, 300, 0.4], [400, 400, 0.8]]
+	pts_array2 = [[100, 100, 0.4], [50, 50, 0.2], [150, 150, 0.6]]
+	pts_array = {'pts1': pts_array1, 'pts2': pts_array2}
+	visualize_image_with_pts(img, pts_array, label_list=['3', '6', '9', '12'], vis=True)	
+
 	print('\n\nDONE! SUCCESSFUL!!\n')
 	
 if __name__ == '__main__':
