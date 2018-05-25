@@ -67,20 +67,22 @@ def visualize_image_with_pts(input_image, input_pts, color_index=0, pts_size=20,
             color_index += 1
     else: visualize_pts_array(input_pts, fig=fig, ax=ax, color_index=color_index, pts_size=pts_size, label=label, label_list=label_list, label_size=label_size, 
         plot_occl=False, covariance=False, xlim=None, ylim=None, vis_threshold=vis_threshold, debug=debug, closefig=False)
-
     return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
 
-def visualize_image_with_bbox(image, bbox, bgr2rgb=False, save_path=None, vis=False, warning=True, debug=True, closefig=True):
+def visualize_image_with_bbox(input_image, input_bbox, linewidth=0.5, edge_color_index=20,
+    bgr2rgb=False, save_path=None, vis=False, warning=True, debug=True, closefig=True):
     '''
-    visualize image and plot keypoints on top of it
+    visualize image and plot bounding boxes on top of it
 
     parameter:
-        image:          a path to an image / an image
-        bbox:           N X 4 numpy array, with TLBR format
+        input_image:    a pil or numpy image
+        input_bbox:     a list of 4 elements, a listoflist of 4 elements: e.g., [[1,2,3,4], [5,6,7,8]],
+                        a numpy array with shape or (N, 4) or (4, )
+                        TLBR format
     '''
-    if debug: assert not islist(image), 'this function only support to plot points on one image'
-    fig, ax = visualize_image(image, vis=False, debug=debug, closefig=False)
-    return visualize_bbox(bbox, fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
+    fig, ax = visualize_image(input_image, bgr2rgb=bgr2rgb, vis=False, warning=warning, debug=debug, closefig=False)
+    fig, ax = visualize_bbox(bbox, linewidth=linewidth, edge_color_index=edge_color_index, fig=fig, ax=ax, vis=vis, save_path=save_path, warning=warning, debug=debug, closefig=closefig)
+    return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
 
 def visualize_image_with_pts_bbox(image, pts_array, window_size, pts_size=20, label=False, label_list=None, color_index=0, 
     bgr2rgb=False, save_path=None, vis=False, warning=True, debug=True, closefig=True):
@@ -90,11 +92,9 @@ def visualize_image_with_pts_bbox(image, pts_array, window_size, pts_size=20, la
     parameters
         pts_array:              2 x N
     '''
-    # if debug:
-        # assert is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array), 'input points are not correct'
-
     fig, ax = visualize_image_with_pts(image, pts_array, pts_size=pts_size, label=label, label_list=label_list, color_index=color_index, debug=False, save_path=None, closefig=False)
     num_pts = pts_array.shape[1]
     # center_bbox = 
     bbox = get_center_crop_bbox(pts_array, window_size, window_size, debug=debug)
-    return visualize_bbox(bbox, fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
+    fig, ax = visualize_bbox(bbox, linewidth=linewidth, edge_color_index=edge_color_index, fig=fig, ax=ax, vis=vis, save_path=save_path, warning=warning, debug=debug, closefig=closefig)
+    return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)

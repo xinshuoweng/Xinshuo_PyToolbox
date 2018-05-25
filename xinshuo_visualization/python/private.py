@@ -19,10 +19,10 @@ def get_fig_ax_helper(fig=None, ax=None, width=None, height=None, debug=True):
     if ax is None: ax = plt.gca()   
     return fig, ax
 
-def save_vis_close_helper(fig=None, ax=None, vis=False, save_path=None, debug=True, transparent=True, closefig=True):
+def save_vis_close_helper(fig=None, ax=None, vis=False, save_path=None, warning=True, debug=True, transparent=True, closefig=True):
     # save and visualization
     if save_path is not None:
-        if debug: mkdir_if_missing(save_path)
+        if debug: mkdir_if_missing(save_path, warning=warning, debug=debug)
         fig.savefig(save_path, dpi=dpi, transparent=transparent)
     if vis: plt.show()
     if closefig:
