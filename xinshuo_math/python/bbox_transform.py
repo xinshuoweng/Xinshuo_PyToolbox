@@ -50,7 +50,7 @@ def bbox_TLWH2TLBR(bboxes_in, warning=True, debug=True):
 	    bbox_TLBR: N X 4 numpy array, TLBR format
 	'''
 	np_bboxes = safe_bbox(bboxes_in, warning=warning, debug=debug)
-	if debug: assert bboxcheck_TLWH(np_bboxes, dwarning=warning, ebug=debug), 'the input bounding box should be TLBR format'
+	if debug: assert bboxcheck_TLWH(np_bboxes, warning=warning, debug=debug), 'the input bounding box should be TLBR format'
 
 	bbox_TLBR = np.zeros_like(np_bboxes)
 	bbox_TLBR[:, 0] = np_bboxes[:, 0]
