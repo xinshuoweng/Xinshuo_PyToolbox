@@ -4,7 +4,8 @@ import numpy as np
 from PIL import Image
 
 import init_paths
-from xinshuo_visualization import visualize_image
+from image_vis import visualize_image
+from xinshuo_images import image_rgb2bgr
 
 def test_visualize_image():
 	image_path = '../lena.png'
@@ -16,6 +17,12 @@ def test_visualize_image():
 	print('testing for color pil image.')
 	img = Image.open(image_path).convert('RGB')
 	visualize_image(img, vis=True)	
+
+	print('testing for bgr image')
+	img = Image.open(image_path).convert('RGB')
+	img = image_rgb2bgr(img)
+	visualize_image(img, vis=True)
+	visualize_image(img, bgr2rgb=True, vis=True)
 
 	print('testing for color numpy uint8 image')
 	img = np.array(Image.open(image_path).convert('RGB')).astype('uint8')

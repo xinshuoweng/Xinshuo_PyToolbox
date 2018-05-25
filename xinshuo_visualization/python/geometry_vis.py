@@ -5,6 +5,13 @@ import matplotlib.collections as plycollections
 from matplotlib.patches import Ellipse
 # from scipy.stats import norm, chi2
 
+# import matplotlib as mpl; mpl.use('Agg')
+# import warnings
+# warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+# warnings.filterwarnings("ignore", message="numpy.ufunc size changed")
+# from warnings import catch_warnings, simplefilter
+# with catch_warnings(record=True):
+    # simplefilter('ignore', FutureWarning)
 from private import save_vis_close_helper, get_fig_ax_helper
 from xinshuo_math.python.private import safe_2dptsarray
 
@@ -18,8 +25,9 @@ hatch_set = [None, 'o', '/', '\\', '|', '-', '+', '*', 'x', 'O', '.']
 linestyle_set = ['-', '--', '-.', ':', None, ' ', 'solid', 'dashed']
 dpi = 80
 
-def visualize_pts_array(input_pts, covariance=False, color_index=0, pts_size=20, label=False, label_list=None, label_size=2, plot_occl=True, vis_threshold=-10000, 
-    xlim=None, ylim=None, fig=None, ax=None, save_path=None, vis=False, warning=True, debug=True, closefig=True):
+def visualize_pts_array(input_pts, color_index=0, pts_size=20, label=False, label_list=None, label_size=20, vis_threshold=-10000, 
+    covariance=False, plot_occl=False, xlim=None, ylim=None, 
+    fig=None, ax=None, save_path=None, vis=False, warning=True, debug=True, closefig=True):
     '''
     plot keypoints with covariance ellipse
 
@@ -29,7 +37,7 @@ def visualize_pts_array(input_pts, covariance=False, color_index=0, pts_size=20,
     # obtain the points
     try: pts_array = safe_2dptsarray(input_pts, homogeneous=True, warning=warning, debug=debug)
     except AssertionError: pts_array = safe_2dptsarray(input_pts, homogeneous=False, warning=warning, debug=debug)
-    if debug: assert is2dptsarray(input_pts) or is2dptsarray_occlusion(input_pts) or is2dptsarray_confidence(input_pts), 'input points are not correct'
+    if debug: assert is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array) or is2dptsarray_confidence(pts_array), 'input points are not correct'
     num_pts = pts_array.shape[1]
 
     # obtain a label list if required but not provided
@@ -52,7 +60,8 @@ def visualize_pts_array(input_pts, covariance=False, color_index=0, pts_size=20,
         pts_ignore_index = []
         pts_invisible_index = []
     else:
-        num_float_elements = np.where(np.logical_and(pts_array[2, :] > 0, pts_array[2, :] < 1))[0].tolist()
+        num_float_elements = np.where(np.logical_and(pts_array[2, :] != -1, np.logical_and(pts_array[2, :] != 0, pts_array[2, :] != 1)))[0].tolist()
+        # num_float_elements2 = np.where(np.logical_and(pts_array[2, :] > -1, pts_array[2, :] < 0))[0].tolist()
         if len(num_float_elements) > 0: type_3row = 'conf'
         else: type_3row = 'occu'
 
@@ -62,8 +71,8 @@ def visualize_pts_array(input_pts, covariance=False, color_index=0, pts_size=20,
             pts_invisible_index = np.where(pts_array[2, :] == 0)[0].tolist()              # plot invisible points in blue color
         else:
             pts_visible_index   = np.where(pts_array[2, :] > vis_threshold)[0].tolist()
-            pts_ignore_index    = np.where(pts_array[2, :] <= vis_threshold)[0].tolist()
-            pts_invisible_index = []
+            pts_invisible_index    = np.where(pts_array[2, :] <= vis_threshold)[0].tolist()
+            pts_ignore_index = []
 
         if debug and islist(color_tmp): assert len(color_tmp) == len(pts_visible_index), 'number of points to plot is not equal to number of colors provided'
         ax.scatter(pts_array[0, pts_visible_index], pts_array[1, pts_visible_index], color=color_tmp, s=pts_size)
@@ -133,15 +142,12 @@ def visualize_pts_line(pts_array, line_index_list, method=2, threshold=None, pts
 
     num_pts = pts_array.shape[1]
     # expand the pts_array to 3 rows if the confidence row is not provided
-    if pts_array.shape[0] == 2:
-        pts_array = np.vstack((pts_array, np.ones((1, num_pts))))
-
+    if pts_array.shape[0] == 2: pts_array = np.vstack((pts_array, np.ones((1, num_pts))))
     fig, ax = get_fig_ax_helper(fig=fig, ax=ax)
     np.random.seed(seed)
     color_option = 'hsv'
 
-    if color_option == 'rgb':
-        color_set_random = np.random.rand(3, num_pts)
+    if color_option == 'rgb': color_set_random = np.random.rand(3, num_pts)
     elif color_option == 'hsv':
         h_random = np.random.rand(num_pts, )
         color_set_random = np.zeros((3, num_pts), dtype='float32')

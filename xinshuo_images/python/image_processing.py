@@ -396,7 +396,7 @@ def image_bgr2rgb(input_image, warning=True, debug=True):
 	outputs:
 		np_image:		a numpy rgb image
 	'''
-	return rgb2bgr(input_image, warning=warning, debug=debug)
+	return image_rgb2bgr(input_image, warning=warning, debug=debug)
 
 def image_hwc2chw(input_image, warning=True, debug=True):
 	'''
