@@ -16,7 +16,7 @@ from private import save_vis_close_helper, get_fig_ax_helper
 from xinshuo_math.python.private import safe_2dptsarray
 
 from xinshuo_math import pts_euclidean, bbox_TLBR2TLWH, bboxcheck_TLBR
-from xinshuo_miscellaneous import islogical, islist, isstring, is2dptsarray_confidence, is2dptsarray_occlusion, is2dptsarray, isdict, list_reorder, list2tuple
+from xinshuo_miscellaneous import islogical, islist, isstring, is2dptsarray_confidence, is2dptsarray_occlusion, is2dptsarray, isdict, list_reorder, list2tuple, islistofstring, ifconfscalar
 
 color_set = ['r', 'b', 'g', 'c', 'm', 'y', 'k', 'w', 'lime', 'cyan', 'aqua']
 color_set_big = ['aqua', 'azure', 'red', 'black', 'blue', 'brown', 'cyan', 'darkblue', 'fuchsia', 'gold', 'green', 'grey', 'indigo', 'magenta', 'lime', 'yellow', 'white', 'tomato', 'salmon']
@@ -25,7 +25,97 @@ hatch_set = [None, 'o', '/', '\\', '|', '-', '+', '*', 'x', 'O', '.']
 linestyle_set = ['-', '--', '-.', ':', None, ' ', 'solid', 'dashed']
 dpi = 80
 
-def visualize_pts_array(input_pts, color_index=0, pts_size=20, label=False, label_list=None, label_size=20, vis_threshold=-10000, 
+def visualize_bbox(bbox, fig=None, ax=None, linewidth=0.5, color_index=20, vis=True, save_path=None, debug=True, closefig=True):
+    '''
+    visualize a set of bounding box
+
+    parameters:
+        bbox:       N x 4
+    '''
+    if debug: assert bboxcheck_TLBR(bbox), 'input bounding boxes are not correct'
+    edge_color = color_set_big[color_index % len(color_set_big)]
+
+    # plot bounding box
+    bbox = bbox_TLBR2TLWH(bbox, debug=debug)              # convert TLBR format to TLWH format
+    for bbox_index in range(bbox.shape[0]):
+        bbox_tmp = bbox[bbox_index, :]     
+        ax.add_patch(plt.Rectangle((bbox_tmp[0], bbox_tmp[1]), bbox_tmp[2], bbox_tmp[3], fill=False, edgecolor=edge_color, linewidth=linewidth))
+    return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
+
+def visualize_pts_covariance(pts_array, conf=None, std=None, fig=None, ax=None, debug=True, **kwargs):
+    """
+    Plots an `nstd` sigma ellipse based on the mean and covariance of a point
+    "cloud" (points, an Nx2 array).
+
+    Parameters
+    ----------
+        pts_array       : 2 x N numpy array of the data points.
+        std            : The radius of the ellipse in numbers of standard deviations.
+            Defaults to 2 standard deviations.
+        ax : The axis that the ellipse will be plotted on. Defaults to the 
+            current axis.
+        Additional keyword arguments are pass on to the ellipse patch.
+
+    Returns
+    -------
+        A matplotlib ellipse artist
+    """
+    if debug:
+        assert is2dptsarray(pts_array), 'input points are not correct: (2, num_pts) vs %s' % print_np_shape(pts_array)
+        if conf is not None: assert ifconfscalar(conf), 'the confidence is not in a good range'
+        if std is not None: assert ispositiveinteger(std), 'the number of standard deviation should be a positive integer'
+
+    pts_array = np.transpose(pts_array)
+    center = pts_array.mean(axis=0)
+    covariance = np.cov(pts_array, rowvar=False)
+    return visualize_covariance_ellipse(covariance=covariance, center=center, conf=conf, std=std, fig=fig, ax=ax, debug=debug, **kwargs), np.sqrt(covariance[0, 0]**2 + covariance[1, 1]**2)
+
+def visualize_covariance_ellipse(covariance, center, conf=None, std=None, fig=None, ax=None, debug=True, **kwargs):
+    """
+    Plots an `nstd` sigma error ellipse based on the specified covariance
+    matrix (`cov`). Additional keyword arguments are passed on to the 
+    ellipse patch artist.
+
+    Parameters
+        covariance      : The 2x2 covariance matrix to base the ellipse on
+        center          : The location of the center of the ellipse. Expects a 2-element sequence of [x0, y0].
+        conf            : a floating number between [0, 1]
+        std             : The radius of the ellipse in numbers of standard deviations. Defaults to 2 standard deviations.
+        ax              : The axis that the ellipse will be plotted on. Defaults to the current axis.
+        Additional keyword arguments are pass on to the ellipse patch.
+
+    Returns
+        A covariance ellipse
+    """
+    if debug:
+        if conf is not None: assert isscalar(conf) and conf >= 0 and conf <= 1, 'the confidence is not in a good range'
+        if std is not None: assert ispositiveinteger(std), 'the number of standard deviation should be a positive integer'
+    fig, ax = get_fig_ax_helper(fig=fig, ax=ax)
+
+    def eigsorted(covariance):
+        vals, vecs = np.linalg.eigh(covariance)
+        # order = vals.argsort()[::-1]
+        # return vals[order], vecs[:,order]
+        return vals, vecs
+
+    if conf is not None: conf = np.asarray(conf)
+    elif std is not None: conf = 2 * norm.cdf(std) - 1
+    else: raise ValueError('One of `conf` and `std` should be specified.')
+    r2 = chi2.ppf(conf, 2)
+    vals, vecs = eigsorted(covariance)
+    theta = np.degrees(np.arctan2(*vecs[:,0][::-1]))
+    # theta = np.degrees(np.arctan2(*vecs[::-1, 0]))
+    # Width and height are "full" widths, not radius
+    # width, height = 2 * std * np.sqrt(vals)
+    width, height = 2 * np.sqrt(np.sqrt(vals) * r2)
+    # width, height = 2 * np.sqrt(vals[:, None] * r2)
+    ellipse = Ellipse(xy=center, width=width, height=height, angle=theta, **kwargs)
+    ellipse.set_facecolor('none')
+
+    ax.add_artist(ellipse)
+    return ellipse
+
+def visualize_pts_array(input_pts, color_index=0, pts_size=20, label=False, label_list=None, label_size=20, vis_threshold=0.3, 
     covariance=False, plot_occl=False, xlim=None, ylim=None, 
     fig=None, ax=None, save_path=None, vis=False, warning=True, debug=True, closefig=True):
     '''
@@ -43,7 +133,7 @@ def visualize_pts_array(input_pts, color_index=0, pts_size=20, label=False, labe
     # obtain a label list if required but not provided
     if debug: assert islogical(label), 'label flag is not correct'
     if label and (label_list is None): label_list = [str(i+1) for i in xrange(num_pts)]
-    if label and debug: assert islist(label_list) and all(isstring(label_tmp) for label_tmp in label_list), 'labels are not correct'
+    if label_list is not None and debug: assert islistofstring(label_list), 'labels are not correct'
 
     # obtain the color index
     if islist(color_index):
@@ -60,8 +150,8 @@ def visualize_pts_array(input_pts, color_index=0, pts_size=20, label=False, labe
         pts_ignore_index = []
         pts_invisible_index = []
     else:
+        # automatically justify if the third row is confidence or occlusion flag
         num_float_elements = np.where(np.logical_and(pts_array[2, :] != -1, np.logical_and(pts_array[2, :] != 0, pts_array[2, :] != 1)))[0].tolist()
-        # num_float_elements2 = np.where(np.logical_and(pts_array[2, :] > -1, pts_array[2, :] < 0))[0].tolist()
         if len(num_float_elements) > 0: type_3row = 'conf'
         else: type_3row = 'occu'
 
@@ -79,7 +169,7 @@ def visualize_pts_array(input_pts, color_index=0, pts_size=20, label=False, labe
         if plot_occl: ax.scatter(pts_array[0, pts_invisible_index], pts_array[1, pts_invisible_index], color=color_set_big[(color_index+1) % len(color_set_big)], s=pts_size)
         if covariance: visualize_pts_covariance(pts_array[0:2, :], std=std, conf=conf, fig=fig, ax=ax, debug=debug, color=color_tmp)
 
-    if label:
+    if label_list is not None:
         for pts_index in xrange(num_pts):
             label_tmp = label_list[pts_index]
             if pts_index in pts_ignore_index: continue
@@ -122,7 +212,9 @@ def visualize_lines(lines_array, color_index=0, line_width=3, fig=None, ax=None,
 
     return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
 
-def visualize_pts_line(pts_array, line_index_list, method=2, threshold=None, pts_size=20, line_size=10, line_color_index=5, fig=None, ax=None, vis=False, save_path=None, closefig=True, debug=True, seed=0, alpha=0.5):
+def visualize_pts_line(pts_array, line_index_list, method=2, seed=0, alpha=0.5,
+    vis_threshold=0.3, pts_size=20, line_size=10, line_color_index=5, 
+    fig=None, ax=None, save_path=None, vis=False, warning=True, debug=True, closefig=True):
     '''
     given a list of index, and a point array, to plot a set of points with line on it
 
@@ -130,15 +222,14 @@ def visualize_pts_line(pts_array, line_index_list, method=2, threshold=None, pts
         pts_array:          2(3) x num_pts
         line_index_list:    a list of index
         method:             1: all points are connected, if some points are missing in the middle, just ignore that point and connect the two nearby points
-                            2: if some points are missing, there might be two sub-lines
+                            2: if some points are missing in the middle of a line, the line is decomposed to sub-lines
         threshold:          confidence to draw the points
 
     '''
-
     if debug:
         assert is2dptsarray(pts_array) or is2dptsarray_occlusion(pts_array) or is2dptsarray_confidence(pts_array), 'input points are not correct'
         assert islist(line_index_list), 'the list of index is not correct'
-        assert method == 2 or method == 1, 'the plot method is not correct'
+        assert method in [1, 2], 'the plot method is not correct'
 
     num_pts = pts_array.shape[1]
     # expand the pts_array to 3 rows if the confidence row is not provided
@@ -151,10 +242,7 @@ def visualize_pts_line(pts_array, line_index_list, method=2, threshold=None, pts
     elif color_option == 'hsv':
         h_random = np.random.rand(num_pts, )
         color_set_random = np.zeros((3, num_pts), dtype='float32')
-        for pts_index in range(num_pts):
-            # print(h_random[pts_index])
-            # print(colorsys.hsv_to_rgb(h_random[pts_index], 1, 1))
-            color_set_random[:, pts_index] = colorsys.hsv_to_rgb(h_random[pts_index], 1, 1) 
+        for pts_index in range(num_pts): color_set_random[:, pts_index] = colorsys.hsv_to_rgb(h_random[pts_index], 1, 1) 
 
     line_color = color_set[line_color_index]
     pts_line = pts_array[:, line_index_list]
@@ -214,19 +302,14 @@ def visualize_pts(pts, title=None, fig=None, ax=None, display_range=False, xlim=
 
     if debug:
         if isdict(pts):
-            for pts_tmp in pts.values():
-                assert is2dptsarray(pts_tmp) , 'input points within dictionary are not correct: (2, num_pts) vs %s' % print_np_shape(pts_tmp)
+            for pts_tmp in pts.values(): assert is2dptsarray(pts_tmp) , 'input points within dictionary are not correct: (2, num_pts) vs %s' % print_np_shape(pts_tmp)
             if display_list is not None:
                 assert islist(display_list) and len(display_list) == len(pts), 'the input display list is not correct'
                 assert CHECK_EQ_LIST_UNORDERED(display_list, pts.keys(), debug=debug), 'the input display list does not match the points key list'
-            else:
-                display_list = pts.keys()
-        else:
-            assert is2dptsarray(pts), 'input points are not correct: (2, num_pts) vs %s' % print_np_shape(pts)
-        if title is not None:
-            assert isstring(title), 'title is not correct'
-        else:
-            title = 'Point Error Vector Distribution Map'
+            else: display_list = pts.keys()
+        else: assert is2dptsarray(pts), 'input points are not correct: (2, num_pts) vs %s' % print_np_shape(pts)
+        if title is not None: assert isstring(title), 'title is not correct'
+        else: title = 'Point Error Vector Distribution Map'
         assert islogical(display_range), 'the flag determine if to display in a specific range should be logical value'
         if display_range:
             assert islist(xlim) and islist(ylim) and len(xlim) == 2 and len(ylim) == 2, 'the input range for x and y is not correct'
@@ -237,7 +320,6 @@ def visualize_pts(pts, title=None, fig=None, ax=None, display_range=False, xlim=
     fig, _ = get_fig_ax_helper(fig=fig, ax=ax, width=width, height=height)
     if ax is None:
         plt.title(title, fontsize=20)
-
         if isdict(pts):
             num_pts_all = pts.values()[0].shape[1]
             if all(pts_tmp.shape[1] == num_pts_all for pts_tmp in pts.values()):
@@ -278,9 +360,7 @@ def visualize_pts(pts, title=None, fig=None, ax=None, display_range=False, xlim=
             hatch_tmp = hatch_set[hatch_index]
 
             # plot covariance ellipse
-            if covariance:
-                _, covariance_number = visualize_pts_covariance(pts_tmp[0:2, :], std=std, conf=conf, ax=ax, debug=debug, color=color_tmp, hatch=hatch_tmp, linewidth=linewidth)
-            
+            if covariance: _, covariance_number = visualize_pts_covariance(pts_tmp[0:2, :], std=std, conf=conf, ax=ax, debug=debug, color=color_tmp, hatch=hatch_tmp, linewidth=linewidth)
             handle_tmp = ax.scatter(pts_tmp[0, :], pts_tmp[1, :], color=color_tmp, marker=marker_tmp, s=pts_size, alpha=alpha)    
             if mse:
                 if mse_value is None:
@@ -290,8 +370,7 @@ def visualize_pts(pts, title=None, fig=None, ax=None, display_range=False, xlim=
                     mse_tmp = mse_value[method_name]
                 display_string = '%s, MSE: %.1f (%.1f um), Covariance: %.1f' % (method_name, mse_tmp, mse_tmp * scale_distance, covariance_number)
                 mse_return[method_name] = mse_tmp
-            else:
-                display_string = method_name
+            else: display_string = method_name
             handle_dict[display_string] = handle_tmp
             color_index += 1
             if color_index / len(color_set) == 1:            
@@ -311,12 +390,10 @@ def visualize_pts(pts, title=None, fig=None, ax=None, display_range=False, xlim=
         color_tmp = color_set[color_index]
         marker_tmp = marker_set[marker_index]
         hatch_tmp = hatch_set[hatch_index]
-
         handle_tmp = ax.scatter(pts[0, :], pts[1, :], color=color_tmp, marker=marker_tmp, s=pts_size, alpha=alpha)    
 
         # plot covariance ellipse
-        if covariance:
-            _, covariance_number = visualize_pts_covariance(pts[0:2, :], std=std, conf=conf, ax=ax, debug=debug, color=color_tmp, hatch=hatch_tmp, linewidth=linewidth)
+        if covariance: _, covariance_number = visualize_pts_covariance(pts[0:2, :], std=std, conf=conf, ax=ax, debug=debug, color=color_tmp, hatch=hatch_tmp, linewidth=linewidth)
 
         if mse:
             if mse_value is None:
@@ -343,103 +420,3 @@ def visualize_pts(pts, title=None, fig=None, ax=None, display_range=False, xlim=
 
     save_vis_close_helper(fig=fig, ax=ax, vis=vis, transparent=False, save_path=save_path, debug=debug, closefig=closefig)
     return mse_return
-
-def visualize_bbox(bbox, fig=None, ax=None, linewidth=0.5, color_index=20, vis=True, save_path=None, debug=True, closefig=True):
-    '''
-    visualize a set of bounding box
-
-    parameters:
-        bbox:       N x 4
-    '''
-    if debug: assert bboxcheck_TLBR(bbox), 'input bounding boxes are not correct'
-    edge_color = color_set_big[color_index % len(color_set_big)]
-
-    # plot bounding box
-    bbox = bbox_TLBR2TLWH(bbox, debug=debug)              # convert TLBR format to TLWH format
-    for bbox_index in range(bbox.shape[0]):
-        bbox_tmp = bbox[bbox_index, :]     
-        ax.add_patch(plt.Rectangle((bbox_tmp[0], bbox_tmp[1]), bbox_tmp[2], bbox_tmp[3], fill=False, edgecolor=edge_color, linewidth=linewidth))
-
-    return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
-
-def visualize_pts_covariance(pts_array, conf=None, std=None, fig=None, ax=None, debug=True, **kwargs):
-    """
-    Plots an `nstd` sigma ellipse based on the mean and covariance of a point
-    "cloud" (points, an Nx2 array).
-
-    Parameters
-    ----------
-        pts_array       : 2 x N numpy array of the data points.
-        std            : The radius of the ellipse in numbers of standard deviations.
-            Defaults to 2 standard deviations.
-        ax : The axis that the ellipse will be plotted on. Defaults to the 
-            current axis.
-        Additional keyword arguments are pass on to the ellipse patch.
-
-    Returns
-    -------
-        A matplotlib ellipse artist
-    """
-    if debug:
-        assert is2dptsarray(pts_array), 'input points are not correct: (2, num_pts) vs %s' % print_np_shape(pts_array)
-        if conf is not None:
-            assert isscalar(conf) and conf >= 0 and conf <= 1, 'the confidence is not in a good range'
-        if std is not None:
-            assert ispositiveinteger(std), 'the number of standard deviation should be a positive integer'
-
-    pts_array = np.transpose(pts_array)
-    center = pts_array.mean(axis=0)
-    covariance = np.cov(pts_array, rowvar=False)
-    return visualize_covariance_ellipse(covariance=covariance, center=center, conf=conf, std=std, fig=fig, ax=ax, debug=debug, **kwargs), np.sqrt(covariance[0, 0]**2 + covariance[1, 1]**2)
-
-def visualize_covariance_ellipse(covariance, center, conf=None, std=None, fig=None, ax=None, debug=True, **kwargs):
-    """
-    Plots an `nstd` sigma error ellipse based on the specified covariance
-    matrix (`cov`). Additional keyword arguments are passed on to the 
-    ellipse patch artist.
-
-    Parameters
-        covariance      : The 2x2 covariance matrix to base the ellipse on
-        center          : The location of the center of the ellipse. Expects a 2-element sequence of [x0, y0].
-        conf            : a floating number between [0, 1]
-        std             : The radius of the ellipse in numbers of standard deviations. Defaults to 2 standard deviations.
-        ax              : The axis that the ellipse will be plotted on. Defaults to the current axis.
-        Additional keyword arguments are pass on to the ellipse patch.
-
-    Returns
-        A covariance ellipse
-    """
-    if debug:
-        if conf is not None: assert isscalar(conf) and conf >= 0 and conf <= 1, 'the confidence is not in a good range'
-        if std is not None: assert ispositiveinteger(std), 'the number of standard deviation should be a positive integer'
-
-    def eigsorted(covariance):
-        vals, vecs = np.linalg.eigh(covariance)
-        # order = vals.argsort()[::-1]
-        # return vals[order], vecs[:,order]
-        return vals, vecs
-
-    if conf is not None:
-        conf = np.asarray(conf)
-    elif std is not None:
-        conf = 2 * norm.cdf(std) - 1
-    else:
-        raise ValueError('One of `conf` and `std` should be specified.')
-    r2 = chi2.ppf(conf, 2)
-
-    fig, ax = get_fig_ax_helper(fig=fig, ax=ax)
-
-    vals, vecs = eigsorted(covariance)
-    theta = np.degrees(np.arctan2(*vecs[:,0][::-1]))
-    # theta = np.degrees(np.arctan2(*vecs[::-1, 0]))
-
-    # Width and height are "full" widths, not radius
-    # width, height = 2 * std * np.sqrt(vals)
-    width, height = 2 * np.sqrt(np.sqrt(vals) * r2)
-    # width, height = 2 * np.sqrt(vals[:, None] * r2)
-
-    ellipse = Ellipse(xy=center, width=width, height=height, angle=theta, **kwargs)
-    ellipse.set_facecolor('none')
-
-    ax.add_artist(ellipse)
-    return ellipse

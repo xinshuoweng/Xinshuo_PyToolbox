@@ -34,13 +34,12 @@ def visualize_image(input_image, bgr2rgb=False, save_path=None, vis=False, warni
     elif isgrayimage_dimension(np_image):
         np_image = np_image.reshape(np_image.shape[0], np_image.shape[1])
         ax.imshow(np_image, interpolation='nearest', cmap='gray')
-    else:
-        assert False, 'unknown image type'
+    else: assert False, 'unknown image type'
 
     ax.set(xlim=[0, width], ylim=[height, 0], aspect=1)
     return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
 
-def visualize_image_with_pts(input_image, input_pts, color_index=0, pts_size=20, vis_threshold=-10000, label=False, label_list=None, label_size=20, 
+def visualize_image_with_pts(input_image, input_pts, color_index=0, pts_size=20, vis_threshold=0.3, label=False, label_list=None, label_size=20, 
     bgr2rgb=False, save_path=None, vis=False, warning=True, debug=True, closefig=True):
     '''
     visualize an image and plot points on top of it
@@ -52,8 +51,8 @@ def visualize_image_with_pts(input_image, input_pts, color_index=0, pts_size=20,
                         occlusion: 0 -> invisible and not annotated, 1 -> visible and annotated, -1 -> visible but not annotated
         color_index:    a scalar or a list of color indexes
         vis_threshold:  the points with confidence above the threshold will be drawn
-        label:          determine to add text label for each point
-        label_list:     label string for all points
+        label:          determine to add text label for each point, if label list is None, then an automatic list is created
+        label_list:     label string for all points, if label list is not None, the label is True automatically
 
     outputs:
         fig, ax

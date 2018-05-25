@@ -62,6 +62,9 @@ def ispositiveinteger(integer_test):
 def isnonnegativeinteger(integer_test):
 	return isinteger(integer_test) and integer_test >= 0
 
+def ifconfscalar(scalar_test):
+	return isscalar(scalar_test) and scalar_test >= 0 and scalar_test <= 1
+
 def isuintnparray(nparray_test):
 	return isnparray(nparray_test) and nparray_test.dtype == 'uint8'
 
