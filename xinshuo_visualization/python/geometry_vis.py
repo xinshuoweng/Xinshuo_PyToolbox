@@ -13,8 +13,7 @@ from matplotlib.patches import Ellipse
 # with catch_warnings(record=True):
     # simplefilter('ignore', FutureWarning)
 from private import save_vis_close_helper, get_fig_ax_helper
-from xinshuo_math.python.private import safe_2dptsarray
-
+from xinshuo_math.python.private import safe_2dptsarray, safe_bbox
 from xinshuo_math import pts_euclidean, bbox_TLBR2TLWH, bboxcheck_TLBR
 from xinshuo_miscellaneous import islogical, islist, isstring, is2dptsarray_confidence, is2dptsarray_occlusion, is2dptsarray, isdict, list_reorder, list2tuple, islistofstring, ifconfscalar
 

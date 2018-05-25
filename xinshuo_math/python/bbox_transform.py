@@ -17,7 +17,7 @@ from xinshuo_miscellaneous import isnparray, is2dptsarray, is2dptsarray_occlusio
 #           e.g., TLWH = [0, 0, 5, 5], it indicates point coordinates from 0 to 4, not including 5
 
 ############################################# format transform #################################
-def bbox_TLBR2TLWH(bboxes_in, debug=True):
+def bbox_TLBR2TLWH(bboxes_in, warning=True, debug=True):
 	'''
 	transform the input bounding box with TLBR format to TLWH format
 
@@ -28,8 +28,8 @@ def bbox_TLBR2TLWH(bboxes_in, debug=True):
 	outputs: 
 	    bbox_TLWH: N X 4 numpy array, TLWH format
 	'''
-	np_bboxes = safe_bbox(bboxes_in, debug=debug)
-	if debug: assert bboxcheck_TLBR(np_bboxes, debug=debug), 'the input bounding box should be TLBR format'
+	np_bboxes = safe_bbox(bboxes_in, warning=warning, debug=debug)
+	if debug: assert bboxcheck_TLBR(np_bboxes, warning=warning, debug=debug), 'the input bounding box should be TLBR format'
 
 	bbox_TLWH = np.zeros_like(np_bboxes)
 	bbox_TLWH[:, 0] = np_bboxes[:, 0]
@@ -38,7 +38,7 @@ def bbox_TLBR2TLWH(bboxes_in, debug=True):
 	bbox_TLWH[:, 3] = np_bboxes[:, 3] - np_bboxes[:, 1]
 	return bbox_TLWH
 
-def bbox_TLWH2TLBR(bboxes_in, debug=True):
+def bbox_TLWH2TLBR(bboxes_in, warning=True, debug=True):
 	'''
 	transform the input bounding box with TLWH format to TLBR format
 
@@ -49,8 +49,8 @@ def bbox_TLWH2TLBR(bboxes_in, debug=True):
 	outputs: 
 	    bbox_TLBR: N X 4 numpy array, TLBR format
 	'''
-	np_bboxes = safe_bbox(bboxes_in, debug=debug)
-	if debug: assert bboxcheck_TLWH(np_bboxes, debug=debug), 'the input bounding box should be TLBR format'
+	np_bboxes = safe_bbox(bboxes_in, warning=warning, debug=debug)
+	if debug: assert bboxcheck_TLWH(np_bboxes, dwarning=warning, ebug=debug), 'the input bounding box should be TLBR format'
 
 	bbox_TLBR = np.zeros_like(np_bboxes)
 	bbox_TLBR[:, 0] = np_bboxes[:, 0]
@@ -60,7 +60,7 @@ def bbox_TLWH2TLBR(bboxes_in, debug=True):
 	return bbox_TLBR
 
 ############################################# 2D transform #################################
-def clip_bboxes_TLBR(bboxes_in, im_width, im_height, debug=True):
+def clip_bboxes_TLBR(bboxes_in, im_width, im_height, warning=True, debug=True):
 	'''
 	this function clips bboxes inside the image boundary, the coordinates in the clipped bbox are half-included [x, y)
 
@@ -70,12 +70,12 @@ def clip_bboxes_TLBR(bboxes_in, im_width, im_height, debug=True):
 	   im_width/im_height:     scalar
 
 	outputs:        
-	   clipped_bboxes_TLWH:    TLBR format, numpy array with shape of (N, 4)
+	   clipped_bboxes:    TLBR format, numpy array with shape of (N, 4)
 	'''
-	np_bboxes = safe_bbox(bboxes_in, debug=debug)
+	np_bboxes = safe_bbox(bboxes_in, warning=warning, debug=debug)
 	if debug:
 		assert isinteger(im_width) and isinteger(im_height), 'the image width and height are not correct'   
-		assert bboxcheck_TLBR(np_bboxes), 'the input bboxes are not good'
+		assert bboxcheck_TLBR(np_bboxes, warning=warning, debug=debug), 'the input bboxes are not good'
 
 	clipped_bboxes = np.zeros_like(np_bboxes)
 	clipped_bboxes[:, 0] = np.maximum(np.minimum(np_bboxes[:, 0], im_width), 0)      # x1 >= 0 & x1 <= width, included
@@ -84,7 +84,7 @@ def clip_bboxes_TLBR(bboxes_in, im_width, im_height, debug=True):
 	clipped_bboxes[:, 3] = np.maximum(np.minimum(np_bboxes[:, 3], im_height), 0)     # y2 >= 0 & y2 <= height, not included
 	return clipped_bboxes
 
-def clip_bboxes_TLWH(bboxes_in, im_width, im_height, debug=True):
+def clip_bboxes_TLWH(bboxes_in, im_width, im_height, warning=True, debug=True):
 	'''
 	this function clips bboxes inside the image boundary
 
@@ -96,17 +96,17 @@ def clip_bboxes_TLWH(bboxes_in, im_width, im_height, debug=True):
 	outputs:        
 	   clipped_bboxes_TLWH:    TLWH format, numpy array with shape of (N, 4)
 	'''
-	np_bboxes = safe_bbox(bboxes_in, debug=debug)
+	np_bboxes = safe_bbox(bboxes_in, warning=warning, debug=debug)
 	if debug:
 		assert isinteger(im_width) and isinteger(im_height), 'the image width and height are not correct'   
-		assert bboxcheck_TLWH(np_bboxes), 'the input bboxes are not good'
+		assert bboxcheck_TLWH(np_bboxes, warning=warning, debug=debug), 'the input bboxes are not good'
 
 	bboxes_TLBR = bbox_TLWH2TLBR(np_bboxes, debug=debug)
-	clipped_bboxes_TLBR = clip_bboxes_TLBR(bboxes_TLBR, im_width, im_height, debug=debug)
-	clipped_bboxes_TLWH = bbox_TLBR2TLWH(clipped_bboxes_TLBR, debug=debug)
+	clipped_bboxes_TLBR = clip_bboxes_TLBR(bboxes_TLBR, im_width, im_height, warning=warning, debug=debug)
+	clipped_bboxes_TLWH = bbox_TLBR2TLWH(clipped_bboxes_TLBR, warning=warning, debug=debug)
 	return clipped_bboxes_TLWH
 
-def get_center_crop_bbox(center_bboxes_in, im_width=None, im_height=None, debug=True):
+def get_center_crop_bbox(center_bboxes_in, im_width=None, im_height=None, warning=True, debug=True):
 	'''
 	obtain a bbox to crop around a center point
 
@@ -119,7 +119,7 @@ def get_center_crop_bbox(center_bboxes_in, im_width=None, im_height=None, debug=
 	outputs:
 	    crop_bboxes:          TLHW format, an int64 numpy array with shape of (N, 4)     
 	'''
-	np_center_bboxes = safe_center_bbox(center_bboxes_in, debug=debug)
+	np_center_bboxes = safe_center_bbox(center_bboxes_in, warning=warning, debug=debug)
 	if debug: assert iscenterbbox(np_center_bboxes), 'the center bbox does not have a good shape'
 
 	if np_center_bboxes.shape[1] == 4:            # crop around the given center and width and height
