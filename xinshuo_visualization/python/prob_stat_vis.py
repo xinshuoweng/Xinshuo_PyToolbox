@@ -440,4 +440,3 @@ def visualize_bar_graph(data, title='Bar Graph of Key-Value Pair', xlabel='pixel
     plt.yticks(fontsize=adaptive_fontsize)
 
     return save_vis_close_helper(fig=fig, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
-

@@ -81,27 +81,27 @@ def islistoflist(list_test):
 
 def islistofstring(list_test):
 	if not islist(list_test): return False
-	return all(isstring(tmp) for tmp in list_test) and len(list_test) > 0
+	return all(isstring(tmp) for tmp in list_test) and len(list_test) >= 0
 
 def islistofimage(list_test):
 	if not islist(list_test): return False
-	return all(isimage(tmp) for tmp in list_test) and len(list_test) > 0
+	return all(isimage(tmp) for tmp in list_test) and len(list_test) >= 0
 
 def islistofdict(list_test):
 	if not islist(list_test): return False
-	return all(isdict(tmp) for tmp in list_test) and len(list_test) > 0
+	return all(isdict(tmp) for tmp in list_test) and len(list_test) >= 0
 
 def islistofscalar(list_test):
 	if not islist(list_test): return False
-	return all(isscalar(tmp) for tmp in list_test) and len(list_test) > 0
+	return all(isscalar(tmp) for tmp in list_test) and len(list_test) >= 0
 
 def islistofpositiveinteger(list_test):
 	if not islist(list_test): return False
-	return all(ispositiveinteger(tmp) for tmp in list_test) and len(list_test) > 0
+	return all(ispositiveinteger(tmp) for tmp in list_test) and len(list_test) >= 0
 
 def islistofnonnegativeinteger(list_test):
 	if not islist(list_test): return False
-	return all(isnonnegativeinteger(tmp) for tmp in list_test) and len(list_test) > 0
+	return all(isnonnegativeinteger(tmp) for tmp in list_test) and len(list_test) >= 0
 
 ############################################################# path 
 # note:

@@ -3,11 +3,11 @@
 
 # this file includes functions for visualizing on images 
 import numpy as np
-
 from xinshuo_math.python.private import safe_2dptsarray
+from xinshuo_images.python.private import safe_image
+
 from private import save_vis_close_helper, get_fig_ax_helper
 from geometry_vis import visualize_pts_array, visualize_bbox
-from xinshuo_images.python.private import safe_image
 from xinshuo_images import image_bgr2rgb
 from xinshuo_math import get_center_crop_bbox, bbox_TLWH2TLBR
 from xinshuo_miscellaneous import isdict, iscolorimage_dimension, isgrayimage_dimension
@@ -113,13 +113,13 @@ def visualize_image_with_pts_bbox(input_image, input_pts, window_size, linewidth
 		pts_size:			size of points
 		label_size:			font of labels
 		vis_threshold:		the points with confidence above the threshold will be drawn
-		label:			determine to add text label for each point, if label list is None, then an automatic list is created
-		label_list:		label string for all points, if label list is not None, the label is True automatically
-						if the input points is a dictionary, then every point array in the dict follow the same label list
-		bgr2rgb:		true if the image needs to be converted from bgr to rgb
+		label:				determine to add text label for each point, if label list is None, then an automatic list is created
+		label_list:			label string for all points, if label list is not None, the label is True automatically
+							if the input points is a dictionary, then every point array in the dict follow the same label list
+		bgr2rgb:			true if the image needs to be converted from bgr to rgb
 
 	outputs:
-		fig, ax:		figure handle for future use
+		fig, ax:			figure handle for future use
 	'''
 	try: safe_pts = safe_2dptsarray(input_pts, homogeneous=True, warning=warning, debug=debug)
 	except AssertionError: safe_pts = safe_2dptsarray(input_pts, homogeneous=False, warning=warning, debug=debug)

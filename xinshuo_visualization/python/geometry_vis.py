@@ -126,7 +126,6 @@ def visualize_lines(lines_array, color_index=0, line_width=3, fig=None, ax=None,
     parameters:
         lines_array:            4 x num_lines, each column denotes (x1, y1, x2, y2)
     '''
-
     if debug: assert islinesarray(lines_array), 'input array of lines are not correct'
     fig, ax = get_fig_ax_helper(fig=fig, ax=ax)
 
@@ -154,7 +153,7 @@ def visualize_pts_line(pts_array, line_index_list, method=2, seed=0, alpha=0.5,
         line_index_list:    a list of index
         method:             1: all points are connected, if some points are missing in the middle, just ignore that point and connect the two nearby points
                             2: if some points are missing in the middle of a line, the line is decomposed to sub-lines
-        threshold:          confidence to draw the points
+        vis_threshold:      confidence to draw the points
 
     '''
     if debug:
@@ -179,7 +178,7 @@ def visualize_pts_line(pts_array, line_index_list, method=2, seed=0, alpha=0.5,
     pts_line = pts_array[:, line_index_list]
 
     if method == 1:    
-        valid_pts_list = np.where(pts_line[2, :] > threshold)[0].tolist()
+        valid_pts_list = np.where(pts_line[2, :] > vis_threshold)[0].tolist()
         pts_line_tmp = pts_line[:, valid_pts_list]
         ax.plot(pts_line_tmp[0, :], pts_line_tmp[1, :], lw=line_size, color=line_color, alpha=alpha)      # plot all lines
 
@@ -189,7 +188,7 @@ def visualize_pts_line(pts_array, line_index_list, method=2, seed=0, alpha=0.5,
             # ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], 'o', color=color_set_big[pts_index_original % len(color_set_big)], alpha=alpha)
             ax.plot(pts_array[0, pts_index_original], pts_array[1, pts_index_original], marker='o', ms=pts_size, lw=line_size, color=color_set_random[:, pts_index], alpha=alpha)
     else:
-        not_valid_pts_list = np.where(pts_line[2, :] < threshold)[0].tolist()
+        not_valid_pts_list = np.where(pts_line[2, :] < vis_threshold)[0].tolist()
         if len(not_valid_pts_list) == 0:            # all valid
             ax.plot(pts_line[0, :], pts_line[1, :], lw=line_size, color=line_color, alpha=alpha)
 
