@@ -143,7 +143,7 @@ def visualize_lines(lines_array, color_index=0, line_width=3, fig=None, ax=None,
     return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, warning=warning, debug=debug, closefig=closefig)
 
 def visualize_pts_line(pts_array, line_index_list, method=2, seed=0, alpha=0.5,
-    vis_threshold=0.3, pts_size=20, line_size=10, line_color_index=5, 
+    vis_threshold=0.3, pts_size=20, line_size=10, line_color_index=0, 
     fig=None, ax=None, save_path=None, vis=False, warning=True, debug=True, closefig=True):
     '''
     given a list of index, and a point array, to plot a set of points with line on it
