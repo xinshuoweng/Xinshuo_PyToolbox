@@ -46,8 +46,9 @@ def generate_video_from_list(image_list, save_path, framerate=30, downsample=1, 
 	outputdict = {'-r': str(framerate), '-crf': '18', '-vcodec': 'libx264', '-profile:V': 'high', '-pix_fmt': 'yuv420p'}
 	video_writer = FFmpegWriter(save_path, inputdict=inputdict, outputdict=outputdict)
 	count = 1
+	num_images = len(image_list)
 	for image_path in image_list:
-		print('processing frame %d' % count)
+		print('processing frame %d/%d' % (count, num_images))
 		image = load_image(image_path, resize_factor=downsample, warning=warning, debug=debug)
 
 		# make sure the height and width are multiple of 2

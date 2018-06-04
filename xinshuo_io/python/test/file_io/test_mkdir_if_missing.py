@@ -7,6 +7,10 @@ from file_io import mkdir_if_missing
 
 def test_mkdir_if_missing():
 	print('test repetitive')
+	path = './mnt/dome/adhoc_0.5x/abd'
+	mkdir_if_missing(path)
+
+	print('test repetitive')
 	path = './'
 	mkdir_if_missing(path)
 

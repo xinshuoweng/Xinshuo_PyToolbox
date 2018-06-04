@@ -132,25 +132,29 @@ def is_path_exists(pathname):
 	except OSError: return False
 
 def is_path_exists_or_creatable(pathname):
-    try: return is_path_exists(pathname) or is_path_creatable(pathname)
-    except OSError: return False
+	try: return is_path_exists(pathname) or is_path_creatable(pathname)
+	except OSError: return False
 
 def isfile(pathname):
-    if is_path_valid(pathname):
-        pathname = os.path.normpath(pathname)
-        name = os.path.splitext(os.path.basename(pathname))[0]
-        ext = os.path.splitext(pathname)[1]
-        return len(name) > 0 and len(ext) > 0
-    else: return False;
+	if is_path_valid(pathname):
+		pathname = os.path.normpath(pathname)
+		name = os.path.splitext(os.path.basename(pathname))[0]
+		ext = os.path.splitext(pathname)[1]
+		return len(name) > 0 and len(ext) > 0
+	else: return False;
 
 def isfolder(pathname):
-    if is_path_valid(pathname):
-        pathname = os.path.normpath(pathname)
-        if pathname == './': return True
-        name = os.path.splitext(os.path.basename(pathname))[0]
-        ext = os.path.splitext(pathname)[1]
-        return len(name) > 0 and len(ext) == 0
-    else: return False
+	'''
+	if '.' exists in the subfolder, the function still justifies it as a folder. e.g., /mnt/dome/adhoc_0.5x/abc is a folder
+	if '.' exists after all slashes, the function will not justify is as a folder. e.g., /mnt/dome/adhoc_0.5x is NOT a folder
+	'''
+	if is_path_valid(pathname):
+		pathname = os.path.normpath(pathname)
+		if pathname == './': return True
+		name = os.path.splitext(os.path.basename(pathname))[0]
+		ext = os.path.splitext(pathname)[1]
+		return len(name) > 0 and len(ext) == 0
+	else: return False
 
 ############################################################# images
 def isimsize(size_test):
