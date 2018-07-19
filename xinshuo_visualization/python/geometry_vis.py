@@ -61,7 +61,7 @@ def visualize_pts_array(input_pts, color_index=0, pts_size=20, label=False, labe
 
     # obtain a label list if required but not provided
     if debug: assert islogical(label), 'label flag is not correct'
-    if label and (label_list is None): label_list = [str(i+1) for i in xrange(num_pts)]
+    if label and (label_list is None): label_list = [str(i) for i in xrange(num_pts)]
     if label_list is not None and debug: assert islistofstring(label_list), 'labels are not correct'
 
     # obtain the color index
