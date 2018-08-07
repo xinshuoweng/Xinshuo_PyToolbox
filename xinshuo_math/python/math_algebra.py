@@ -104,7 +104,7 @@ def rotate(center, point, angle):
     ])
 
 def avgAngle(angs):
-    return np.arctan2( np.mean(np.sin(angs)), np.mean(np.cos(angs)) )
+    return np.arctan2( np.mean(np.sin(angs)), np.mean(np.cos(angs)))
 
 def get_iris_box(all_pts):
     # return 8 sampled points and ellipse parameters
@@ -115,7 +115,7 @@ def get_iris_box(all_pts):
     d = np.linalg.norm(diff)
     if d:
         angle = np.arccos(diff.dot([0,-1])/d)
-        if diff[0]<0:
+        if diff[0] < 0:
             angle *= -1
     angle *= -1
     angle -= np.pi
@@ -126,38 +126,35 @@ def get_iris_box(all_pts):
     b = abs(all_pts[1][1])
 
     n = all_pts[2][1]**2 - all_pts[1][1]**2
-    d = (all_pts[2][1]*all_pts[1][0])**2 - (all_pts[1][1]*all_pts[2][0])**2
+    d = (all_pts[2][1] * all_pts[1][0])**2 - (all_pts[1][1] * all_pts[2][0])**2
+    # print(n)
+    # print(d)
 
     if d:
-        a = 1.0 / np.sqrt(n / d)
+        try:
+            a = 1.0 / np.sqrt(n / d)
+        except RuntimeWarning:
+            return np.zeros((8, 2), np.float32), False
         angs = np.linspace(0, 2*np.pi, 100)
-        pts = np.zeros((len(angs),2),np.float32)
+        pts = np.zeros((len(angs), 2), np.float32)
         for ia in range(len(angs)):
             pt = np.array([np.cos(angs[ia]) * a, np.sin(angs[ia]) * b])
-            pt = rotate(0*pt, pt, -angle)
+            pt = rotate(0 * pt, pt, -angle)
             pt += all_pts[0]
             pts[ia,:] = pt
             # cv2.circle(image, (int(pt[0]),int(pt[1])), 2, col, -1, cv2.LINE_AA)
         # cv2.polylines( image, [pts[:,0:2].astype(np.int32).reshape(-1,1,2)], False, col, 2)
-        imaxx = np.argmax(pts[:,0])
-        iminx = np.argmin(pts[:,0])
-        imaxy = np.argmax(pts[:,1])
-        iminy = np.argmin(pts[:,1])
+        imaxx = np.argmax(pts[:, 0])
+        iminx = np.argmin(pts[:, 0])
+        imaxy = np.argmax(pts[:, 1])
+        iminy = np.argmin(pts[:, 1])
 
-        angs = [np.pi,np.pi/2,
-        angs[imaxx],
-        avgAngle(angs[[imaxx,iminy]]),
-        angs[iminy],
-        avgAngle(angs[[iminx,iminy]]),
-        angs[iminx],
-        avgAngle(angs[[iminx,imaxy]]),
-        angs[imaxy],
-        avgAngle(angs[[imaxx,imaxy]])]
-        pts = np.zeros((len(angs),2),np.float32)
+        angs = [np.pi, np.pi / 2, angs[imaxx], avgAngle(angs[[imaxx, iminy]]), angs[iminy], avgAngle(angs[[iminx, iminy]]), angs[iminx], avgAngle(angs[[iminx, imaxy]]), angs[imaxy], avgAngle(angs[[imaxx, imaxy]])]
+        pts = np.zeros((len(angs), 2),np.float32)
         for ia in range(len(angs)):
             pt = np.array([np.cos(angs[ia]) * a, np.sin(angs[ia]) * b])
-            pt = rotate(0*pt, pt, -angle)
+            pt = rotate(0 * pt, pt, -angle)
             pt += all_pts[0]
             pts[ia,:] = pt
-        return pts[2:,:].astype(np.float32), np.array([a,b,angle,all_pts[0][0],all_pts[0][1]]).astype(np.float32)
-    return np.zeros((8,2),np.float32), (0,0,0,0)
+        return pts[2:,:].astype(np.float32), np.array([a, b, angle, all_pts[0][0], all_pts[0][1]]).astype(np.float32)
+    return np.zeros((8, 2), np.float32), False
