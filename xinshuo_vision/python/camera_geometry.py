@@ -38,6 +38,10 @@ def triangulate_two_views(input_pts1, input_pts2, projection1, projection2, scal
 
 	print(projection1)
 	print(projection2)
+	condition_matrix = np.array([[1e-3, 0, 0, 0],			# 4 x 4
+								 [0, 1e-3, 0, 0],
+								 [0, 0, 1e-3, 0],
+								 [0, 0, 0, 1e-6]])
 
 	# A = [projection1; projection2];
 	# H = (A'*A)\A';
@@ -59,11 +63,21 @@ def triangulate_two_views(input_pts1, input_pts2, projection1, projection2, scal
 		U[5, :] = np.multiply(pts_array2[0, i], p2T2) - np.multiply(pts_array2[1, i], p2T1)		# x * p2T2 - y * p2T1
 
 		print(U)
-		aa
+		# aa
+		print(condition_matrix)
+		
+		conditioned_U = np.matmul(U, condition_matrix)
+		print(conditioned_U)
+		# aa
 
 		_, _, V = np.linalg.svd(U)
-		pts_3d[i, :] = V[:, -1].transpose()
+		# conditioned_pts_3d[i, :] = V[:, -1].transpose()			# 1 x 4
+		conditioned_pts_3d = V[:, -1]			# 4 x 1
+		pts_3d[i, :] = np.matmul(condition_matrix, conditioned_pts_3d.reshape((4, 1))).transpose()
 
+		# print(pts_3d)
+
+		# aa
 		#     b = [pts_array1(i, :)'; 1; pts_array2(i, :)'; 1];    
 		#     pts_3d(i, :) = (H * b)'
 		pts_3d[i, :] = np.divide(pts_3d[i, :], pts_3d[i, 3])		# N x 4
@@ -79,10 +93,13 @@ def triangulate_two_views(input_pts1, input_pts2, projection1, projection2, scal
 		p2_proj[i, :] = np.divide(p2_proj[i, :], p2_proj[i, -1])
 		# error = error + np.norm(p1_proj[i, 0:2] - pts_array1[0:2, i]) + np.norm(p2_proj[i, 0:2] - pts_array2[0:2, i])
 
-	error_tmp, _ = pts_euclidean(p1_proj[:, 0:2].transpose(), pts_array1[0:2, :], warning=warning, debug=debug)
+	error_tmp, error_list = pts_euclidean(p1_proj[:, 0:2].transpose(), pts_array1[0:2, :], warning=warning, debug=debug)
 	error = error_tmp * num_pts
-	error_tmp, _ = pts_euclidean(p2_proj[:, 0:2].transpose(), pts_array2[0:2, :], warning=warning, debug=debug)
+	print(error_list)
+	error_tmp, error_list = pts_euclidean(p2_proj[:, 0:2].transpose(), pts_array2[0:2, :], warning=warning, debug=debug)
 	error += error_tmp * num_pts
+	# print(error)
+	print(error_list)
 
 	pts_3d = pts_3d[:, 0:3].transpose() 		# 3 x N
 	return pts_3d, p1_proj, p2_proj
