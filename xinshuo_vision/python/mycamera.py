@@ -33,6 +33,7 @@ def load_camera_cluster(calibration_file, warning=True, debug=True):
 	# 3 x 3 for intrinsics
 	# 1 x N for distortion
 	# 3 x 4 for extrinsics
+	print('load camera file from %s' % calibration_file)
 	camera_data, num_lines = load_txt_file(calibration_file, debug=debug)
 	num_lines_each_camera = 9
 	camera_cluster = dict()

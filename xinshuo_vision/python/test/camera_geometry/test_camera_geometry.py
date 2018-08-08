@@ -68,14 +68,14 @@ def test_triangulate_multiple_views():
 
 	# pts_3d, pts_reproj = triangulate_multiple_views(pts_array, projection, scaling_factor=1000)
 	pts_3d, pts_reproj = triangulate_multiple_views(pts_array, projection, scaling_factor=1)
-	# img_path = '../20180514--handsy--400015--0800.png'
-	img_path = '../20180514--handsy--400053--0800.png'
+	img_path = '../20180514--handsy--400015--0800.png'
+	# img_path = '../20180514--handsy--400053--0800.png'
 	# img_path = '../20180514--handsy--400025--0800.png'
 	# img_path = '../20180514--handsy--400027--0800.png'
 	img = load_image(img_path)
 	debug = False
-	fig, ax = visualize_image_with_pts(img, pts_array[1, :, :], label=True, debug=debug, closefig=False, vis=True)
-	fig, ax = visualize_image_with_pts(img, pts_reproj[1, :, :], label=True, debug=debug, closefig=False, vis=True)
+	fig, ax = visualize_image_with_pts(img, pts_array[0, :, :], label=True, debug=debug, closefig=False, vis=True)
+	fig, ax = visualize_image_with_pts(img, pts_reproj[0, :, :], label=True, debug=debug, closefig=False, vis=True)
 	# visualize_pts_array(pts_reproj[0, :], fig=fig, ax=ax, color_index=1, pts_size=20, label=True, vis=True, debug=debug)
 
 	print('\n\nDONE! SUCCESSFUL!!\n')
