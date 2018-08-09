@@ -147,7 +147,7 @@ def triangulate_multiple_views(input_pts, projection, scaling_factor=1, warning=
 	for cam_index in range(num_cam):
 		valid_index_list = np.where(pts_array[cam_index, 2, :] == 1)[0].tolist()
 		# print(type(valid_index_list))
-		print(valid_index_list)
+		# print(valid_index_list)
 		# print(pts_proj[cam_index, 0:2, :])
 		# print(pts_proj[cam_index, 0:2, valid_index_list])
 		# bbb
@@ -155,7 +155,7 @@ def triangulate_multiple_views(input_pts, projection, scaling_factor=1, warning=
 		# error_tmp, error_list = pts_euclidean(p1_proj[:, 0:2].transpose(), pts_array1[0:2, :], warning=warning, debug=debug)
 		# error_tmp, error_list = pts_euclidean(p1_proj[:, 0:2].transpose(), pts_array1[0:2, :], warning=warning, debug=debug)
 	# error = error_tmp * num_pts
-		print(error_list)
+		# print(error_list)
 
 	pts_3d = pts_3d[:, 0:3].transpose() 		# 3 x N
 	return pts_3d, pts_proj, pts_merged
