@@ -2,7 +2,7 @@
 # email: xinshuo.weng@gmail.com
 
 # this file includes functions checking the datatype and equality of input variables
-import os, numpy as np
+import os, numpy as np, sys
 from PIL import Image
 
 ############################################################# basic and customized datatype
@@ -10,7 +10,10 @@ from PIL import Image
 #       the tuple with length of 1 is equivalent to just the single element, it is not a tuple anymore
 #       the boolean value True and False are the scalar value 1 and 0 respectively
 def isstring(string_test):
-	return isinstance(string_test, basestring)
+	if sys.version_info[0] < 3:
+		return isinstance(string_test, basestring)
+	else:
+		return isinstance(string_test, str)
 
 def islist(list_test):
 	return isinstance(list_test, list)

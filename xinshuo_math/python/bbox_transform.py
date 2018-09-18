@@ -5,9 +5,9 @@
 import numpy as np, math, time, copy
 from math import radians as rad
 
-from private import safe_bbox, safe_center_bbox, bboxcheck_TLBR, bboxcheck_TLWH
-from math_geometry import get_2dline_from_pts_slope, get_2dpts_from_lines
-from math_conversion import imagecoor2cartesian, cartesian2imagecoor
+from .private import safe_bbox, safe_center_bbox, bboxcheck_TLBR, bboxcheck_TLWH
+from .math_geometry import get_2dline_from_pts_slope, get_2dpts_from_lines
+from .math_conversion import imagecoor2cartesian, cartesian2imagecoor
 from xinshuo_miscellaneous import isnparray, is2dptsarray, is2dptsarray_occlusion, is2dptsarray_confidence, is2dpts, isinteger, isbbox, islist, iscenterbbox
 
 # general format instruction

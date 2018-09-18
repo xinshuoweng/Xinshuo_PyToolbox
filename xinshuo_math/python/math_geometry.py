@@ -3,9 +3,9 @@
 
 # this file includes functions of basic geometry in math
 import math, numpy as np, warnings
-warnings.filterwarnings("error")
+# warnings.filterwarnings("error")
 
-from private import safe_2dptsarray, safe_npdata
+from .private import safe_2dptsarray, safe_npdata
 from xinshuo_miscellaneous import is2dpts, is2dhomopts, is2dhomoline, is3dpts, isscalar
 
 # homogeneous representation

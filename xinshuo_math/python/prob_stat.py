@@ -4,7 +4,7 @@
 # this file includes functions of basic probability and statistics
 import math, cv2, numpy as np
 
-from private import safe_npdata
+from .private import safe_npdata
 from xinshuo_miscellaneous import isnparray, isrange, isscalar
 
 def hist_equalization(input_data, num_bins=256, warning=True, debug=True):
