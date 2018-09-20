@@ -3,6 +3,8 @@ matplotlib
 graphviz
 matlab_wrapper
 scikit-learn
+scikit-image
+scikit-video
 glob2
 seaborn
 terminaltables
