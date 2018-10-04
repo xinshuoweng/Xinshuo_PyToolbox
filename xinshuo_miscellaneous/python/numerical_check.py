@@ -3,8 +3,7 @@
 
 # this file includes functions checking the datatype and equality of input variables
 import numpy as np
-
-from type_check import islist, isdict, isnparray
+from .type_check import islist, isdict, isnparray
 
 ############################################################# equality check
 def CHECK_EQ_LIST_SELF(input_list, debug=True):

@@ -4,7 +4,7 @@
 # this file includes basic functions to convert the format of numpy array for further computation
 import cv2, numpy as np
 
-from private import safe_2dptsarray_occlusion, safe_npdata
+from .private import safe_2dptsarray_occlusion, safe_npdata
 from xinshuo_miscellaneous import isscalar, isimsize, isnparray
 
 ############################################# format conversion #################################

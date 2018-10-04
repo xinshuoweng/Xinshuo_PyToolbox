@@ -5,7 +5,7 @@
 import numpy as np
 # from scipy import ndimage
 
-from private import safe_image
+from .private import safe_image
 from xinshuo_miscellaneous import isimsize, iscolorimage_dimension, isgrayimage_dimension, isuintimage, isfloatimage
 from xinshuo_math import data_normalize
 

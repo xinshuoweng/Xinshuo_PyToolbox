@@ -6,8 +6,8 @@ import numpy as np
 from xinshuo_math.python.private import safe_2dptsarray
 from xinshuo_images.python.private import safe_image
 
-from private import save_vis_close_helper, get_fig_ax_helper
-from geometry_vis import visualize_pts_array, visualize_bbox
+from .private import save_vis_close_helper, get_fig_ax_helper
+from .geometry_vis import visualize_pts_array, visualize_bbox
 from xinshuo_images import image_bgr2rgb
 from xinshuo_math import get_center_crop_bbox, bbox_TLWH2TLBR
 from xinshuo_miscellaneous import isdict, iscolorimage_dimension, isgrayimage_dimension

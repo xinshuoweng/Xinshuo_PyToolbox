@@ -1,10 +1,7 @@
 # Author: Xinshuo Weng
 # Email: xinshuo.weng@gmail.com
 
-# visualize the blob of caffe net
-
-import time, sys
-import numpy as np
+import time, sys, numpy as np
 
 class Timer(object):
     """A simple timer."""

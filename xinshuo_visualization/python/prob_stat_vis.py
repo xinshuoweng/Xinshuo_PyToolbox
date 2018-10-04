@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt, numpy as np
 from terminaltables import AsciiTable
 from collections import Counter
 
-from private import save_vis_close_helper
+from .private import save_vis_close_helper
 from xinshuo_miscellaneous import isdict, islogical, is_path_exists, isscalar, islist, is_path_exists_or_creatable, CHECK_EQ_LIST_UNORDERED, isnparray, isinteger, isstring, scalarlist2strlist, islistoflist, iscolorimage_dimension, isgrayimage_dimension
 from xinshuo_math import calculate_truncated_mse
 
@@ -145,15 +145,15 @@ def visualize_ced(normed_mean_error_dict, error_threshold, normalized=True, trun
     # metrics_table = list_reorder([table_title] + metrics_table, order_index_list, debug=debug)
     table = AsciiTable(metrics_table)
     if display2terminal:
-        print '\nprint detailed metrics'
-        print table.table
+        print('\nprint detailed metrics')
+        print(table.table)
         
     # save table to file
     if table_savepath is not None:
         table_file = open(table_savepath, 'w')
         table_file.write(table.table)
         table_file.close()
-        if display2terminal: print '\nsave detailed metrics to %s' % table_savepath
+        if display2terminal: print('\nsave detailed metrics to %s' % table_savepath)
     
     return metrics_dict, metrics_table
 
@@ -229,7 +229,7 @@ def visualize_nearest_neighbor(featuremap_dict, num_neighbor=5, top_number=5, vi
 
     # save to the csv file
     if save_csv and csv_save_path is not None:
-        print 'Saving nearest neighbor result as .csv to path: %s' % csv_save_path
+        print('Saving nearest neighbor result as .csv to path: %s' % csv_save_path)
         with open(csv_save_path, 'w+') as file:
             np.savetxt(file, distances, delimiter=',', fmt='%f')
             np.savetxt(file, all_sorted_nearest_id, delimiter=',', fmt='%s')
@@ -382,8 +382,8 @@ def visualize_bar_graph(data, title='Bar Graph of Key-Value Pair', xlabel='pixel
             keys = sorted(data[0].keys())
             for dict_tmp in data:
                 if not (sorted(dict_tmp.keys()) == keys):
-                    print dict_tmp.keys()
-                    print keys
+                    print(dict_tmp.keys())
+                    print(keys)
                     assert False, 'the keys are not equal across different input set'
                 assert all(isstring(key_tmp) for key_tmp in dict_tmp.keys()), 'the keys are not all strings'
                 assert all(isscalar(value_tmp) for value_tmp in dict_tmp.values()), 'the values are not all scalars'   

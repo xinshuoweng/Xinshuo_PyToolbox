@@ -5,8 +5,8 @@
 import struct, numpy as np
 from itertools import islice
 
-from private import safe_list
-from type_check import isstring, isinteger, isnparray, islist, isext, islistoflist, isrange, isscalar, isfloat
+from .private import safe_list
+from .type_check import isstring, isinteger, isnparray, islist, isext, islistoflist, isrange, isscalar, isfloat
 
 ######################################################### list related #########################################################
 def remove_list_from_list(input_list, list_toremove_src, warning=True, debug=True):
@@ -327,7 +327,10 @@ def sort_dict(dictionary, sort_base='value', order='descending', debug=True):
 		assert order == 'descending' or order == 'ascending', 'the sorting order is not descending or ascending'
 
 	reverse = True if order == 'descending' else False
-	if sort_base == 'value': return sorted(dictionary.iteritems(), key= lambda (k,v): (v,k), reverse=reverse)
+
+	# if sys.version_info[0] < 3:
+	# if sort_base == 'value': return sorted(dictionary.iteritems(), key=lambda (k,v):(v,k), reverse=reverse)	# for python2
+	if sort_base == 'value': return sorted(dictionary.iteritems(), key=lambda kv: (kv[1], kv[0]), reverse=reverse)	# for python3
 	else: return sorted(dictionary.iteritems(), reverse=reverse)
 
 def construct_dict_from_lists(list_key, list_value, debug=True):
