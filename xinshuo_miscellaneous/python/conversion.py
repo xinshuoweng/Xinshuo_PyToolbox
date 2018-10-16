@@ -166,6 +166,18 @@ def strlist2floatlist(str_list, warning=True, debug=True):
 		str_list = filter(None, str_list)
 	return [float(str_tmp) for str_tmp in str_list]
 
+def strlist2intlist(str_list, warning=True, debug=True):
+	'''
+	convert a list of string to a list of integer number
+	'''
+	if debug:
+		assert islist(str_list), 'input is not a list'
+		assert all(isstring(str_tmp) for str_tmp in str_list), 'input is not a list of string'
+	if any(len(str_tmp) == 0 for str_tmp in str_list):
+		if warning: print('warning: the list of string contains empty element which will be removed before converting to integer number')
+		str_list = filter(None, str_list)
+	return [int(str_tmp) for str_tmp in str_list]
+
 def floatlist2bytes(float_list, debug=True):
 	'''
 	convert a list of floating number to bytes

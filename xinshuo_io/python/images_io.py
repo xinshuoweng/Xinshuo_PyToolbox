@@ -33,7 +33,6 @@ def load_image(src_path, resize_factor=None, target_size=None, input_angle=0, wa
             img = img.convert('RGB')
             np_image = image_rotate(img, input_angle=input_angle, warning=warning, debug=debug)
             np_image = image_resize(np_image, resize_factor=resize_factor, target_size=target_size, warning=warning, debug=debug)
-
     return np_image
 
 def save_image(input_image, save_path, resize_factor=None, target_size=None, input_angle=0, warning=True, debug=True):

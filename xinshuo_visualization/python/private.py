@@ -23,7 +23,7 @@ def save_vis_close_helper(fig=None, ax=None, vis=False, save_path=None, warning=
     # save and visualization
     if save_path is not None:
         if debug: mkdir_if_missing(save_path, warning=warning, debug=debug)
-        fig.savefig(save_path, dpi=dpi, transparent=transparent)
+        fig.savefig(save_path, dpi=dpi, transparent=transparent, bbox_inches='tight')
     if vis: plt.show()
     if closefig:
         plt.close(fig)
