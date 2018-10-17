@@ -30,12 +30,12 @@ def minimize_mask(bbox, mask, mini_shape, debug=True):
         y1, x1, y2, x2 = bbox[i][:4]
         m = m[y1:y2, x1:x2]
         if m.size == 0: 
-            
+            print(i)
             print(bbox[i][:4])
             print(m[y1:y2, x1:x2])
-            visualize_image(mask[:, :, i])
-            visualize_image_with_bbox(mask[:, :, i], bbox[i][:4])
-            visualize_image(m)
+            # visualize_image(mask[:, :, i])
+            # visualize_image_with_bbox(mask[:, :, i], bbox[i][:4])
+            # visualize_image(m)
 
             raise Exception("Invalid bounding box with area of zero")
         m = scipy.misc.imresize(m.astype(float), mini_shape, interp='bilinear')
