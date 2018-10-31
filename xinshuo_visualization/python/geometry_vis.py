@@ -445,7 +445,7 @@ def apply_mask(image, mask, color, alpha=0.5):
         image[:, :, c] = np.where(mask == 1, image[:, :, c] * (1 - alpha) + alpha * color[c] * 255, image[:, :, c])
     return image
 
-def visualize_image_with_bbox_mask(image, boxes, masks, class_ids, class_names, scores=None, title="", figsize=(16, 16), ax=None):
+def visualize_image_with_bbox_mask(image, boxes, masks, class_ids, class_names, scores=None, title="", figsize=(16, 16), ax=None, alpha=0.3):
     """
     boxes: [num_instance, (y1, x1, y2, x2, class_id)] in image coordinates.
     masks: [height, width, num_instances]
@@ -485,8 +485,8 @@ def visualize_image_with_bbox_mask(image, boxes, masks, class_ids, class_names, 
         # Bounding box
         if not np.any(boxes[i]): continue # Skip this instance. Has no bbox. Likely lost in image cropping.
             
-        # y1, x1, y2, x2 = boxes[i]
-        x1, y1, x2, y2 = boxes[i]
+        y1, x1, y2, x2 = boxes[i]
+        # x1, y1, x2, y2 = boxes[i]
         p = patches.Rectangle((x1, y1), x2 - x1, y2 - y1, linewidth=2,
                               alpha=0.7, linestyle="dashed",
                               edgecolor=color, facecolor='none')
@@ -515,7 +515,7 @@ def visualize_image_with_bbox_mask(image, boxes, masks, class_ids, class_names, 
         for verts in contours:
             # Subtract the padding and flip (y, x) to (x, y)
             verts = np.fliplr(verts) - 1
-            p = patches.Polygon(verts, facecolor="none", edgecolor=color)
+            p = patches.Polygon(verts, facecolor="none", edgecolor=color, alpha=alpha)
             ax.add_patch(p)
     ax.imshow(masked_image.astype(np.uint8))
     # plt.tight_layout()

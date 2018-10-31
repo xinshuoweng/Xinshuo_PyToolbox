@@ -183,8 +183,7 @@ def bbox2center(bboxes_in, debug=True, vis=False):
         center: 2 x N numpy array, x and y correspond to first and second row respectively
     '''
     np_bboxes = safe_bbox(bboxes_in, debug=debug)
-    if debug:
-        assert bboxcheck_TLBR(np_bboxes), 'the input bounding box should be TLBR format'
+    if debug: assert bboxcheck_TLBR(np_bboxes), 'the input bounding box should be TLBR format'
 
     num_bbox = np_bboxes.shape[0]        
     center = np.zeros((num_bbox, 2), dtype='float32')
@@ -461,7 +460,8 @@ def bboxes_from_mask(mask, debug=True):
             # No mask for this instance. Might happen due to
             # resizing or cropping. Set bbox to zeros
             x1, x2, y1, y2 = 0, 0, 0, 0
-        boxes[i] = np.array([x1, y1, x2, y2])
+        # boxes[i] = np.array([x1, y1, x2, y2])
+        boxes[i] = np.array([y1, x1, y2, x2])
     return boxes.astype(np.int32)
 
 def compute_iou(box, boxes, box_area, boxes_area):
