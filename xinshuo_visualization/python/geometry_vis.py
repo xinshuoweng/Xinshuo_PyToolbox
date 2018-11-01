@@ -425,7 +425,6 @@ def visualize_pts(pts, title=None, fig=None, ax=None, display_range=False, xlim=
     save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, warning=warning, debug=debug, closefig=closefig, transparent=False)
     return mse_return
 
-
 def random_colors(N, bright=True):
     """
     Generate random colors.

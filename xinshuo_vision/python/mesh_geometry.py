@@ -1,15 +1,13 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
 
-import os, sys, subprocess
-import numpy as np
-from pyntcloud
-
+import os, sys, subprocess, inspect, numpy as np, trimesh
 from xinshuo_io import load_txt_file, save_txt_file
 from xinshuo_miscellaneous import get_timestring
+from xinshuo_miscellaneous.python.private import safe_path
 
-# this mesh downsample method is based on meshlab, please install meshlab first in order to use this
 def get_merge_script():
+	# this mesh downsample method is based on meshlab, please install meshlab first in order to use this
 	return """<!DOCTYPE FilterScript>
 	<FilterScript>
 		<filter name="Flatten Visible Layers">
@@ -21,8 +19,7 @@ def get_merge_script():
 	</FilterScript>
 	"""
 def create_merge_filter_file(filename='filter_file_tmp.mlx'):
-	with open('/tmp/' + filename, 'w') as f:
-		f.write(get_merge_script())
+	with open('/tmp/' + filename, 'w') as f: f.write(get_merge_script())
 	return '/tmp/' + filename
 
 def mesh_merge(in_file1, in_file2, out_file):
@@ -32,7 +29,6 @@ def mesh_merge(in_file1, in_file2, out_file):
 	command = "meshlabserver -i %s %s" % (in_file1, in_file2)
 	command += " -s " + filter_script_path
 	command += " -o " + out_file + " -om vn fn vc"
-
 	subprocess.call(command, shell=True, stdout=open(os.devnull, 'w'), stderr=subprocess.STDOUT)
 
 def mesh_list_merge(in_file_list, out_file):
@@ -40,11 +36,9 @@ def mesh_list_merge(in_file_list, out_file):
 	filter_script_path = create_merge_filter_file(filename=filename)  
 
 	command = "meshlabserver -i"
-	for in_file in in_file_list:
-		command = "%s %s" % (command, in_file)
+	for in_file in in_file_list: command = "%s %s" % (command, in_file)
 	command += " -s " + filter_script_path
 	command += " -o " + out_file + " -om vn fn vc"
-
 	subprocess.call(command, shell=True, stdout=open(os.devnull, 'w'), stderr=subprocess.STDOUT)
 
 # Script taken from doing the needed operation (Filters > Remeshing, Simplification and Reconstruction > Quadric Edge Collapse Decimation,
@@ -71,13 +65,11 @@ def get_downsample_script(num_faces):
 	""" % num_faces
 
 def create_downsample_filter_file(num_faces, filename='filter_file_tmp.mlx'):
-	with open('/tmp/' + filename, 'w') as f:
-		f.write(get_downsample_script(num_faces))
+	with open('/tmp/' + filename, 'w') as f: f.write(get_downsample_script(num_faces))
 	return '/tmp/' + filename
 
 def mesh_downsample(in_file, out_file, num_faces):
 	filter_script_path = create_downsample_filter_file(num_faces, filename='reduce_tmp_%d.mlx' % num_faces)  
-
 	command = "meshlabserver -i " + in_file
 	command += " -s " + filter_script_path
 	command += " -o " + out_file + " -om vn fn vc"
@@ -102,26 +94,19 @@ def __parse_obj_line(obj_line):
 				remain_str = remain_str + ' %s' % str_list[str_index]
 
 		return pts, 'coordinate', remain_str
-	else:
-		return None, ' ', ' '
+	else: return None, ' ', ' '
 
 def __translate_line(obj_line, translation, debug=True):
 	pts, line_type, remain_str = __parse_obj_line(obj_line)
-
 	if line_type == 'coordinate':
 		pts_translated = pts + np.array(translation)
-		# print pts_translated
-		# ass
 		translated_line = 'v %f %f %f%s' % (pts_translated[0], pts_translated[1], pts_translated[2], remain_str)
-		# print translated_line
 		return translated_line
-	else:
-		return obj_line
+	else: return obj_line
 
 def mesh_translate_obj(obj_file, out_file, translation, debug=True):
 	data, num_lines = load_txt_file(obj_file, debug=debug)
 	out_data = []
-
 	for line_index in range(num_lines):
 		line_tmp = data[line_index]
 		new_line = __translate_line(line_tmp, translation, debug=debug)
@@ -132,19 +117,30 @@ def mesh_translate_obj(obj_file, out_file, translation, debug=True):
 def mesh_change_color_obj(obj_file, out_file, color, alpha=0.1, debug=True):
 	data, num_lines = load_txt_file(obj_file, debug=debug)
 	out_data = []
-
 	for line_index in range(num_lines):
 		line_tmp = data[line_index]
 		pts, line_type, remain_str = __parse_obj_line(line_tmp)
 
 		if line_type == 'coordinate':
 			colored_line = 'v %f %f %f %f %f %f %f' % (pts[0], pts[1], pts[2], color[0], color[1], color[2], alpha)
-		else:
-			colored_line = line_tmp
-
-		# new_line = translate_line(line_tmp, translation, debug=debug)
+		else: colored_line = line_tmp
 		out_data.append(colored_line)
 
 	save_txt_file(out_data, out_file, debug=debug)
 
-def mesh2pointcloud_obj(obj_file, out_file, debug=True):
+def obj2ply_pcl(obj_file, ply_file, debug=True):
+	filepath = inspect.getfile(inspect.currentframe())
+	filepath = safe_path(filepath)
+	parent_list = filepath.split('/')			# works on linux
+	parent_list = parent_list[0:-2]
+	parent_dir = '/'.join(parent_list)
+	lib_dir = os.path.join(parent_dir, 'cplusplus/obj2ply')
+	command = '%s/obj2ply %s %s' % (lib_dir, obj_file, ply_file)
+	os.system(command)
+
+def obj2ply_trimesh(obj_file, ply_file, debug=True):
+	'''
+	sometims the pcl function does not work
+	'''
+	mesh = trimesh.load(obj_file)
+	trimesh.io.export.export_mesh(mesh, ply_file)

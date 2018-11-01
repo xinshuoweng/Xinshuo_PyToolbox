@@ -1,8 +1,6 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
-import numpy as np
-
-import init_paths
+import numpy as np, init_paths
 from mycamera import MyCamera, load_camera_cluster
 from camera_geometry import triangulate_two_views, triangulate_multiple_views
 from xinshuo_io import anno_parser, load_image

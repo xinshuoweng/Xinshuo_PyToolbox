@@ -13,3 +13,5 @@ google-api-python-client
 opencv-python
 h5py
 pillow
+open3d-python
+trimesh

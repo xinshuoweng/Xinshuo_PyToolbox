@@ -1,0 +1,237 @@
+# File produced by Open Asset Import Library (http://www.assimp.sf.net)
+# (assimp v3.2.202087883)
+
+newmtl material_0_0
+Kd 0 0 0
+Ka 0 0 0
+Ks 0.4 0.4 0.4
+Ke 0 0 0
+d 1
+Ns 10
+illum 2
+
+newmtl material_10_0
+Kd 0.05098 0.05098 0.05098
+Ka 0 0 0
+Ks 0.4 0.4 0.4
+Ke 0 0 0
+d 1
+Ns 10
+illum 2
+
+newmtl material_11_0
+Kd 0.584314 0.584314 0.584314
+Ka 0 0 0
+Ks 0.4 0.4 0.4
+Ke 0 0 0
+d 1
+Ns 10
+illum 2
+
+newmtl material_12_0
+Kd 0.184314 0.184314 0.184314
+Ka 0 0 0
+Ks 0.4 0.4 0.4
+Ke 0 0 0
+d 1
+Ns 10
+illum 2
+
+newmtl material_13_0
+Kd 0.803922 0.803922 0.803922
+Ka 0 0 0
+Ks 0.4 0.4 0.4
+Ke 0 0 0
+d 1
+Ns 10
+illum 2
+
+newmtl material_14_0
+Kd 0.784314 0.792157 0.815686
+Ka 0 0 0
+Ks 0.4 0.4 0.4
+Ke 0 0 0
+d 0.5
+Ns 10
+illum 2
+
+newmtl material_15_0
+Kd 0.588235 0.588235 0.588235
+Ka 0 0 0
+Ks 0.4 0.4 0.4
+Ke 0 0 0
+d 1
+Ns 10
+illum 2
+
+newmtl material_16_0
+Kd 0 0 0
+Ka 0 0 0
+Ks 0.4 0.4 0.4
+Ke 0 0 0
+d 1
+Ns 10
+illum 2
+
+newmtl material_17_0
+Kd 0.584314 0.584314 0.584314
+Ka 0 0 0
+Ks 0.4 0.4 0.4
+Ke 0 0 0
+d 1
+Ns 10
+illum 2
+
+newmtl material_18_0
+Kd 1 1 1
+Ka 0 0 0
+Ks 0.4 0.4 0.4
+Ke 0 0 0
+d 1
+Ns 10
+illum 2
+
+newmtl material_19_0
+Kd 1 0 0
+Ka 0 0 0
+Ks 0.4 0.4 0.4
+Ke 0 0 0
+d 1
+Ns 10
+illum 2
+
+newmtl material_19_8
+Kd 1 0 0
+Ka 0 0 0
+Ks 0.4 0.4 0.4
+Ke 0 0 0
+d 1
+Ns 10
+illum 2
+
+newmtl material_1_0
+Kd 0.588235 0.588235 0.588235
+Ka 0 0 0
+Ks 0.4 0.4 0.4
+Ke 0 0 0
+d 1
+Ns 10
+illum 2
+
+newmtl material_20_0
+Kd 0 0 0
+Ka 0 0 0
+Ks 0.4 0.4 0.4
+Ke 0 0 0
+d 1
+Ns 10
+illum 2
+
+newmtl material_20_8
+Kd 0 0 0
+Ka 0 0 0
+Ks 0.4 0.4 0.4
+Ke 0 0 0
+d 1
+Ns 10
+illum 2
+
+newmtl material_21_0
+Kd 0 0 1
+Ka 0 0 0
+Ks 0.4 0.4 0.4
+Ke 0 0 0
+d 1
+Ns 10
+illum 2
+
+newmtl material_21_8
+Kd 0 0 1
+Ka 0 0 0
+Ks 0.4 0.4 0.4
+Ke 0 0 0
+d 1
+Ns 10
+illum 2
+
+newmtl material_22_0
+Kd 0.227451 0.227451 0.227451
+Ka 0 0 0
+Ks 0.4 0.4 0.4
+Ke 0 0 0
+d 1
+Ns 10
+illum 2
+
+newmtl material_2_0
+Kd 0.803922 0.803922 0.803922
+Ka 0 0 0
+Ks 0.4 0.4 0.4
+Ke 0 0 0
+d 1
+Ns 10
+illum 2
+
+newmtl material_3_0
+Kd 0.803922 0.803922 0.803922
+Ka 0 0 0
+Ks 0.4 0.4 0.4
+Ke 0 0 0
+d 1
+Ns 10
+illum 2
+
+newmtl material_4_0
+Kd 0.803922 0.803922 0.803922
+Ka 0 0 0
+Ks 0.4 0.4 0.4
+Ke 0 0 0
+d 1
+Ns 10
+illum 2
+
+newmtl material_5_0
+Kd 0 0 0
+Ka 0 0 0
+Ks 0.4 0.4 0.4
+Ke 0 0 0
+d 1
+Ns 10
+illum 2
+
+newmtl material_6_0
+Kd 0 0 0
+Ka 0 0 0
+Ks 0.4 0.4 0.4
+Ke 0 0 0
+d 1
+Ns 10
+illum 2
+
+newmtl material_7_0
+Kd 0.784314 0.784314 0.784314
+Ka 0 0 0
+Ks 0.4 0.4 0.4
+Ke 0 0 0
+d 0.5
+Ns 10
+illum 2
+
+newmtl material_8_0
+Kd 1 0.423529 0.141176
+Ka 0 0 0
+Ks 0.4 0.4 0.4
+Ke 0 0 0
+d 1
+Ns 10
+illum 2
+
+newmtl material_9_0
+Kd 0.756863 0.141176 0.141176
+Ka 0 0 0
+Ks 0.4 0.4 0.4
+Ke 0 0 0
+d 1
+Ns 10
+illum 2
+

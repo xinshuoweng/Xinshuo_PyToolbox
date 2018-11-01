@@ -1,7 +1,6 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
 
-
 from xinshuo_vision import reduce_faces
 # from xinshuo_io import load_list_from_folder
 
