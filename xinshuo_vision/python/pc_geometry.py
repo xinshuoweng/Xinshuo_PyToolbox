@@ -38,6 +38,7 @@ def pc_fit_transform(pc1, pc2):
 
     # compute scaling
     s = sum(b.T.dot(a) for a, b in zip(centered_pc1, centered_pc2)) / sum(a.T.dot(a) for a in centered_pc1)
+    print(s)
 
     # translation
     t = centroid2.T - s * np.dot(R, centroid1.T)
