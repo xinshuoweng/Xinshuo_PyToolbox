@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # Author: Xinshuo Weng
 # Email: xinshuo.weng@gmail.com
 

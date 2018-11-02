@@ -9,7 +9,7 @@ from xinshuo_visualization import visualize_image
 from xinshuo_io import mkdir_if_missing, load_image, load_list_from_folder
 from xinshuo_images import image_resize
 
-def extract_images_from_video(video_file, save_dir, debug=True):
+def extract_images_from_video_opencv(video_file, save_dir, debug=True):
 	'''
 	if the VideoCapture does not work, uninstall python-opencv and reinstall the newest version
 	'''
@@ -27,6 +27,15 @@ def extract_images_from_video(video_file, save_dir, debug=True):
 		print('processing frame %d' % frame_id)
 
 	cap.release()
+
+def extract_images_from_video_ffmpeg(video_file, save_dir, format='frame%06d.png', debug=True):
+	'''
+	if the VideoCapture does not work, uninstall python-opencv and reinstall the newest version
+	'''
+	if debug: assert is_path_exists(video_file), 'the input video file does not exist'
+	mkdir_if_missing(save_dir)
+	command = 'ffmpeg -i %s %s/%s' % (video_file, save_dir, format)
+	os.system(command)
 
 def generate_video_from_list(image_list, save_path, framerate=30, downsample=1, warning=True, debug=True):
 	'''
