@@ -446,7 +446,7 @@ def apply_mask(image, mask, color, alpha=0.5):
 
 def visualize_image_with_bbox_mask(image, boxes, masks, class_ids, class_names, scores=None, title="", figsize=(16, 16), ax=None, alpha=0.3):
     """
-    boxes: [num_instance, (y1, x1, y2, x2, class_id)] in image coordinates.
+    boxes: [num_instance, (x1, y1, x2, y2, class_id)] in image coordinates.
     masks: [height, width, num_instances]
     class_ids: [num_instances]
     class_names: list of class names of the dataset
@@ -484,8 +484,8 @@ def visualize_image_with_bbox_mask(image, boxes, masks, class_ids, class_names, 
         # Bounding box
         if not np.any(boxes[i]): continue # Skip this instance. Has no bbox. Likely lost in image cropping.
             
-        y1, x1, y2, x2 = boxes[i]
-        # x1, y1, x2, y2 = boxes[i]
+        # y1, x1, y2, x2 = boxes[i]
+        x1, y1, x2, y2 = boxes[i]
         p = patches.Rectangle((x1, y1), x2 - x1, y2 - y1, linewidth=2,
                               alpha=0.7, linestyle="dashed",
                               edgecolor=color, facecolor='none')

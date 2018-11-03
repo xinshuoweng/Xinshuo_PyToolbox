@@ -460,14 +460,13 @@ def bboxes_from_mask(mask, debug=True):
             # No mask for this instance. Might happen due to
             # resizing or cropping. Set bbox to zeros
             x1, x2, y1, y2 = 0, 0, 0, 0
-        # boxes[i] = np.array([x1, y1, x2, y2])
-        boxes[i] = np.array([y1, x1, y2, x2])
+        boxes[i] = np.array([x1, y1, x2, y2])
     return boxes.astype(np.int32)
 
 def compute_iou(box, boxes, box_area, boxes_area):
     """Calculates IoU of the given box with the array of the given boxes.
-    box: 1D vector [y1, x1, y2, x2]
-    boxes: [boxes_count, (y1, x1, y2, x2)]
+    box: 1D vector [x1, y1, x2, y2]
+    boxes: [boxes_count, (x1, y1, x2, y2)]
     box_area: float. the area of 'box'
     boxes_area: array of length boxes_count.
 
@@ -475,10 +474,10 @@ def compute_iou(box, boxes, box_area, boxes_area):
           efficency. Calculate once in the caller to avoid duplicate work.
     """
     # Calculate intersection areas
-    y1 = np.maximum(box[0], boxes[:, 0])
-    y2 = np.minimum(box[2], boxes[:, 2])
-    x1 = np.maximum(box[1], boxes[:, 1])
-    x2 = np.minimum(box[3], boxes[:, 3])
+    x1 = np.maximum(box[0], boxes[:, 0])
+    x2 = np.minimum(box[2], boxes[:, 2])
+    y1 = np.maximum(box[1], boxes[:, 1])
+    y2 = np.minimum(box[3], boxes[:, 3])
     intersection = np.maximum(x2 - x1, 0) * np.maximum(y2 - y1, 0)
     union = box_area + boxes_area[:] - intersection[:]
     iou = intersection / union
@@ -486,7 +485,7 @@ def compute_iou(box, boxes, box_area, boxes_area):
 
 def compute_overlaps(boxes1, boxes2):
     """Computes IoU overlaps between two sets of boxes.
-    boxes1, boxes2: [N, (y1, x1, y2, x2)].
+    boxes1, boxes2: [N, (x1, y1, x2, y2)].
 
     For better performance, pass the largest set first and the smaller second.
     """
