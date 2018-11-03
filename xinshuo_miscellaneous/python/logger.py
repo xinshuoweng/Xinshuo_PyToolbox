@@ -69,7 +69,7 @@ def printProgressBar(iteration, total, log, prefix='', suffix='', decimals=1, le
     percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
     filledLength = int(length * iteration // total)
     bar = fill * filledLength + '-' * (length - filledLength)
-    str_to_print = '%s |%s| %s%% %s' % (prefix, bar, percent, suffix)
+    str_to_print = '%s |%s| %s%%%s' % (prefix, bar, percent, suffix)
     # print(str_to_print)
     # print(str_to_print)
     # zxc
