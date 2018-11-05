@@ -25,22 +25,31 @@ def minimize_mask(bbox, mask, mini_shape, debug=True):
 
     """
     mini_mask = np.zeros(mini_shape + (mask.shape[-1],), dtype=bool)
+    num_instances = bbox.shape[0]
+    good_index = np.ones((num_instances, ), dtype=bool)
     for i in range(mask.shape[-1]):
         m = mask[:, :, i]
         y1, x1, y2, x2 = bbox[i][:4]
         m = m[y1:y2, x1:x2]
         if m.size == 0: 
-            print(i)
-            print(bbox[i][:4])
-            print(m[y1:y2, x1:x2])
+            good_index[i] = False
+            continue
+            # print(i)
+            # print(bbox[i][:4])
+            # print(m[y1:y2, x1:x2])
             # visualize_image(mask[:, :, i])
             # visualize_image_with_bbox(mask[:, :, i], bbox[i][:4])
             # visualize_image(m)
 
-            raise Exception("Invalid bounding box with area of zero")
+            # raise Exception("Invalid bounding box with area of zero")
         m = scipy.misc.imresize(m.astype(float), mini_shape, interp='bilinear')
         mini_mask[:, :, i] = np.where(m >= 128, 1, 0)
-    return mini_mask
+
+    good_index_list = np.where(good_index == True)[0].tolist()
+    # print(good_index_list)
+    # print(num_instances)
+    # zxc
+    return mini_mask, good_index_list
 
 def expand_mask(bbox, mini_mask, image_shape):
     """Resizes mini masks back to image size. Reverses the change
