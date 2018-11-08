@@ -471,7 +471,7 @@ def visualize_image_with_bbox_mask(image, boxes, masks, class_ids, class_names, 
     ax.set(xlim=[0, width], ylim=[height, 0], aspect=1)
     masked_image = image.astype(np.uint32).copy()
 
-    tmp_dir = '/home/xinshuo/Workspace/junk/vis_individual'
+    # tmp_dir = '/home/xinshuo/Workspace/junk/vis_individual'
 
     for instance_index in range(num_instances):
         color = colors[instance_index]

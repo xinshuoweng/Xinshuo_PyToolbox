@@ -13,7 +13,7 @@ from xinshuo_io import load_2dmatrix_from_file
 N = 1000                                    # number of random points in the dataset
 num_tests = 10                               # number of test iterations
 dim = 3                                     # number of dimensions of the points
-noise_sigma = .1                           # standard deviation error to be added
+noise_sigma = .0001                           # standard deviation error to be added
 translation = 1                            # max translation of the test set
 rotation = 1                               # max rotation (radians) of the test set
 
@@ -37,7 +37,8 @@ def test_pc_fit_transform():
 
 		# Find best fit transform
 		start = time.time()
-		T, R1, t1, s = pc_fit_transform(B, A)
+		T, R1, t1 = pc_fit_transform(B, A)
+		# T, R1, t1, s = pc_fit_transform(B, A)
 		total_time += time.time() - start
 
 		# Make C a homogeneous representation of B
@@ -66,20 +67,21 @@ def test_pc_icp_random():
 	t = np.random.rand(dim) * translation
 	B += t
 	R = construct_3drotation_matrix_rodrigue(np.random.rand(dim), np.random.rand() * rotation)
-	B = np.dot(R, B.T).T
+	B = np.dot(R, B.transpose()).transpose()
 	B += np.random.randn(N, dim) * noise_sigma
 	np.random.shuffle(B)		# Shuffle to disrupt correspondence
 
 	# Run ICP
 	start = time.time()
-	T, s, distances, iterations = pc_icp(B, A, tolerance=0.001)
+	# T, num_iter, mean_error_list, pc_transformed_list, scale = pc_icp(B, A, tolerance=0.001)
+	T, num_iter, mean_error_list, pc_transformed_list = pc_icp(B, A, tolerance=0.0001)
 	total_time += time.time() - start
-	print(T.shape)
+	# print(T.shape)
 
 	# Make C a homogeneous representation of B
 	C = np.ones((N, 4))
 	C[:, 0:3] = np.copy(B)
-	C = np.dot(T, C.T).T
+	C = np.dot(T, C.transpose()).transpose()
 	# assert np.mean(distances) < 6*noise_sigma                   # mean error should be small
 	# assert np.allclose(T[0:3,0:3].T, R, atol=6*noise_sigma)     # T and R should be inverses
 	# assert np.allclose(-T[0:3,3], t, atol=6*noise_sigma)        # T and t should be inverses
@@ -89,15 +91,15 @@ def test_pc_icp_random():
 	pcd1 = PointCloud()
 	pcd1.points = Vector3dVector(A)
 	pcd1.paint_uniform_color([1, 0, 0])
-	write_point_cloud('pc1.ply', pcd1)
+	write_point_cloud('pc_target.ply', pcd1)
 	pcd2 = PointCloud()
 	pcd2.points = Vector3dVector(B)
 	pcd2.paint_uniform_color([0, 1, 0])
-	write_point_cloud('pc2.ply', pcd2)
+	write_point_cloud('pc_source.ply', pcd2)
 	pcd3 = PointCloud()
 	pcd3.points = Vector3dVector(C[:, 0:3])
 	pcd3.paint_uniform_color([0, 1, 0])
-	write_point_cloud('pc3.ply', pcd3)
+	write_point_cloud('pc_registered.ply', pcd3)
 
 def test_pc_icp_given():
 	total_time = 0
@@ -144,4 +146,4 @@ def test_pc_icp_given():
 if __name__ == "__main__":
 	test_pc_fit_transform()
 	test_pc_icp_random()
-	test_pc_icp_given()
+	# test_pc_icp_given()
