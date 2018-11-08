@@ -445,7 +445,7 @@ def apply_mask(image, mask, color, alpha=0.5):
         image[:, :, c] = np.where(mask == 1, image[:, :, c] * (1 - alpha) + alpha * color[c] * 255, image[:, :, c])
     return image
 
-def visualize_image_with_bbox_mask(image, boxes, masks, class_ids, class_names, scores=None, alpha=0.3, fig=None, ax=None, title='Mask & Bounding Box Visualization'):
+def visualize_image_with_bbox_mask(image, boxes, masks, class_ids, class_names, class_to_plot=None, scores=None, alpha=0.3, fig=None, ax=None, title='Mask & Bounding Box Visualization'):
     """
     visualize the image with bbox and mask (and text and score)
 
@@ -455,7 +455,8 @@ def visualize_image_with_bbox_mask(image, boxes, masks, class_ids, class_names, 
         class_ids: [num_instances]
         class_names: list of class names of the dataset
         scores: (optional) confidence scores for each box
-        title
+        class_to_plot:     list of class index in the class_names to plot
+        title:
     """
 
     num_instances = boxes.shape[0]          # Number of instances
@@ -476,6 +477,10 @@ def visualize_image_with_bbox_mask(image, boxes, masks, class_ids, class_names, 
     for instance_index in range(num_instances):
         color = colors[instance_index]
 
+        # skip to visualize the class we do not care
+        class_id = class_ids[instance_index]
+        if not (class_id in class_to_plot): continue
+
         # visualize the bbox
         if not np.any(boxes[instance_index]): continue           # Skip this instance. Has no bbox. Likely lost in image cropping.
         x1, y1, x2, y2 = boxes[instance_index]
@@ -483,7 +488,6 @@ def visualize_image_with_bbox_mask(image, boxes, masks, class_ids, class_names, 
         ax.add_patch(p)
 
         # add the text and score
-        class_id = class_ids[instance_index]
         score = scores[instance_index] if scores is not None else None
         label = class_names[class_id]
         x = random.randint(x1, (x1 + x2) // 2)
