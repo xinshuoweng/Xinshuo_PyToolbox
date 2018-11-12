@@ -458,18 +458,26 @@ def visualize_image_with_bbox_mask(image, boxes, masks, class_ids, class_names, 
         class_to_plot:     list of class index in the class_names to plot
         title:
     """
-
+    if class_to_plot is None: class_to_plot = range(len(class_names))
     num_instances = boxes.shape[0]          # Number of instances
     if not num_instances: print("\n*** No instances to display *** \n")
     else: assert boxes.shape[0] == masks.shape[-1] == class_ids.shape[0]
+    colors = random_colors(num_instances)       # Generate random colors
 
     height, width = image.shape[:2]
-    if not ax: fig = plt.figure(figsize=(16, 16))
-    ax = fig.add_axes([0, 0, 1, 0.5])
-    colors = random_colors(num_instances)       # Generate random colors
+    # print(height)
+    # print(width)
+    # zxc
+
+    fig, _ = get_fig_ax_helper(fig=fig, ax=ax, width=width, height=height)
+    ax = fig.add_axes([0, 0, 1, 1])
     ax.axis('off')
+
+    # if not ax: fig = plt.figure(figsize=(16, 16))
+    # ax = fig.add_axes([0, 0, 1, 0.5])
+    
+    # ax.axis('off')
     ax.set_title(title)
-    ax.set(xlim=[0, width], ylim=[height, 0], aspect=1)
     masked_image = image.astype(np.uint32).copy()
 
     # tmp_dir = '/home/xinshuo/Workspace/junk/vis_individual'
@@ -484,7 +492,7 @@ def visualize_image_with_bbox_mask(image, boxes, masks, class_ids, class_names, 
         # visualize the bbox
         if not np.any(boxes[instance_index]): continue           # Skip this instance. Has no bbox. Likely lost in image cropping.
         x1, y1, x2, y2 = boxes[instance_index]
-        p = patches.Rectangle((x1, y1), x2 - x1, y2 - y1, linewidth=2, alpha=alpha, linestyle="dashed", edgecolor=color, facecolor='none')
+        p = patches.Rectangle((x1, y1), x2 - x1, y2 - y1, linewidth=2, alpha=alpha, linestyle='dashed', edgecolor=color, facecolor='none')
         ax.add_patch(p)
 
         # add the text and score
@@ -492,7 +500,7 @@ def visualize_image_with_bbox_mask(image, boxes, masks, class_ids, class_names, 
         label = class_names[class_id]
         x = random.randint(x1, (x1 + x2) // 2)
         caption = "{} {:.3f}".format(label, score) if score else label
-        ax.text(x1, y1 + 8, caption, color='w', size=11, backgroundcolor="none")
+        ax.text(x1, y1 + 8, caption, color='w', size=11, backgroundcolor='none')
 
         # add the mask
         mask = masks[:, :, instance_index]
@@ -511,5 +519,8 @@ def visualize_image_with_bbox_mask(image, boxes, masks, class_ids, class_names, 
             p = patches.Polygon(verts, facecolor="none", edgecolor=color, alpha=alpha)
             ax.add_patch(p)
 
+    # print(masked_image.shape)
+    # zxc
     ax.imshow(masked_image.astype(np.uint8))
+    ax.set(xlim=[0, width], ylim=[height, 0], aspect=1)
     return fig, ax
