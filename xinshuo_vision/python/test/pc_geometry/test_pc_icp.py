@@ -106,7 +106,7 @@ def test_pc_icp_random():
 
 def test_pc_icp_given():
 	total_time = 0
-	filename = '004'
+	filename = '003'
 	filepath = 'archive/%s.txt' % filename
 	pc1, _ = load_2dmatrix_from_file(filepath)
 	# print(pc1.shape)
@@ -114,11 +114,15 @@ def test_pc_icp_given():
 	pcd1 = PointCloud()
 	pcd1.points = Vector3dVector(pc1)
 	# obj2ply_trimesh('car.obj', 'car.ply')
-	pcd1.paint_uniform_color([1, 0, 0])
+	pcd1.paint_uniform_color([0, 1, 0])
 	write_point_cloud('partial_car%s.ply' % filename, pcd1)
 
 	pcd2 = read_point_cloud('archive/car.ply')
 	pc2 = np.array(pcd2.points)
+	pc2 *= 4.5
+	print(pc2)
+	print(pc1)
+
 	np.save('car.npy', pc2)
 
 
@@ -148,10 +152,10 @@ def test_pc_icp_given():
 	print('icp time: {:.3}'.format(total_time))
 	pcd3 = PointCloud()
 	pcd3.points = Vector3dVector(pc3[:, 0:3])
-	pcd3.paint_uniform_color([0, 1, 0])
+	pcd3.paint_uniform_color([1, 0, 0])
 	write_point_cloud('aligned_car.ply', pcd3)
 
 if __name__ == "__main__":
 	# test_pc_fit_transform()
-	test_pc_icp_random()
-	# test_pc_icp_given()
+	# test_pc_icp_random()
+	test_pc_icp_given()
