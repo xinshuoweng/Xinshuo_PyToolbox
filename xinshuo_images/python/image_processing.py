@@ -657,8 +657,9 @@ def image_rotate(input_image, input_angle, warning=True, debug=True):
 	'''	
 	if debug: assert isscalar(input_angle), 'the input angle is not a scalar'
 	rotation_angle = safe_angle(input_angle, warning=warning, debug=True)             # ensure to be in [-180, 180]
-
 	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
+	if input_angle == 0: return np_image
+
 	if isfloatimage(np_image): np_image = (np_image * 255.).astype('uint8')
 	pil_image = Image.fromarray(np_image)
 	if rotation_angle != 0: pil_image = pil_image.rotate(rotation_angle, expand=True)
