@@ -128,7 +128,8 @@ def load_list_from_folder(folder_path, ext_filter=None, depth=1, recursive=False
         wildcard_prefix = '**'
         if ext_filter is not None:
             for ext_tmp in ext_filter:
-                wildcard = os.path.join(wildcard_prefix, '*' + string2ext_filter(ext_tmp))
+                # wildcard = os.path.join(wildcard_prefix, '*' + string2ext_filter(ext_tmp))
+                wildcard = os.path.join(wildcard_prefix, '*' + ext_tmp)
                 curlist = glob2.glob(os.path.join(folder_path, wildcard))
                 if sort: curlist = sorted(curlist)
                 fulllist += curlist
@@ -142,7 +143,8 @@ def load_list_from_folder(folder_path, ext_filter=None, depth=1, recursive=False
         for index in range(depth-1): wildcard_prefix = os.path.join(wildcard_prefix, '*')
         if ext_filter is not None:
             for ext_tmp in ext_filter:
-                wildcard = wildcard_prefix + string2ext_filter(ext_tmp)
+                # wildcard = wildcard_prefix + string2ext_filter(ext_tmp)
+                wildcard = wildcard_prefix + ext_tmp
                 curlist = glob.glob(os.path.join(folder_path, wildcard))
                 if sort: curlist = sorted(curlist)
                 fulllist += curlist

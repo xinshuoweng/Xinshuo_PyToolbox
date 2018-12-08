@@ -30,12 +30,27 @@ def extract_images_from_video_opencv(video_file, save_dir, debug=True):
 
 def extract_images_from_video_ffmpeg(video_file, save_dir, format='frame%06d.png', debug=True):
 	'''
-	if the VideoCapture does not work, uninstall python-opencv and reinstall the newest version
+	loading the video using the ffmpeg
 	'''
 	if debug: assert is_path_exists(video_file), 'the input video file does not exist'
 	mkdir_if_missing(save_dir)
 	command = 'ffmpeg -i %s %s/%s' % (video_file, save_dir, format)
 	os.system(command)
+
+def extract_images_from_video_ffmpeg2(video_file, save_dir, format='frame%06d.png', debug=True):
+    """loading the video using the ffmpeg built-in in python.
+
+    Returns:
+        List[FloatTensor]: the frames of the video as a list of 3D tensors
+            (channels, width, height)"""
+
+    vid = imageio.get_reader(filename, 'ffmpeg')
+    frames = []
+    for i in range(0, num_frames):
+        image = vid.get_data(i)
+        image = functional.to_tensor(image)
+        frames.append(image)
+    return frames
 
 def generate_video_from_list(image_list, save_path, framerate=30, downsample=1, warning=True, debug=True):
 	'''
