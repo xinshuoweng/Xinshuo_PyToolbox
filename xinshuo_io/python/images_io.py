@@ -52,7 +52,7 @@ def save_image(input_image, save_path, resize_factor=None, target_size=None, inp
     # preprocessing the image before saving
     np_image = image_rotate(np_image, input_angle=input_angle, warning=warning, debug=debug)
     np_image = image_resize(np_image, resize_factor=resize_factor, target_size=target_size, warning=warning, debug=debug)
-
+    
     # saving
     pil_image = Image.fromarray(np_image)
     pil_image.save(save_path)

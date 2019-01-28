@@ -115,12 +115,15 @@ def load_list_from_folder(folder_path, ext_filter=None, depth=1, recursive=False
     '''
     folder_path = safe_path(folder_path)
     if debug: assert isfolder(folder_path), 'input folder path is not correct: %s' % folder_path
-    if not is_path_exists(folder_path): return [], 0
+    if not is_path_exists(folder_path): 
+        print('the input folder does not exist\n')
+        return [], 0
     if debug:
         assert islogical(recursive), 'recursive should be a logical variable: {}'.format(recursive)
         assert depth is None or (isinteger(depth) and depth >= 1), 'input depth is not correct {}'.format(depth)
         assert ext_filter is None or (islist(ext_filter) and all(isstring(ext_tmp) for ext_tmp in ext_filter)) or isstring(ext_filter), 'extension filter is not correct'
     if isstring(ext_filter): ext_filter = [ext_filter]                               # convert to a list
+    # zxc
 
     fulllist = list()
     if depth is None:        # find all files recursively
@@ -148,9 +151,11 @@ def load_list_from_folder(folder_path, ext_filter=None, depth=1, recursive=False
                 curlist = glob.glob(os.path.join(folder_path, wildcard))
                 if sort: curlist = sorted(curlist)
                 fulllist += curlist
+            # zxc
         else:
             wildcard = wildcard_prefix
             curlist = glob.glob(os.path.join(folder_path, wildcard))
+            # print(curlist)
             if sort: curlist = sorted(curlist)
             fulllist += curlist
         if recursive and depth > 1:

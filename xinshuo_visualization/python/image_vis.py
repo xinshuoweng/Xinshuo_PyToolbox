@@ -75,7 +75,7 @@ def visualize_image_with_pts(input_image, input_pts, color_index=0, pts_size=20,
 		plot_occl=False, covariance=False, xlim=None, ylim=None, vis_threshold=vis_threshold, debug=debug, vis=False, save_path=None, warning=warning, closefig=False)
 	return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, warning=warning, closefig=closefig)
 
-def visualize_image_with_bbox(input_image, input_bbox, linewidth=0.5, color_index=20,
+def visualize_image_with_bbox(input_image, input_bbox, linewidth=0.5, color_index=20, scores=None, threshold=0.0,
 	bgr2rgb=False, save_path=None, vis=False, warning=True, debug=True, closefig=True):
 	'''
 	visualize image and plot bounding boxes on top of it
@@ -92,7 +92,7 @@ def visualize_image_with_bbox(input_image, input_bbox, linewidth=0.5, color_inde
 		fig, ax:		figure handle for future use
 	'''
 	fig, ax = visualize_image(input_image, bgr2rgb=bgr2rgb, vis=False, save_path=None, warning=warning, debug=debug, closefig=False)
-	fig, ax = visualize_bbox(input_bbox, linewidth=linewidth, edge_color_index=color_index, fig=fig, ax=ax, debug=debug, vis=False, save_path=None, warning=warning, closefig=False)
+	fig, ax = visualize_bbox(input_bbox, linewidth=linewidth, edge_color_index=color_index, scores=scores, threshold=threshold, fig=fig, ax=ax, debug=debug, vis=False, save_path=None, warning=warning, closefig=False)
 	return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, warning=warning, closefig=closefig)
 
 def visualize_image_with_pts_bbox(input_image, input_pts, window_size, linewidth=0.5, edge_color_index=20, 

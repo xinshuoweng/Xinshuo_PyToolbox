@@ -6,3 +6,5 @@ rsync -rlvz --ignore-existing --exclude='*cropped112.npy' /media/xinshuo/Data/Da
 rsync -rlvz --ignore-existing xinshuo@128.2.176.246:/media/hdd1/xinshuo/data/models/end_to_end_audiovisual_lipreading/i3d_alone /media/xinshuo/Data/models/end_to_end_audiovisual_lipreading/
 rsync -rlvz --ignore-existing xinshuo@128.2.176.246:/media/hdd1/xinshuo/data/models/end_to_end_audiovisual_lipreading/backendGRU_every_frame /media/xinshuo/Data/models/end_to_end_audiovisual_lipreading/
 rsync -rlvz --ignore-existing xinshuo@128.2.176.246:/media/hdd1/xinshuo/data/models/end_to_end_audiovisual_lipreading/finetuneGRU_every_frame /media/xinshuo/Data/models/end_to_end_audiovisual_lipreading/
+rsync -rlvz --ignore-existing xinshuo@128.2.176.246:/media/hdd1/xinshuo/data/models/end_to_end_audiovisual_lipreading/i3d_BGRU /media/xinshuo/Data/models/end_to_end_audiovisual_lipreading/
+rsync -rlvz --ignore-existing xinshuo@128.2.176.246:/media/hdd1/xinshuo/data/models/end_to_end_audiovisual_lipreading/i3d_rgb_alone /media/xinshuo/Data/models/end_to_end_audiovisual_lipreading/

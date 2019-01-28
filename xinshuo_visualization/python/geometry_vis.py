@@ -26,7 +26,7 @@ hatch_set = [None, 'o', '/', '\\', '|', '-', '+', '*', 'x', 'O', '.']
 linestyle_set = ['-', '--', '-.', ':', None, ' ', 'solid', 'dashed']
 dpi = 80
 
-def visualize_bbox(input_bbox, linewidth=0.5, edge_color_index=20, 
+def visualize_bbox(input_bbox, linewidth=0.5, edge_color_index=20, scores=None, threshold=0.0,
     fig=None, ax=None, save_path=None, vis=False, warning=True, debug=True, closefig=True):
     '''
     visualize a set of bounding box
@@ -35,6 +35,7 @@ def visualize_bbox(input_bbox, linewidth=0.5, edge_color_index=20,
         input_bbox:     a list of 4 elements, a listoflist of 4 elements: e.g., [[1,2,3,4], [5,6,7,8]],
                         a numpy array with shape or (N, 4) or (4, )
                         TLBR format
+        scores:         a list of floating numbers representing the confidences
     '''
     np_bboxes = safe_bbox(input_bbox, warning=warning, debug=debug)
     if debug: assert bboxcheck_TLBR(np_bboxes, warning=warning, debug=debug), 'input bounding boxes are not correct'
@@ -43,6 +44,12 @@ def visualize_bbox(input_bbox, linewidth=0.5, edge_color_index=20,
     np_bboxes = bbox_TLBR2TLWH(np_bboxes, warning=warning, debug=debug)              # convert TLBR format to TLWH format
     for bbox_index in range(np_bboxes.shape[0]):
         bbox_tmp = np_bboxes[bbox_index, :]     
+        if scores is not None:
+            score = scores[bbox_index]
+            if score < threshold: continue
+            caption = '{:.3f}'.format(score)
+            ax.text(bbox_tmp[0], bbox_tmp[1] + 8, caption, color='w', size=11, backgroundcolor='none')
+
         ax.add_patch(plt.Rectangle((bbox_tmp[0], bbox_tmp[1]), bbox_tmp[2], bbox_tmp[3], fill=False, edgecolor=edge_color, linewidth=linewidth))
     return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, warning=warning, debug=debug, closefig=closefig)
 
@@ -445,7 +452,7 @@ def apply_mask(image, mask, color, alpha=0.5):
         image[:, :, c] = np.where(mask == 1, image[:, :, c] * (1 - alpha) + alpha * color[c] * 255, image[:, :, c])
     return image
 
-def visualize_image_with_bbox_mask(image, boxes, masks, class_ids, class_names, class_to_plot=None, scores=None, alpha=0.3, fig=None, ax=None, title='Mask & Bounding Box Visualization'):
+def visualize_image_with_bbox_mask(image, boxes, masks, class_ids, class_names, class_to_plot=None, scores=None, alpha=0.7, fig=None, ax=None, title='Mask & Bounding Box Visualization'):
     """
     visualize the image with bbox and mask (and text and score)
 
