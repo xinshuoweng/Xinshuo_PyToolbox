@@ -8,3 +8,4 @@ rsync -rlvz --ignore-existing xinshuo@128.2.176.246:/media/hdd1/xinshuo/data/mod
 rsync -rlvz --ignore-existing xinshuo@128.2.176.246:/media/hdd1/xinshuo/data/models/end_to_end_audiovisual_lipreading/finetuneGRU_every_frame /media/xinshuo/Data/models/end_to_end_audiovisual_lipreading/
 rsync -rlvz --ignore-existing xinshuo@128.2.176.246:/media/hdd1/xinshuo/data/models/end_to_end_audiovisual_lipreading/i3d_BGRU /media/xinshuo/Data/models/end_to_end_audiovisual_lipreading/
 rsync -rlvz --ignore-existing xinshuo@128.2.176.246:/media/hdd1/xinshuo/data/models/end_to_end_audiovisual_lipreading/i3d_rgb_alone /media/xinshuo/Data/models/end_to_end_audiovisual_lipreading/
+rsync -rlvz --ignore-existing xinshuo@128.2.177.239:/home/eshed1/Downloads/MATLAB_2018a_Licensing_Standard /home/xinshuo/Downloads/

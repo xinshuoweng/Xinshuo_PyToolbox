@@ -16,7 +16,7 @@ from skimage.measure import find_contours
 from .private import save_vis_close_helper, get_fig_ax_helper
 from xinshuo_math.python.private import safe_2dptsarray, safe_bbox
 from xinshuo_math import pts_euclidean, bbox_TLBR2TLWH, bboxcheck_TLBR
-from xinshuo_miscellaneous import islogical, islist, isstring, is2dptsarray_confidence, is2dptsarray_occlusion, is2dptsarray, isdict, list_reorder, list2tuple, islistofstring, ifconfscalar
+from xinshuo_miscellaneous import islogical, islist, isstring, is2dptsarray_confidence, is2dptsarray_occlusion, is2dptsarray, isdict, list_reorder, list2tuple, islistofstring, ifconfscalar, isscalar, isnparray
 from xinshuo_io import mkdir_if_missing, save_image
 
 color_set = ['r', 'b', 'g', 'c', 'm', 'y', 'k', 'w', 'lime', 'cyan', 'aqua']
@@ -37,6 +37,11 @@ def visualize_bbox(input_bbox, linewidth=0.5, edge_color_index=20, scores=None, 
                         TLBR format
         scores:         a list of floating numbers representing the confidences
     '''
+    if islist(input_bbox) and len(input_bbox) == 0: 
+        return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, warning=warning, debug=debug, closefig=closefig)
+    elif isnparray(input_bbox) and input_bbox.size == 0:
+        return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, warning=warning, debug=debug, closefig=closefig)
+
     np_bboxes = safe_bbox(input_bbox, warning=warning, debug=debug)
     if debug: assert bboxcheck_TLBR(np_bboxes, warning=warning, debug=debug), 'input bounding boxes are not correct'
     edge_color = color_set_big[edge_color_index % len(color_set_big)]
@@ -45,7 +50,19 @@ def visualize_bbox(input_bbox, linewidth=0.5, edge_color_index=20, scores=None, 
     for bbox_index in range(np_bboxes.shape[0]):
         bbox_tmp = np_bboxes[bbox_index, :]     
         if scores is not None:
-            score = scores[bbox_index]
+            score = float(scores[bbox_index])
+            # print(float(score))
+            # print(islist(score))
+            # print(type(score))
+            # zxc
+            # if not isscalar(score): 
+                # score = score[0]
+                # print('aaaa')
+            # print(score)
+            # print(type(score))
+            # zxc
+            # print(type(score))
+
             if score < threshold: continue
             caption = '{:.3f}'.format(score)
             ax.text(bbox_tmp[0], bbox_tmp[1] + 8, caption, color='w', size=11, backgroundcolor='none')
