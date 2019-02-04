@@ -12,7 +12,7 @@ from .file_io import mkdir_if_missing
 from xinshuo_miscellaneous import is_path_exists_or_creatable, isimage, isscalar, is_path_exists
 from xinshuo_images import image_rotate, image_resize, rgb2gray
 
-def load_image(src_path, resize_factor=None, target_size=None, input_angle=0, warning=True, debug=True):
+def load_image(src_path, resize_factor=None, target_size=None, input_angle=0, gray=False, warning=True, debug=True):
     '''
     load an image from given path, with preprocessing of resizing and rotating, output a rgb image
 
@@ -30,7 +30,8 @@ def load_image(src_path, resize_factor=None, target_size=None, input_angle=0, wa
 
     with open(src_path, 'rb') as f:
         with Image.open(f) as img:
-            img = img.convert('RGB')
+            if gray: img = img.convert('L')
+            else: img = img.convert('RGB')
             np_image = image_rotate(img, input_angle=input_angle, warning=warning, debug=debug)
             np_image = image_resize(np_image, resize_factor=resize_factor, target_size=target_size, warning=warning, debug=debug)
     return np_image

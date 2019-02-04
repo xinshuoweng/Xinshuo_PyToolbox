@@ -629,6 +629,7 @@ def image_resize(input_image, resize_factor=None, target_size=None, interp='bicu
 	if target_size is not None:
 		if debug: assert isimsize(target_size), 'the input target size is not correct'
 		target_width, target_height = int(round(target_size[1])), int(round(target_size[0]))
+		if target_width == np_image.shape[1] and target_height == np_image.shape[0]: return np_image
 	elif resize_factor is not None:
 		if debug: assert isscalar(resize_factor) and resize_factor > 0, 'the resize factor is not a scalar'
 		if resize_factor == 1: return np_image 			# no resizing

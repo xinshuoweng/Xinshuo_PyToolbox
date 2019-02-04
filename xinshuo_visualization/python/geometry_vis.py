@@ -65,7 +65,7 @@ def visualize_bbox(input_bbox, linewidth=0.5, edge_color_index=20, scores=None, 
 
             if score < threshold: continue
             caption = '{:.3f}'.format(score)
-            ax.text(bbox_tmp[0], bbox_tmp[1] + 8, caption, color='w', size=11, backgroundcolor='none')
+            ax.text(bbox_tmp[0], bbox_tmp[1] + 8, caption, color='r', size=8, backgroundcolor='none')
 
         ax.add_patch(plt.Rectangle((bbox_tmp[0], bbox_tmp[1]), bbox_tmp[2], bbox_tmp[3], fill=False, edgecolor=edge_color, linewidth=linewidth))
     return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, warning=warning, debug=debug, closefig=closefig)
@@ -457,9 +457,9 @@ def random_colors(N, bright=True):
     convert to RGB.
     """
     brightness = 1.0 if bright else 0.7
-    hsv = [(i / N, 1, brightness) for i in range(N)]
+    hsv = [(i / float(N), 1, brightness) for i in range(N)]
     colors = list(map(lambda c: colorsys.hsv_to_rgb(*c), hsv))
-    random.shuffle(colors)
+    # random.shuffle(colors)
     return colors
 
 def apply_mask(image, mask, color, alpha=0.5):
@@ -475,18 +475,19 @@ def visualize_image_with_bbox_mask(image, boxes, masks, class_ids, class_names, 
 
     parameters:
         boxes: [num_instance, (x1, y1, x2, y2, class_id)] in image coordinates.
-        masks: [height, width, num_instances]
+        masks: [height, width, num_instances], numpy images, range in [0, 1]
         class_ids: [num_instances]
         class_names: list of class names of the dataset
         scores: (optional) confidence scores for each box
         class_to_plot:     list of class index in the class_names to plot
         title:
     """
+    max_numinstances = 20
     if class_to_plot is None: class_to_plot = range(len(class_names))
     num_instances = boxes.shape[0]          # Number of instances
     if not num_instances: print("\n*** No instances to display *** \n")
     else: assert boxes.shape[0] == masks.shape[-1] == class_ids.shape[0]
-    colors = random_colors(num_instances)       # Generate random colors
+    colors = random_colors(max_numinstances)       # Generate random colors
 
     height, width = image.shape[:2]
     # print(height)
@@ -502,21 +503,30 @@ def visualize_image_with_bbox_mask(image, boxes, masks, class_ids, class_names, 
     
     # ax.axis('off')
     ax.set_title(title)
-    masked_image = image.astype(np.uint32).copy()
-
+    masked_image = image.astype(np.uint8).copy()
+    # print(masked_image.shape)
+    # save_image(masked_image, '/home/xinshuo/test.jpg')
     # tmp_dir = '/home/xinshuo/Workspace/junk/vis_individual'
 
     for instance_index in range(num_instances):
-        color = colors[instance_index]
+        color = colors[instance_index % max_numinstances]
+        # print(color)
+        # zxc
 
         # skip to visualize the class we do not care
         class_id = class_ids[instance_index]
         if not (class_id in class_to_plot): continue
 
+        # zxc
+
         # visualize the bbox
         if not np.any(boxes[instance_index]): continue           # Skip this instance. Has no bbox. Likely lost in image cropping.
         x1, y1, x2, y2 = boxes[instance_index]
-        p = patches.Rectangle((x1, y1), x2 - x1, y2 - y1, linewidth=2, alpha=alpha, linestyle='dashed', edgecolor=color, facecolor='none')
+        # print(x1)
+        # print(y1)
+        # print(x2)
+        # print(y2)
+        p = patches.Rectangle((x1, y1), x2 - x1, y2 - y1, linewidth=2, alpha=alpha, edgecolor=color, facecolor='none')
         ax.add_patch(p)
 
         # add the text and score
@@ -524,11 +534,17 @@ def visualize_image_with_bbox_mask(image, boxes, masks, class_ids, class_names, 
         label = class_names[class_id]
         x = random.randint(x1, (x1 + x2) // 2)
         caption = "{} {:.3f}".format(label, score) if score else label
-        ax.text(x1, y1 + 8, caption, color='w', size=11, backgroundcolor='none')
+        ax.text(x1, y1 + 8, caption, color='w', size=8, backgroundcolor='none')
 
         # add the mask
         mask = masks[:, :, instance_index]
+        # print(np.max(mask))
+        # print(np.min(mask))
+        # save_image(mask, '/home/xinshuo/test.jpg')
+        # zxc
         masked_image = apply_mask(masked_image, mask, color)
+        # save_image(masked_image, '/home/xinshuo/test%d.jpg' % instance_index)
+        # zxc
 
         # save the individual mask one by one
         # save_tmp_dir = os.path.join(tmp_dir, 'instance_%04d.jpg' % instance_index); mkdir_if_missing(save_tmp_dir)
@@ -543,6 +559,8 @@ def visualize_image_with_bbox_mask(image, boxes, masks, class_ids, class_names, 
             p = patches.Polygon(verts, facecolor="none", edgecolor=color, alpha=alpha)
             ax.add_patch(p)
 
+
+    # zxc
     # print(masked_image.shape)
     # zxc
     ax.imshow(masked_image.astype(np.uint8))
