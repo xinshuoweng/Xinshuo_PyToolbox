@@ -64,7 +64,7 @@ def visualize_bbox(input_bbox, linewidth=0.5, edge_color_index=20, scores=None, 
             # print(type(score))
 
             if score < threshold: continue
-            caption = '{:.3f}'.format(score)
+            caption = '{:.2f}'.format(score)
             ax.text(bbox_tmp[0], bbox_tmp[1] + 8, caption, color='r', size=8, backgroundcolor='none')
 
         ax.add_patch(plt.Rectangle((bbox_tmp[0], bbox_tmp[1]), bbox_tmp[2], bbox_tmp[3], fill=False, edgecolor=edge_color, linewidth=linewidth))
@@ -469,7 +469,7 @@ def apply_mask(image, mask, color, alpha=0.5):
         image[:, :, c] = np.where(mask == 1, image[:, :, c] * (1 - alpha) + alpha * color[c] * 255, image[:, :, c])
     return image
 
-def visualize_image_with_bbox_mask(image, boxes, masks, class_ids, class_names, class_to_plot=None, scores=None, alpha=0.7, fig=None, ax=None, title='Mask & Bounding Box Visualization'):
+def visualize_image_with_bbox_mask(image, boxes, masks, class_ids, class_names, class_to_plot=None, scores=None, alpha=0.7, fig=None, ax=None, color_list=None, title='Mask & Bounding Box Visualization'):
     """
     visualize the image with bbox and mask (and text and score)
 
@@ -488,6 +488,7 @@ def visualize_image_with_bbox_mask(image, boxes, masks, class_ids, class_names, 
     if not num_instances: print("\n*** No instances to display *** \n")
     else: assert boxes.shape[0] == masks.shape[-1] == class_ids.shape[0]
     colors = random_colors(max_numinstances)       # Generate random colors
+    if color_list is None: color_list = range(num_instances)
 
     height, width = image.shape[:2]
     # print(height)
@@ -509,7 +510,7 @@ def visualize_image_with_bbox_mask(image, boxes, masks, class_ids, class_names, 
     # tmp_dir = '/home/xinshuo/Workspace/junk/vis_individual'
 
     for instance_index in range(num_instances):
-        color = colors[instance_index % max_numinstances]
+        color = colors[color_list[instance_index] % max_numinstances]
         # print(color)
         # zxc
 
@@ -533,7 +534,7 @@ def visualize_image_with_bbox_mask(image, boxes, masks, class_ids, class_names, 
         score = scores[instance_index] if scores is not None else None
         label = class_names[class_id]
         x = random.randint(x1, (x1 + x2) // 2)
-        caption = "{} {:.3f}".format(label, score) if score else label
+        caption = "{} {:.2f}".format(label, score) if score else label
         ax.text(x1, y1 + 8, caption, color='w', size=8, backgroundcolor='none')
 
         # add the mask
