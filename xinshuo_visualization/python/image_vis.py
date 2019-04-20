@@ -2,7 +2,7 @@
 # email: xinshuo.weng@gmail.com
 
 # this file includes functions for visualizing on images 
-import numpy as np
+import numpy as np, matplotlib.pyplot as plt
 from xinshuo_math.python.private import safe_2dptsarray
 from xinshuo_images.python.private import safe_image
 
@@ -27,9 +27,13 @@ def visualize_image(input_image, bgr2rgb=False, save_path=None, vis=False, warni
 	'''
 	np_image, _ = safe_image(input_image, warning=warning, debug=debug)
 	width, height = np_image.shape[1], np_image.shape[0]
-	fig, _ = get_fig_ax_helper(fig=None, ax=None, width=width, height=height)
+	fig, ax = get_fig_ax_helper(fig=None, ax=None, width=width, height=height, frameon=False)
 	ax = fig.add_axes([0, 0, 1, 1])
-	ax.axis('off')
+	ax.set_axis_off()
+	fig.axes[0].get_xaxis().set_visible(False)
+	fig.axes[0].get_yaxis().set_visible(False)
+	fig.axes[1].get_xaxis().set_visible(False)
+	fig.axes[1].get_yaxis().set_visible(False)
 
 	# display image
 	if iscolorimage_dimension(np_image):
@@ -75,7 +79,7 @@ def visualize_image_with_pts(input_image, input_pts, color_index=0, pts_size=20,
 		plot_occl=False, covariance=False, xlim=None, ylim=None, vis_threshold=vis_threshold, debug=debug, vis=False, save_path=None, warning=warning, closefig=False)
 	return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, warning=warning, closefig=closefig)
 
-def visualize_image_with_bbox(input_image, input_bbox, linewidth=0.5, color_index=20, scores=None, threshold=0.0,
+def visualize_image_with_bbox(input_image, input_bbox, linewidth=0.5, color_index=2, scores=None, threshold=0.0, textsize=8,
 	bgr2rgb=False, save_path=None, vis=False, warning=True, debug=True, closefig=True):
 	'''
 	visualize image and plot bounding boxes on top of it
@@ -92,7 +96,7 @@ def visualize_image_with_bbox(input_image, input_bbox, linewidth=0.5, color_inde
 		fig, ax:		figure handle for future use
 	'''
 	fig, ax = visualize_image(input_image, bgr2rgb=bgr2rgb, vis=False, save_path=None, warning=warning, debug=debug, closefig=False)
-	fig, ax = visualize_bbox(input_bbox, linewidth=linewidth, edge_color_index=color_index, scores=scores, threshold=threshold, fig=fig, ax=ax, debug=debug, vis=False, save_path=None, warning=warning, closefig=False)
+	fig, ax = visualize_bbox(input_bbox, linewidth=linewidth, edge_color_index=color_index, scores=scores, threshold=threshold, textsize=textsize, fig=fig, ax=ax, debug=debug, vis=False, save_path=None, warning=warning, closefig=False)
 	return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, warning=warning, closefig=closefig)
 
 def visualize_image_with_pts_bbox(input_image, input_pts, window_size, linewidth=0.5, edge_color_index=20, 

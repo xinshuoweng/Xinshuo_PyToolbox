@@ -26,7 +26,7 @@ hatch_set = [None, 'o', '/', '\\', '|', '-', '+', '*', 'x', 'O', '.']
 linestyle_set = ['-', '--', '-.', ':', None, ' ', 'solid', 'dashed']
 dpi = 80
 
-def visualize_bbox(input_bbox, linewidth=0.5, edge_color_index=20, scores=None, threshold=0.0,
+def visualize_bbox(input_bbox, linewidth=0.5, edge_color_index=2, scores=None, threshold=0.0, textsize=8,
     fig=None, ax=None, save_path=None, vis=False, warning=True, debug=True, closefig=True):
     '''
     visualize a set of bounding box
@@ -51,21 +51,9 @@ def visualize_bbox(input_bbox, linewidth=0.5, edge_color_index=20, scores=None, 
         bbox_tmp = np_bboxes[bbox_index, :]     
         if scores is not None:
             score = float(scores[bbox_index])
-            # print(float(score))
-            # print(islist(score))
-            # print(type(score))
-            # zxc
-            # if not isscalar(score): 
-                # score = score[0]
-                # print('aaaa')
-            # print(score)
-            # print(type(score))
-            # zxc
-            # print(type(score))
-
             if score < threshold: continue
             caption = '{:.2f}'.format(score)
-            ax.text(bbox_tmp[0], bbox_tmp[1] + 8, caption, color='r', size=8, backgroundcolor='none')
+            ax.text(bbox_tmp[0], bbox_tmp[1] + textsize, caption, color='y', size=textsize, backgroundcolor='none')
 
         ax.add_patch(plt.Rectangle((bbox_tmp[0], bbox_tmp[1]), bbox_tmp[2], bbox_tmp[3], fill=False, edgecolor=edge_color, linewidth=linewidth))
     return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, warning=warning, debug=debug, closefig=closefig)
