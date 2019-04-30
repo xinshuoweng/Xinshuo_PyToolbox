@@ -132,7 +132,7 @@ def remove_empty_item_from_list(list_to_remove, debug=True):
 	remove an empty string from a list
 	'''
 	if debug: assert islist(list_to_remove), 'input list is not a list'
-	return remove_item_from_list(list_to_remove, '', debug=debug)
+	return remove_unique_item_from_list(list_to_remove, '', debug=debug)[0]
 
 def scalarlist2strlist(scalar_list, debug=True):
 	'''

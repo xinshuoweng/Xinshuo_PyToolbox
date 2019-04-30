@@ -58,6 +58,8 @@ def anno_parser(anno_path, num_pts=None, anno_version=None, warning=True, debug=
         if num_pts is not None:
             assert num_pts == n_points, 'number of points is not correct: %d vs %d' % (num_pts, n_points)
 
+    # print(anno_path)
+
     # read points coordinate
     pts_array = np.zeros((3, n_points), dtype='float32')
     line_offset = 3     # first point starts at fourth line
@@ -66,6 +68,8 @@ def anno_parser(anno_path, num_pts=None, anno_version=None, warning=True, debug=
             pts_list = data[point_index + line_offset].split(' ')           # x y format
             if len(pts_list) > 2 and pts_list[2] == '':     # handle edge case where additional whitespace exists after point coordinates
                 pts_list = remove_empty_item_from_list(pts_list)
+
+            # print(pts_list[0])
             pts_array[0, point_index] = float(pts_list[0])
             pts_array[1, point_index] = float(pts_list[1])
             if len(pts_list) == 3:

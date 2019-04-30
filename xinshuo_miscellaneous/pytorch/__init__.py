@@ -1,5 +1,4 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
 
-from .python import *
-# from .pytorch import *
+from .configuration import prepare_seed
