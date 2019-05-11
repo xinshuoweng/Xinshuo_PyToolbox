@@ -27,6 +27,47 @@ def print_log(print_str, log, same_line=False, display=True):
 	else: log.write('{}\n'.format(print_str))
 	log.flush()
 
+def print_confusion_matrix(confusion_matrix, class_names, log, fmt='%10d', sum_col=True, display=True):
+    '''
+    print a string to a log file
+
+    parameters:
+        print_str:          a string to print
+        log:                a opened file to save the log
+        display:            False if we want to disable to print the string onto the terminal
+    '''
+    # if display:
+        # print_str = ''
+        # for class_tmp in class_names:
+    print_str = '\n\n%15s ' % ('gt \\ predict') + ' '.join(['%10s' % class_tmp for class_tmp in class_names])
+    if sum_col: print_str += ' %10s' % 'sum'
+    if display: print('{}'.format(print_str))
+    log.write('{}\n'.format(print_str))
+    for index in range(len(class_names)):
+        print_str = '%15s ' % class_names[index]
+        print_str += ' '.join([fmt % num_tmp for num_tmp in confusion_matrix[index].tolist()])
+        if sum_col: print_str += ' ' + fmt % sum(confusion_matrix[index].tolist())
+        if display: print('{}'.format(print_str))
+        log.write('{}\n'.format(print_str))
+
+    if sum_col:
+        print_str = '%15s ' % 'sum'
+        print_str += ' '.join([fmt % sum(confusion_matrix[:, index].tolist()) for index in range(len(class_names))])
+        if display: print('{}'.format(print_str))
+        log.write('{}\n'.format(print_str))
+        # for index in range(len(class_names)):
+
+
+    # print_str = '%10s' % (' ') + ''.join(['%10s' % class_tmp for class_tmp in class_names])
+    # print('{}'.format(print_str))
+    # for index in range(len(class_names)):
+    #     print_str = '%10s' % class_names[index]
+    #     print_str += ''.join(['%10d' % num_tmp for num_tmp in confusion_matrix[index]])
+
+
+    # log.write('{}\n'.format(print_str))
+    log.flush()
+
 def print_np_shape(nparray, debug=True):
 	'''
 	print a string to represent the shape of a numpy array
