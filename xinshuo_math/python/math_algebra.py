@@ -158,3 +158,36 @@ def get_iris_box(all_pts):
             pts[ia,:] = pt
         return pts[2:,:].astype(np.float32), np.array([a, b, angle, all_pts[0][0], all_pts[0][1]]).astype(np.float32)
     return np.zeros((8, 2), np.float32), False
+
+def smoothing_moving_average(signal, window=5, debug=True):
+    '''
+    smooth the input signal
+
+    parameters:
+        signal:             N x M, numpy array, N is the length, M is the dimension
+        window:             int, length of the average window, usually an odd number
+
+    return
+        smoothed:           N x M numpy array
+    '''
+    # print(signal)
+    # zxc
+    signal = signal.copy()
+    num_data = signal.shape[0]
+    smoothed = np.zeros(signal.shape, signal.dtype)
+
+    middle_index = int(math.floor(window/2))
+    # print(middle_index)
+    # zxc
+    smoothed[0:middle_index, :] = signal[0:middle_index, :]
+    smoothed[-middle_index:, :] = signal[-middle_index, :]
+    for index in range(middle_index, num_data-middle_index):
+        data_window = signal[index - middle_index : index + middle_index + 1, :]
+        # print(data_window)
+        # print(np.sum(data_window, axis=0))
+        smoothed[index, :] = np.sum(data_window, axis=0) / float(window)
+
+    # print(smoothed)
+    # zxc
+    return smoothed
+

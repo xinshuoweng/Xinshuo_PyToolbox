@@ -1,6 +1,6 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
-import os, numpy as np, random, torch
+import os, numpy as np, random
 # import tensorflow as tf
 
 def suppress_caffe_terminal_log():
@@ -36,3 +36,7 @@ def suppress_caffe_terminal_log():
 # 		config.gpu_options.allow_growth=True
 	    
 # 	return tf.Session(config=config)  
+
+def prepare_seed(rand_seed):
+	np.random.seed(rand_seed)
+	random.seed(rand_seed)

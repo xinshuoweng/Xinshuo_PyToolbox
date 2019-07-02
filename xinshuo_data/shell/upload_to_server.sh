@@ -17,3 +17,5 @@ rsync -rlvz --ignore-existing /media/hdd1/xinshuo/data/datasets/LRD/LRW/centered
 rsync -rlvz --ignore-existing /media/xinshuo/Data/Datasets/KITTI/original_download xinshuo@128.2.177.239:/mnt/hdd2/xinshuo/datasets/KITTI/
 rsync -rlvz --ignore-existing /media/xinshuo/Data/Datasets/LRD/LRW/lipread_mp4 xinshuo@128.2.176.246:/media/hdd1/xinshuo/data/datasets/LRD/LRW/
 rsync -rlvz --ignore-existing /media/xinshuo/Data/Datasets/LRD/LRW/lipread_mp4 xinshuo@128.2.177.239:/mnt/hdd2/xinshuo/datasets/LRD/LRW/
+rsync -rlvz --ignore-existing -e "ssh -p 19751" /media/xinshuo/Data/Datasets/shimizu/annotation_raw xinshuo@128.2.194.19:19751/media/klab/Data1/xinshuo/datasets/shimizu/
+rsync -rlvz --ignore-existing -e "ssh -p 19751" xinshuo@128.2.194.19:/media/klab/Data1/shimizu/polygons /media/xinshuo/Data/Datasets/shimizu/
