@@ -15,3 +15,5 @@ pip install -r requirements.txt
 ~~~
 
 *3. The index to the available functions will be coming soon.*
+
+#### End
