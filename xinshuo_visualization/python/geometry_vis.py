@@ -53,6 +53,10 @@ def visualize_bbox(input_bbox, linewidth=0.5, edge_color_index=15, scores=None, 
             score = float(scores[bbox_index])
             if score < threshold: continue
             caption = '{:.2f}'.format(score)
+
+            # score = str(scores[bbox_index])
+            # caption = '%s' % (score)
+
             ax.text(bbox_tmp[0], bbox_tmp[1] + textsize, caption, color='r', size=textsize, backgroundcolor='none')
 
         ax.add_patch(plt.Rectangle((bbox_tmp[0], bbox_tmp[1]), bbox_tmp[2], bbox_tmp[3], fill=False, edgecolor=edge_color, linewidth=linewidth))

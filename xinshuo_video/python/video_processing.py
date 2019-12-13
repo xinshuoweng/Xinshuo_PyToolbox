@@ -1,7 +1,7 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
 
-import cv2, os
+import cv2, os, sys
 from skvideo.io import FFmpegWriter
 
 from xinshuo_miscellaneous import is_path_exists, islistofstring, ispositiveinteger, reverse_list
@@ -28,13 +28,16 @@ def extract_images_from_video_opencv(video_file, save_dir, debug=True):
 
 	cap.release()
 
-def extract_images_from_video_ffmpeg(video_file, save_dir, format='frame%06d.png', debug=True):
+def extract_images_from_video_ffmpeg(video_file, save_dir, format='frame%06d.png', display=True, debug=True):
 	'''
 	loading the video using the ffmpeg
 	'''
 	if debug: assert is_path_exists(video_file), 'the input video file does not exist'
 	mkdir_if_missing(save_dir)
-	command = 'ffmpeg -i %s %s/%s' % (video_file, save_dir, format)
+	if display:
+		command = 'ffmpeg -i %s %s/%s' % (video_file, save_dir, format)
+	else:
+		command = 'ffmpeg -loglevel panic -i %s %s/%s' % (video_file, save_dir, format)
 	os.system(command)
 
 def extract_images_from_video_ffmpeg2(video_file, save_dir, format='frame%06d.png', debug=True):
@@ -52,7 +55,7 @@ def extract_images_from_video_ffmpeg2(video_file, save_dir, format='frame%06d.pn
         frames.append(image)
     return frames
 
-def generate_video_from_list(image_list, save_path, framerate=30, downsample=1, warning=True, debug=True):
+def generate_video_from_list(image_list, save_path, framerate=30, downsample=1, display=True, warning=True, debug=True):
 	'''
 	create video from a list of images with a framerate
 	note that: the height and widht of the images should be a multiple of 2
@@ -72,7 +75,9 @@ def generate_video_from_list(image_list, save_path, framerate=30, downsample=1, 
 	count = 1
 	num_images = len(image_list)
 	for image_path in image_list:
-		print('processing frame %d/%d' % (count, num_images))
+		if display:
+			sys.stdout.write('processing frame %d/%d\r' % (count, num_images))
+			sys.stdout.flush()
 		image = load_image(image_path, resize_factor=downsample, warning=warning, debug=debug)
 
 		# make sure the height and width are multiple of 2
@@ -87,8 +92,9 @@ def generate_video_from_list(image_list, save_path, framerate=30, downsample=1, 
 
 	video_writer.close()
 
-def generate_video_from_folder(images_dir, save_path, framerate=30, downsample=1, reverse=False, warning=True, debug=True):
+def generate_video_from_folder(images_dir, save_path, framerate=30, downsample=1, reverse=False, display=True, warning=True, debug=True):
 	image_list, num_images = load_list_from_folder(images_dir, ext_filter=['.jpg', '.png', '.jpeg'], debug=debug)
 	if reverse: image_list = reverse_list(image_list, warning=warning, debug=debug)
-	print('%d images loaded' % num_images)
-	generate_video_from_list(image_list, save_path, framerate=framerate, downsample=downsample, warning=warning, debug=debug)
+	if display:
+		print('%d images loaded' % num_images)
+	generate_video_from_list(image_list, save_path, framerate=framerate, downsample=downsample, display=display, warning=warning, debug=debug)
