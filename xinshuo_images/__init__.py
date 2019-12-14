@@ -1,4 +1,5 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
 
-from .python import *
+from .image_processing import *
+from .image_operator import *
