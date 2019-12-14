@@ -1,11 +1,11 @@
-# Xinshuo's Toolbox
-A fully tested toolbox for **computer vision** and **machine learning** (**deep learning**) algorithms. For convenience, it contains functions of **I/O stream**, **image & video processing**, **visualization**, **evaluation**, **geometry and algebra** in python, matlab, and c++. 
+# Xinshuo's Python Toolbox
+A Python toolbox that contains common help functions for **I/O**, **mathematics**, **image & video processing** and **visualization**, which is generally useful for data processing in computer vision and machine learning.
 
 #### Usage:
 
-*1. clone the github repository recursively including xinshuo_toolbox.*
+*1. clone the github repository.*
 ~~~shell
-git clone --recursive https://github.com/xinshuoweng/xinshuo_toolbox
+git clone https://github.com/xinshuoweng/xinshuo_toolbox
 ~~~
 
 *2. install dependency for the toolbox.*
