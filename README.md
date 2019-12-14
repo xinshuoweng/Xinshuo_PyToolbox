@@ -1,5 +1,5 @@
 # Xinshuo's Python Toolbox
-A Python toolbox that contains common help functions for **I/O**, **mathematics**, **image & video processing** and **visualization**, which is generally useful for data processing in computer vision and machine learning.
+A Python toolbox that contains common help functions for **stream I/O**, **mathematics**, **image & video processing** and **visualization**, which is generally useful for data processing in computer vision and machine learning.
 
 #### Usage:
 
