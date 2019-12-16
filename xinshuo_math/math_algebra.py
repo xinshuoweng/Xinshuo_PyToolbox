@@ -5,7 +5,7 @@
 import math, cv2, numpy as np
 
 from .private import safe_2dptsarray, safe_angle, safe_npdata
-from xinshuo_miscellaneous.python.private import safe_list
+from xinshuo_miscellaneous.private import safe_list
 from xinshuo_miscellaneous import is2dptsarray, islist, isscalar, isnparray, istuple
 
 # all rotation angle is processes in degree

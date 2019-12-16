@@ -166,7 +166,7 @@ def visualize_pts_line(pts_array, line_index_list, method=2, seed=0, alpha=0.5,
     '''
     given a list of index, and a point array, to plot a set of points with line on it
 
-    inputs:
+    parameters:
         pts_array:          2(3) x num_pts
         line_index_list:    a list of index
         method:             1: all points are connected, if some points are missing in the middle, just ignore that point and connect the two nearby points

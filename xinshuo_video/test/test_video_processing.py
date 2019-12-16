@@ -1,8 +1,7 @@
 # Author: Xinshuo Weng
 # email: xinshuo.weng@gmail.com
 
-import init_paths
-from video_processing import generate_video_from_list
+from xinshuo_video.video_processing import generate_video_from_list
 
 def test_generate_video_from_list():
 	print('test basic')

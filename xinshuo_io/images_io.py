@@ -5,8 +5,8 @@
 import numpy as np
 from PIL import Image
 
-from xinshuo_miscellaneous.python.private import safe_path
-from xinshuo_images.python.private import safe_image
+from xinshuo_miscellaneous.private import safe_path
+from xinshuo_images.private import safe_image
 
 from .file_io import mkdir_if_missing
 from xinshuo_miscellaneous import is_path_exists_or_creatable, isimage, isscalar, is_path_exists

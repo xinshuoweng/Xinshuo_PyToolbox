@@ -4,7 +4,7 @@
 # this file contains a set of function for manipulating file io in python
 import os, sys, time, glob, glob2, numpy as np
 
-from xinshuo_miscellaneous.python.private import safe_path
+from xinshuo_miscellaneous.private import safe_path
 from xinshuo_miscellaneous import string2ext_filter, remove_empty_item_from_list, str2num, is_path_exists_or_creatable, is_path_exists, isfolder, isnparray, is2dptsarray, is2dptsarray_occlusion, islogical, isinteger, islist, isstring
 
 def fileparts(input_path, warning=True, debug=True):

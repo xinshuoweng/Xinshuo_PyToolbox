@@ -11,7 +11,15 @@ from xinshuo_images import image_resize
 
 def extract_images_from_video_opencv(video_file, save_dir, debug=True):
 	'''
-	if the VideoCapture does not work, uninstall python-opencv and reinstall the newest version
+	extract a list of images from a video file using opencv package
+	Note that if the VideoCapture does not work, uninstall python-opencv and reinstall the newest version
+
+	Parameters:
+		video_file:		a file path to a video file
+		save_dir:		a folder to save the images extracted from the video
+		debug:			boolean, debug mode to check format
+
+	Returns:
 	'''
 	if debug: assert is_path_exists(video_file), 'the input video file does not exist'
 	mkdir_if_missing(save_dir)
@@ -28,31 +36,46 @@ def extract_images_from_video_opencv(video_file, save_dir, debug=True):
 
 	cap.release()
 
-def extract_images_from_video_ffmpeg(video_file, save_dir, format='frame%06d.png', display=True, debug=True):
+	return
+
+def extract_images_from_video_ffmpeg(video_file, save_dir, format='frame%06d.png', verbose=True, debug=True):
 	'''
-	loading the video using the ffmpeg
+	extract a list of images from a video file using system ffmpeg library
+
+	Parameters:
+		video_file:		a file path to a video file
+		save_dir:		a folder to save the images extracted from the video
+		format:			string format for the extracted output images
+		verbose:		boolean, display logging information
+		debug:			boolean, debug mode to check format
+
+	Returns:
 	'''
 	if debug: assert is_path_exists(video_file), 'the input video file does not exist'
 	mkdir_if_missing(save_dir)
-	if display:
+	if verbose:
 		command = 'ffmpeg -i %s %s/%s' % (video_file, save_dir, format)
 	else:
 		command = 'ffmpeg -loglevel panic -i %s %s/%s' % (video_file, save_dir, format)
 	os.system(command)
 
-def extract_images_from_video_ffmpeg2(video_file, save_dir, format='frame%06d.png', debug=True):
-    """loading the video using the ffmpeg built-in in python.
+	return
 
-    Returns:
-        List[FloatTensor]: the frames of the video as a list of 3D tensors
-            (channels, width, height)"""
+def extract_images_from_video_ffmpeg_python(video_file, save_dir, debug=True):
+	'''
+	extract a list of images from a video file using python ffmpeg library
+
+	Returns:
+		frames: the frames of the video as a list of 3D tensors
+	        (channels, width, height)"""
+	'''
 
     vid = imageio.get_reader(filename, 'ffmpeg')
     frames = []
     for i in range(0, num_frames):
         image = vid.get_data(i)
-        image = functional.to_tensor(image)
         frames.append(image)
+
     return frames
 
 def generate_video_from_list(image_list, save_path, framerate=30, downsample=1, display=True, warning=True, debug=True):
