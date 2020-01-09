@@ -70,13 +70,13 @@ def extract_images_from_video_ffmpeg_python(video_file, save_dir, debug=True):
 	        (channels, width, height)"""
 	'''
 
-    vid = imageio.get_reader(filename, 'ffmpeg')
-    frames = []
-    for i in range(0, num_frames):
-        image = vid.get_data(i)
-        frames.append(image)
+	vid = imageio.get_reader(filename, 'ffmpeg')
+	frames = []
+	for i in range(0, num_frames):
+		image = vid.get_data(i)
+		frames.append(image)
 
-    return frames
+	return frames
 
 def generate_video_from_list(image_list, save_path, framerate=30, downsample=1, display=True, warning=True, debug=True):
 	'''

@@ -27,8 +27,6 @@ class Timer(object):
         else:
             return self.diff
 
-
-
 def get_timestring():
     return time.strftime('%Y%m%d_%Hh%Mm%Ss')
 
@@ -43,9 +41,6 @@ def get_iso_timestring(mode='normal'):
         assert False, 'mode error for iso time string'
 
     return '{}'.format(time.strftime(ISOTIMEFORMAT, time.gmtime(time.time())))
-
-
-
 
 class AverageMeter(object):     
   """Computes and stores the average and current value"""    
@@ -63,9 +58,6 @@ class AverageMeter(object):
     self.sum += val * n     
     self.count += n
     self.avg = self.sum / self.count  
-
-
-
 
 class LossRecorderMeter(object):
     """Computes and stores the minimum loss value and its epoch index"""
