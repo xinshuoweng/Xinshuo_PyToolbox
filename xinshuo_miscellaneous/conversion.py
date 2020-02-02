@@ -67,12 +67,28 @@ def find_unique_common_from_lists(input_list1, input_list2, warning=True, debug=
 
 	outputs:
 		list_common:	a list of elements existing both in list_src1 and list_src2	
+		index_list1:	a list of index that list 1 has common items
+		index_list2:	a list of index that list 2 has common items
 	'''
 	input_list1 = safe_list(input_list1, warning=warning, debug=debug)
 	input_list2 = safe_list(input_list2, warning=warning, debug=debug)
 
 	common_list = list(set(input_list1).intersection(input_list2))
-	return common_list
+	
+	# find index
+	index_list1 = []
+	for index in range(len(input_list1)):
+		item = input_list1[index]
+		if item in common_list:
+			index_list1.append(index)
+
+	index_list2 = []
+	for index in range(len(input_list2)):
+		item = input_list2[index]
+		if item in common_list:
+			index_list2.append(index)
+
+	return common_list, index_list1, index_list2
 
 def reverse_list(input_list, warning=True, debug=True):
 	'''
