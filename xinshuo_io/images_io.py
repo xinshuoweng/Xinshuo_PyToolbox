@@ -18,7 +18,7 @@ def load_image(src_path, resize_factor=None, target_size=None, input_angle=0, gr
 
     parameters:
         resize_factor:      a scalar
-        target_size:        a list of tuple or numpy array with 2 elements, representing height and width
+        target_size:        a list or tuple or numpy array with 2 elements, representing height and width
         input_angle:        a scalar, counterclockwise rotation in degree
 
     output:
