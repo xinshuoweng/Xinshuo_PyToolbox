@@ -407,6 +407,8 @@ def bbox_enlarge(bbox, ratio, img_hw, ratio_hw=None, min_length=None, min_hw=Non
         img_hw: height and width
     '''
 
+    bbox = copy.copy(bbox)
+
     if debug:
         assert bboxcheck_TLBR(bbox), 'the input bounding box should be TLBR format'
 
