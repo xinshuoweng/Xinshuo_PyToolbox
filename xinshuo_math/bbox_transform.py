@@ -397,7 +397,7 @@ def apply_rotation_tight(bbox_in, angle_in_degree, im_shape, debug=True):
     pts_total[3, :] = np.reshape(pts_bl, (1, 2))
     return pts_total
 
-def bbox_enlarge(bbox, ratio, img_hw, ratio_hw=None, min_length=None, min_hw=None, debug=True):
+def bbox_enlarge(bbox, img_hw, ratio=None, ratio_hw=None, min_length=None, min_hw=None, debug=True):
     '''
     enlarge the bbox around the edge
 
