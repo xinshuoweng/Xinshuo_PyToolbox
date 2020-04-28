@@ -397,7 +397,7 @@ def apply_rotation_tight(bbox_in, angle_in_degree, im_shape, debug=True):
     pts_total[3, :] = np.reshape(pts_bl, (1, 2))
     return pts_total
 
-def bbox_enlarge(bbox, img_hw, ratio=None, ratio_hw=None, min_length=None, min_hw=None, debug=True):
+def bbox_enlarge(bbox, img_hw=None, ratio=None, ratio_hw=None, min_length=None, min_hw=None, debug=True):
     '''
     enlarge the bbox around the edge
 
@@ -437,11 +437,12 @@ def bbox_enlarge(bbox, img_hw, ratio=None, ratio_hw=None, min_length=None, min_h
     bbox[:, 2] += width / 2.0
     bbox[:, 3] += height / 2.0
     
-    img_height, img_width = img_hw
-    bad_index = np.where(bbox[:, 0] < 0)[0].tolist(); bbox[bad_index, 0] = 0
-    bad_index = np.where(bbox[:, 1] < 0)[0].tolist(); bbox[bad_index, 1] = 0
-    bad_index = np.where(bbox[:, 2] >= img_width)[0].tolist(); bbox[bad_index, 2] = img_width - 1
-    bad_index = np.where(bbox[:, 3] >= img_height)[0].tolist(); bbox[bad_index, 3] = img_height - 1
+    if img_hw is not None:
+        img_height, img_width = img_hw
+        bad_index = np.where(bbox[:, 0] < 0)[0].tolist(); bbox[bad_index, 0] = 0
+        bad_index = np.where(bbox[:, 1] < 0)[0].tolist(); bbox[bad_index, 1] = 0
+        bad_index = np.where(bbox[:, 2] >= img_width)[0].tolist(); bbox[bad_index, 2] = img_width - 1
+        bad_index = np.where(bbox[:, 3] >= img_height)[0].tolist(); bbox[bad_index, 3] = img_height - 1
     
     return bbox
 
