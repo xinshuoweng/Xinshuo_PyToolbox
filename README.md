@@ -16,7 +16,7 @@ pip install -r requirements.txt
 
 *3. Add the path to the code to your PYTHONPATH.*
 ~~~shell
-$ export PYTHONPATH=${PYTHONPATH}:/home/user/workspace/code/Xinshuo_PyToolbox
+export PYTHONPATH=${PYTHONPATH}:/home/user/workspace/code/Xinshuo_PyToolbox
 ~~~
 
 ### Features
