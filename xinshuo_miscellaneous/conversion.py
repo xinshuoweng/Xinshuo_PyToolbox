@@ -116,14 +116,24 @@ def list_reorder(input_list, order_index, debug=True):
 	reordered_list = [ordered for whatever, ordered in sorted(zip(order_index, input_list))]
 	return reordered_list
 
-def merge_listoflist(listoflist, debug=True):
+def merge_listoflist(listoflist, unique=False, debug=True):
 	'''
-	merge a list of list in original order
+	merge a list of list
+
+	parameters:
+		unique: 	boolean
+
+	outputs:
+		if unique false:	a combination of lists in original order
+		if unique true:		a combination of lists with only unique items
 	'''
 	if debug: assert islistoflist(listoflist), 'the input is not a list of list'
 	merged = list()
 	for individual in listoflist:
 		merged = merged + individual
+
+	if unique:
+		merged = list(set(merged))
 
 	return merged
 
