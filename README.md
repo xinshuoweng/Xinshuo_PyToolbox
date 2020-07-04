@@ -3,16 +3,22 @@ A Python toolbox that contains common help functions for **stream I/O**, **mathe
 
 ### Usage:
 
-*1. clone the github repository.*
+*1. Clone the github repository.*
 ~~~shell
 git clone https://github.com/xinshuoweng/Xinshuo_PyToolbox
 ~~~
 
-*2. install dependency for the toolbox.*
+*2. Install dependency for the toolbox.*
 ~~~shell
 cd Xinshuo_PyToolbox
 pip install -r requirements.txt
 ~~~
+
+*3. Add the path to the code to your PYTHONPATH.*
+```
+$ export PYTHONPATH=${PYTHONPATH}:/home/user/workspace/code/Xinshuo_PyToolbox
+```
+
 
 ### Features
 - **I/O Stream**
