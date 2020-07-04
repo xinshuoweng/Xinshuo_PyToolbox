@@ -2,6 +2,7 @@
 # email: xinshuo.weng@gmail.com
 
 # this file includes functions for visualizing on images 
+import matplotlib; matplotlib.use('Agg')
 import numpy as np, matplotlib.pyplot as plt
 from xinshuo_math.private import safe_2dptsarray
 from xinshuo_images.private import safe_image
