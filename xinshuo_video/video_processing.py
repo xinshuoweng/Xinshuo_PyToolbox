@@ -121,6 +121,3 @@ def generate_video_from_folder(images_dir, save_path, framerate=30, downsample=1
 	if display:
 		print('%d images loaded' % num_images)
 	generate_video_from_list(image_list, save_path, framerate=framerate, downsample=downsample, display=display, warning=warning, debug=debug)
-
-
-	rsync -rlvz --ignore-existing xinshuo@128.2.194.44:/mnt/hdd2/shimizu/2020_01_constructionsitemovie88 /media/hdd2/xinshuo/datasets/shimizu_p2/
