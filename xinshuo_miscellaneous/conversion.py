@@ -125,7 +125,7 @@ def merge_listoflist(listoflist, unique=False, debug=True):
 
 	outputs:
 		if unique false:	a combination of lists in original order
-		if unique true:		a combination of lists with only unique items
+		if unique true:		a combination of lists with only unique items, the resulting list is not in original order
 	'''
 	if debug: assert islistoflist(listoflist), 'the input is not a list of list'
 	merged = list()
@@ -134,6 +134,7 @@ def merge_listoflist(listoflist, unique=False, debug=True):
 
 	if unique:
 		merged = list(set(merged))
+		merged.sort()
 
 	return merged
 

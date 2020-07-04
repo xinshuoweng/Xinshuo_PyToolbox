@@ -63,6 +63,25 @@ def load_txt_file(file_path, debug=True):
     file.close()
     return data, num_lines
 
+def combine_txt_file(file_path_list, save_path=None, debug=True):
+    '''
+    combine txt file line by line
+    '''
+    if debug: assert islist(file_path_list), 'input is not a list'
+    
+    data = []
+    num_lines = 0
+    for file_path in file_path_list:
+        data_tmp, num_lines_tmp = load_txt_file(file_path, debug=debug)
+
+        num_lines += num_lines_tmp
+        data += data_tmp
+
+    if save_path is not None:
+        save_txt_file(data, save_path, debug=debug)
+
+    return data, num_lines
+
 def save_txt_file(data_list, save_path, debug=True):
     '''
     save a list of string to a file
