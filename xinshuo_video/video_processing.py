@@ -38,7 +38,7 @@ def extract_images_from_video_opencv(video_file, save_dir, debug=True):
 
 	return
 
-def extract_images_from_video_ffmpeg(video_file, save_dir, format='frame%06d.png', verbose=True, debug=True):
+def extract_images_from_video_ffmpeg(video_file, save_dir, format='frame%06d.png', startnum=0, verbose=True, debug=True):
 	'''
 	extract a list of images from a video file using system ffmpeg library
 
@@ -54,9 +54,9 @@ def extract_images_from_video_ffmpeg(video_file, save_dir, format='frame%06d.png
 	if debug: assert is_path_exists(video_file), 'the input video file does not exist'
 	mkdir_if_missing(save_dir)
 	if verbose:
-		command = 'ffmpeg -i %s %s/%s' % (video_file, save_dir, format)
+		command = 'ffmpeg -i %s -start_number %d %s/%s' % (video_file, startnum, save_dir, format)
 	else:
-		command = 'ffmpeg -loglevel panic -i %s %s/%s' % (video_file, save_dir, format)
+		command = 'ffmpeg -loglevel panic -i %s -start_number %d %s/%s' % (video_file, startnum, save_dir, format)
 	os.system(command)
 
 	return
