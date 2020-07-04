@@ -397,39 +397,53 @@ def apply_rotation_tight(bbox_in, angle_in_degree, im_shape, debug=True):
     pts_total[3, :] = np.reshape(pts_bl, (1, 2))
     return pts_total
 
-def bbox_enlarge(bbox, ratio=0.2, width_ratio=None, height_ratio=None, min_length=128, min_width=None, min_height=None, debug=True):
+def bbox_enlarge(bbox, img_hw=None, ratio=None, ratio_hw=None, min_length=None, min_hw=None, debug=True):
     '''
     enlarge the bbox around the edge
 
     parameters:
         bbox:   N X 4 numpy array, TLBR format
         ratio:  how much to enlarge, for example, the ratio=0.2, then the width and height will be increased by 0.2 times of original width and height
+        img_hw: height and width
     '''
+
+    bbox = copy.copy(bbox)
 
     if debug:
         assert bboxcheck_TLBR(bbox), 'the input bounding box should be TLBR format'
 
-    if width_ratio is not None and height_ratio is not None:
+    if ratio_hw is not None:
+        height_ratio, width_ratio = ratio_hw
         width = (bbox[:, 2] - bbox[:, 0]) * width_ratio
         height = (bbox[:, 3] - bbox[:, 1]) * height_ratio
     else:
         width = (bbox[:, 2] - bbox[:, 0]) * ratio
         height = (bbox[:, 3] - bbox[:, 1]) * ratio
 
-    cur_width = bbox[:, 2] - bbox[:, 0]
-    cur_height = bbox[:, 3] - bbox[:, 1]
-    if min_height is not None and min_width is not None:
-        width = max(width, min_width - cur_width)
-        height = max(height, min_height - cur_height)
-    else:
-        width = max(width, min_length - cur_width)
-        height = max(height, min_length - cur_height)
+    # enlarge and meet the minimum length
+    if (min_hw is not None) or (min_length is not None):
+        cur_width = bbox[:, 2] - bbox[:, 0]
+        cur_height = bbox[:, 3] - bbox[:, 1]
+        if min_hw is not None:
+            min_height, min_width = min_hw
+            width = max(width, min_width - cur_width)
+            height = max(height, min_height - cur_height)
+        elif min_length is not None:
+            width = max(width, min_length - cur_width)
+            height = max(height, min_length - cur_height)
 
     bbox[:, 0] -= width / 2.0
+    bbox[:, 1] -= height / 2.0
     bbox[:, 2] += width / 2.0
     bbox[:, 3] += height / 2.0
-    bbox[:, 1] -= height / 2.0
-
+    
+    if img_hw is not None:
+        img_height, img_width = img_hw
+        bad_index = np.where(bbox[:, 0] < 0)[0].tolist(); bbox[bad_index, 0] = 0
+        bad_index = np.where(bbox[:, 1] < 0)[0].tolist(); bbox[bad_index, 1] = 0
+        bad_index = np.where(bbox[:, 2] >= img_width)[0].tolist(); bbox[bad_index, 2] = img_width - 1
+        bad_index = np.where(bbox[:, 3] >= img_height)[0].tolist(); bbox[bad_index, 3] = img_height - 1
+    
     return bbox
 
 def bboxes_from_mask(mask, debug=True):

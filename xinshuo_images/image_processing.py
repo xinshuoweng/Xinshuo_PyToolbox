@@ -668,7 +668,7 @@ def image_rotate(input_image, input_angle, warning=True, debug=True):
 
 	return rotated_image
 
-def image_concatenate(input_image, target_size=[1600, 2560], grid_size=None, edge_factor=0.99, warning=True, debug=True):
+def image_concatenate(input_image, target_size=[1600, 2560], grid_size=None, edge_factor=0.99, fill_value=0, warning=True, debug=True):
 	'''
 	concatenate a list of images automatically
 
@@ -677,6 +677,7 @@ def image_concatenate(input_image, target_size=[1600, 2560], grid_size=None, edg
 		target_size:			a tuple or list or numpy array with 2 elements, for [H, W]
 		grid_size:				a tuple or list or numpy array with 2 elements, for [num_rows, num_cols] 
 		edge_factor:			the margin between images after concatenation, bigger, the edge is smaller, [0, 1]
+		fill_value:				float between 0-1 to fill the gap
 
 	outputs:
 		image_merged: 			CHW uint8 numpy image with size of target_size
@@ -703,6 +704,7 @@ def image_concatenate(input_image, target_size=[1600, 2560], grid_size=None, edg
 
 	# concatenate
 	image_merged = np.zeros((window_height, window_width, im_channel), dtype='uint8')
+	image_merged.fill(fill_value)
 	for image_index in range(num_images):
 		image_tmp = np_image[image_index, :, :, :]
 		image_tmp = image_resize(image_tmp, target_size=(im_height, im_width), warning=warning, debug=debug)
