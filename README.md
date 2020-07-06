@@ -1,5 +1,5 @@
 # Xinshuo's Python Toolbox
-A Python toolbox that contains common help functions for **stream I/O**, **mathematics**, **image & video processing** and **visualization**. Most project repositories that I have released code depend on this toolbox.
+A Python toolbox that contains common help functions for **stream I/O**, **mathematics**, **image & video processing** and **visualization**. All my projects depend on this toolbox.
 
 ### Usage:
 
