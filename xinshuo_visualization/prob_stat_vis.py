@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt, numpy as np
 from terminaltables import AsciiTable
 from collections import Counter
 
-from .private import save_vis_close_helper
-from xinshuo_miscellaneous import isdict, islogical, is_path_exists, isscalar, islist, is_path_exists_or_creatable, CHECK_EQ_LIST_UNORDERED, isnparray, isinteger, isstring, scalarlist2strlist, islistoflist, iscolorimage_dimension, isgrayimage_dimension
+from .private import save_vis_close_helper, get_fig_ax_helper
+from xinshuo_miscellaneous import isdict, islogical, is_path_exists, isscalar, islist, is_path_exists_or_creatable, CHECK_EQ_LIST_UNORDERED, isnparray, isinteger, isstring, scalarlist2strlist, islistoflist, iscolorimage_dimension, isgrayimage_dimension, istuple
 from xinshuo_math import calculate_truncated_mse
 
 color_set = ['r', 'b', 'g', 'c', 'm', 'y', 'k', 'w', 'lime', 'cyan', 'aqua']
