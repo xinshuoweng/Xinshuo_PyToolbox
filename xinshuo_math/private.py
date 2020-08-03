@@ -3,7 +3,8 @@
 
 # this file includes private functions for internal use only
 import copy, numpy as np
-from xinshuo_miscellaneous import islist, isnparray, isbbox, islistoflist, iscenterbbox, isscalar, is2dptsarray, is2dptsarray_occlusion, is2dptsarray_homogeneous
+from xinshuo_miscellaneous import islist, isnparray, isbbox, islistoflist, iscenterbbox, isscalar, is2dptsarray
+from xinshuo_miscellaneous import is2dptsarray_occlusion, is2dptsarray_homogeneous, is3dptsarray, is4dptsarray
 
 ################################################################## conversion ##################################################################
 def safe_npdata(input_data, warning=True, debug=True):
@@ -110,7 +111,7 @@ def safe_angle(input_angle, radian=False, warning=True, debug=True):
 
 	return angle
 	
-def safe_2dptsarray(input_pts, homogeneous=False, warning=True, debug=True):
+def safe_2dptsarray(input_pts, homogeneous=False, dimen_add=0, warning=True, debug=True):
 	'''
 	make sure to copy the pts array without modifying it and make the dimension to 2(3 if homogenous) x N
 
@@ -118,12 +119,13 @@ def safe_2dptsarray(input_pts, homogeneous=False, warning=True, debug=True):
 		input_pts: 		a list of 2(3 if homogenous) elements, a listoflist of 2 elements: 
 						e.g., [[1,2], [5,6]], a numpy array with shape or (2, N) or (2, )
 		homogeneous:		the input points are in the homogenous coordinate
+		dimen_add:		additional dimension, used to accommdate for higher dimensional array
 	
 	outputs:
 		np_pts:			2 (3 if homogenous) X N numpy array
 	'''
-	if homogeneous: dimension = 3
-	else: dimension = 2
+	if homogeneous: dimension = 3 + dimen_add
+	else: dimension = 2 + dimen_add
 
 	if islist(input_pts):
 		if islistoflist(input_pts):
@@ -145,6 +147,36 @@ def safe_2dptsarray(input_pts, homogeneous=False, warning=True, debug=True):
 		else: assert is2dptsarray(np_pts), 'the input pts array does not have a good shape'
 
 	return np_pts
+
+def safe_3dptsarray(input_pts, homogeneous=False, warning=True, debug=True):
+	'''
+	make sure to copy the pts array without modifying it and make the dimension to 3 x N
+
+	parameters:
+		input_pts: 	a list of 3 elements, a listoflist of 3 elements: e.g., [[1,2], [5,6], [0, 1]],
+						a numpy array with shape or (3, N) or (3, )
+
+	outputs:
+		np_pts:		3 X N numpy array
+	'''
+	np_pts = safe_2dptsarray(input_pts, homogeneous=False, dimen_add=1, warning=warning, debug=False)
+	if debug: assert is3dptsarray(np_pts), 'the input pts array does not have a good shape'
+	return np_pts	
+
+def safe_4dptsarray(input_pts, homogeneous=False, warning=True, debug=True):
+	'''
+	make sure to copy the pts array without modifying it and make the dimension to 4 x N
+
+	parameters:
+		input_pts: 	a list of 3 elements, a listoflist of 3 elements: e.g., [[1,2], [5,6], [0, 1]],
+						a numpy array with shape or (4, N) or (4, )
+
+	outputs:
+		np_pts:		4 X N numpy array
+	'''
+	np_pts = safe_2dptsarray(input_pts, homogeneous=False, dimen_add=2, warning=warning, debug=False)
+	if debug: assert is4dptsarray(np_pts), 'the input pts array does not have a good shape'
+	return np_pts	
 
 def safe_2dptsarray_occlusion(input_pts, warning=True, debug=True):
 	'''
