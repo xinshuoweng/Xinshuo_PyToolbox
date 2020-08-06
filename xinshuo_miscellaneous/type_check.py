@@ -249,6 +249,12 @@ def is3dptsarray(pts_test):
     '''
     return isnparray(pts_test) and pts_test.shape[0] == 3 and len(pts_test.shape) == 2 and pts_test.shape[1] >= 0                   
 
+def is4dptsarray(pts_test):
+    '''
+    numpy array with [4, N], N >= 0
+    '''
+    return isnparray(pts_test) and pts_test.shape[0] == 4 and len(pts_test.shape) == 2 and pts_test.shape[1] >= 0                   
+
 def is2dptsarray_occlusion(pts_test):
     '''
     numpy array with [3, N], N >= 0. The third row represents occlusion, which contains only 1 or 0 or -1

@@ -1,17 +1,22 @@
 # Xinshuo's Python Toolbox
-A Python toolbox that contains common help functions for **stream I/O**, **mathematics**, **image & video processing** and **visualization**. Most project repositories that I have released code depend on this toolbox.
+A Python toolbox that contains common help functions for **stream I/O**, **mathematics**, **image & video processing** and **visualization**. All my projects depend on this toolbox.
 
 ### Usage:
 
-*1. clone the github repository.*
+*1. Clone the github repository.*
 ~~~shell
 git clone https://github.com/xinshuoweng/Xinshuo_PyToolbox
 ~~~
 
-*2. install dependency for the toolbox.*
+*2. Install dependency for the toolbox.*
 ~~~shell
 cd Xinshuo_PyToolbox
 pip install -r requirements.txt
+~~~
+
+*3. Add the path to the code to your PYTHONPATH.*
+~~~shell
+export PYTHONPATH=${PYTHONPATH}:/home/user/workspace/code/Xinshuo_PyToolbox
 ~~~
 
 ### Features
