@@ -7,6 +7,7 @@ from itertools import islice
 
 from .private import safe_list
 from .type_check import isstring, isinteger, isnparray, islist, isext, islistoflist, isrange, isscalar, isfloat
+from .counter import Timer
 
 ######################################################### list related #########################################################
 def remove_list_from_list(input_list, list_toremove_src, warning=True, debug=True):
@@ -57,24 +58,28 @@ def remove_unique_item_from_list(input_list, item, warning=True, debug=True):
 
 	return list_remained, count_removal
 
-def find_unique_common_from_lists(input_list1, input_list2, warning=True, debug=True):
+def find_unique_common_from_lists(input_list1, input_list2, only_com=False, warning=True, debug=True):
 	'''
 	find common items from 2 lists, the returned elements are unique. repetitive items will be ignored
 	if the common items in two elements are not in the same order, the outputs follows the order in the first list
 
 	parameters:
 		input_list1, input_list2:		two input lists
+		only_com:		True if only need the common list, i.e., the first output, saving computational time
 
 	outputs:
 		list_common:	a list of elements existing both in list_src1 and list_src2	
 		index_list1:	a list of index that list 1 has common items
 		index_list2:	a list of index that list 2 has common items
 	'''
+
 	input_list1 = safe_list(input_list1, warning=warning, debug=debug)
 	input_list2 = safe_list(input_list2, warning=warning, debug=debug)
 
 	common_list = list(set(input_list1).intersection(input_list2))
-	
+
+	if only_com: return common_list
+
 	# find index
 	index_list1 = []
 	for index in range(len(input_list1)):
