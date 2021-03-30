@@ -115,8 +115,8 @@ def generate_video_from_list(image_list, save_path, framerate=30, downsample=1, 
 
 	video_writer.close()
 
-def generate_video_from_folder(images_dir, save_path, framerate=30, downsample=1, reverse=False, display=True, warning=True, debug=True):
-	image_list, num_images = load_list_from_folder(images_dir, ext_filter=['.jpg', '.png', '.jpeg'], debug=debug)
+def generate_video_from_folder(images_dir, save_path, framerate=30, downsample=1, depth=1, reverse=False, display=True, warning=True, debug=True):
+	image_list, num_images = load_list_from_folder(images_dir, ext_filter=['.jpg', '.png', '.jpeg'], depth=depth, debug=debug)
 	if reverse: image_list = reverse_list(image_list, warning=warning, debug=debug)
 	if display:
 		print('%d images loaded' % num_images)
