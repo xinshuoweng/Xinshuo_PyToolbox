@@ -25,13 +25,18 @@ def load_image(src_path, resize_factor=None, target_size=None, input_angle=0, gr
         np_image:           an uint8 rgb numpy image
     '''
     src_path = safe_path(src_path, warning=warning, debug=debug)
-    if debug: assert is_path_exists(src_path), 'txt path is not correct at %s' % src_path
+    if debug: assert is_path_exists(src_path), 'image path is not correct at %s' % src_path
     if resize_factor is None and target_size is None: resize_factor = 1.0           # default not to have resizing
 
     with open(src_path, 'rb') as f:
         with Image.open(f) as img:
             if gray: img = img.convert('L')
-            else: img = img.convert('RGB')
+            else: 
+                try:
+                    img = img.convert('RGB')
+                except IOError:
+                    print(src_path)
+                    zxc
             np_image = image_rotate(img, input_angle=input_angle, warning=warning, debug=debug)
             np_image = image_resize(np_image, resize_factor=resize_factor, target_size=target_size, warning=warning, debug=debug)
     return np_image
