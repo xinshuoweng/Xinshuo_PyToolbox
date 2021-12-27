@@ -278,7 +278,7 @@ def visualize_nearest_neighbor(featuremap_dict, num_neighbor=5, top_number=5, vi
 
     return all_sorted_nearest_id, selected_nearest_id
 
-def visualize_distribution(data, bin_size=None, vis=False, save_path=None, debug=True, closefig=True):
+def visualize_distribution(data, bin_size=None, xlim=None, ylim=None, vis=False, save_path=None, debug=True, closefig=True):
     '''
     visualize the histogram of a data, which can be a dictionary or list or numpy array or tuple or a list of list
     '''
@@ -331,7 +331,8 @@ def visualize_distribution(data, bin_size=None, vis=False, save_path=None, debug
     plt.title('distribution of data')
     plt.xlabel('data (bin size = %f)' % bin_size)
     plt.ylabel('count')
-
+    if xlim is not None: plt.xlim(xlim)
+    if ylim is not None: plt.ylim(ylim)
     return save_vis_close_helper(fig=fig, ax=ax, vis=vis, save_path=save_path, debug=debug, closefig=closefig)
 
 def visualize_bar(data, bin_size=2.0, title='Bar Graph of Key-Value Pair', xlabel='index', ylabel='count', vis=True, save_path=None, debug=True, closefig=True):

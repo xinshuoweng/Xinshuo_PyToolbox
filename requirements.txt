@@ -5,10 +5,10 @@ scikit-image
 scikit-video
 opencv-python
 matplotlib
+terminaltables
 
 #humanize
 #seaborn
-#terminaltables
 #tabulate
 #graphviz
 #open3d-python
