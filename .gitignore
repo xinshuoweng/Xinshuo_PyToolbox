@@ -54,4 +54,4 @@ Temporary Items
 # test files
 external/*
 **/.cache/*
-
+*/tmp
